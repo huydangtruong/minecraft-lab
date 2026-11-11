@@ -43,24 +43,29 @@ public class PermaHearts implements ModInitializer {
 		});
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity instanceof Enemy && entity.getKillCredit() instanceof ServerPlayer sp) {
-				onHostileKill(sp);
+				onHostileKill(sp, HeartRules.xpFor(entity.getMaxHealth()));
 			}
 		});
 		LOGGER.info("PermaHearts loaded");
 	}
 
-	static void onHostileKill(ServerPlayer sp) {
-		HeartRules.KillResult r = HeartRules.onHostileKill(HeartsAttachment.get(sp));
+	static void onHostileKill(ServerPlayer sp, int xp) {
+		HeartsData before = HeartsAttachment.get(sp);
+		HeartRules.KillResult r = HeartRules.onHostileKill(before, xp);
 		HeartsAttachment.set(sp, r.data());
 		switch (r.outcome()) {
-			case PROGRESS -> sp.sendOverlayMessage(Messages.progress(r.data().killProgress(), HeartRules.KILLS_PER_HEART));
+			case PROGRESS -> sp.sendOverlayMessage(Messages.xpGained(r.xpGained()));
 			case GAINED -> {
 				HealthApplier.apply(sp, false);
-				sp.setHealth(Math.min(sp.getMaxHealth(), sp.getHealth() + 2f));
+				sp.setHealth(Math.min(sp.getMaxHealth(), sp.getHealth() + 2f * r.heartsGained()));
 				sp.level().playSound(null, sp.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1f, 1f);
-				sp.sendSystemMessage(Messages.gained(HeartRules.maxHearts(r.data())));
+				sp.sendSystemMessage(Messages.gained(r.heartsGained(), HeartRules.maxHearts(r.data())));
 			}
-			case AT_CAP -> sp.sendSystemMessage(Messages.cap());
+			case AT_CAP -> {
+				if (HeartRules.maxHearts(before) >= HeartRules.MAX) {
+					sp.sendSystemMessage(Messages.cap());
+				}
+			}
 		}
 	}
 }

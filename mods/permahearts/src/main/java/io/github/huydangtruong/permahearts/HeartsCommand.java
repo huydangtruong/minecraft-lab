@@ -15,13 +15,13 @@ public final class HeartsCommand {
 			.executes(ctx -> {
 				ServerPlayer p = ctx.getSource().getPlayerOrException();
 				HeartsData d = HeartsAttachment.get(p);
-				ctx.getSource().sendSuccess(() -> Messages.status(HeartRules.maxHearts(d), d.killProgress(), d.totalHostileKills(), d.totalDeaths()), false);
+				ctx.getSource().sendSuccess(() -> Messages.status(HeartRules.maxHearts(d), d.heartXp(), d.totalHostileKills(), d.totalDeaths()), false);
 				return 1;
 			})
 			.then(Commands.literal("set")
 				.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 				.then(Commands.argument("targets", EntityArgument.players())
-					.then(Commands.argument("n", IntegerArgumentType.integer(1, 30))
+					.then(Commands.argument("n", IntegerArgumentType.integer(1, 50))
 						.executes(ctx -> {
 							int n = IntegerArgumentType.getInteger(ctx, "n");
 							var targets = EntityArgument.getPlayers(ctx, "targets");
@@ -32,17 +32,17 @@ public final class HeartsCommand {
 							}
 							return targets.size();
 						}))))
-			.then(Commands.literal("progress")
+			.then(Commands.literal("xp")
 				.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 				.then(Commands.argument("targets", EntityArgument.players())
-					.then(Commands.argument("n", IntegerArgumentType.integer(0, 99))
+					.then(Commands.argument("n", IntegerArgumentType.integer(0, 499))
 						.executes(ctx -> {
 							int n = IntegerArgumentType.getInteger(ctx, "n");
 							var targets = EntityArgument.getPlayers(ctx, "targets");
 							for (ServerPlayer p : targets) {
-								HeartsAttachment.set(p, HeartRules.withProgress(HeartsAttachment.get(p), n));
+								HeartsAttachment.set(p, HeartRules.withXp(HeartsAttachment.get(p), n));
 								HealthApplier.apply(p, false);
-								ctx.getSource().sendSuccess(() -> Messages.progressSet(p.getDisplayName(), n), true);
+								ctx.getSource().sendSuccess(() -> Messages.xpSet(p.getDisplayName(), n), true);
 							}
 							return targets.size();
 						})))));

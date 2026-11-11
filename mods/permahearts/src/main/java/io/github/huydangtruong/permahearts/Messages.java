@@ -13,28 +13,36 @@ public final class Messages {
 		return Component.translatableWithFallback("permahearts.msg.floor", "You are at the minimum of 1 heart");
 	}
 
-	public static Component gained(int maxHearts) {
-		return Component.translatableWithFallback("permahearts.msg.gained", "Hostile mobs defeated: +1 heart! Max hearts: %s", maxHearts);
+	public static Component gained(int hearts, int maxHearts) {
+		return Component.translatableWithFallback("permahearts.msg.gained", "+%s heart(s)! Max hearts: %s", hearts, maxHearts);
 	}
 
 	public static Component cap() {
-		return Component.translatableWithFallback("permahearts.msg.cap", "You already have the maximum of 30 hearts");
+		return Component.translatableWithFallback("permahearts.msg.cap", "You already have the maximum of 50 hearts");
 	}
 
-	public static Component progress(int current, int total) {
-		return Component.translatableWithFallback("permahearts.msg.progress", "Hostile %s/%s", current, total);
+	public static Component xpGained(int xp) {
+		return Component.translatableWithFallback("permahearts.msg.xp_gained", "+%s HeartXP", xp);
 	}
 
-	public static Component status(int hearts, int progress, int kills, int deaths) {
+	public static Component status(int hearts, int xp, int kills, int deaths) {
 		return Component.translatableWithFallback("permahearts.msg.status",
-			"Hearts %s/30 · Hostile %s/100 · Kills %s · Deaths %s", hearts, progress, kills, deaths);
+			"Hearts %s/50 · HeartXP %s/500 · Kills %s · Deaths %s", hearts, xp, kills, deaths);
 	}
 
 	public static Component set(Component name, int hearts) {
 		return Component.translatableWithFallback("permahearts.msg.set", "%s now has %s hearts", name, hearts);
 	}
 
-	public static Component progressSet(Component name, int progress) {
-		return Component.translatableWithFallback("permahearts.msg.progress_set", "%s progress set to %s", name, progress);
+	public static Component xpSet(Component name, int xp) {
+		return Component.translatableWithFallback("permahearts.msg.xp_set", "%s HeartXP set to %s", name, xp);
+	}
+
+	public static Component hudLabel(int xp) {
+		return Component.translatableWithFallback("permahearts.hud.label", "HeartXP %s/500", xp);
+	}
+
+	public static Component hudMax() {
+		return Component.translatableWithFallback("permahearts.hud.max", "HeartXP MAX");
 	}
 }
