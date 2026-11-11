@@ -16,6 +16,9 @@ public final class HeartsCommand {
 				ServerPlayer p = ctx.getSource().getPlayerOrException();
 				HeartsData d = HeartsAttachment.get(p);
 				ctx.getSource().sendSuccess(() -> Messages.status(HeartRules.maxHearts(d), d.heartXp(), d.totalHostileKills(), d.totalDeaths()), false);
+				if (!PermaHearts.enabled(ctx.getSource().getServer())) {
+					ctx.getSource().sendSuccess(Messages::disabledHint, false);
+				}
 				return 1;
 			})
 			.then(Commands.literal("set")

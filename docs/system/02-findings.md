@@ -55,3 +55,11 @@ Tên và chữ ký dưới đây lấy từ `javap` jar 26.3 và mã Fabric API 
 - `GuiGraphicsExtractor` (thay `GuiGraphics`): `fill(x1,y1,x2,y2,color)`, `outline(x, y, width, height, color)`, `text(Font, Component|String, x, y, color, boolean shadow)`, `guiHeight()`.
 - `Options.hideGui` không còn: dùng `Minecraft.getInstance().gui.hud.isHidden()` (`net.minecraft.client.gui.Hud`). `Player#isCreative()`, `#isSpectator()` còn.
 - Source set `src/client` biên dịch cùng `build`; HUD chỉ được biên dịch, chưa thấy trong game. `WitherBoss`/`Warden` đều `extends Monster`; `EntityTypes.WARDEN` spawn và giết được trong game test (+500 XP).
+
+## Thêm (khi làm P-003, game rule bật/tắt)
+
+- Game rule: `GameRuleBuilder.forBoolean(false).category(GameRuleCategory.PLAYER).buildAndRegister(Identifier)` (`net.fabricmc.fabric.api.gamerule.v1`) → `net.minecraft.world.level.gamerules.GameRule<Boolean>`. Đọc `server.getGameRules().get(rule)`, ghi `GameRules#set(rule, value, server)`; `GameRuleEvents.changeCallback(rule).register((Boolean v, MinecraftServer s) -> …)`.
+- `GameRules#set` gọi từ game test CÓ bắn change callback (kiểm bằng game test `toggleUpdatesOnlinePlayers`). Cần `/gamerule` trong game thật vẫn chưa thấy.
+- `ByteBufCodecs.BOOL` là `StreamCodec<ByteBuf, Boolean>`; attachment không persistent + `syncWith(BOOL, targetOnly())` chạy được (mock player xanh).
+- Khoá dịch: `GameRule#getDescriptionId()` = `gamerule.<ns>.<path>`; vanilla còn khoá `gamerule.<tên>.description` (đã thêm cả hai).
+- Game test chạy chung một server nên dùng chung game rule: mỗi test đổi rule phải trả về `true` trong `finally`; mọi test cũ gọi `enable(context, true)` trước (mặc định rule là `false`).

@@ -25,7 +25,16 @@ public final class HeartsAttachment {
 		b -> b.persistent(CODEC).copyOnDeath().initializer(() -> HeartsData.DEFAULT)
 			.syncWith(STREAM_CODEC, AttachmentSyncPredicate.targetOnly()));
 
+	/** Mirror of the world's game rule for this player, so the client HUD knows whether to draw. Not saved. */
+	public static final AttachmentType<Boolean> ACTIVE = AttachmentRegistry.create(
+		Identifier.fromNamespaceAndPath(PermaHearts.MOD_ID, "active"),
+		b -> b.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.targetOnly()));
+
 	private HeartsAttachment() {}
+
+	public static void setActive(ServerPlayer p, boolean active) {
+		p.setAttached(ACTIVE, active);
+	}
 
 	public static HeartsData get(ServerPlayer p) {
 		return p.getAttachedOrCreate(HEARTS);

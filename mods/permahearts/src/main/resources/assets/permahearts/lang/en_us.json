@@ -7,6 +7,11 @@
   "permahearts.msg.status": "Hearts %s/50 · HeartXP %s/500 · Kills %s · Deaths %s",
   "permahearts.msg.set": "%s now has %s hearts",
   "permahearts.msg.xp_set": "%s HeartXP set to %s",
+  "permahearts.msg.on": "PermaHearts is now ON in this world",
+  "permahearts.msg.off": "PermaHearts is now OFF in this world",
+  "permahearts.msg.disabled": "PermaHearts is off in this world. Turn on: /gamerule permahearts:enabled true",
+  "gamerule.permahearts.enabled": "PermaHearts: lose a heart on death, earn hearts with HeartXP",
+  "gamerule.permahearts.enabled.description": "Each death costs one max heart for good; killing hostile mobs earns HeartXP, and each full bar gives a heart back. When off, everyone has 10 hearts and nothing is lost.",
   "permahearts.hud.label": "HeartXP %s/500",
   "permahearts.hud.max": "HeartXP MAX"
 }

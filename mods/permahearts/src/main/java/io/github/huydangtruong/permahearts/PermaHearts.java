@@ -5,12 +5,17 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.Event;
+import net.fabricmc.fabric.api.gamerule.v1.GameRuleBuilder;
+import net.fabricmc.fabric.api.gamerule.v1.GameRuleEvents;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.level.gamerules.GameRule;
+import net.minecraft.world.level.gamerules.GameRuleCategory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,16 +24,44 @@ public class PermaHearts implements ModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 	private static final Identifier AFTER_ATTACHMENT_COPY = Identifier.fromNamespaceAndPath(MOD_ID, "after_attachment_copy");
 
+	/** Per-world switch (D10). Default off; Game Rules screen at world creation or /gamerule permahearts:enabled. */
+	public static final GameRule<Boolean> ENABLED = GameRuleBuilder.forBoolean(false)
+		.category(GameRuleCategory.PLAYER)
+		.buildAndRegister(Identifier.fromNamespaceAndPath(MOD_ID, "enabled"));
+
+	public static boolean enabled(MinecraftServer server) {
+		return server.getGameRules().get(ENABLED);
+	}
+
 	@Override
 	public void onInitialize() {
-		HeartsAttachment.HEARTS.identifier(); // touch the class so the attachment is registered
+		HeartsAttachment.HEARTS.identifier(); // touch the class so the attachments are registered
+		HeartsAttachment.ACTIVE.identifier();
+		GameRuleEvents.changeCallback(ENABLED).register((Boolean value, MinecraftServer server) -> {
+			for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+				HeartsAttachment.setActive(p, value);
+				HealthApplier.apply(p, false);
+				p.sendSystemMessage(Messages.toggled(value));
+			}
+		});
 		CommandRegistrationCallback.EVENT.register((d, c, s) -> HeartsCommand.register(d));
-		ServerPlayerEvents.JOIN.register(p -> HealthApplier.apply(p, false));
+		ServerPlayerEvents.JOIN.register(p -> {
+			HeartsAttachment.setActive(p, enabled(p.level().getServer()));
+			HealthApplier.apply(p, false);
+		});
 		// Fabric copies attachments old -> new player in its own AFTER_RESPAWN listener (default phase). Run after it,
 		// or that copy overwrites what we set (docs/system/02-findings.md). Data is read from the old player anyway.
 		ServerPlayerEvents.AFTER_RESPAWN.addPhaseOrdering(Event.DEFAULT_PHASE, AFTER_ATTACHMENT_COPY);
 		ServerPlayerEvents.AFTER_RESPAWN.register(AFTER_ATTACHMENT_COPY, (old, p, alive) -> {
 			HeartsData before = HeartsAttachment.get(old);
+			boolean on = enabled(p.level().getServer());
+			HeartsAttachment.setActive(p, on);
+			if (!on) {
+				// World switched off: no heart lost, no message; keep the data so turning it on again restores everything.
+				HeartsAttachment.set(p, before);
+				HealthApplier.apply(p, true);
+				return;
+			}
 			if (alive) {
 				HeartsAttachment.set(p, before);
 				HealthApplier.apply(p, false);
@@ -42,7 +75,8 @@ public class PermaHearts implements ModInitializer {
 				: Messages.floor());
 		});
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
-			if (entity instanceof Enemy && entity.getKillCredit() instanceof ServerPlayer sp) {
+			if (entity instanceof Enemy && entity.getKillCredit() instanceof ServerPlayer sp
+				&& enabled(sp.level().getServer())) {
 				onHostileKill(sp, HeartRules.xpFor(entity.getMaxHealth()));
 			}
 		});

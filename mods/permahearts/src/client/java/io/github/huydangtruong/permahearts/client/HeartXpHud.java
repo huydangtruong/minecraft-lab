@@ -21,7 +21,8 @@ public class HeartXpHud implements HudElement {
 	public void extractRenderState(GuiGraphicsExtractor g, DeltaTracker t) {
 		Minecraft mc = Minecraft.getInstance();
 		LocalPlayer p = mc.player;
-		if (p == null || mc.gui.hud.isHidden() || p.isCreative() || p.isSpectator()) {
+		if (p == null || mc.gui.hud.isHidden() || p.isCreative() || p.isSpectator()
+			|| !p.getAttachedOrElse(HeartsAttachment.ACTIVE, false)) {
 			return;
 		}
 		HeartsData d = p.getAttachedOrElse(HeartsAttachment.HEARTS, HeartsData.DEFAULT);
