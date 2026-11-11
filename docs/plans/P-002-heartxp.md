@@ -2,7 +2,7 @@
 
 > **Tóm tắt cho Huy:** bỏ luật "100 kill = 1 tim", thay bằng HeartXP: giết mob hostile được XP bằng máu tối đa của mob (Zombie +20, Warden +500), đủ 500 = +1 tim, dư thì giữ. Trần lên 50 tim. Thêm thanh HeartXP ở góc dưới bên trái màn hình (cần cài mod ở cả host và bạn). Bản 0.2.0.
 
-- **Status:** ready
+- **Status:** merged
 - **Mod / decision:** `permahearts`, D7, D8, D9 · **Branch:** `feat/P-002-heartxp` · **Depends on:** P-001 (merged, 0.1.1)
 
 ## Goal
