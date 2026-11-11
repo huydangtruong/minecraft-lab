@@ -1,0 +1,10 @@
+{
+  "permahearts.msg.lost": "You lost a heart. Max hearts: %s",
+  "permahearts.msg.floor": "You are at the minimum of 1 heart",
+  "permahearts.msg.gained": "Hostile mobs defeated: +1 heart! Max hearts: %s",
+  "permahearts.msg.cap": "You already have the maximum of 30 hearts",
+  "permahearts.msg.progress": "Hostile %s/%s",
+  "permahearts.msg.status": "Hearts %s/30 · Hostile %s/100 · Kills %s · Deaths %s",
+  "permahearts.msg.set": "%s now has %s hearts",
+  "permahearts.msg.progress_set": "%s progress set to %s"
+}
