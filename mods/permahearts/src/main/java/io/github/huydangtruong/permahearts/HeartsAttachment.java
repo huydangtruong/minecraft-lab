@@ -35,6 +35,11 @@ public final class HeartsAttachment {
 		Identifier.fromNamespaceAndPath(PermaHearts.MOD_ID, "cultivation"),
 		b -> b.persistent(CultivationData.CODEC).copyOnDeath().initializer(() -> CultivationData.DEFAULT));
 
+	/** Marks the Wandering Trader that is our Wanderer NPC. Saved with the entity and synced to every client (the client use-callback needs it). */
+	public static final AttachmentType<Boolean> WANDERER = AttachmentRegistry.create(
+		Identifier.fromNamespaceAndPath(PermaHearts.MOD_ID, "wanderer"),
+		b -> b.persistent(Codec.BOOL).syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
+
 	private HeartsAttachment() {}
 
 	public static CultivationData getCultivation(ServerPlayer p) {

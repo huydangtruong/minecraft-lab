@@ -2,6 +2,6 @@
 
 | Mod | id | Version | Trạng thái | Cài trong profile |
 |---|---|---|---|---|
-| PermaHearts | `permahearts` | 0.4.0 | Code xong theo [P-004](../plans/P-004-elixirs.md) (công tắc ImmortalCultivation `permahearts:immortal_cultivation` + 6 linh dược tăng chỉ số vĩnh viễn), chờ review + chơi thử | Chưa cập nhật (chỉ có bản khung) |
+| PermaHearts | `permahearts` | 0.5.0 | Code xong theo [P-005](../plans/P-005-wanderer-quests.md) (Lữ Khách + màn hình nhiệm vụ thu thập/giết + thưởng linh dược; trước đó P-004: công tắc ImmortalCultivation + 6 linh dược), chờ review + chơi thử. Màn hình nhiệm vụ chưa từng được nhìn thấy trong game | Chưa cập nhật (chỉ có bản khung) |
 
 Mỗi mod: `docs/mods/<id>/idea.md` (lời Huy nguyên văn) và `spec.md` (luật chơi, tin nhắn, edge case).

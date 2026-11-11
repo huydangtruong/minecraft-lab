@@ -7,6 +7,16 @@ import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.gamerule.v1.GameRuleBuilder;
 import net.fabricmc.fabric.api.gamerule.v1.GameRuleEvents;
+import io.github.huydangtruong.permahearts.wanderer.QuestCommand;
+import io.github.huydangtruong.permahearts.wanderer.Wanderer;
+import io.github.huydangtruong.permahearts.wanderer.WandererMenus;
+import io.github.huydangtruong.permahearts.wanderer.WandererNpc;
+import io.github.huydangtruong.permahearts.wanderer.WandererScheduler;
+import io.github.huydangtruong.permahearts.wanderer.Phase;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
+import net.fabricmc.fabric.api.event.player.UseEntityCallback;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -38,7 +48,10 @@ public class PermaHearts implements ModInitializer {
 		HeartsAttachment.HEARTS.identifier(); // touch the class so the attachments are registered
 		HeartsAttachment.ACTIVE.identifier();
 		HeartsAttachment.CULTIVATION.identifier();
+		HeartsAttachment.WANDERER.identifier();
 		ElixirItems.init();
+		WandererMenus.init();
+		WandererScheduler.register();
 		GameRuleEvents.changeCallback(ENABLED).register((Boolean value, MinecraftServer server) -> {
 			for (ServerPlayer p : server.getPlayerList().getPlayers()) {
 				HeartsAttachment.setActive(p, value);
@@ -46,7 +59,36 @@ public class PermaHearts implements ModInitializer {
 				p.sendSystemMessage(Messages.toggled(value));
 			}
 		});
-		CommandRegistrationCallback.EVENT.register((d, c, s) -> HeartsCommand.register(d));
+		CommandRegistrationCallback.EVENT.register((d, c, s) -> {
+			HeartsCommand.register(d);
+			QuestCommand.register(d);
+		});
+		// Right-click on the Wanderer opens the quest screen instead of the trade screen (SUCCESS also blocks vanilla).
+		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
+			if (!WandererNpc.isWanderer(entity)) {
+				return InteractionResult.PASS;
+			}
+			if (hand == InteractionHand.MAIN_HAND && player instanceof ServerPlayer sp) {
+				if (enabled(sp.level().getServer())) {
+					WandererMenus.open(sp, entity);
+				} else {
+					sp.sendSystemMessage(Messages.disabledHint());
+				}
+			}
+			return InteractionResult.SUCCESS;
+		});
+		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> !WandererNpc.isWanderer(entity));
+		// A wanderer that is not the stored one (after a reset or respawn) is a stale copy: remove it.
+		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
+			if (WandererNpc.isWanderer(entity)) {
+				var d = Wanderer.data(level.getServer());
+				boolean current = d.phase() == Phase.PRESENT && d.npcUuid().isPresent()
+					&& d.npcUuid().get().equals(entity.getUUID().toString());
+				if (!current) {
+					entity.discard();
+				}
+			}
+		});
 		ServerPlayerEvents.JOIN.register(p -> {
 			HeartsAttachment.setActive(p, enabled(p.level().getServer()));
 			HealthApplier.apply(p, false);
@@ -77,6 +119,9 @@ public class PermaHearts implements ModInitializer {
 				: Messages.floor());
 		});
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
+			if (entity.getKillCredit() instanceof ServerPlayer killer && enabled(killer.level().getServer())) {
+				Wanderer.onKill(killer.level().getServer(), killer, entity.getType());
+			}
 			if (entity instanceof Enemy && entity.getKillCredit() instanceof ServerPlayer sp
 				&& enabled(sp.level().getServer())) {
 				onHostileKill(sp, HeartRules.xpFor(entity.getMaxHealth()));

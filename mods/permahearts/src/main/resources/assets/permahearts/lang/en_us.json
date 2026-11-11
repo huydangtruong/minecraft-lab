@@ -30,5 +30,21 @@
   "permahearts.elixir.tooltip": "%s %s, permanent",
   "permahearts.msg.elixir_disabled": "ImmortalCultivation is off in this world",
   "permahearts.msg.cultivation_part": "%s %s",
-  "permahearts.msg.cultivation_none": "No elixirs yet"
+  "permahearts.msg.cultivation_none": "No elixirs yet",
+  "permahearts.wanderer.name": "Wanderer",
+  "permahearts.wanderer.planned": "A Wanderer is waiting at X %s, Z %s",
+  "permahearts.wanderer.intro": "I am a traveller of many realms. Help me with a few tasks and I will give you cultivation elixirs.",
+  "permahearts.wanderer.accept": "Accept",
+  "permahearts.wanderer.line_collect": "Find %s %s: %s/%s",
+  "permahearts.wanderer.line_kill": "Kill %s %s: %s/%s",
+  "permahearts.wanderer.line_done": "Reward: %s",
+  "permahearts.wanderer.line_claimed": "Claimed",
+  "permahearts.wanderer.kill_progress": "Quest: %s %s/%s",
+  "permahearts.wanderer.line_completed": "Quest line done: %s. Reward waits at the Wanderer",
+  "permahearts.wanderer.farewell": "The Wanderer thanks you and moves on",
+  "permahearts.wanderer.where": "Wanderer at X %s, Z %s (%s blocks away)",
+  "permahearts.wanderer.next": "Next Wanderer in about %s day(s)",
+  "permahearts.wanderer.not_accepted": "Quest not accepted yet: talk to the Wanderer",
+  "permahearts.wanderer.status_line": "%s. %s",
+  "permahearts.wanderer.done": "done"
 }
