@@ -4,4 +4,4 @@ Quy trình: [workflow/team.md](../workflow/team.md); mẫu: [TEMPLATE.md](TEMPLA
 
 | ID | Việc | Status | Dev |
 |---|---|---|---|
-| [P-001](P-001-permahearts.md) | PermaHearts: luật chết/giết, lưu dữ liệu, lệnh, tin nhắn, test | ready | — |
+| [P-001](P-001-permahearts.md) | PermaHearts: luật chết/giết, lưu dữ liệu, lệnh, tin nhắn, test | merged | Sonnet subagent |
