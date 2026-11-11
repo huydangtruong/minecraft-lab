@@ -13,7 +13,8 @@ public final class HealthApplier {
 
 	public static void apply(ServerPlayer p, boolean refill) {
 		AttributeInstance a = p.getAttribute(Attributes.MAX_HEALTH);
-		double extra = HeartsAttachment.get(p).bonusHearts() * 2.0;
+		boolean on = PermaHearts.enabled(p.level().getServer());
+		double extra = on ? HeartsAttachment.get(p).bonusHearts() * 2.0 : 0;
 		if (extra == 0) {
 			a.removeModifier(MODIFIER_ID);
 		} else {

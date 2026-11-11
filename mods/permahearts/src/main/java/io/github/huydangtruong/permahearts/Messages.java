@@ -38,6 +38,17 @@ public final class Messages {
 		return Component.translatableWithFallback("permahearts.msg.xp_set", "%s HeartXP set to %s", name, xp);
 	}
 
+	public static Component toggled(boolean on) {
+		return on
+			? Component.translatableWithFallback("permahearts.msg.on", "PermaHearts is now ON in this world")
+			: Component.translatableWithFallback("permahearts.msg.off", "PermaHearts is now OFF in this world");
+	}
+
+	public static Component disabledHint() {
+		return Component.translatableWithFallback("permahearts.msg.disabled",
+			"PermaHearts is off in this world. Turn on: /gamerule permahearts:enabled true");
+	}
+
 	public static Component hudLabel(int xp) {
 		return Component.translatableWithFallback("permahearts.hud.label", "HeartXP %s/500", xp);
 	}

@@ -7,6 +7,11 @@
   "permahearts.msg.status": "Tim %s/50 · HeartXP %s/500 · Số kill %s · Số lần chết %s",
   "permahearts.msg.set": "%s giờ có %s tim",
   "permahearts.msg.xp_set": "HeartXP của %s đặt thành %s",
+  "permahearts.msg.on": "PermaHearts đã BẬT trong world này",
+  "permahearts.msg.off": "PermaHearts đã TẮT trong world này",
+  "permahearts.msg.disabled": "PermaHearts đang tắt trong world này. Bật: /gamerule permahearts:enabled true",
+  "gamerule.permahearts.enabled": "PermaHearts: chết mất tim, kiếm tim bằng HeartXP",
+  "gamerule.permahearts.enabled.description": "Mỗi lần chết mất 1 tim tối đa vĩnh viễn; giết mob hostile được HeartXP, đủ một thanh thì được 1 tim. Khi tắt: ai cũng 10 tim và không mất gì.",
   "permahearts.hud.label": "HeartXP %s/500",
   "permahearts.hud.max": "HeartXP TỐI ĐA"
 }

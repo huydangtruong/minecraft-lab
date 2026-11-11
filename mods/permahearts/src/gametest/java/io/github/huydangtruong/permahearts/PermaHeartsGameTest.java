@@ -13,6 +13,11 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 
 public class PermaHeartsGameTest {
+	private static void enable(GameTestHelper context, boolean on) {
+		MinecraftServer s = context.getLevel().getServer();
+		s.getGameRules().set(PermaHearts.ENABLED, on, s);
+	}
+
 	private static void kill(GameTestHelper context, ServerPlayer p, LivingEntity e) {
 		ServerLevel level = context.getLevel();
 		e.hurtServer(level, level.damageSources().playerAttack(p), 1000f);
@@ -20,6 +25,7 @@ public class PermaHeartsGameTest {
 
 	@GameTest(maxTicks = 100)
 	public void healthMatchesBonus(GameTestHelper context) {
+		enable(context, true);
 		ServerPlayer p = context.makeMockServerPlayerInLevel();
 		HeartsAttachment.set(p, new HeartsData(-3, 0, 0, 0));
 		HealthApplier.apply(p, true);
@@ -29,6 +35,7 @@ public class PermaHeartsGameTest {
 
 	@GameTest(maxTicks = 100)
 	public void hostileKillGivesXpCowDoesNot(GameTestHelper context) {
+		enable(context, true);
 		ServerPlayer p = context.makeMockServerPlayerInLevel();
 		HeartsAttachment.set(p, HeartsData.DEFAULT);
 		Zombie z = context.spawn(EntityTypes.ZOMBIE, 1, 1, 1);
@@ -42,6 +49,7 @@ public class PermaHeartsGameTest {
 
 	@GameTest(maxTicks = 100)
 	public void fullBarGivesHeart(GameTestHelper context) {
+		enable(context, true);
 		ServerPlayer p = context.makeMockServerPlayerInLevel();
 		HeartsAttachment.set(p, new HeartsData(0, 480, 99, 0));
 		HealthApplier.apply(p, true);
@@ -53,6 +61,7 @@ public class PermaHeartsGameTest {
 
 	@GameTest(maxTicks = 100)
 	public void bigMobGivesHeart(GameTestHelper context) {
+		enable(context, true);
 		ServerPlayer p = context.makeMockServerPlayerInLevel();
 		HeartsAttachment.set(p, HeartsData.DEFAULT);
 		HealthApplier.apply(p, true);
@@ -76,6 +85,7 @@ public class PermaHeartsGameTest {
 
 	@GameTest(maxTicks = 100)
 	public void deathCostsOneHeartAndRespawnsFull(GameTestHelper context) {
+		enable(context, true);
 		ServerPlayer p = context.makeMockServerPlayerInLevel();
 		HeartsAttachment.set(p, new HeartsData(0, 42, 542, 0));
 		HealthApplier.apply(p, true);
@@ -95,6 +105,7 @@ public class PermaHeartsGameTest {
 
 	@GameTest(maxTicks = 100)
 	public void deathAtOneHeartStaysAtOne(GameTestHelper context) {
+		enable(context, true);
 		ServerPlayer p = context.makeMockServerPlayerInLevel();
 		HeartsAttachment.set(p, HeartRules.withHearts(HeartsData.DEFAULT, 1));
 		HealthApplier.apply(p, true);
@@ -108,6 +119,7 @@ public class PermaHeartsGameTest {
 
 	@GameTest(maxTicks = 100)
 	public void killAtCapKeepsFiftyHearts(GameTestHelper context) {
+		enable(context, true);
 		ServerPlayer p = context.makeMockServerPlayerInLevel();
 		HeartsAttachment.set(p, HeartRules.withHearts(HeartsData.DEFAULT, 50));
 		HealthApplier.apply(p, true);
@@ -122,6 +134,7 @@ public class PermaHeartsGameTest {
 
 	@GameTest(maxTicks = 100)
 	public void joinWithDefaultDataHasTenHearts(GameTestHelper context) {
+		enable(context, true);
 		ServerPlayer p = context.makeMockServerPlayerInLevel();
 		context.assertTrue(p.getMaxHealth() == 20f, "new player should have 20 health, was " + p.getMaxHealth());
 		context.succeed();
@@ -138,6 +151,7 @@ public class PermaHeartsGameTest {
 
 	@GameTest(maxTicks = 100)
 	public void adminCommandsChangeData(GameTestHelper context) {
+		enable(context, true);
 		ServerPlayer p = context.makeMockServerPlayerInLevel();
 		MinecraftServer server = context.getLevel().getServer();
 		// Admin permissions, executing as this player so @s targets it (mock players all share one name, and a UUID is an entity selector).
@@ -161,5 +175,55 @@ public class PermaHeartsGameTest {
 		run(context, p.createCommandSourceStack(), "hearts");
 		context.assertTrue(HeartRules.maxHearts(HeartsAttachment.get(p)) == 45, "/hearts must not change data");
 		context.succeed();
+	}
+
+	@GameTest(maxTicks = 100)
+	public void disabledWorldIgnoresDeathsAndKills(GameTestHelper context) {
+		try {
+			enable(context, true);
+			ServerPlayer p = context.makeMockServerPlayerInLevel();
+			HeartsAttachment.set(p, new HeartsData(5, 100, 0, 0));
+			HealthApplier.apply(p, true);
+			context.assertTrue(p.getMaxHealth() == 30f, "15 hearts should be 30 health while on, was " + p.getMaxHealth());
+			enable(context, false);
+			HealthApplier.apply(p, true);
+			context.assertTrue(p.getMaxHealth() == 20f, "off: max health should be 20, was " + p.getMaxHealth());
+			kill(context, p, context.spawn(EntityTypes.ZOMBIE, 1, 1, 1));
+			context.assertTrue(HeartsAttachment.get(p).heartXp() == 100, "off: kill must not give XP, was " + HeartsAttachment.get(p).heartXp());
+			ServerPlayer r = dieAndRespawn(context, p);
+			HeartsData d = HeartsAttachment.get(r);
+			context.assertTrue(HeartRules.maxHearts(d) == 15, "off: hearts unchanged, had " + HeartRules.maxHearts(d));
+			context.assertTrue(d.heartXp() == 100, "off: XP unchanged, was " + d.heartXp());
+			context.assertTrue(d.totalDeaths() == 0, "off: deaths not counted, was " + d.totalDeaths());
+			context.assertTrue(r.getMaxHealth() == 20f, "off: max health 20 after respawn, was " + r.getMaxHealth());
+			context.assertTrue(r.getHealth() == 20f, "off: health 20 after respawn, was " + r.getHealth());
+			context.assertTrue(!r.getAttachedOrElse(HeartsAttachment.ACTIVE, false), "ACTIVE should be false");
+			enable(context, true);
+			HealthApplier.apply(r, false);
+			context.assertTrue(r.getMaxHealth() == 30f, "on again: max health 30, was " + r.getMaxHealth());
+			context.succeed();
+		} finally {
+			enable(context, true);
+		}
+	}
+
+	@GameTest(maxTicks = 100)
+	public void toggleUpdatesOnlinePlayers(GameTestHelper context) {
+		try {
+			enable(context, true);
+			ServerPlayer p = context.makeMockServerPlayerInLevel();
+			HeartsAttachment.set(p, new HeartsData(5, 0, 0, 0));
+			HealthApplier.apply(p, true);
+			context.assertTrue(p.getMaxHealth() == 30f, "on: max health 30, was " + p.getMaxHealth());
+			enable(context, false);
+			context.assertTrue(p.getMaxHealth() == 20f, "callback off: max health 20, was " + p.getMaxHealth());
+			context.assertTrue(!p.getAttachedOrElse(HeartsAttachment.ACTIVE, false), "callback off: ACTIVE false");
+			enable(context, true);
+			context.assertTrue(p.getMaxHealth() == 30f, "callback on: max health 30, was " + p.getMaxHealth());
+			context.assertTrue(p.getAttachedOrElse(HeartsAttachment.ACTIVE, false), "callback on: ACTIVE true");
+			context.succeed();
+		} finally {
+			enable(context, true);
+		}
 	}
 }
