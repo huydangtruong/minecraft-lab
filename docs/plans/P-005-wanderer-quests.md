@@ -2,7 +2,7 @@
 
 > **Tóm tắt cho Huy:** sau 3–5 ngày Minecraft, một **Lữ Khách** xuất hiện cách ~1000 block (tọa độ báo trên chat). Bấm vào: màn hình nhiệm vụ + nút Nhận → 2–4 dòng "Tìm 64 Sắt" (ô bỏ đồ) / "Giết 16 Zombie" (số đếm), tiến độ chung cho mọi người. Dòng xong → ô linh dược, ai lấy trước được. Thử nhanh: `/quest summon`. Bản 0.5.0.
 
-- **Status:** ready
+- **Status:** merged
 - **Mod / decision:** `permahearts`, D11–D14 · **Branch:** `feat/P-005-wanderer` · **Depends on:** P-004 (merged, 0.4.0: `ElixirStat`, `ElixirItems.get`)
 
 ## Goal
