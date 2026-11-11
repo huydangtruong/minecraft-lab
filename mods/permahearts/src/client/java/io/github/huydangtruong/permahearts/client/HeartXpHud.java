@@ -13,7 +13,7 @@ import net.minecraft.network.chat.Component;
 
 /** HeartXP bar at the bottom-left of the screen. */
 public class HeartXpHud implements HudElement {
-	private static final int X = 4;
+	private static final int X = 20; // 16px further from the left edge (Huy, 2026-11-12)
 	private static final int W = 102;
 	private static final int H = 5;
 
@@ -26,7 +26,7 @@ public class HeartXpHud implements HudElement {
 			return;
 		}
 		HeartsData d = p.getAttachedOrElse(HeartsAttachment.HEARTS, HeartsData.DEFAULT);
-		int barY = g.guiHeight() - 4 - H;
+		int barY = g.guiHeight() - 20 - H; // 16px further from the bottom edge
 		int labelY = barY - 10;
 		Component label = HeartRules.maxHearts(d) >= HeartRules.MAX ? Messages.hudMax() : Messages.hudLabel(d.heartXp());
 		g.text(mc.font, label, X, labelY, 0xFFFF5555, true);
