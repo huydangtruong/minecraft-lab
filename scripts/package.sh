@@ -15,13 +15,19 @@ fetch_fabric_api "$OUT/mods"
 cat > "$OUT/INSTALL-vi.txt" <<TXT
 Cài mod (Minecraft 26.3, Fabric Loader 0.20.1)
 
-1. Cài Fabric Loader 0.20.1 cho Minecraft 26.3 (hoặc dùng Essential Installer chọn Fabric 26.3).
-2. Chép TẤT CẢ file .jar trong thư mục "mods" của gói này vào thư mục mods của profile:
-   Mac:     ~/Library/Application Support/minecraft/mods
-            (hoặc .../minecraft/installations/<tên profile>/mods nếu profile có thư mục riêng)
-   Windows: %APPDATA%\\.minecraft\\mods
-3. Mở Minecraft Launcher, chọn profile Fabric 26.3, bấm Play.
-4. Cần Java 25 (Launcher tự có).
+Cần sẵn: profile Fabric 26.3 có Essential (cài bằng Essential Installer, chọn Fabric 26.3).
+
+1. Thoát Minecraft nếu đang mở.
+2. Mở thư mục mods của profile: trong Minecraft Launcher vào tab Installations,
+   rê chuột lên profile "26.3 Fabric Essential", bấm biểu tượng thư mục, mở thư mục "mods"
+   (tạo mới nếu chưa có).
+   Thường là: Mac     ~/Library/Application Support/minecraft/installations/26.3 Fabric Essential/mods
+              Windows %APPDATA%\\.minecraft\\installations\\26.3 Fabric Essential\\mods
+3. Xoá bản cũ của các mod này nếu có (ví dụ permahearts-0.1.1.jar), rồi chép TẤT CẢ file .jar
+   trong thư mục "mods" của gói này vào đó. Không xoá file Essential.
+4. Mở Launcher, chọn profile "26.3 Fabric Essential", bấm Play.
+
+Host và khách phải cài cùng phiên bản mod.
 TXT
 
 (cd "$ROOT/dist" && zip -qr "$(basename "$OUT").zip" "$(basename "$OUT")")
