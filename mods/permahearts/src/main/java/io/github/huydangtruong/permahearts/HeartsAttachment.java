@@ -30,7 +30,20 @@ public final class HeartsAttachment {
 		Identifier.fromNamespaceAndPath(PermaHearts.MOD_ID, "active"),
 		b -> b.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.targetOnly()));
 
+	/** Elixir levels. Saved, kept on death, server side only. */
+	public static final AttachmentType<CultivationData> CULTIVATION = AttachmentRegistry.create(
+		Identifier.fromNamespaceAndPath(PermaHearts.MOD_ID, "cultivation"),
+		b -> b.persistent(CultivationData.CODEC).copyOnDeath().initializer(() -> CultivationData.DEFAULT));
+
 	private HeartsAttachment() {}
+
+	public static CultivationData getCultivation(ServerPlayer p) {
+		return p.getAttachedOrCreate(CULTIVATION);
+	}
+
+	public static void setCultivation(ServerPlayer p, CultivationData d) {
+		p.setAttached(CULTIVATION, d);
+	}
 
 	public static void setActive(ServerPlayer p, boolean active) {
 		p.setAttached(ACTIVE, active);

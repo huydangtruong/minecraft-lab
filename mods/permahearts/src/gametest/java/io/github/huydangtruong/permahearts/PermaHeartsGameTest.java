@@ -10,7 +10,10 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.zombie.Zombie;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 public class PermaHeartsGameTest {
 	private static void enable(GameTestHelper context, boolean on) {
@@ -221,6 +224,83 @@ public class PermaHeartsGameTest {
 			enable(context, true);
 			context.assertTrue(p.getMaxHealth() == 30f, "callback on: max health 30, was " + p.getMaxHealth());
 			context.assertTrue(p.getAttachedOrElse(HeartsAttachment.ACTIVE, false), "callback on: ACTIVE true");
+			context.succeed();
+		} finally {
+			enable(context, true);
+		}
+	}
+
+	private static void drink(ServerPlayer p, ElixirStat stat) {
+		Item item = ElixirItems.get(stat);
+		item.finishUsingItem(new ItemStack(item), p.level(), p);
+	}
+
+	private static void near(GameTestHelper context, double expected, double actual, String what) {
+		context.assertTrue(Math.abs(expected - actual) < 1e-6, what + ": expected " + expected + ", was " + actual);
+	}
+
+	@GameTest(maxTicks = 100)
+	public void elixirAddsAttackDamage(GameTestHelper context) {
+		enable(context, true);
+		ServerPlayer p = context.makeMockServerPlayerInLevel();
+		HeartsAttachment.setCultivation(p, CultivationData.DEFAULT);
+		StatApplier.apply(p);
+		double base = p.getAttributeValue(Attributes.ATTACK_DAMAGE);
+		drink(p, ElixirStat.STRENGTH);
+		drink(p, ElixirStat.STRENGTH);
+		near(context, base + 1.0, p.getAttributeValue(Attributes.ATTACK_DAMAGE), "attack damage");
+		context.assertTrue(HeartsAttachment.getCultivation(p).level(ElixirStat.STRENGTH) == 2, "level should be 2");
+		context.succeed();
+	}
+
+	@GameTest(maxTicks = 100)
+	public void elixirMultiplierStats(GameTestHelper context) {
+		enable(context, true);
+		ServerPlayer p = context.makeMockServerPlayerInLevel();
+		HeartsAttachment.setCultivation(p, CultivationData.DEFAULT);
+		StatApplier.apply(p);
+		double speed = p.getAttributeValue(Attributes.MOVEMENT_SPEED);
+		double block = p.getAttributeValue(Attributes.BLOCK_INTERACTION_RANGE);
+		double entity = p.getAttributeValue(Attributes.ENTITY_INTERACTION_RANGE);
+		drink(p, ElixirStat.SWIFTNESS);
+		drink(p, ElixirStat.REACH);
+		near(context, speed * 1.05, p.getAttributeValue(Attributes.MOVEMENT_SPEED), "movement speed");
+		near(context, block + 0.5, p.getAttributeValue(Attributes.BLOCK_INTERACTION_RANGE), "block range");
+		near(context, entity + 0.5, p.getAttributeValue(Attributes.ENTITY_INTERACTION_RANGE), "entity range");
+		context.succeed();
+	}
+
+	@GameTest(maxTicks = 100)
+	public void elixirKeptOnDeath(GameTestHelper context) {
+		enable(context, true);
+		ServerPlayer p = context.makeMockServerPlayerInLevel();
+		HeartsAttachment.setCultivation(p, CultivationData.DEFAULT);
+		StatApplier.apply(p);
+		double base = p.getAttributeValue(Attributes.ARMOR);
+		drink(p, ElixirStat.IRON_SKIN);
+		ServerPlayer r = dieAndRespawn(context, p);
+		near(context, base + 1.0, r.getAttributeValue(Attributes.ARMOR), "armor after respawn");
+		context.assertTrue(HeartsAttachment.getCultivation(r).level(ElixirStat.IRON_SKIN) == 1, "level should be 1");
+		context.succeed();
+	}
+
+	@GameTest(maxTicks = 100)
+	public void elixirOffWhenDisabled(GameTestHelper context) {
+		try {
+			enable(context, true);
+			ServerPlayer p = context.makeMockServerPlayerInLevel();
+			HeartsAttachment.setCultivation(p, CultivationData.DEFAULT);
+			StatApplier.apply(p);
+			double base = p.getAttributeValue(Attributes.ATTACK_DAMAGE);
+			drink(p, ElixirStat.STRENGTH);
+			near(context, base + 0.5, p.getAttributeValue(Attributes.ATTACK_DAMAGE), "on");
+			enable(context, false);
+			near(context, base, p.getAttributeValue(Attributes.ATTACK_DAMAGE), "off");
+			context.assertTrue(HeartsAttachment.getCultivation(p).level(ElixirStat.STRENGTH) == 1, "data kept while off");
+			drink(p, ElixirStat.STRENGTH);
+			context.assertTrue(HeartsAttachment.getCultivation(p).level(ElixirStat.STRENGTH) == 1, "drinking while off must not change level");
+			enable(context, true);
+			near(context, base + 0.5, p.getAttributeValue(Attributes.ATTACK_DAMAGE), "on again");
 			context.succeed();
 		} finally {
 			enable(context, true);

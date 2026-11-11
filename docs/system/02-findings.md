@@ -63,3 +63,12 @@ Tên và chữ ký dưới đây lấy từ `javap` jar 26.3 và mã Fabric API 
 - `ByteBufCodecs.BOOL` là `StreamCodec<ByteBuf, Boolean>`; attachment không persistent + `syncWith(BOOL, targetOnly())` chạy được (mock player xanh).
 - Khoá dịch: `GameRule#getDescriptionId()` = `gamerule.<ns>.<path>`; vanilla còn khoá `gamerule.<tên>.description` (đã thêm cả hai).
 - Game test chạy chung một server nên dùng chung game rule: mỗi test đổi rule phải trả về `true` trong `finally`; mọi test cũ gọi `enable(context, true)` trước (mặc định rule là `false`).
+
+## Thêm (khi làm P-004, linh dược)
+
+- Đăng ký item: `Registry.register(BuiltInRegistries.ITEM, key, new Item(props.setId(key)))`; `Item.Properties`: `setId`, `stacksTo`, `rarity`, `component(type, v)`, `usingConvertsTo(Item)`. Uống được: `DataComponents.CONSUMABLE` = `Consumables.DEFAULT_DRINK`, glint = `DataComponents.ENCHANTMENT_GLINT_OVERRIDE`. Đúng như plan, biên dịch và chạy được.
+- `Item#finishUsingItem(ItemStack, Level, LivingEntity)` gọi trực tiếp được từ game test với mock player (không cần `drink()` riêng); `appendHoverText(ItemStack, Item.TooltipContext, TooltipDisplay, Consumer<Component>, TooltipFlag)`.
+- Creative tab: `CreativeModeTabEvents.modifyOutputEvent(key).register(out -> out.accept(ItemLike))` (`out` là `FabricCreativeModeTabOutput`, `accept(ItemLike)` kế thừa từ `CreativeModeTab.Output`); key `Identifier.withDefaultNamespace("food_and_drinks")`. Biên dịch được, chưa thấy trong game.
+- Model item không cần texture: `assets/<ns>/items/<id>.json` với `minecraft:model` `minecraft:item/potion` + `tints` `minecraft:constant` (số nguyên ARGB có dấu). Chưa thấy trong game.
+- Modifier vĩnh viễn trên `ATTACK_DAMAGE`, `MOVEMENT_SPEED`, `ARMOR`, `BLOCK/ENTITY_INTERACTION_RANGE`... sống qua respawn (game test `elixirKeptOnDeath`).
+
