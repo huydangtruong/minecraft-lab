@@ -2,7 +2,7 @@
 
 > **Tóm tắt cho Huy:** thêm game rule "PermaHearts" (mặc định tắt). Lúc tạo world: More → Game Rules → bật. Trong game: `/gamerule permahearts:enabled true|false`. Tắt thì không mất tim, không HeartXP, máu về 10 tim, ẩn thanh HeartXP; số tim đã có vẫn giữ để bật lại. Bản 0.3.0.
 
-- **Status:** ready
+- **Status:** merged
 - **Mod / decision:** `permahearts`, D10 · **Branch:** `feat/P-003-world-toggle` · **Depends on:** P-002 (merged, 0.2.0)
 
 ## Goal
