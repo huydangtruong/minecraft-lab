@@ -47,3 +47,11 @@ Tên và chữ ký dưới đây lấy từ `javap` jar 26.3 và mã Fabric API 
 - Cách đúng: `AFTER_RESPAWN.addPhaseOrdering(Event.DEFAULT_PHASE, myPhase)` + `register(myPhase, …)`, và đọc dữ liệu từ `oldPlayer`.
 - Game test: mock player (`makeMockServerPlayerInLevel`) là **Creative** và client chưa "loaded" → bất tử với damage; muốn chết thì `setHealth(0)` + `die(source)`, rồi `server.getPlayerList().respawn(p, false, Entity.RemovalReason.KILLED)`. Mọi mock player trùng tên `test-mock-player` (game test chạy song song) và UUID là selector entity → dùng `server.createCommandSourceStack().withEntity(p)` + `@s`. Chạy lệnh qua `getDispatcher().execute` để lỗi làm fail test (`performPrefixedCommand` nuốt lỗi).
 - Bộ game test hiện có (9): máu theo bonus, zombie tính/bò không, kill thứ 100 +1 tim, chết −1 tim + máu đầy + giữ tiến độ, sàn 1 tim, trần 30, người mới 10 tim, lệnh admin + từ chối 31, cùng 1 test hạ tầng.
+
+## Thêm (khi làm P-002, HUD + đồng bộ)
+
+- Đồng bộ attachment: `builder.syncWith(StreamCodec<? super RegistryFriendlyByteBuf, A>, AttachmentSyncPredicate.targetOnly())`; `StreamCodec<ByteBuf, HeartsData>` dựng bằng `StreamCodec.composite(ByteBufCodecs.VAR_INT, getter, ..., ctor)` (4 trường) chạy được. Đồng bộ qua `setAttached`; game test với mock player vẫn xanh. Client đọc bằng `player.getAttachedOrElse(type, default)`.
+- HUD: `HudElementRegistry.attachElementAfter(VanillaHudElements.CHAT, Identifier, HudElement)` (`net.fabricmc.fabric.api.client.rendering.v1.hud`); `HudElement#extractRenderState(GuiGraphicsExtractor, DeltaTracker)`.
+- `GuiGraphicsExtractor` (thay `GuiGraphics`): `fill(x1,y1,x2,y2,color)`, `outline(x, y, width, height, color)`, `text(Font, Component|String, x, y, color, boolean shadow)`, `guiHeight()`.
+- `Options.hideGui` không còn: dùng `Minecraft.getInstance().gui.hud.isHidden()` (`net.minecraft.client.gui.Hud`). `Player#isCreative()`, `#isSpectator()` còn.
+- Source set `src/client` biên dịch cùng `build`; HUD chỉ được biên dịch, chưa thấy trong game. `WitherBoss`/`Warden` đều `extends Monster`; `EntityTypes.WARDEN` spawn và giết được trong game test (+500 XP).

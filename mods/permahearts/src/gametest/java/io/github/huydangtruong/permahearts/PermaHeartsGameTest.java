@@ -10,6 +10,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.zombie.Zombie;
 
 public class PermaHeartsGameTest {
 	private static void kill(GameTestHelper context, ServerPlayer p, LivingEntity e) {
@@ -27,24 +28,37 @@ public class PermaHeartsGameTest {
 	}
 
 	@GameTest(maxTicks = 100)
-	public void hostileKillCountsCowDoesNot(GameTestHelper context) {
+	public void hostileKillGivesXpCowDoesNot(GameTestHelper context) {
 		ServerPlayer p = context.makeMockServerPlayerInLevel();
 		HeartsAttachment.set(p, HeartsData.DEFAULT);
-		kill(context, p, context.spawn(EntityTypes.ZOMBIE, 1, 1, 1));
-		context.assertTrue(HeartsAttachment.get(p).killProgress() == 1, "zombie kill should give progress 1, was " + HeartsAttachment.get(p).killProgress());
+		Zombie z = context.spawn(EntityTypes.ZOMBIE, 1, 1, 1);
+		int expected = (int) z.getMaxHealth();
+		kill(context, p, z);
+		context.assertTrue(HeartsAttachment.get(p).heartXp() == expected, "zombie kill should give " + expected + " XP, was " + HeartsAttachment.get(p).heartXp());
 		kill(context, p, context.spawn(EntityTypes.COW, 2, 1, 1));
-		context.assertTrue(HeartsAttachment.get(p).killProgress() == 1, "cow kill must not change progress");
+		context.assertTrue(HeartsAttachment.get(p).heartXp() == expected, "cow kill must not change XP");
 		context.succeed();
 	}
 
 	@GameTest(maxTicks = 100)
-	public void hundredthKillGivesHeart(GameTestHelper context) {
+	public void fullBarGivesHeart(GameTestHelper context) {
 		ServerPlayer p = context.makeMockServerPlayerInLevel();
-		HeartsAttachment.set(p, new HeartsData(0, 99, 99, 0));
+		HeartsAttachment.set(p, new HeartsData(0, 480, 99, 0));
 		HealthApplier.apply(p, true);
 		kill(context, p, context.spawn(EntityTypes.ZOMBIE, 1, 1, 1));
 		context.assertTrue(HeartRules.maxHearts(HeartsAttachment.get(p)) == 11, "should have 11 hearts");
 		context.assertTrue(p.getMaxHealth() == 22f, "max health should be 22, was " + p.getMaxHealth());
+		context.succeed();
+	}
+
+	@GameTest(maxTicks = 100)
+	public void bigMobGivesHeart(GameTestHelper context) {
+		ServerPlayer p = context.makeMockServerPlayerInLevel();
+		HeartsAttachment.set(p, HeartsData.DEFAULT);
+		HealthApplier.apply(p, true);
+		kill(context, p, context.spawn(EntityTypes.WARDEN, 1, 1, 1));
+		HeartsData d = HeartsAttachment.get(p);
+		context.assertTrue(HeartRules.maxHearts(d) == 11, "warden (500 XP) should give 11 hearts, had " + HeartRules.maxHearts(d) + " xp " + d.heartXp());
 		context.succeed();
 	}
 
@@ -68,7 +82,7 @@ public class PermaHeartsGameTest {
 		ServerPlayer r = dieAndRespawn(context, p);
 		HeartsData d = HeartsAttachment.get(r);
 		context.assertTrue(HeartRules.maxHearts(d) == 9, "should have 9 hearts after dying, had " + HeartRules.maxHearts(d));
-		context.assertTrue(d.killProgress() == 42, "kill progress must survive death, was " + d.killProgress());
+		context.assertTrue(d.heartXp() == 42, "HeartXP must survive death, was " + d.heartXp());
 		context.assertTrue(d.totalHostileKills() == 542, "total kills must survive death");
 		context.assertTrue(d.totalDeaths() == 1, "deaths should be 1, was " + d.totalDeaths());
 		context.assertTrue(r.getMaxHealth() == 18f, "max health should be 18, was " + r.getMaxHealth());
@@ -93,16 +107,16 @@ public class PermaHeartsGameTest {
 	}
 
 	@GameTest(maxTicks = 100)
-	public void killAtCapKeepsThirtyHearts(GameTestHelper context) {
+	public void killAtCapKeepsFiftyHearts(GameTestHelper context) {
 		ServerPlayer p = context.makeMockServerPlayerInLevel();
-		HeartsAttachment.set(p, HeartRules.withProgress(HeartRules.withHearts(HeartsData.DEFAULT, 30), 99));
+		HeartsAttachment.set(p, HeartRules.withHearts(HeartsData.DEFAULT, 50));
 		HealthApplier.apply(p, true);
-		context.assertTrue(p.getMaxHealth() == 60f, "30 hearts = 60 health, was " + p.getMaxHealth());
+		context.assertTrue(p.getMaxHealth() == 100f, "50 hearts = 100 health, was " + p.getMaxHealth());
 		kill(context, p, context.spawn(EntityTypes.ZOMBIE, 1, 1, 1));
 		HeartsData d = HeartsAttachment.get(p);
-		context.assertTrue(HeartRules.maxHearts(d) == 30, "cap is 30 hearts");
-		context.assertTrue(d.killProgress() == 0, "progress resets at cap, was " + d.killProgress());
-		context.assertTrue(p.getMaxHealth() == 60f, "max health should stay 60");
+		context.assertTrue(HeartRules.maxHearts(d) == 50, "cap is 50 hearts");
+		context.assertTrue(d.heartXp() == 0, "XP stays 0 at cap, was " + d.heartXp());
+		context.assertTrue(p.getMaxHealth() == 100f, "max health should stay 100");
 		context.succeed();
 	}
 
@@ -129,23 +143,23 @@ public class PermaHeartsGameTest {
 		// Admin permissions, executing as this player so @s targets it (mock players all share one name, and a UUID is an entity selector).
 		CommandSourceStack admin = server.createCommandSourceStack().withEntity(p);
 		String name = "@s";
-		run(context, admin, "hearts set " + name + " 25");
-		context.assertTrue(HeartRules.maxHearts(HeartsAttachment.get(p)) == 25, "set should give 25 hearts, had " + HeartRules.maxHearts(HeartsAttachment.get(p)));
-		context.assertTrue(p.getMaxHealth() == 50f, "max health should be 50, was " + p.getMaxHealth());
-		run(context, admin, "hearts progress " + name + " 77");
-		context.assertTrue(HeartsAttachment.get(p).killProgress() == 77, "progress should be 77");
+		run(context, admin, "hearts set " + name + " 45");
+		context.assertTrue(HeartRules.maxHearts(HeartsAttachment.get(p)) == 45, "set should give 45 hearts, had " + HeartRules.maxHearts(HeartsAttachment.get(p)));
+		context.assertTrue(p.getMaxHealth() == 90f, "max health should be 90, was " + p.getMaxHealth());
+		run(context, admin, "hearts xp " + name + " 250");
+		context.assertTrue(HeartsAttachment.get(p).heartXp() == 250, "XP should be 250");
 		// Out of range is rejected, data unchanged.
 		boolean rejected = false;
 		try {
-			server.getCommands().getDispatcher().execute("hearts set " + name + " 31", admin);
+			server.getCommands().getDispatcher().execute("hearts set " + name + " 51", admin);
 		} catch (CommandSyntaxException e) {
 			rejected = true;
 		}
-		context.assertTrue(rejected, "hearts set 31 should be a syntax error");
-		context.assertTrue(HeartRules.maxHearts(HeartsAttachment.get(p)) == 25, "31 must be rejected");
+		context.assertTrue(rejected, "hearts set 51 should be a syntax error");
+		context.assertTrue(HeartRules.maxHearts(HeartsAttachment.get(p)) == 45, "51 must be rejected");
 		// Plain /hearts as the player runs without changing anything.
 		run(context, p.createCommandSourceStack(), "hearts");
-		context.assertTrue(HeartRules.maxHearts(HeartsAttachment.get(p)) == 25, "/hearts must not change data");
+		context.assertTrue(HeartRules.maxHearts(HeartsAttachment.get(p)) == 45, "/hearts must not change data");
 		context.succeed();
 	}
 }

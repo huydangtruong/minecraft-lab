@@ -8,7 +8,8 @@
 	"license": "MIT",
 	"environment": "*",
 	"entrypoints": {
-		"main": ["io.github.huydangtruong.permahearts.PermaHearts"]
+		"main": ["io.github.huydangtruong.permahearts.PermaHearts"],
+		"client": ["io.github.huydangtruong.permahearts.client.PermaHeartsClient"]
 	},
 	"depends": {
 		"fabricloader": ">=0.20.1",

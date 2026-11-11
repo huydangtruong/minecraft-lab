@@ -12,6 +12,7 @@ class HeartsCodecTest {
 		var d = new HeartsData(-3, 42, 500, 7);
 		var json = HeartsData.CODEC.encodeStart(JsonOps.INSTANCE, d).getOrThrow();
 		assertEquals(d, HeartsData.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow());
+		assertEquals(42, json.getAsJsonObject().get("heart_xp").getAsInt());
 	}
 
 	@Test

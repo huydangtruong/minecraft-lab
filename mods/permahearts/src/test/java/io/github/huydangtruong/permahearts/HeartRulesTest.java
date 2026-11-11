@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import io.github.huydangtruong.permahearts.HeartRules.DeathOutcome;
 import io.github.huydangtruong.permahearts.HeartRules.KillOutcome;
-import io.github.huydangtruong.permahearts.HeartRules.KillResult;
 import org.junit.jupiter.api.Test;
 
 class HeartRulesTest {
@@ -30,47 +29,86 @@ class HeartRulesTest {
 		assertEquals(1, r.data().totalDeaths());
 	}
 
-	private static KillResult kills(HeartsData d, int n) {
-		KillResult r = null;
-		for (int i = 0; i < n; i++) {
-			r = HeartRules.onHostileKill(d);
-			d = r.data();
-		}
-		return r;
+	private static HeartsData at(int hearts, int xp) {
+		return HeartRules.withXp(HeartRules.withHearts(HeartsData.DEFAULT, hearts), xp);
 	}
 
 	@Test
-	void hundredKillsGainHeart() {
-		var r99 = kills(HeartsData.DEFAULT, 99);
-		assertEquals(KillOutcome.PROGRESS, r99.outcome());
-		assertEquals(99, r99.data().killProgress());
-		var r = HeartRules.onHostileKill(r99.data());
+	void xpForMobHealth() {
+		assertEquals(20, HeartRules.xpFor(20f));
+		assertEquals(1, HeartRules.xpFor(0.5f));
+		assertEquals(500, HeartRules.xpFor(499.6f));
+	}
+
+	@Test
+	void fullBarGainsHeart() {
+		var r = HeartRules.onHostileKill(at(10, 480), 20);
 		assertEquals(KillOutcome.GAINED, r.outcome());
 		assertEquals(11, HeartRules.maxHearts(r.data()));
-		assertEquals(0, r.data().killProgress());
-		assertEquals(100, r.data().totalHostileKills());
+		assertEquals(0, r.data().heartXp());
+		assertEquals(1, r.heartsGained());
+		assertEquals(1, r.data().totalHostileKills());
 	}
 
 	@Test
-	void hundredthKillAtCap() {
-		var d = HeartRules.withProgress(HeartRules.withHearts(HeartsData.DEFAULT, 30), 99);
-		var r = HeartRules.onHostileKill(d);
+	void partialXpIsProgress() {
+		var r = HeartRules.onHostileKill(HeartsData.DEFAULT, 20);
+		assertEquals(KillOutcome.PROGRESS, r.outcome());
+		assertEquals(20, r.data().heartXp());
+		assertEquals(20, r.xpGained());
+		assertEquals(0, r.heartsGained());
+	}
+
+	@Test
+	void overflowCarriesOver() {
+		var r = HeartRules.onHostileKill(at(10, 300), 300);
+		assertEquals(11, HeartRules.maxHearts(r.data()));
+		assertEquals(100, r.data().heartXp());
+	}
+
+	@Test
+	void bigKillGivesTwoHearts() {
+		var r = HeartRules.onHostileKill(HeartsData.DEFAULT, 1200);
+		assertEquals(12, HeartRules.maxHearts(r.data()));
+		assertEquals(200, r.data().heartXp());
+		assertEquals(2, r.heartsGained());
+	}
+
+	@Test
+	void reachingCapDropsExtraXp() {
+		var r = HeartRules.onHostileKill(at(49, 0), 1200);
+		assertEquals(KillOutcome.GAINED, r.outcome());
+		assertEquals(50, HeartRules.maxHearts(r.data()));
+		assertEquals(0, r.data().heartXp());
+		assertEquals(1, r.heartsGained());
+	}
+
+	@Test
+	void killAtCap() {
+		var r = HeartRules.onHostileKill(at(50, 0), 20);
 		assertEquals(KillOutcome.AT_CAP, r.outcome());
-		assertEquals(30, HeartRules.maxHearts(r.data()));
-		assertEquals(0, r.data().killProgress());
+		assertEquals(50, HeartRules.maxHearts(r.data()));
+		assertEquals(0, r.data().heartXp());
+		assertEquals(0, r.heartsGained());
 	}
 
 	@Test
-	void progressSurvivesDeath() {
-		var d = HeartRules.withProgress(HeartsData.DEFAULT, 37);
-		assertEquals(37, HeartRules.onDeath(d).data().killProgress());
+	void xpSurvivesDeath() {
+		assertEquals(37, HeartRules.onDeath(at(10, 37)).data().heartXp());
 	}
 
 	@Test
 	void clamping() {
 		assertEquals(1, HeartRules.maxHearts(HeartRules.withHearts(HeartsData.DEFAULT, 0)));
-		assertEquals(30, HeartRules.maxHearts(HeartRules.withHearts(HeartsData.DEFAULT, 99)));
-		assertEquals(99, HeartRules.withProgress(HeartsData.DEFAULT, 150).killProgress());
-		assertEquals(0, HeartRules.withProgress(HeartsData.DEFAULT, -5).killProgress());
+		assertEquals(50, HeartRules.maxHearts(HeartRules.withHearts(HeartsData.DEFAULT, 99)));
+		assertEquals(499, HeartRules.withXp(HeartsData.DEFAULT, 600).heartXp());
+		assertEquals(0, HeartRules.withXp(HeartsData.DEFAULT, -5).heartXp());
+		assertEquals(0, HeartRules.withHearts(at(10, 100), 99).heartXp());
+	}
+
+	@Test
+	void xpFractionForHud() {
+		assertEquals(0.5f, HeartRules.xpFraction(at(10, 250)));
+		assertEquals(1f, HeartRules.xpFraction(at(50, 0)));
 	}
 }
