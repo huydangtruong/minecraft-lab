@@ -16,3 +16,36 @@
 - Game rule `permahearts:enabled`, **mặc định tắt**. Tạo world: **More → Game Rules → PermaHearts** (nhóm Player) → bật. Trong game: `/gamerule permahearts:enabled true` hoặc `false` (cần quyền lệnh).
 - Khi tắt: chết không mất tim, giết mob không có HeartXP, máu tối đa về 10 tim, thanh HeartXP ẩn. Dữ liệu tim/HeartXP vẫn lưu; bật lại là trở về như cũ. Đổi trạng thái thì mọi người đang online nhận tin báo.
 - `/hearts` vẫn chạy khi tắt và nhắc cách bật.
+
+## Công tắc ImmortalCultivation (0.4.0, D11)
+
+- Game rule `permahearts:immortal_cultivation` (tên hiện trong Game Rules: **ImmortalCultivation**), mặc định tắt, thay `permahearts:enabled`. Một công tắc cho tất cả: tim, HeartXP, linh dược, Lữ Khách.
+- World đã bật bằng lệnh cũ: chạy lại `/gamerule permahearts:immortal_cultivation true`. Dữ liệu tim không mất.
+
+## Linh dược (0.4.0, D15)
+
+| Item | Tên VN | Mỗi bình | Thuộc tính |
+|---|---|---|---|
+| `permahearts:elixir_strength` | Linh Dược Sức Mạnh | +0.5 sát thương | `ATTACK_DAMAGE` cộng |
+| `permahearts:elixir_fury` | Linh Dược Cuồng Phong | +10% tốc đánh | `ATTACK_SPEED` ×base |
+| `permahearts:elixir_swiftness` | Linh Dược Thần Tốc | +5% tốc chạy | `MOVEMENT_SPEED` ×base |
+| `permahearts:elixir_iron_skin` | Linh Dược Kim Cang | +1 giáp | `ARMOR` cộng |
+| `permahearts:elixir_reach` | Linh Dược Trường Thủ | +0.5 tầm với | `BLOCK_INTERACTION_RANGE` + `ENTITY_INTERACTION_RANGE` cộng |
+| `permahearts:elixir_mining` | Linh Dược Khai Sơn | +10% tốc đào | `BLOCK_BREAK_SPEED` ×base |
+
+- Uống như bình thuốc (trả lại chai rỗng), có hiệu ứng lấp lánh, xếp chồng 16. Không trần, lưu theo người chơi, chết không mất.
+- Công tắc tắt: uống không được (báo cách bật), chỉ số đã có không tác dụng nhưng vẫn lưu.
+- `/hearts` có thêm dòng chỉ số linh dược. Thử: `/give @s permahearts:elixir_strength 4`.
+
+## Lữ Khách và nhiệm vụ (0.5.0–0.6.0, D12–D14)
+
+- Mỗi 3–5 ngày Minecraft (ngẫu nhiên): chọn một người chơi ở Overworld, lấy điểm cách ~900–1100 block hướng ngẫu nhiên, báo mọi người "Một Lữ Khách đang chờ ở X, Z". NPC hiện khi có người trong ~96 block. Trên mặt nước: đặt bè gỗ 3×3.
+- NPC: Wandering Trader đứng yên, bất tử, không biến mất, tên "Lữ Khách". Bấm vào: màn hình nhiệm vụ (không phải bảng trao đổi).
+- Màn hình: lời giới thiệu + **Nhận** → danh sách 2–4 dòng. Mọi người thấy cùng tiến độ.
+  - **Thu thập**: "Tìm 64 Sắt" + ô bỏ đồ; bỏ vào là trừ đồ, cộng tiến độ, dư trả lại.
+  - **Giết**: "Giết 16 Zombie" + số đếm; ai giết cũng tính.
+  - **Trăng máu** (0.6.0): nút Bắt đầu → trời thành đêm, mỗi 10 giây 5 zombie quanh mỗi người chơi ở Overworld (tối đa 30 con sống), không ngủ được; người bấm sống tới sáng là xong, chết thì dòng quay về chưa làm.
+  - **Thám hiểm** (0.6.0): "Đặt chân tới một Làng/Đền sa mạc/…".
+  - **Hạ thủ lĩnh** (0.6.0): nút Triệu hồi → trùm to gấp đôi, nhiều máu, có đệ tử, cạnh NPC.
+- Dòng xong → ô thưởng có 1 linh dược ngẫu nhiên; ai lấy trước được. Xong hết + lấy hết thưởng → NPC chào và đi, đếm lại 3–5 ngày.
+- Lệnh: `/quest` (NPC ở đâu, còn bao lâu, tiến độ). Admin: `/quest summon` (gọi NPC ngay cạnh mình với nhiệm vụ mới), `/quest skip` (NPC xuất hiện ngay ở ~1000 block), `/quest complete <dòng>`, `/quest reset`.
