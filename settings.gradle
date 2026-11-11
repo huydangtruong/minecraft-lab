@@ -1,0 +1,23 @@
+pluginManagement {
+	repositories {
+		maven {
+			name = 'Fabric'
+			url = 'https://maven.fabricmc.net/'
+		}
+		mavenCentral()
+		gradlePluginPortal()
+	}
+}
+
+rootProject.name = 'minecraft-lab'
+
+// Every folder in mods/ is a mod (a Gradle subproject). Folders starting with "_" are skipped.
+def modsDir = file('mods')
+if (modsDir.isDirectory()) {
+	modsDir.listFiles().sort().each { dir ->
+		if (dir.isDirectory() && !dir.name.startsWith('_') && !dir.name.startsWith('.') && new File(dir, 'gradle.properties').exists()) {
+			include dir.name
+			project(":${dir.name}").projectDir = dir
+		}
+	}
+}
