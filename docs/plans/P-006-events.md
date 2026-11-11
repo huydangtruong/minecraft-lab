@@ -2,7 +2,7 @@
 
 > **Tóm tắt cho Huy:** thêm 3 loại nhiệm vụ cho Lữ Khách. **Trăng máu**: bấm Bắt đầu → trời thành đêm, mỗi 10 giây 5 zombie quanh mỗi người (tối đa 30 con), không ngủ được, người bấm sống tới sáng là xong. **Thám hiểm**: đứng trong một Làng/Đền/Pháo đài… **Hạ thủ lĩnh**: bấm Triệu hồi → trùm to gấp đôi, 150 máu, 4 đệ tử. Bản 0.6.0.
 
-- **Status:** ready
+- **Status:** merged
 - **Mod / decision:** `permahearts`, D13 · **Branch:** `feat/P-006-events` · **Depends on:** P-005 (merged, 0.5.0)
 
 ## Goal
