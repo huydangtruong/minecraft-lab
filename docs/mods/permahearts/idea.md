@@ -9,3 +9,9 @@
 > Tăng trần lên 50 tim nhé. Tôi muốn ở góc trái, bên dưới có 1 thanh HeartXP, mỗi lần đầy thanh này mới cộng 1 tim, lưu theo từng người chơi, thì lượng xp này đem lại dựa theo số heart của mob, ví dụ giết ender dragon sẽ được warden thì được 1 tim - tức đầy cây xp, rồi từ đó scale xuống cho các mob khác nhé.
 
 Khi hỏi lại cách quy đổi: "Tuyến tính, XP = máu mob. Mỗi thanh để đầy sẽ cần là 500. Giết warden được +500xp, giết Wither được cộng 300xp. Tương tự với zombie, skeleton,..."
+
+## 2026-11-12 (bật/tắt)
+
+> có cách nào mà kiểu lúc tạo thế giới hay sao đó, tôi có thể tick chọn mod rồi tạo không, như tạo một game warcraft và chọn map vậy
+
+> tức là kể cả tạo game mà không bật lên, thì trong game muốn bật hay tắt cái này cũng được phải không? → đồng ý (game rule, mặc định tắt).

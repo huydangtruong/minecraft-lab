@@ -10,3 +10,9 @@
 - Lệnh: `/hearts` (tim, HeartXP, tổng kill, số lần chết); `/hearts set <targets> <1..50>` và `/hearts xp <targets> <0..499>` cần quyền gamemaster.
 - Tin nhắn có en_us và vi_vn; người không cài mod vẫn đọc được bản tiếng Anh.
 - Host và bạn phải cài **cùng phiên bản** mod.
+
+## Bật/tắt theo world (0.3.0, D10)
+
+- Game rule `permahearts:enabled`, **mặc định tắt**. Tạo world: **More → Game Rules → PermaHearts** (nhóm Player) → bật. Trong game: `/gamerule permahearts:enabled true` hoặc `false` (cần quyền lệnh).
+- Khi tắt: chết không mất tim, giết mob không có HeartXP, máu tối đa về 10 tim, thanh HeartXP ẩn. Dữ liệu tim/HeartXP vẫn lưu; bật lại là trở về như cũ. Đổi trạng thái thì mọi người đang online nhận tin báo.
+- `/hearts` vẫn chạy khi tắt và nhắc cách bật.

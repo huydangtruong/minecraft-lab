@@ -11,3 +11,4 @@
 | D7 | Trần tim (thay D6) | Tối đa **50 tim** | 2026-11-12 |
 | D8 | HeartXP (thay luật 100 kill) | Giết mob hostile được **HeartXP = máu tối đa của mob** (Zombie +20, Enderman +40, Ender Dragon +200, Wither +300, Warden +500). Đủ **500 HeartXP** = +1 tim, phần dư giữ lại. Ở trần thì không tích thêm. Lưu theo người chơi, không mất khi chết | 2026-11-12 |
 | D9 | Thanh HeartXP | Thanh ở **góc dưới bên trái** màn hình, hiện tiến độ x/500. Cần cài mod ở client (cả host và bạn) | 2026-11-12 |
+| D10 | Bật/tắt theo world | Game rule **`permahearts:enabled`**, **mặc định tắt**. Bật lúc tạo world (More → Game Rules) hoặc trong game bằng `/gamerule permahearts:enabled true/false`. Tắt: không mất tim, không HeartXP, máu về 10 tim, ẩn thanh; dữ liệu tim giữ nguyên để bật lại | 2026-11-12 |
