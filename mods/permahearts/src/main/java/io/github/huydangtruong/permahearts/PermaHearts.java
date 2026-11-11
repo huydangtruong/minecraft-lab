@@ -4,7 +4,12 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
+import net.fabricmc.fabric.api.entity.event.v1.EntitySleepEvents;
 import net.fabricmc.fabric.api.event.Event;
+import io.github.huydangtruong.permahearts.wanderer.BloodMoon;
+import io.github.huydangtruong.permahearts.wanderer.QuestBoss;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.player.Player;
 import net.fabricmc.fabric.api.gamerule.v1.GameRuleBuilder;
 import net.fabricmc.fabric.api.gamerule.v1.GameRuleEvents;
 import io.github.huydangtruong.permahearts.wanderer.QuestCommand;
@@ -89,7 +94,19 @@ public class PermaHearts implements ModInitializer {
 				}
 			}
 		});
+		// Blood Moon: no sleeping, the starter dying or leaving ends it, late joiners get the boss bar; boss death ends the boss line.
+		EntitySleepEvents.ALLOW_SLEEPING.register((player, pos) ->
+			player instanceof ServerPlayer sp && BloodMoon.running(sp.level().getServer())
+				? new Player.BedSleepingProblem(Messages.bloodMoonNoSleep()) : null);
+		ServerPlayerEvents.LEAVE.register(BloodMoon::onLeave);
+		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
+			if (entity.level() instanceof ServerLevel level) {
+				BloodMoon.onDeath(level.getServer(), entity);
+				QuestBoss.onDeath(level.getServer(), entity);
+			}
+		});
 		ServerPlayerEvents.JOIN.register(p -> {
+			BloodMoon.onJoin(p);
 			HeartsAttachment.setActive(p, enabled(p.level().getServer()));
 			HealthApplier.apply(p, false);
 		});

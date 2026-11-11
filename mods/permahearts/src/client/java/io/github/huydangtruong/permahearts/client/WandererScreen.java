@@ -37,7 +37,14 @@ public class WandererScreen extends AbstractContainerScreen<WandererMenu> {
 	private static final int TEXT_X = 30;
 	private static final int TEXT_W = WandererMenu.LINE_SLOT_X - 3 - TEXT_X;
 
+	/** Event rows (blood moon, boss) keep their Start / Summon button left of the slot square, so the text column is narrower. */
+	private static final int BUTTON_W = 78;
+	private static final int BUTTON_H = 18;
+	private static final int BUTTON_X = WandererMenu.LINE_SLOT_X - 3 - BUTTON_W;
+	private static final int EVENT_TEXT_W = BUTTON_X - 4 - TEXT_X;
+
 	private boolean shownAccepted;
+	private final Button[] eventButtons = new Button[WandererMenu.LINES];
 
 	public WandererScreen(WandererMenu menu, Inventory inv, Component title) {
 		super(menu, inv, title, WandererMenu.PANEL_W, WandererMenu.PANEL_H);
@@ -51,6 +58,43 @@ public class WandererScreen extends AbstractContainerScreen<WandererMenu> {
 			addRenderableWidget(Button.builder(Messages.accept(),
 					b -> minecraft.gameMode.handleInventoryButtonClick(menu.containerId, 0))
 				.bounds(leftPos + (imageWidth - 120) / 2, topPos + 76, 120, 20).build());
+			return;
+		}
+		QuestSnapshot snap = menu.snapshot();
+		for (int i = 0; i < WandererMenu.LINES; i++) {
+			eventButtons[i] = null;
+			if (i < snap.lines().size() && hasButton(snap.lines().get(i).type())) {
+				int line = i;
+				// 18 px high, same top as the 18x18 slot square of that row.
+				Button b = Button.builder(buttonLabel(i), x -> minecraft.gameMode.handleInventoryButtonClick(menu.containerId, 10 + line))
+					.bounds(leftPos + BUTTON_X, topPos + WandererMenu.LINE_SLOT_Y0 + i * WandererMenu.LINE_STEP - 1, BUTTON_W, BUTTON_H)
+					.build();
+				eventButtons[i] = addRenderableWidget(b);
+			}
+		}
+		updateButtons();
+	}
+
+	private static boolean hasButton(QuestType type) {
+		return type == QuestType.BLOOD_MOON || type == QuestType.BOSS;
+	}
+
+	private Component buttonLabel(int i) {
+		QuestType type = menu.snapshot().lines().get(i).type();
+		if (menu.eventRunning(i)) {
+			return type == QuestType.BOSS ? Messages.fighting() : Messages.running();
+		}
+		return type == QuestType.BOSS ? Messages.summon() : Messages.start();
+	}
+
+	private void updateButtons() {
+		for (int i = 0; i < WandererMenu.LINES; i++) {
+			Button b = eventButtons[i];
+			if (b != null) {
+				b.visible = !menu.isDone(i); // a done row shows the reward slot instead
+				b.active = !menu.eventRunning(i);
+				b.setMessage(buttonLabel(i));
+			}
 		}
 	}
 
@@ -60,6 +104,7 @@ public class WandererScreen extends AbstractContainerScreen<WandererMenu> {
 		if (menu.isAccepted() != shownAccepted) {
 			rebuildWidgets(); // swaps the Accept button for the quest rows
 		}
+		updateButtons();
 	}
 
 	@Override
@@ -107,15 +152,21 @@ public class WandererScreen extends AbstractContainerScreen<WandererMenu> {
 			icon = ElixirStat.byId(line.reward()).map(s -> new ItemStack(ElixirItems.get(s))).orElse(ItemStack.EMPTY);
 		} else {
 			text = Wanderer.lineText(line.type(), line.target(), line.required(), menu.progressOf(i));
-			icon = line.type() == QuestType.COLLECT
-				? new ItemStack(BuiltInRegistries.ITEM.getValue(Identifier.parse(line.target())))
-				: new ItemStack(Items.IRON_SWORD);
+			icon = switch (line.type()) {
+				case COLLECT -> new ItemStack(BuiltInRegistries.ITEM.getValue(Identifier.parse(line.target())));
+				case KILL -> new ItemStack(Items.IRON_SWORD);
+				case EXPLORE -> new ItemStack(Items.COMPASS);
+				case BLOOD_MOON -> new ItemStack(Items.CLOCK);
+				case BOSS -> new ItemStack(Items.DIAMOND_HELMET);
+			};
 		}
 		if (!icon.isEmpty()) {
 			g.fakeItem(icon, 10, slotY);
 		}
-		List<FormattedCharSequence> lines = font.split(text, TEXT_W);
-		int n = Math.min(2, lines.size());
+		// A row with a button (and not yet done) has a narrower text column and may use three lines (3 x 9 = 27 = row step).
+		boolean narrow = hasButton(line.type()) && !menu.isDone(i);
+		List<FormattedCharSequence> lines = font.split(text, narrow ? EVENT_TEXT_W : TEXT_W);
+		int n = Math.min(narrow ? 3 : 2, lines.size());
 		int y = slotY + 8 - (n * 9) / 2;
 		for (int k = 0; k < n; k++) {
 			g.text(font, lines.get(k), TEXT_X, y + k * 9, color, true);

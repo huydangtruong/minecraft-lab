@@ -23,24 +23,86 @@ public final class QuestGenerator {
 		new Entry("minecraft:creeper", 8), new Entry("minecraft:enderman", 8), new Entry("minecraft:witch", 4),
 		new Entry("minecraft:drowned", 8));
 
+	private record Weighted(String id, int weight) {}
+
+	private static final List<Weighted> EXPLORE = List.of(
+		new Weighted("#minecraft:village", 4), new Weighted("#minecraft:ruined_portal", 3),
+		new Weighted("minecraft:pillager_outpost", 2), new Weighted("#minecraft:mineshaft", 2),
+		new Weighted("minecraft:shipwreck", 2), new Weighted("minecraft:desert_pyramid", 1),
+		new Weighted("minecraft:jungle_temple", 1), new Weighted("minecraft:swamp_hut", 1),
+		new Weighted("minecraft:igloo", 1), new Weighted("minecraft:trail_ruins", 1),
+		new Weighted("minecraft:trial_chambers", 1), new Weighted("minecraft:ocean_monument", 1),
+		new Weighted("minecraft:ancient_city", 1), new Weighted("minecraft:fortress", 1),
+		new Weighted("minecraft:bastion_remnant", 1));
+
+	private static final List<Weighted> BOSS = List.of(new Weighted("minecraft:zombie", 1), new Weighted("minecraft:skeleton", 1));
+
 	private QuestGenerator() {}
+
+	private static QuestType pickType(RandomGenerator rng) {
+		int r = rng.nextInt(30 + 30 + 15 + 12 + 13);
+		if (r < 30) {
+			return QuestType.COLLECT;
+		} else if (r < 60) {
+			return QuestType.KILL;
+		} else if (r < 75) {
+			return QuestType.EXPLORE;
+		} else if (r < 87) {
+			return QuestType.BLOOD_MOON;
+		}
+		return QuestType.BOSS;
+	}
+
+	private static String pickWeighted(List<Weighted> pool, RandomGenerator rng) {
+		int total = 0;
+		for (Weighted w : pool) {
+			total += w.weight();
+		}
+		int r = rng.nextInt(total);
+		for (Weighted w : pool) {
+			r -= w.weight();
+			if (r < 0) {
+				return w.id();
+			}
+		}
+		return pool.get(0).id();
+	}
 
 	public static Quest generate(long id, RandomGenerator rng) {
 		int n = 2 + rng.nextInt(3);
 		List<QuestLine> lines = new ArrayList<>();
 		Set<String> used = new HashSet<>();
 		ElixirStat[] stats = ElixirStat.values();
+		boolean bossUsed = false;
 		while (lines.size() < n) {
-			QuestType type = rng.nextBoolean() ? QuestType.COLLECT : QuestType.KILL;
-			List<Entry> pool = switch (type) {
-				case COLLECT -> COLLECT;
-				case KILL -> KILL;
-			};
-			Entry e = pool.get(rng.nextInt(pool.size()));
-			if (!used.add(e.id())) {
+			QuestType type = pickType(rng);
+			String target;
+			int required = 1;
+			switch (type) {
+				case COLLECT -> {
+					Entry e = COLLECT.get(rng.nextInt(COLLECT.size()));
+					target = e.id();
+					required = e.count();
+				}
+				case KILL -> {
+					Entry e = KILL.get(rng.nextInt(KILL.size()));
+					target = e.id();
+					required = e.count();
+				}
+				case EXPLORE -> target = pickWeighted(EXPLORE, rng);
+				case BOSS -> target = pickWeighted(BOSS, rng);
+				default -> target = ""; // BLOOD_MOON
+			}
+			// No duplicate targets (so a boss zombie and a kill-zombie line never meet); the blood moon's "" and a
+			// second boss are covered by the same set plus the flag.
+			if (type == QuestType.BOSS && bossUsed) {
 				continue;
 			}
-			lines.add(new QuestLine(type, e.id(), e.count(), 0, stats[rng.nextInt(stats.length)].id(), false));
+			if (!used.add(target)) {
+				continue;
+			}
+			bossUsed |= type == QuestType.BOSS;
+			lines.add(new QuestLine(type, target, required, 0, stats[rng.nextInt(stats.length)].id(), false));
 		}
 		return new Quest(id, List.copyOf(lines), false);
 	}

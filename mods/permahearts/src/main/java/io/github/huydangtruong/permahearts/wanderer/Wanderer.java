@@ -10,6 +10,12 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.random.RandomGenerator;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.StructureTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -168,6 +174,97 @@ public final class Wanderer {
 		}
 	}
 
+	// ---- events (blood moon, explore, boss) ----
+
+	/** The Start / Summon button of an event line. Returns false when nothing was started. */
+	public static boolean startEvent(MinecraftServer server, int line, ServerPlayer player) {
+		Optional<Quest> q = quest(server);
+		if (q.isEmpty() || !q.get().accepted() || line < 0 || line >= q.get().lines().size()) {
+			return false;
+		}
+		return switch (q.get().lines().get(line).type()) {
+			case BLOOD_MOON -> BloodMoon.start(server, line, player);
+			case BOSS -> QuestBoss.summon(server, line, player);
+			default -> false;
+		};
+	}
+
+	/** 1 while an event runs for this line (blood moon or boss), else 0. */
+	public static int eventState(MinecraftServer server, int line) {
+		WandererData d = data(server);
+		boolean moon = d.bloodMoon().isPresent() && d.bloodMoon().get().line() == line;
+		boolean boss = d.boss().isPresent() && d.boss().get().line() == line;
+		return moon || boss ? 1 : 0;
+	}
+
+	/** An event finished by itself: mark the line done and tell everyone. */
+	static void eventDone(MinecraftServer server, int line) {
+		WandererData d = data(server);
+		if (d.quest().isEmpty()) {
+			return;
+		}
+		Quest before = d.quest().get();
+		Quest after = QuestLogic.eventDone(before, line);
+		save(server, d.withQuest(Optional.of(after)));
+		announceIfDone(server, before, after, line);
+	}
+
+	/** Every 40 ticks: a player standing inside a quest structure finishes that EXPLORE line. */
+	public static void exploreCheck(MinecraftServer server) {
+		Optional<Quest> q = quest(server);
+		if (q.isEmpty() || !q.get().accepted()) {
+			return;
+		}
+		boolean any = q.get().lines().stream().anyMatch(l -> l.type() == QuestType.EXPLORE && !l.done());
+		if (!any) {
+			return;
+		}
+		for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+			if (p.isSpectator()) {
+				continue;
+			}
+			ServerLevel level = p.level();
+			BlockPos pos = p.blockPosition();
+			Optional<Quest> cur = quest(server);
+			if (cur.isEmpty()) {
+				return;
+			}
+			Optional<QuestLogic.KillResult> r = QuestLogic.explore(cur.get(), target -> isInside(level, pos, target));
+			if (r.isPresent()) {
+				commit(server, cur.get(), r.get());
+			}
+		}
+	}
+
+	/** Test helper: pretend someone stands inside this structure target. */
+	public static void markExploredForTest(MinecraftServer server, String target) {
+		Optional<Quest> q = quest(server);
+		if (q.isEmpty()) {
+			return;
+		}
+		QuestLogic.explore(q.get(), t -> t.equals(target)).ifPresent(r -> commit(server, q.get(), r));
+	}
+
+	private static void commit(MinecraftServer server, Quest before, QuestLogic.KillResult r) {
+		save(server, data(server).withQuest(Optional.of(r.quest())));
+		announceIfDone(server, before, r.quest(), r.line());
+	}
+
+	/** target: "#ns:path" = structure tag, "ns:path" = one structure. */
+	private static boolean isInside(ServerLevel level, BlockPos pos, String target) {
+		java.util.function.Predicate<Holder<Structure>> test;
+		if (target.startsWith("#")) {
+			TagKey<Structure> tag = TagKey.create(Registries.STRUCTURE, Identifier.parse(target.substring(1)));
+			test = h -> h.is(tag);
+		} else if (target.equals("minecraft:shipwreck")) {
+			test = h -> h.is(StructureTags.SHIPWRECK); // buried and beached wrecks too
+		} else {
+			ResourceKey<Structure> key = ResourceKey.create(Registries.STRUCTURE, Identifier.parse(target));
+			test = h -> h.is(key);
+		}
+		return level.structureManager().getStructureWithPieceAt(pos, test).isValid();
+	}
+
 	/** Admin: finish a line (0-based). Returns false if there is no such line. */
 	public static boolean complete(MinecraftServer server, int line) {
 		WandererData d = data(server);
@@ -222,6 +319,8 @@ public final class Wanderer {
 			npc.discard();
 		}
 		REWARDS.clear();
+		BloodMoon.onReset(server);
+		QuestBoss.onReset(server);
 		save(server, WandererData.DEFAULT);
 	}
 
@@ -234,10 +333,12 @@ public final class Wanderer {
 	// ---- text helpers (also used by the screen) ----
 
 	public static Component targetName(QuestType type, String target) {
-		Identifier id = Identifier.parse(target);
 		return switch (type) {
-			case COLLECT -> Component.translatable(BuiltInRegistries.ITEM.getValue(id).getDescriptionId());
-			case KILL -> BuiltInRegistries.ENTITY_TYPE.getValue(id).getDescription();
+			case COLLECT -> Component.translatable(BuiltInRegistries.ITEM.getValue(Identifier.parse(target)).getDescriptionId());
+			case KILL -> BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.parse(target)).getDescription();
+			case EXPLORE -> Messages.structureName(target);
+			case BLOOD_MOON -> Messages.bloodMoonBar();
+			case BOSS -> Messages.bossName(BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.parse(target)).getDescription());
 		};
 	}
 
@@ -246,6 +347,9 @@ public final class Wanderer {
 		return switch (type) {
 			case COLLECT -> Messages.lineCollect(required, name, progress);
 			case KILL -> Messages.lineKill(required, name, progress);
+			case EXPLORE -> Messages.lineExplore(name);
+			case BLOOD_MOON -> Messages.lineBloodMoon();
+			case BOSS -> Messages.lineBoss(name);
 		};
 	}
 

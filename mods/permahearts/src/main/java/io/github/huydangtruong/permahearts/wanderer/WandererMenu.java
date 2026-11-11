@@ -3,6 +3,7 @@ package io.github.huydangtruong.permahearts.wanderer;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.Entity;
@@ -45,6 +46,8 @@ public class WandererMenu extends AbstractContainerMenu {
 	private final DataSlot accepted;
 	private final DataSlot[] progress = new DataSlot[LINES];
 	private final DataSlot[] claimed = new DataSlot[LINES];
+	/** Per event line: 1 while the blood moon / boss of that line is running. */
+	private final DataSlot[] eventState = new DataSlot[LINES];
 	private final Container deposit;
 	private final Container rewards;
 	private boolean processing;
@@ -68,6 +71,8 @@ public class WandererMenu extends AbstractContainerMenu {
 				: live(() -> line(snapshot.questId(), line, QuestLine::progress)));
 			claimed[i] = addDataSlot(server == null ? DataSlot.standalone()
 				: live(() -> line(snapshot.questId(), line, l -> l.claimed() ? 1 : 0)));
+			eventState[i] = addDataSlot(server == null ? DataSlot.standalone()
+				: live(() -> quest(snapshot.questId(), q -> Wanderer.eventState(server, line))));
 		}
 		this.deposit = new SimpleContainer(LINES) {
 			@Override
@@ -133,6 +138,10 @@ public class WandererMenu extends AbstractContainerMenu {
 
 	public boolean isClaimed(int line) {
 		return claimed[line].get() != 0;
+	}
+
+	public boolean eventRunning(int line) {
+		return eventState[line].get() != 0;
 	}
 
 	public boolean depositActive(int line) {
@@ -235,6 +244,11 @@ public class WandererMenu extends AbstractContainerMenu {
 	public boolean clickMenuButton(Player p, int id) {
 		if (server != null && id == 0) {
 			Wanderer.accept(server);
+			return true;
+		}
+		// 10 + line: the Start / Summon button of an event line.
+		if (server != null && id >= 10 && id < 10 + LINES && p instanceof ServerPlayer sp && isAccepted()) {
+			Wanderer.startEvent(server, id - 10, sp);
 			return true;
 		}
 		return false;

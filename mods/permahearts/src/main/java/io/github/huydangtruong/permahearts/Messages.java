@@ -169,4 +169,72 @@ public final class Messages {
 	public static Component questAdmin(String text) {
 		return Component.literal(text);
 	}
+
+	// ---- Quest events (0.6.0) ----
+
+	public static Component lineExplore(Component name) {
+		return Component.translatableWithFallback("permahearts.wanderer.line_explore", "Reach %s", name);
+	}
+
+	public static Component lineBloodMoon() {
+		return Component.translatableWithFallback("permahearts.wanderer.line_blood_moon", "Survive the Blood Moon night");
+	}
+
+	public static Component lineBoss(Component name) {
+		return Component.translatableWithFallback("permahearts.wanderer.line_boss", "Defeat %s", name);
+	}
+
+	public static Component start() {
+		return Component.translatableWithFallback("permahearts.wanderer.start", "Start");
+	}
+
+	public static Component summon() {
+		return Component.translatableWithFallback("permahearts.wanderer.summon", "Summon");
+	}
+
+	public static Component running() {
+		return Component.translatableWithFallback("permahearts.wanderer.running", "In progress…");
+	}
+
+	public static Component fighting() {
+		return Component.translatableWithFallback("permahearts.wanderer.fighting", "Fighting…");
+	}
+
+	public static Component bloodMoonStarted() {
+		return Component.translatableWithFallback("permahearts.wanderer.blood_moon_started", "The Blood Moon rises! Survive until dawn");
+	}
+
+	public static Component bloodMoonFailed(Component player) {
+		return Component.translatableWithFallback("permahearts.wanderer.blood_moon_failed", "The Blood Moon claimed %s. Try again", player);
+	}
+
+	public static Component bloodMoonNoSleep() {
+		return Component.translatableWithFallback("permahearts.wanderer.blood_moon_no_sleep", "You cannot sleep under the Blood Moon");
+	}
+
+	public static Component bloodMoonBar() {
+		return Component.translatableWithFallback("permahearts.wanderer.blood_moon_bar", "Blood Moon");
+	}
+
+	public static Component bossName(Component entity) {
+		return Component.translatableWithFallback("permahearts.wanderer.boss_name", "%s Chieftain", entity);
+	}
+
+	public static Component bossSummoned(Component name) {
+		return Component.translatableWithFallback("permahearts.wanderer.boss_summoned", "%s has appeared!", name);
+	}
+
+	public static Component bossAlreadyHere() {
+		return Component.translatableWithFallback("permahearts.wanderer.boss_already_here", "The chieftain is already here");
+	}
+
+	public static Component eventNotHere() {
+		return Component.translatableWithFallback("permahearts.wanderer.event_not_here", "This can only be started in the Overworld, near the Wanderer");
+	}
+
+	/** id is a structure id or "#tag" id, e.g. "#minecraft:village". */
+	public static Component structureName(String id) {
+		String path = id.substring(id.indexOf(':') + 1);
+		return Component.translatableWithFallback("permahearts.structure." + path, path);
+	}
 }
