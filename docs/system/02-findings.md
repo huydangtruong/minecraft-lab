@@ -40,3 +40,10 @@ Tên và chữ ký dưới đây lấy từ `javap` jar 26.3 và mã Fabric API 
 - `AttachmentType` có `identifier()` (không phải `id()`).
 - `GameTestHelper#makeMockServerPlayerInLevel()` đã `@Deprecated(forRemoval)` nhưng vẫn chạy; kill bằng `hurtServer(level, damageSources().playerAttack(p), 1000f)` cho kill credit đúng người chơi mock (game test xanh).
 - `HeartsData.CODEC` đặt trong `HeartsData` (để JUnit không nạp registry); `HeartsAttachment.CODEC` trỏ tới nó.
+
+## Bẫy đã gặp: thứ tự `AFTER_RESPAWN` (2026-11-11, sửa ở 0.1.1)
+
+- Fabric chép attachment cũ → người mới **trong chính listener `ServerPlayerEvents.AFTER_RESPAWN` của nó** (`AttachmentEntrypoint`, phase mặc định), không phải ở `COPY_FROM`. Listener của mod khác có thể chạy trước và bị ghi đè. Bản 0.1.0 dính lỗi này: chết không mất tim, thanh máu lệch dữ liệu.
+- Cách đúng: `AFTER_RESPAWN.addPhaseOrdering(Event.DEFAULT_PHASE, myPhase)` + `register(myPhase, …)`, và đọc dữ liệu từ `oldPlayer`.
+- Game test: mock player (`makeMockServerPlayerInLevel`) là **Creative** và client chưa "loaded" → bất tử với damage; muốn chết thì `setHealth(0)` + `die(source)`, rồi `server.getPlayerList().respawn(p, false, Entity.RemovalReason.KILLED)`. Mọi mock player trùng tên `test-mock-player` (game test chạy song song) và UUID là selector entity → dùng `server.createCommandSourceStack().withEntity(p)` + `@s`. Chạy lệnh qua `getDispatcher().execute` để lỗi làm fail test (`performPrefixedCommand` nuốt lỗi).
+- Bộ game test hiện có (9): máu theo bonus, zombie tính/bò không, kill thứ 100 +1 tim, chết −1 tim + máu đầy + giữ tiến độ, sàn 1 tim, trần 30, người mới 10 tim, lệnh admin + từ chối 31, cùng 1 test hạ tầng.
