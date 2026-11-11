@@ -72,3 +72,15 @@ Tên và chữ ký dưới đây lấy từ `javap` jar 26.3 và mã Fabric API 
 - Model item không cần texture: `assets/<ns>/items/<id>.json` với `minecraft:model` `minecraft:item/potion` + `tints` `minecraft:constant` (số nguyên ARGB có dấu). Chưa thấy trong game.
 - Modifier vĩnh viễn trên `ATTACK_DAMAGE`, `MOVEMENT_SPEED`, `ARMOR`, `BLOCK/ENTITY_INTERACTION_RANGE`... sống qua respawn (game test `elixirKeptOnDeath`).
 
+
+## Thêm (khi làm P-005, Lữ Khách)
+
+- `SavedData`: `new SavedDataType<>(Identifier, Supplier<T>, Codec<T>, DataFixTypes)`; `DataFixTypes` truyền `null` chạy được (game test lưu/đọc xanh). Lấy bằng `server.getDataStorage().computeIfAbsent(TYPE)`; ghi xong gọi `setDirty()`.
+- Ngày: `server.overworld().getOverworldClockTime() / 24000L` (có trên `Level`).
+- Spawn: `EntityTypes.WANDERING_TRADER.create(level, EntitySpawnReason.EVENT)` → `snapTo(x,y,z,yaw,pitch)`, `setNoAi`, `setPersistenceRequired`, `setDespawnDelay(0)`, `setCustomName`, `level.addFreshEntity`. Tên hiển thị: `Item#getDescriptionId()` (final) và `EntityType#getDescription()`; `Registry#getValue(Identifier)`, `EntityType.getKey(type)` (tĩnh).
+- Sự kiện Fabric: `UseEntityCallback.EVENT` `(Player, Level, InteractionHand, Entity, EntityHitResult) -> InteractionResult`; `ServerLivingEntityEvents.ALLOW_DAMAGE (LivingEntity, DamageSource, float) -> boolean`; `ServerEntityEvents.ENTITY_LOAD (Entity, ServerLevel)`.
+- Menu có dữ liệu mở: `new ExtendedMenuType<>((int id, Inventory inv, D data) -> menu, StreamCodec<? super RegistryFriendlyByteBuf, D>)`; mở bằng `player.openMenu(ExtendedMenuProvider<D>)` (`getScreenOpeningData(ServerPlayer)`, `getDisplayName()`, `createMenu(int, Inventory, Player)`).
+- Menu: `AbstractContainerMenu(MenuType, int)`; `addDataSlot(DataSlot)` (server dùng lớp con ẩn danh đọc giá trị sống, client dùng `DataSlot.standalone()`); `addStandardInventorySlots(Container, x, y)`; `Slot#isActive()`; `slotsChanged(Container)`, `clearContainer(Player, Container)`, `clickMenuButton(Player, int)`; `moveItemStackTo`. Nút client: `minecraft.gameMode.handleInventoryButtonClick(containerId, id)`.
+- Đăng ký màn hình: `MenuScreens.register(menuType, Screen::new)` dùng được trực tiếp (Fabric `fabric-transitive-access-wideners-v1` mở sẵn `register` + `ScreenConstructor`), không cần class tweaker riêng.
+- Màn hình: `AbstractContainerScreen(menu, inv, title, imageWidth, imageHeight)`; vẽ nền trong `extractBackground(GuiGraphicsExtractor, mx, my, dt)` (chạy trước widget và ô), chữ trong `extractLabels(g, mx, my)` (đã dịch về góc trên-trái bảng), ô đồ do `extractSlots`. `g.fill`, `g.text(font, Component|FormattedCharSequence, x, y, argb, shadow)`, `g.textWithWordWrap(font, FormattedText, x, y, width, color)`, `g.fakeItem(ItemStack, x, y)`, `font.split(FormattedText, width)`; `Button.builder(text, onPress).bounds(x,y,w,h).build()`; `rebuildWidgets()`. Chỉ biên dịch, chưa thấy trong game.
+- Game test: mọi test chạy xong trong một lần gọi nên không xen nhau; trạng thái Lữ Khách dùng chung server nên mỗi test `Wanderer.reset` đầu và trong `finally`.

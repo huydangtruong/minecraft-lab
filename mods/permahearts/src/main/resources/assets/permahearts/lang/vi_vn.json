@@ -30,5 +30,21 @@
   "permahearts.elixir.tooltip": "%s %s, vĩnh viễn",
   "permahearts.msg.elixir_disabled": "ImmortalCultivation đang tắt trong world này",
   "permahearts.msg.cultivation_part": "%s %s",
-  "permahearts.msg.cultivation_none": "Chưa uống linh dược nào"
+  "permahearts.msg.cultivation_none": "Chưa uống linh dược nào",
+  "permahearts.wanderer.name": "Lữ Khách",
+  "permahearts.wanderer.planned": "Một Lữ Khách đang chờ ở X %s, Z %s",
+  "permahearts.wanderer.intro": "Ta là kẻ lữ hành qua nhiều cõi. Giúp ta vài việc, ta sẽ tặng ngươi linh dược tu luyện.",
+  "permahearts.wanderer.accept": "Nhận nhiệm vụ",
+  "permahearts.wanderer.line_collect": "Tìm %s %s: %s/%s",
+  "permahearts.wanderer.line_kill": "Giết %s %s: %s/%s",
+  "permahearts.wanderer.line_done": "Phần thưởng: %s",
+  "permahearts.wanderer.line_claimed": "Đã nhận",
+  "permahearts.wanderer.kill_progress": "Nhiệm vụ: %s %s/%s",
+  "permahearts.wanderer.line_completed": "Xong một nhiệm vụ: %s. Phần thưởng đang chờ ở Lữ Khách",
+  "permahearts.wanderer.farewell": "Lữ Khách cảm ơn và lên đường",
+  "permahearts.wanderer.where": "Lữ Khách ở X %s, Z %s (cách %s block)",
+  "permahearts.wanderer.next": "Lữ Khách tiếp theo sau khoảng %s ngày",
+  "permahearts.wanderer.not_accepted": "Chưa nhận nhiệm vụ: hãy nói chuyện với Lữ Khách",
+  "permahearts.wanderer.status_line": "%s. %s",
+  "permahearts.wanderer.done": "xong"
 }

@@ -97,4 +97,76 @@ public final class Messages {
 		}
 		return line;
 	}
+
+	// ---- Wanderer (0.5.0) ----
+
+	public static Component wandererName() {
+		return Component.translatableWithFallback("permahearts.wanderer.name", "Wanderer");
+	}
+
+	public static Component wandererPlanned(int x, int z) {
+		return Component.translatableWithFallback("permahearts.wanderer.planned", "A Wanderer is waiting at X %s, Z %s", x, z);
+	}
+
+	public static Component wandererIntro() {
+		return Component.translatableWithFallback("permahearts.wanderer.intro",
+			"I am a traveller of many realms. Help me with a few tasks and I will give you cultivation elixirs.");
+	}
+
+	public static Component accept() {
+		return Component.translatableWithFallback("permahearts.wanderer.accept", "Accept");
+	}
+
+	public static Component lineCollect(int required, Component name, int progress) {
+		return Component.translatableWithFallback("permahearts.wanderer.line_collect", "Find %s %s: %s/%s", required, name, progress, required);
+	}
+
+	public static Component lineKill(int required, Component name, int progress) {
+		return Component.translatableWithFallback("permahearts.wanderer.line_kill", "Kill %s %s: %s/%s", required, name, progress, required);
+	}
+
+	public static Component lineDone(Component reward) {
+		return Component.translatableWithFallback("permahearts.wanderer.line_done", "Reward: %s", reward);
+	}
+
+	public static Component lineClaimed() {
+		return Component.translatableWithFallback("permahearts.wanderer.line_claimed", "Claimed");
+	}
+
+	public static Component killProgress(Component name, int progress, int required) {
+		return Component.translatableWithFallback("permahearts.wanderer.kill_progress", "Quest: %s %s/%s", name, progress, required);
+	}
+
+	public static Component lineCompleted(Component name) {
+		return Component.translatableWithFallback("permahearts.wanderer.line_completed",
+			"Quest line done: %s. Reward waits at the Wanderer", name);
+	}
+
+	public static Component farewell() {
+		return Component.translatableWithFallback("permahearts.wanderer.farewell", "The Wanderer thanks you and moves on");
+	}
+
+	public static Component questWhere(int x, int z, int distance) {
+		return Component.translatableWithFallback("permahearts.wanderer.where", "Wanderer at X %s, Z %s (%s blocks away)", x, z, distance);
+	}
+
+	public static Component questNext(long days) {
+		return Component.translatableWithFallback("permahearts.wanderer.next", "Next Wanderer in about %s day(s)", days);
+	}
+
+	public static Component questNoLines() {
+		return Component.translatableWithFallback("permahearts.wanderer.not_accepted", "Quest not accepted yet: talk to the Wanderer");
+	}
+
+	public static Component questLineStatus(int number, Component text) {
+		return Component.translatableWithFallback("permahearts.wanderer.status_line", "%s. %s", number, text);
+	}
+
+	public static Component questDone() {
+		return Component.translatableWithFallback("permahearts.wanderer.done", "done");
+	}
+
+	public static Component questAdmin(String text) {
+		return Component.literal(text);
+	}
 }
