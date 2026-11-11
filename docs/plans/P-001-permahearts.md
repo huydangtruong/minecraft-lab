@@ -2,7 +2,7 @@
 
 > **Tóm tắt cho Huy:** code mod đầu tiên. Chết mất 1 tim vĩnh viễn (sàn 1 tim), giết 100 mob hostile được +1 tim (trần 30), lưu theo người chơi, có lệnh `/hearts`, tin nhắn tiếng Anh + Việt, test JUnit + game test. Huy sẽ thấy: chơi thử trong `runClient`, sau đó `scripts/install.sh` rồi chơi với bạn.
 
-- **Status:** ready
+- **Status:** merged
 - **Mod / decision:** `permahearts`, D1, D2, D5 · **Branch:** `feat/P-001-permahearts` · **Depends on:** none (build skeleton already works)
 
 ## Goal
