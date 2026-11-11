@@ -13,7 +13,7 @@ Tạo world Survival mới (Creative bật cheat nếu cần lệnh). Kịch b�
 2. `/kill` → hồi sinh 9 tim, máu đầy, có tin báo.
 3. `/hearts set @s 1` rồi `/kill` → vẫn 1 tim + tin "mức thấp nhất".
 4. `/hearts progress @s 99`, `/summon zombie`, giết bằng cung → +1 tim, âm thanh level-up, tiến độ 0.
-5. Giết bò → tiến độ không đổi. `/hearts set @s 20` + `/hearts progress @s 99` + giết zombie → vẫn 20 tim, báo "tối đa".
+5. Giết bò → tiến độ không đổi. `/hearts set @s 30` + `/hearts progress @s 99` + giết zombie → vẫn 30 tim, báo "tối đa".
 6. Thoát world, vào lại → giữ nguyên.
 
 ## Với bạn (Essential)
