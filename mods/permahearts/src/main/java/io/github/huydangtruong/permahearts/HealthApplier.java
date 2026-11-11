@@ -12,6 +12,7 @@ public final class HealthApplier {
 	private HealthApplier() {}
 
 	public static void apply(ServerPlayer p, boolean refill) {
+		StatApplier.apply(p);
 		AttributeInstance a = p.getAttribute(Attributes.MAX_HEALTH);
 		boolean on = PermaHearts.enabled(p.level().getServer());
 		double extra = on ? HeartsAttachment.get(p).bonusHearts() * 2.0 : 0;

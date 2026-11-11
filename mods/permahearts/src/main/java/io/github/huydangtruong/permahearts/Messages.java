@@ -1,6 +1,8 @@
 package io.github.huydangtruong.permahearts;
 
 import net.minecraft.network.chat.Component;
+import java.util.ArrayList;
+import java.util.List;
 
 public final class Messages {
 	private Messages() {}
@@ -40,13 +42,13 @@ public final class Messages {
 
 	public static Component toggled(boolean on) {
 		return on
-			? Component.translatableWithFallback("permahearts.msg.on", "PermaHearts is now ON in this world")
-			: Component.translatableWithFallback("permahearts.msg.off", "PermaHearts is now OFF in this world");
+			? Component.translatableWithFallback("permahearts.msg.on", "ImmortalCultivation is now ON in this world")
+			: Component.translatableWithFallback("permahearts.msg.off", "ImmortalCultivation is now OFF in this world");
 	}
 
 	public static Component disabledHint() {
 		return Component.translatableWithFallback("permahearts.msg.disabled",
-			"PermaHearts is off in this world. Turn on: /gamerule permahearts:enabled true");
+			"ImmortalCultivation is off in this world. Turn on: /gamerule permahearts:immortal_cultivation true");
 	}
 
 	public static Component hudLabel(int xp) {
@@ -55,5 +57,44 @@ public final class Messages {
 
 	public static Component hudMax() {
 		return Component.translatableWithFallback("permahearts.hud.max", "HeartXP MAX");
+	}
+
+	public static Component statName(ElixirStat stat) {
+		return Component.translatable("permahearts.stat." + stat.id());
+	}
+
+	public static Component elixirDrunk(ElixirStat stat, int newLevel) {
+		return Component.translatableWithFallback("permahearts.msg.elixir_drunk", "%s %s! Total: %s",
+			stat.format(stat.step()), statName(stat), stat.format(stat.bonus(newLevel)));
+	}
+
+	public static Component elixirTooltip(ElixirStat stat) {
+		return Component.translatableWithFallback("permahearts.elixir.tooltip", "%s %s, permanent",
+			stat.format(stat.step()), statName(stat));
+	}
+
+	public static Component elixirDisabled() {
+		return Component.translatableWithFallback("permahearts.msg.elixir_disabled", "ImmortalCultivation is off in this world");
+	}
+
+	public static Component cultivationStatus(CultivationData data) {
+		List<Component> parts = new ArrayList<>();
+		for (ElixirStat stat : ElixirStat.values()) {
+			int level = data.level(stat);
+			if (level > 0) {
+				parts.add(Component.translatable("permahearts.msg.cultivation_part", statName(stat), stat.format(stat.bonus(level))));
+			}
+		}
+		if (parts.isEmpty()) {
+			return Component.translatableWithFallback("permahearts.msg.cultivation_none", "No elixirs yet");
+		}
+		Component line = Component.empty();
+		for (int i = 0; i < parts.size(); i++) {
+			if (i > 0) {
+				line = Component.empty().append(line).append(Component.literal(" · "));
+			}
+			line = Component.empty().append(line).append(parts.get(i));
+		}
+		return line;
 	}
 }

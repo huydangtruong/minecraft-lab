@@ -9,7 +9,8 @@ export JAVA_HOME=$(/usr/libexec/java_home -v 25)
 
 Tạo world Survival mới (Creative bật cheat nếu cần lệnh). Kịch bản PermaHearts:
 
-0. Tạo world mới: **Create New World → More → Game Rules → PermaHearts → bật** (mặc định tắt; hoặc trong game `/gamerule permahearts:enabled true`). Tắt: `/gamerule permahearts:enabled false` → máu về 10 tim, thanh HeartXP ẩn, chết không mất tim, `/hearts` nhắc cách bật; bật lại → tim cũ trở về. (Màn Game Rules chưa từng được nhìn thấy trong game.)
+0. Tạo world mới: **Create New World → More → Game Rules → ImmortalCultivation → bật** (mặc định tắt; hoặc trong game `/gamerule permahearts:immortal_cultivation true`). Tắt: `/gamerule permahearts:immortal_cultivation false` → máu về 10 tim, thanh HeartXP ẩn, chết không mất tim, `/hearts` nhắc cách bật; bật lại → tim cũ trở về. (Màn Game Rules chưa từng được nhìn thấy trong game.)
+0b. Linh dược: `/give @s permahearts:elixir_strength 4`, uống hết → `/hearts` hiện +2.0 sát thương; chết → vẫn còn. Tắt công tắc → chỉ số về gốc, `/hearts` vẫn nhớ cấp; uống khi tắt thì không tiêu hao. (Màu chai, hiệu ứng lấp lánh chưa từng được nhìn thấy trong game.)
 1. `/hearts` → 10 tim, HeartXP 0/500.
 2. `/kill` → hồi sinh 9 tim, máu đầy, có tin báo.
 3. `/hearts set @s 1` rồi `/kill` → vẫn 1 tim + tin "mức thấp nhất".

@@ -24,10 +24,10 @@ public class PermaHearts implements ModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 	private static final Identifier AFTER_ATTACHMENT_COPY = Identifier.fromNamespaceAndPath(MOD_ID, "after_attachment_copy");
 
-	/** Per-world switch (D10). Default off; Game Rules screen at world creation or /gamerule permahearts:enabled. */
+	/** Per-world ImmortalCultivation switch (D10, D11). Default off; Game Rules screen at world creation or /gamerule permahearts:immortal_cultivation. */
 	public static final GameRule<Boolean> ENABLED = GameRuleBuilder.forBoolean(false)
 		.category(GameRuleCategory.PLAYER)
-		.buildAndRegister(Identifier.fromNamespaceAndPath(MOD_ID, "enabled"));
+		.buildAndRegister(Identifier.fromNamespaceAndPath(MOD_ID, "immortal_cultivation"));
 
 	public static boolean enabled(MinecraftServer server) {
 		return server.getGameRules().get(ENABLED);
@@ -37,6 +37,8 @@ public class PermaHearts implements ModInitializer {
 	public void onInitialize() {
 		HeartsAttachment.HEARTS.identifier(); // touch the class so the attachments are registered
 		HeartsAttachment.ACTIVE.identifier();
+		HeartsAttachment.CULTIVATION.identifier();
+		ElixirItems.init();
 		GameRuleEvents.changeCallback(ENABLED).register((Boolean value, MinecraftServer server) -> {
 			for (ServerPlayer p : server.getPlayerList().getPlayers()) {
 				HeartsAttachment.setActive(p, value);
