@@ -81,9 +81,82 @@ class QuestLogicTest {
 
 	@Test
 	void dataRoundTrips() {
-		var d = new WandererData(Phase.PRESENT, 12, 5, 70, -9, Optional.of("abc"), Optional.of(quest(true)), 3);
+		var d = new WandererData(Phase.PRESENT, 12, 5, 70, -9, Optional.of("abc"), Optional.of(quest(true)), 3,
+			Optional.of(new BloodMoonState(1, "uuid-1", 5000L)), Optional.of(new BossState(2, "uuid-2")));
 		var json = WandererData.CODEC.encodeStart(JsonOps.INSTANCE, d).getOrThrow();
 		assertEquals(d, WandererData.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow());
 		assertEquals(WandererData.DEFAULT, WandererData.CODEC.parse(JsonOps.INSTANCE, new com.google.gson.JsonObject()).getOrThrow());
+	}
+
+	private static Quest eventQuest() {
+		return new Quest(2, List.of(
+			new QuestLine(QuestType.EXPLORE, "#minecraft:village", 1, 0, "strength", false),
+			new QuestLine(QuestType.EXPLORE, "minecraft:fortress", 1, 0, "fury", false),
+			new QuestLine(QuestType.BLOOD_MOON, "", 1, 0, "strength", false),
+			new QuestLine(QuestType.BOSS, "minecraft:zombie", 1, 0, "fury", false)), true);
+	}
+
+	@Test
+	void generatorWithAllTypes() {
+		var seen = new HashSet<QuestType>();
+		for (int seed = 0; seed < 1000; seed++) {
+			Quest q = QuestGenerator.generate(seed, new Random(seed));
+			int moons = 0;
+			int bosses = 0;
+			var targets = new HashSet<String>();
+			for (QuestLine l : q.lines()) {
+				seen.add(l.type());
+				assertTrue(targets.add(l.target()), "duplicate target, seed " + seed);
+				if (l.type() == QuestType.BLOOD_MOON) {
+					moons++;
+					assertEquals("", l.target());
+				}
+				if (l.type() == QuestType.BOSS) {
+					bosses++;
+					assertTrue(l.target().equals("minecraft:zombie") || l.target().equals("minecraft:skeleton"));
+				}
+				if (l.type().isEvent()) {
+					assertEquals(1, l.required());
+				}
+				if (l.type() == QuestType.EXPLORE) {
+					assertTrue(l.target().contains(":"));
+				}
+			}
+			assertTrue(moons <= 1 && bosses <= 1, "seed " + seed);
+		}
+		assertEquals(5, seen.size());
+	}
+
+	@Test
+	void exploreMatchesFirstNotDoneLine() {
+		Quest q = eventQuest();
+		assertTrue(QuestLogic.explore(q, t -> t.equals("minecraft:igloo")).isEmpty());
+		var r = QuestLogic.explore(q, t -> t.equals("#minecraft:village")).orElseThrow();
+		assertEquals(0, r.line());
+		assertTrue(r.quest().lines().get(0).done());
+		assertFalse(r.quest().lines().get(1).done());
+		assertTrue(QuestLogic.explore(r.quest(), t -> t.equals("#minecraft:village")).isEmpty());
+		Quest notAccepted = new Quest(2, q.lines(), false);
+		assertTrue(QuestLogic.explore(notAccepted, t -> true).isEmpty());
+	}
+
+	@Test
+	void eventDoneMarksLine() {
+		Quest q = eventQuest();
+		Quest after = QuestLogic.eventDone(q, 2);
+		assertTrue(after.lines().get(2).done());
+		assertFalse(after.lines().get(3).done());
+		assertEquals(after, QuestLogic.eventDone(after, 2));
+		assertEquals(q, QuestLogic.eventDone(q, 9));
+	}
+
+	@Test
+	void oldDataWithoutEventStateStillLoads() {
+		var json = new com.google.gson.JsonObject();
+		json.addProperty("phase", "PRESENT");
+		json.addProperty("quest_counter", 4);
+		var d = WandererData.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow();
+		assertEquals(Phase.PRESENT, d.phase());
+		assertTrue(d.bloodMoon().isEmpty() && d.boss().isEmpty());
 	}
 }

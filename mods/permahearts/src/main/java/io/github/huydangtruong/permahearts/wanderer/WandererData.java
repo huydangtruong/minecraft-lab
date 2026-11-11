@@ -5,8 +5,10 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
 
 public record WandererData(Phase phase, long nextDay, int x, int y, int z, Optional<String> npcUuid,
-						   Optional<Quest> quest, long questCounter) {
-	public static final WandererData DEFAULT = new WandererData(Phase.WAITING, -1, 0, 0, 0, Optional.empty(), Optional.empty(), 0);
+						   Optional<Quest> quest, long questCounter,
+						   Optional<BloodMoonState> bloodMoon, Optional<BossState> boss) {
+	public static final WandererData DEFAULT = new WandererData(Phase.WAITING, -1, 0, 0, 0, Optional.empty(), Optional.empty(), 0,
+		Optional.empty(), Optional.empty());
 
 	private static final Codec<Phase> PHASE_CODEC = Codec.STRING.xmap(Phase::valueOf, Phase::name);
 
@@ -18,30 +20,40 @@ public record WandererData(Phase phase, long nextDay, int x, int y, int z, Optio
 		Codec.INT.optionalFieldOf("z", 0).forGetter(WandererData::z),
 		Codec.STRING.optionalFieldOf("npc_uuid").forGetter(WandererData::npcUuid),
 		Quest.CODEC.optionalFieldOf("quest").forGetter(WandererData::quest),
-		Codec.LONG.optionalFieldOf("quest_counter", 0L).forGetter(WandererData::questCounter)
+		Codec.LONG.optionalFieldOf("quest_counter", 0L).forGetter(WandererData::questCounter),
+		BloodMoonState.CODEC.optionalFieldOf("blood_moon").forGetter(WandererData::bloodMoon),
+		BossState.CODEC.optionalFieldOf("boss").forGetter(WandererData::boss)
 	).apply(i, WandererData::new));
 
 	public WandererData withPhase(Phase p) {
-		return new WandererData(p, nextDay, x, y, z, npcUuid, quest, questCounter);
+		return new WandererData(p, nextDay, x, y, z, npcUuid, quest, questCounter, bloodMoon, boss);
 	}
 
 	public WandererData withNextDay(long d) {
-		return new WandererData(phase, d, x, y, z, npcUuid, quest, questCounter);
+		return new WandererData(phase, d, x, y, z, npcUuid, quest, questCounter, bloodMoon, boss);
 	}
 
 	public WandererData withPos(int nx, int ny, int nz) {
-		return new WandererData(phase, nextDay, nx, ny, nz, npcUuid, quest, questCounter);
+		return new WandererData(phase, nextDay, nx, ny, nz, npcUuid, quest, questCounter, bloodMoon, boss);
 	}
 
 	public WandererData withNpc(Optional<String> uuid) {
-		return new WandererData(phase, nextDay, x, y, z, uuid, quest, questCounter);
+		return new WandererData(phase, nextDay, x, y, z, uuid, quest, questCounter, bloodMoon, boss);
 	}
 
 	public WandererData withQuest(Optional<Quest> q) {
-		return new WandererData(phase, nextDay, x, y, z, npcUuid, q, questCounter);
+		return new WandererData(phase, nextDay, x, y, z, npcUuid, q, questCounter, bloodMoon, boss);
 	}
 
 	public WandererData withQuestCounter(long c) {
-		return new WandererData(phase, nextDay, x, y, z, npcUuid, quest, c);
+		return new WandererData(phase, nextDay, x, y, z, npcUuid, quest, c, bloodMoon, boss);
+	}
+
+	public WandererData withBloodMoon(Optional<BloodMoonState> s) {
+		return new WandererData(phase, nextDay, x, y, z, npcUuid, quest, questCounter, s, boss);
+	}
+
+	public WandererData withBoss(Optional<BossState> s) {
+		return new WandererData(phase, nextDay, x, y, z, npcUuid, quest, questCounter, bloodMoon, s);
 	}
 }

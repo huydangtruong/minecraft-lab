@@ -1,6 +1,7 @@
 package io.github.huydangtruong.permahearts.wanderer;
 
 import java.util.Optional;
+import java.util.function.Predicate;
 
 /** Pure quest rules. Every method returns new immutable values; the caller stores them. */
 public final class QuestLogic {
@@ -59,5 +60,27 @@ public final class QuestLogic {
 		}
 		QuestLine l = q.lines().get(line);
 		return q.withLine(line, l.withProgress(l.required()));
+	}
+
+	/** First not-done EXPLORE line whose target satisfies isInside gets done. */
+	public static Optional<KillResult> explore(Quest q, Predicate<String> isInside) {
+		if (!q.accepted()) {
+			return Optional.empty();
+		}
+		for (int i = 0; i < q.lines().size(); i++) {
+			QuestLine l = q.lines().get(i);
+			if (l.type() == QuestType.EXPLORE && !l.done() && isInside.test(l.target())) {
+				return Optional.of(new KillResult(eventDone(q, i), i));
+			}
+		}
+		return Optional.empty();
+	}
+
+	/** Marks an event line (blood moon, explore, boss) done. Unchanged if the quest is not accepted or the line is done. */
+	public static Quest eventDone(Quest q, int line) {
+		if (!q.accepted() || line < 0 || line >= q.lines().size() || q.lines().get(line).done()) {
+			return q;
+		}
+		return complete(q, line);
 	}
 }

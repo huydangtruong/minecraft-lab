@@ -26,6 +26,11 @@ public final class WandererScheduler {
 			int t = server.getTickCount();
 			if (t % 20 == 0 && PermaHearts.enabled(server)) {
 				work(server, t % 100 == 0);
+				BloodMoon.tick(server);
+				QuestBoss.tick(server);
+				if (t % 40 == 0) {
+					Wanderer.exploreCheck(server);
+				}
 			}
 		});
 	}

@@ -1,6 +1,9 @@
 package io.github.huydangtruong.permahearts;
 
+import io.github.huydangtruong.permahearts.wanderer.BloodMoon;
+import io.github.huydangtruong.permahearts.wanderer.BloodMoonState;
 import io.github.huydangtruong.permahearts.wanderer.Phase;
+import io.github.huydangtruong.permahearts.wanderer.QuestBoss;
 import io.github.huydangtruong.permahearts.wanderer.Quest;
 import io.github.huydangtruong.permahearts.wanderer.QuestLine;
 import io.github.huydangtruong.permahearts.wanderer.QuestType;
@@ -21,7 +24,11 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.monster.zombie.Zombie;
+import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.phys.AABB;
+import java.util.Optional;
 
 /**
  * Wanderer logic without any UI. The tests share one server and one saved Wanderer state, so each one resets it
@@ -196,6 +203,148 @@ public class WandererGameTest {
 			double own = Math.hypot(p.getX() - d.x(), p.getZ() - d.z());
 			ok |= own >= 899 && own <= 1101;
 			context.assertTrue(ok, "planned point should be 900..1100 blocks from a player");
+			context.succeed();
+		} finally {
+			Wanderer.reset(s);
+		}
+	}
+
+	// ---- P-006 events ----
+
+	private static Quest eventQuest(QuestLine... lines) {
+		return new Quest(7, List.of(lines), false);
+	}
+
+	private static QuestLine moonLine() {
+		return new QuestLine(QuestType.BLOOD_MOON, "", 1, 0, "strength", false);
+	}
+
+	private static List<? extends Zombie> tagged(MinecraftServer s, String tag) {
+		return s.overworld().getEntities(EntityTypeTest.forClass(Zombie.class), z -> z.entityTags().contains(tag));
+	}
+
+	private static ServerPlayer testPlayer(GameTestHelper context) {
+		ServerPlayer p = context.makeMockServerPlayerInLevel();
+		p.snapTo(context.absoluteVec(new net.minecraft.world.phys.Vec3(2, 1, 2)));
+		return p;
+	}
+
+	@GameTest(maxTicks = 100)
+	public void bloodMoonStartsNightAndSpawns(GameTestHelper context) {
+		MinecraftServer s = context.getLevel().getServer();
+		try {
+			enable(context, true);
+			Wanderer.startQuestForTest(context.getLevel(), context.absolutePos(new BlockPos(1, 1, 1)), eventQuest(moonLine(), testQuest().lines().get(1)));
+			Wanderer.accept(s);
+			ServerPlayer p = testPlayer(context);
+			context.assertTrue(Wanderer.startEvent(s, 0, p), "start should work");
+			context.assertTrue(BloodMoon.isNight(s), "the clock should be at night after the blood moon starts");
+			context.assertTrue(!Wanderer.startEvent(s, 0, p), "second start while running must be refused");
+			BloodMoon.wave(s, List.of(p));
+			int one = tagged(s, BloodMoon.TAG).size();
+			context.assertTrue(one >= 1 && one <= 5, "first wave spawns 1..5 zombies, was " + one);
+			for (int i = 0; i < 10; i++) {
+				BloodMoon.wave(s, List.of(p));
+			}
+			int all = tagged(s, BloodMoon.TAG).size();
+			context.assertTrue(all <= 30, "at most 30 alive, was " + all);
+			context.succeed();
+		} finally {
+			BloodMoon.moveClock(s, false);
+			Wanderer.reset(s);
+		}
+	}
+
+	@GameTest(maxTicks = 100)
+	public void bloodMoonFailsOnStarterDeath(GameTestHelper context) {
+		MinecraftServer s = context.getLevel().getServer();
+		try {
+			enable(context, true);
+			Wanderer.startQuestForTest(context.getLevel(), context.absolutePos(new BlockPos(1, 1, 1)), eventQuest(moonLine(), testQuest().lines().get(1)));
+			Wanderer.accept(s);
+			ServerPlayer p = testPlayer(context);
+			context.assertTrue(Wanderer.startEvent(s, 0, p), "start should work");
+			context.assertTrue(BloodMoon.running(s), "should be running");
+			p.setHealth(0f);
+			p.die(context.getLevel().damageSources().generic());
+			context.assertTrue(!BloodMoon.running(s), "starter death should end the blood moon");
+			context.assertTrue(!Wanderer.data(s).quest().orElseThrow().lines().get(0).done(), "line must stay not done");
+			context.assertTrue(Wanderer.eventState(s, 0) == 0, "button usable again");
+			context.succeed();
+		} finally {
+			BloodMoon.moveClock(s, false);
+			Wanderer.reset(s);
+		}
+	}
+
+	@GameTest(maxTicks = 100)
+	public void bloodMoonSucceedsAtDawn(GameTestHelper context) {
+		MinecraftServer s = context.getLevel().getServer();
+		try {
+			enable(context, true);
+			context.assertTrue(BloodMoon.succeeded(5000, true) && !BloodMoon.succeeded(100, true)
+				&& !BloodMoon.succeeded(5000, false) && BloodMoon.succeeded(13000, false), "decision function");
+			Wanderer.startQuestForTest(context.getLevel(), context.absolutePos(new BlockPos(1, 1, 1)), eventQuest(moonLine(), testQuest().lines().get(1)));
+			Wanderer.accept(s);
+			ServerPlayer p = testPlayer(context);
+			context.assertTrue(Wanderer.startEvent(s, 0, p), "start should work");
+			WandererData d = Wanderer.data(s);
+			Wanderer.save(s, d.withBloodMoon(Optional.of(new BloodMoonState(0, p.getUUID().toString(), s.overworld().getGameTime() - 13500))));
+			// Level#isBrightOutside follows a sky value that only refreshes on a real tick, so the dawn test goes through the
+			// hard-end rule; the dawn rule itself is covered by the decision function above.
+			BloodMoon.moveClock(s, false);
+			BloodMoon.tick(s);
+			context.assertTrue(Wanderer.data(s).quest().orElseThrow().lines().get(0).done(), "line should be done at the end");
+			context.assertTrue(!BloodMoon.running(s), "state should be cleared");
+			context.succeed();
+		} finally {
+			BloodMoon.moveClock(s, false);
+			Wanderer.reset(s);
+		}
+	}
+
+	@GameTest(maxTicks = 100)
+	public void bossSummonAndKill(GameTestHelper context) {
+		MinecraftServer s = context.getLevel().getServer();
+		try {
+			enable(context, true);
+			Wanderer.startQuestForTest(context.getLevel(), context.absolutePos(new BlockPos(1, 1, 1)),
+				eventQuest(new QuestLine(QuestType.BOSS, "minecraft:zombie", 1, 0, "fury", false), testQuest().lines().get(0)));
+			Wanderer.accept(s);
+			ServerPlayer p = testPlayer(context);
+			context.assertTrue(Wanderer.startEvent(s, 0, p), "summon should work");
+			List<? extends Zombie> bosses = tagged(s, QuestBoss.TAG);
+			context.assertTrue(bosses.size() == 1, "one boss, found " + bosses.size());
+			Zombie boss = bosses.get(0);
+			context.assertTrue(boss.getMaxHealth() == 150f, "boss max health 150, was " + boss.getMaxHealth());
+			context.assertTrue(boss.getAttributeValue(Attributes.SCALE) == 2.0, "boss scale 2");
+			int minions = tagged(s, QuestBoss.MINION_TAG).size();
+			context.assertTrue(minions == 4, "four minions, found " + minions);
+			context.assertTrue(Wanderer.eventState(s, 0) == 1, "line shows running");
+			context.assertTrue(!Wanderer.startEvent(s, 0, p), "second summon must be refused");
+			context.assertTrue(tagged(s, QuestBoss.TAG).size() == 1, "still one boss");
+			kill(context, p, boss);
+			context.assertTrue(Wanderer.data(s).quest().orElseThrow().lines().get(0).done(), "boss line should be done");
+			context.assertTrue(Wanderer.data(s).boss().isEmpty(), "boss state cleared");
+			context.succeed();
+		} finally {
+			Wanderer.reset(s);
+		}
+	}
+
+	@GameTest(maxTicks = 100)
+	public void exploreMarksLine(GameTestHelper context) {
+		MinecraftServer s = context.getLevel().getServer();
+		try {
+			enable(context, true);
+			Wanderer.startQuestForTest(context.getLevel(), context.absolutePos(new BlockPos(1, 1, 1)),
+				eventQuest(new QuestLine(QuestType.EXPLORE, "#minecraft:village", 1, 0, "strength", false),
+					new QuestLine(QuestType.EXPLORE, "minecraft:fortress", 1, 0, "fury", false)));
+			Wanderer.accept(s);
+			Wanderer.markExploredForTest(s, "#minecraft:village");
+			var lines = Wanderer.data(s).quest().orElseThrow().lines();
+			context.assertTrue(lines.get(0).done(), "village line should be done");
+			context.assertTrue(!lines.get(1).done(), "fortress line must stay open");
 			context.succeed();
 		} finally {
 			Wanderer.reset(s);
