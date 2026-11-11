@@ -53,10 +53,10 @@ class HeartRulesTest {
 
 	@Test
 	void hundredthKillAtCap() {
-		var d = HeartRules.withProgress(HeartRules.withHearts(HeartsData.DEFAULT, 20), 99);
+		var d = HeartRules.withProgress(HeartRules.withHearts(HeartsData.DEFAULT, 30), 99);
 		var r = HeartRules.onHostileKill(d);
 		assertEquals(KillOutcome.AT_CAP, r.outcome());
-		assertEquals(20, HeartRules.maxHearts(r.data()));
+		assertEquals(30, HeartRules.maxHearts(r.data()));
 		assertEquals(0, r.data().killProgress());
 	}
 
@@ -69,7 +69,7 @@ class HeartRulesTest {
 	@Test
 	void clamping() {
 		assertEquals(1, HeartRules.maxHearts(HeartRules.withHearts(HeartsData.DEFAULT, 0)));
-		assertEquals(20, HeartRules.maxHearts(HeartRules.withHearts(HeartsData.DEFAULT, 99)));
+		assertEquals(30, HeartRules.maxHearts(HeartRules.withHearts(HeartsData.DEFAULT, 99)));
 		assertEquals(99, HeartRules.withProgress(HeartsData.DEFAULT, 150).killProgress());
 		assertEquals(0, HeartRules.withProgress(HeartsData.DEFAULT, -5).killProgress());
 	}

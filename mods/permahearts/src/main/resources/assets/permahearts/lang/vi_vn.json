@@ -2,9 +2,9 @@
   "permahearts.msg.lost": "Bạn mất 1 tim. Tim tối đa: %s",
   "permahearts.msg.floor": "Bạn đã ở mức thấp nhất: 1 tim",
   "permahearts.msg.gained": "Đã hạ quái hostile: +1 tim! Tim tối đa: %s",
-  "permahearts.msg.cap": "Bạn đã đạt tối đa 20 tim",
+  "permahearts.msg.cap": "Bạn đã đạt tối đa 30 tim",
   "permahearts.msg.progress": "Hostile %s/%s",
-  "permahearts.msg.status": "Tim %s/20 · Hostile %s/100 · Số kill %s · Số lần chết %s",
+  "permahearts.msg.status": "Tim %s/30 · Hostile %s/100 · Số kill %s · Số lần chết %s",
   "permahearts.msg.set": "%s giờ có %s tim",
   "permahearts.msg.progress_set": "Tiến độ của %s đặt thành %s"
 }

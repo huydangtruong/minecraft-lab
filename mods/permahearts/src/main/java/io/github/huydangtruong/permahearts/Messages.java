@@ -18,7 +18,7 @@ public final class Messages {
 	}
 
 	public static Component cap() {
-		return Component.translatableWithFallback("permahearts.msg.cap", "You already have the maximum of 20 hearts");
+		return Component.translatableWithFallback("permahearts.msg.cap", "You already have the maximum of 30 hearts");
 	}
 
 	public static Component progress(int current, int total) {
@@ -27,7 +27,7 @@ public final class Messages {
 
 	public static Component status(int hearts, int progress, int kills, int deaths) {
 		return Component.translatableWithFallback("permahearts.msg.status",
-			"Hearts %s/20 · Hostile %s/100 · Kills %s · Deaths %s", hearts, progress, kills, deaths);
+			"Hearts %s/30 · Hostile %s/100 · Kills %s · Deaths %s", hearts, progress, kills, deaths);
 	}
 
 	public static Component set(Component name, int hearts) {
