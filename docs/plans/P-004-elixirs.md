@@ -2,7 +2,7 @@
 
 > **Tóm tắt cho Huy:** đổi công tắc thành **ImmortalCultivation** (`/gamerule permahearts:immortal_cultivation true`). Thêm 6 linh dược: uống là +1 cấp chỉ số vĩnh viễn (sát thương, tốc đánh, tốc chạy, giáp, tầm với, tốc đào), không trần, chết không mất. Thử bằng `/give`. Bản 0.4.0.
 
-- **Status:** ready
+- **Status:** merged
 - **Mod / decision:** `permahearts`, D11, D15 · **Branch:** `feat/P-004-elixirs` · **Depends on:** P-003 (merged, 0.3.0)
 
 ## Goal
