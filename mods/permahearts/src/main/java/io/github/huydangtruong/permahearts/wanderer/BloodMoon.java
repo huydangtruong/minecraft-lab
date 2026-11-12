@@ -2,6 +2,7 @@ package io.github.huydangtruong.permahearts.wanderer;
 
 import io.github.huydangtruong.permahearts.Messages;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.random.RandomGenerator;
@@ -14,9 +15,12 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.entity.EntitySpawnReason;
-import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.monster.zombie.Zombie;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.clock.ClockTimeMarkers;
@@ -55,7 +59,25 @@ public final class BloodMoon {
 		return (elapsed >= MIN_ELAPSED && brightOutside) || elapsed >= HARD_END;
 	}
 
-	/** Pure decision: how many zombies to add for one player. */
+	/** The mob type of a Blood Moon line target (zombie, piglin brute or creeper; "" = zombie). */
+	public static EntityType<?> mobType(String target) {
+		return BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.parse(QuestGenerator.bloodMoonMob(target)));
+	}
+
+	/** The mob of the running event (zombie if the line is gone). */
+	private static EntityType<?> runningMob(MinecraftServer server) {
+		WandererData d = Wanderer.data(server);
+		if (d.bloodMoon().isPresent() && d.quest().isPresent()) {
+			int line = d.bloodMoon().get().line();
+			List<QuestLine> lines = d.quest().get().lines();
+			if (line >= 0 && line < lines.size()) {
+				return mobType(lines.get(line).target());
+			}
+		}
+		return mobType("");
+	}
+
+	/** Pure decision: how many mobs to add for one player. */
 	public static int toSpawn(int alive) {
 		return Math.max(0, Math.min(PER_WAVE, MAX_ALIVE - alive));
 	}
@@ -84,7 +106,7 @@ public final class BloodMoon {
 		for (ServerPlayer p : ow.players()) {
 			bar.addPlayer(p);
 		}
-		server.getPlayerList().broadcastSystemMessage(Messages.bloodMoonStarted(), false);
+		server.getPlayerList().broadcastSystemMessage(Messages.bloodMoonStarted(runningMob(server).getDescription()), false);
 		return true;
 	}
 
@@ -102,7 +124,7 @@ public final class BloodMoon {
 
 	private static void ensureBar(MinecraftServer server) {
 		if (bar == null) {
-			bar = new ServerBossEvent(UUID.randomUUID(), Messages.bloodMoonBar(), BossEvent.BossBarColor.RED,
+			bar = new ServerBossEvent(UUID.randomUUID(), Messages.bloodMoonBar(runningMob(server).getDescription()), BossEvent.BossBarColor.RED,
 				BossEvent.BossBarOverlay.PROGRESS);
 			bar.setDarkenScreen(true);
 			bar.setCreateWorldFog(true);
@@ -122,12 +144,17 @@ public final class BloodMoon {
 		clearBar();
 	}
 
-	/** Runtime cleanup when the whole Wanderer state is reset (admin, tests): bar, wave counter and leftover zombies. */
+	/** Runtime cleanup when the whole Wanderer state is reset (admin, tests): bar, wave counter and leftover mobs. */
 	static void onReset(MinecraftServer server) {
 		clearBar();
-		for (Zombie z : server.overworld().getEntities(EntityTypeTest.forClass(Zombie.class), e -> e.entityTags().contains(TAG))) {
-			z.discard();
+		for (Mob m : alive(server.overworld())) {
+			m.discard();
 		}
+	}
+
+	/** Living Blood Moon mobs (any variant). Public for the game tests. */
+	public static List<? extends Mob> alive(ServerLevel ow) {
+		return ow.getEntities(EntityTypeTest.forClass(Mob.class), e -> e.entityTags().contains(TAG));
 	}
 
 	// ---- tick ----
@@ -168,36 +195,39 @@ public final class BloodMoon {
 	/** One wave around each given player (the caller filters creative/spectator). Public for the game tests. */
 	public static void wave(MinecraftServer server, Collection<ServerPlayer> players) {
 		ServerLevel ow = server.overworld();
-		int alive = ow.getEntities(EntityTypeTest.forClass(Zombie.class), e -> e.entityTags().contains(TAG)).size();
+		EntityType<?> type = runningMob(server);
+		int alive = alive(ow).size();
 		for (ServerPlayer p : players) {
 			if (p.level() != ow) {
 				continue;
 			}
 			int n = toSpawn(alive);
 			for (int i = 0; i < n; i++) {
-				if (spawnZombie(ow, p)) {
+				if (spawn(ow, type, p)) {
 					alive++;
 				}
 			}
 		}
 	}
 
-	private static boolean spawnZombie(ServerLevel ow, ServerPlayer target) {
+	private static boolean spawn(ServerLevel ow, EntityType<?> type, ServerPlayer target) {
 		double angle = RNG.nextDouble() * Math.PI * 2;
 		double dist = 3 + RNG.nextDouble() * 3;
 		int x = (int) Math.floor(target.getX() + Math.cos(angle) * dist);
 		int z = (int) Math.floor(target.getZ() + Math.sin(angle) * dist);
 		int y = ow.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
-		Zombie zombie = EntityTypes.ZOMBIE.create(ow, EntitySpawnReason.EVENT);
-		if (zombie == null) {
+		if (!(type.create(ow, EntitySpawnReason.EVENT) instanceof Mob mob)) {
 			return false;
 		}
 		BlockPos pos = new BlockPos(x, y, z);
-		zombie.snapTo(x + 0.5, y, z + 0.5, RNG.nextFloat() * 360f, 0f);
-		zombie.finalizeSpawn(ow, ow.getCurrentDifficultyAt(pos), EntitySpawnReason.EVENT, null);
-		zombie.addTag(TAG);
-		zombie.setTarget(target);
-		return ow.addFreshEntity(zombie);
+		mob.snapTo(x + 0.5, y, z + 0.5, RNG.nextFloat() * 360f, 0f);
+		mob.finalizeSpawn(ow, ow.getCurrentDifficultyAt(pos), EntitySpawnReason.EVENT, null);
+		if (mob instanceof AbstractPiglin piglin) {
+			piglin.setImmuneToZombification(true); // piglin brutes would turn into zombified piglins in the overworld
+		}
+		mob.addTag(TAG);
+		mob.setTarget(target);
+		return ow.addFreshEntity(mob);
 	}
 
 	// ---- failure and join hooks ----

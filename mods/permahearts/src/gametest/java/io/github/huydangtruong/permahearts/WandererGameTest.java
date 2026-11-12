@@ -25,6 +25,7 @@ import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.phys.AABB;
@@ -219,8 +220,8 @@ public class WandererGameTest {
 		return new QuestLine(QuestType.BLOOD_MOON, "", 1, 0, "strength", false);
 	}
 
-	private static List<? extends Zombie> tagged(MinecraftServer s, String tag) {
-		return s.overworld().getEntities(EntityTypeTest.forClass(Zombie.class), z -> z.entityTags().contains(tag));
+	private static List<? extends Mob> tagged(MinecraftServer s, String tag) {
+		return s.overworld().getEntities(EntityTypeTest.forClass(Mob.class), m -> m.entityTags().contains(tag));
 	}
 
 	private static ServerPlayer testPlayer(GameTestHelper context) {
@@ -251,6 +252,58 @@ public class WandererGameTest {
 			context.succeed();
 		} finally {
 			BloodMoon.moveClock(s, false);
+			Wanderer.reset(s);
+		}
+	}
+
+	@GameTest(maxTicks = 100)
+	public void bloodMoonVariantsSpawnTheirMob(GameTestHelper context) {
+		MinecraftServer s = context.getLevel().getServer();
+		try {
+			enable(context, true);
+			for (String mob : List.of("minecraft:piglin_brute", "minecraft:creeper")) {
+				Wanderer.reset(s);
+				Wanderer.startQuestForTest(context.getLevel(), context.absolutePos(new BlockPos(1, 1, 1)),
+					eventQuest(new QuestLine(QuestType.BLOOD_MOON, mob, 1, 0, "strength", false), testQuest().lines().get(1)));
+				Wanderer.accept(s);
+				ServerPlayer p = testPlayer(context);
+				context.assertTrue(Wanderer.startEvent(s, 0, p), "start should work for " + mob);
+				BloodMoon.wave(s, List.of(p));
+				List<? extends Mob> spawned = tagged(s, BloodMoon.TAG);
+				context.assertTrue(!spawned.isEmpty(), "a wave should spawn " + mob);
+				for (Mob m : spawned) {
+					String id = net.minecraft.world.entity.EntityType.getKey(m.getType()).toString();
+					context.assertTrue(id.equals(mob), "expected " + mob + ", got " + id);
+				}
+				BloodMoon.moveClock(s, false);
+			}
+			context.succeed();
+		} finally {
+			BloodMoon.moveClock(s, false);
+			Wanderer.reset(s);
+		}
+	}
+
+	@GameTest(maxTicks = 100)
+	public void evokerBossBringsVindicators(GameTestHelper context) {
+		MinecraftServer s = context.getLevel().getServer();
+		try {
+			enable(context, true);
+			Wanderer.startQuestForTest(context.getLevel(), context.absolutePos(new BlockPos(1, 1, 1)),
+				eventQuest(new QuestLine(QuestType.BOSS, "minecraft:evoker", 1, 0, "fury", false), testQuest().lines().get(0)));
+			Wanderer.accept(s);
+			ServerPlayer p = testPlayer(context);
+			context.assertTrue(Wanderer.startEvent(s, 0, p), "summon should work");
+			List<? extends Mob> bosses = tagged(s, QuestBoss.TAG);
+			context.assertTrue(bosses.size() == 1 && bosses.get(0) instanceof net.minecraft.world.entity.monster.illager.Evoker, "one evoker boss");
+			context.assertTrue(bosses.get(0).getMaxHealth() == 150f, "boss max health 150");
+			List<? extends Mob> minions = tagged(s, QuestBoss.MINION_TAG);
+			context.assertTrue(minions.size() == 4, "four minions, found " + minions.size());
+			for (Mob m : minions) {
+				context.assertTrue(m instanceof net.minecraft.world.entity.monster.illager.Vindicator, "evoker minions are vindicators");
+			}
+			context.succeed();
+		} finally {
 			Wanderer.reset(s);
 		}
 	}
@@ -313,9 +366,10 @@ public class WandererGameTest {
 			Wanderer.accept(s);
 			ServerPlayer p = testPlayer(context);
 			context.assertTrue(Wanderer.startEvent(s, 0, p), "summon should work");
-			List<? extends Zombie> bosses = tagged(s, QuestBoss.TAG);
+			List<? extends Mob> bosses = tagged(s, QuestBoss.TAG);
 			context.assertTrue(bosses.size() == 1, "one boss, found " + bosses.size());
-			Zombie boss = bosses.get(0);
+			context.assertTrue(bosses.get(0) instanceof Zombie, "zombie boss");
+			Mob boss = bosses.get(0);
 			context.assertTrue(boss.getMaxHealth() == 150f, "boss max health 150, was " + boss.getMaxHealth());
 			context.assertTrue(boss.getAttributeValue(Attributes.SCALE) == 2.0, "boss scale 2");
 			int minions = tagged(s, QuestBoss.MINION_TAG).size();

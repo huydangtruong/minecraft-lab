@@ -28,7 +28,7 @@ subprojects {
 			createSourceSet = true
 			modId = "${project.mod_id}-test"
 			enableGameTests = true
-			enableClientGameTests = false
+			enableClientGameTests = true
 			eula = true // Accepts the Minecraft EULA for the test server (Huy already accepted it as a player).
 		}
 	}

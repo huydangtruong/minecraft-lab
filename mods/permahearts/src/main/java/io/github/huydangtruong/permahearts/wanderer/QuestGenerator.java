@@ -10,18 +10,20 @@ import io.github.huydangtruong.permahearts.ElixirStat;
 public final class QuestGenerator {
 	private record Entry(String id, int count) {}
 
+	// Amounts set by Huy (2026-11-12).
 	private static final List<Entry> COLLECT = List.of(
-		new Entry("minecraft:iron_ingot", 64), new Entry("minecraft:gold_ingot", 32), new Entry("minecraft:diamond", 8),
-		new Entry("minecraft:emerald", 8), new Entry("minecraft:coal", 64), new Entry("minecraft:redstone", 64),
+		new Entry("minecraft:iron_ingot", 64), new Entry("minecraft:coal", 64), new Entry("minecraft:redstone", 64),
 		new Entry("minecraft:lapis_lazuli", 64), new Entry("minecraft:carrot", 64), new Entry("minecraft:potato", 64),
-		new Entry("minecraft:wheat", 64), new Entry("minecraft:mutton", 32), new Entry("minecraft:beef", 32),
-		new Entry("minecraft:oak_log", 64), new Entry("minecraft:bone", 32), new Entry("minecraft:string", 32),
-		new Entry("minecraft:gunpowder", 16), new Entry("minecraft:ender_pearl", 8), new Entry("minecraft:leather", 32));
+		new Entry("minecraft:wheat", 64), new Entry("minecraft:oak_log", 64),
+		new Entry("minecraft:gold_ingot", 48), new Entry("minecraft:mutton", 48), new Entry("minecraft:beef", 48),
+		new Entry("minecraft:bone", 48), new Entry("minecraft:string", 48), new Entry("minecraft:leather", 48),
+		new Entry("minecraft:gunpowder", 32), new Entry("minecraft:ender_pearl", 32),
+		new Entry("minecraft:diamond", 16), new Entry("minecraft:emerald", 16));
 
 	private static final List<Entry> KILL = List.of(
 		new Entry("minecraft:zombie", 16), new Entry("minecraft:skeleton", 16), new Entry("minecraft:spider", 16),
-		new Entry("minecraft:creeper", 8), new Entry("minecraft:enderman", 8), new Entry("minecraft:witch", 4),
-		new Entry("minecraft:drowned", 8));
+		new Entry("minecraft:creeper", 16), new Entry("minecraft:enderman", 16), new Entry("minecraft:drowned", 16),
+		new Entry("minecraft:witch", 8));
 
 	private record Weighted(String id, int weight) {}
 
@@ -35,7 +37,16 @@ public final class QuestGenerator {
 		new Weighted("minecraft:ancient_city", 1), new Weighted("minecraft:fortress", 1),
 		new Weighted("minecraft:bastion_remnant", 1));
 
-	private static final List<Weighted> BOSS = List.of(new Weighted("minecraft:zombie", 1), new Weighted("minecraft:skeleton", 1));
+	private static final List<Weighted> BOSS = List.of(new Weighted("minecraft:zombie", 1), new Weighted("minecraft:skeleton", 1),
+		new Weighted("minecraft:evoker", 1), new Weighted("minecraft:blaze", 1), new Weighted("minecraft:vindicator", 1));
+
+	/** Blood Moon variants: the mob that comes in waves. */
+	public static final List<String> BLOOD_MOON = List.of("minecraft:zombie", "minecraft:piglin_brute", "minecraft:creeper");
+
+	/** The Blood Moon mob of a line target; quests saved before 0.6.0's variants have "" and mean zombies. */
+	public static String bloodMoonMob(String target) {
+		return target == null || target.isEmpty() ? BLOOD_MOON.get(0) : target;
+	}
 
 	private QuestGenerator() {}
 
@@ -74,6 +85,7 @@ public final class QuestGenerator {
 		Set<String> used = new HashSet<>();
 		ElixirStat[] stats = ElixirStat.values();
 		boolean bossUsed = false;
+		boolean moonUsed = false;
 		while (lines.size() < n) {
 			QuestType type = pickType(rng);
 			String target;
@@ -91,17 +103,19 @@ public final class QuestGenerator {
 				}
 				case EXPLORE -> target = pickWeighted(EXPLORE, rng);
 				case BOSS -> target = pickWeighted(BOSS, rng);
-				default -> target = ""; // BLOOD_MOON
+				case BLOOD_MOON -> target = BLOOD_MOON.get(rng.nextInt(BLOOD_MOON.size()));
+				default -> throw new IllegalStateException();
 			}
-			// No duplicate targets (so a boss zombie and a kill-zombie line never meet); the blood moon's "" and a
-			// second boss are covered by the same set plus the flag.
-			if (type == QuestType.BOSS && bossUsed) {
+			// No duplicate targets (so a zombie boss, a zombie Blood Moon and a kill-zombie line never meet, and
+			// event mobs never count towards a kill line); at most one boss and one Blood Moon per quest.
+			if ((type == QuestType.BOSS && bossUsed) || (type == QuestType.BLOOD_MOON && moonUsed)) {
 				continue;
 			}
 			if (!used.add(target)) {
 				continue;
 			}
 			bossUsed |= type == QuestType.BOSS;
+			moonUsed |= type == QuestType.BLOOD_MOON;
 			lines.add(new QuestLine(type, target, required, 0, stats[rng.nextInt(stats.length)].id(), false));
 		}
 		return new Quest(id, List.copyOf(lines), false);

@@ -5,10 +5,10 @@
 - **HeartXP** (D8): giết mob hostile (`Enemy`: zombie, skeleton, creeper, slime, ghast, phantom, piglin, enderman, Wither, Warden, Ender Dragon…) được HeartXP = **máu tối đa của mob đó**, làm tròn, tối thiểu 1. Ví dụ: Zombie/Skeleton/Creeper +20, Spider +16, Enderman +40, Ravager +100, Ender Dragon +200, Wither +300, Warden +500. Người được tính là người nhận kill credit của vanilla (đánh, bắn, sói, đẩy rơi trong 5 giây). Mob không hostile không tính.
 - **Đủ 500 HeartXP** = +1 tim tối đa, phần dư chuyển sang thanh mới (một lần giết hơn 500 có thể cho nhiều tim). Trần **50 tim** (D7): khi đạt trần, HeartXP về 0 và không tích nữa, báo "đã tối đa". Cộng tim: +2 máu hiện tại mỗi tim, âm thanh level-up, tin trong chat.
 - Mỗi lần giết: overlay "+20 HeartXP".
-- **Thanh HeartXP** (D9): góc dưới bên trái (cách mép trái và mép dưới 20px), chữ "HeartXP 320/500" (ở trần: "HeartXP MAX") trên một thanh đỏ. Ẩn khi Creative/Spectator và khi tắt HUD (F1). Chỉ thấy khi client cũng cài mod.
+- **Thanh HeartXP** (D9): góc dưới bên trái (cách mép trái và mép dưới 8px), chữ "HeartXP 320/500" (ở trần: "HeartXP MAX") trên một thanh đỏ. Ẩn khi Creative/Spectator và khi tắt HUD (F1). Chỉ thấy khi client cũng cài mod.
 - Dữ liệu lưu theo người chơi trong save của world (Essential: save của máy host), đồng bộ xuống client của chính người đó.
 - Lệnh: `/hearts` (tim, HeartXP, tổng kill, số lần chết); `/hearts set <targets> <1..50>` và `/hearts xp <targets> <0..499>` cần quyền gamemaster.
-- Tin nhắn có en_us và vi_vn; người không cài mod vẫn đọc được bản tiếng Anh.
+- Mọi chữ của mod (giao diện, tên item, tin nhắn) chỉ có **tiếng Anh** (D16). Tên đồ/quái của game gốc vẫn theo ngôn ngữ game.
 - Host và bạn phải cài **cùng phiên bản** mod.
 
 ## Bật/tắt theo world (0.3.0, D10)
@@ -26,12 +26,12 @@
 
 | Item | Tên VN | Mỗi bình | Thuộc tính |
 |---|---|---|---|
-| `permahearts:elixir_strength` | Linh Dược Sức Mạnh | +0.5 sát thương | `ATTACK_DAMAGE` cộng |
-| `permahearts:elixir_fury` | Linh Dược Cuồng Phong | +10% tốc đánh | `ATTACK_SPEED` ×base |
-| `permahearts:elixir_swiftness` | Linh Dược Thần Tốc | +5% tốc chạy | `MOVEMENT_SPEED` ×base |
-| `permahearts:elixir_iron_skin` | Linh Dược Kim Cang | +1 giáp | `ARMOR` cộng |
-| `permahearts:elixir_reach` | Linh Dược Trường Thủ | +0.5 tầm với | `BLOCK_INTERACTION_RANGE` + `ENTITY_INTERACTION_RANGE` cộng |
-| `permahearts:elixir_mining` | Linh Dược Khai Sơn | +10% tốc đào | `BLOCK_BREAK_SPEED` ×base |
+| `permahearts:elixir_strength` | Elixir of Strength | +0.5 sát thương | `ATTACK_DAMAGE` cộng |
+| `permahearts:elixir_fury` | Elixir of Fury | +10% tốc đánh | `ATTACK_SPEED` ×base |
+| `permahearts:elixir_swiftness` | Elixir of Swiftness | +5% tốc chạy | `MOVEMENT_SPEED` ×base |
+| `permahearts:elixir_iron_skin` | Elixir of Iron Skin | +1 giáp | `ARMOR` cộng |
+| `permahearts:elixir_reach` | Elixir of Reach | +0.5 tầm với | `BLOCK_INTERACTION_RANGE` + `ENTITY_INTERACTION_RANGE` cộng |
+| `permahearts:elixir_mining` | Elixir of Mining | +10% tốc đào | `BLOCK_BREAK_SPEED` ×base |
 
 - Uống như bình thuốc (trả lại chai rỗng), có hiệu ứng lấp lánh, xếp chồng 16. Không trần, lưu theo người chơi, chết không mất.
 - Công tắc tắt: uống không được (báo cách bật), chỉ số đã có không tác dụng nhưng vẫn lưu.
@@ -42,10 +42,10 @@
 - Mỗi 3–5 ngày Minecraft (ngẫu nhiên): chọn một người chơi ở Overworld, lấy điểm cách ~900–1100 block hướng ngẫu nhiên, báo mọi người "Một Lữ Khách đang chờ ở X, Z". NPC hiện khi có người trong ~96 block. Trên mặt nước: đặt bè gỗ 3×3.
 - NPC: Wandering Trader đứng yên, bất tử, không biến mất, tên "Lữ Khách". Bấm vào: màn hình nhiệm vụ (không phải bảng trao đổi).
 - Màn hình: lời giới thiệu + **Nhận** → danh sách 2–4 dòng. Mọi người thấy cùng tiến độ.
-  - **Thu thập**: "Tìm 64 Sắt" + ô bỏ đồ; bỏ vào là trừ đồ, cộng tiến độ, dư trả lại.
-  - **Giết**: "Giết 16 Zombie" + số đếm; ai giết cũng tính.
-  - **Trăng máu** (0.6.0): nút Bắt đầu → trời thành đêm, mỗi 10 giây 5 zombie quanh mỗi người chơi ở Overworld (tối đa 30 con sống), không ngủ được; người bấm sống tới sáng là xong, chết thì dòng quay về chưa làm.
+  - **Thu thập**: "Tìm 64 Sắt" + ô bỏ đồ; bỏ vào là trừ đồ, cộng tiến độ, dư trả lại. Số lượng (D18): 64 sắt / than / redstone / lapis / cà rốt / khoai tây / lúa mì / gỗ sồi · 48 vàng / thịt cừu / thịt bò / xương / tơ / da · 32 thuốc súng / ngọc ender · 16 kim cương / ngọc lục bảo.
+  - **Giết**: "Giết 16 Zombie" + số đếm; ai giết cũng tính. 16 zombie / skeleton / nhện / creeper / enderman / drowned · 8 phù thủy.
+  - **Trăng máu** (0.6.0): ngẫu nhiên 1 trong 3 loại: đêm **Zombie**, đêm **Piglin Brute** (không biến thành zombie piglin) hoặc đêm **Creeper**. Nút Bắt đầu → trời thành đêm, mỗi 10 giây 5 con loại đó quanh mỗi người chơi ở Overworld (tối đa 30 con sống), không ngủ được; người bấm sống tới sáng là xong, chết thì dòng quay về chưa làm.
   - **Thám hiểm** (0.6.0): "Đặt chân tới một Làng/Đền sa mạc/…".
-  - **Hạ thủ lĩnh** (0.6.0): nút Triệu hồi → trùm to gấp đôi, nhiều máu, có đệ tử, cạnh NPC.
+  - **Hạ thủ lĩnh** (0.6.0): nút Triệu hồi → trùm to gấp đôi, 150 máu, 4 đệ tử, cạnh NPC. Trùm: Zombie, Skeleton, Evoker (đệ tử là Vindicator), Blaze, Vindicator Chieftain.
 - Dòng xong → ô thưởng có 1 linh dược ngẫu nhiên; ai lấy trước được. Xong hết + lấy hết thưởng → NPC chào và đi, đếm lại 3–5 ngày.
 - Lệnh: `/quest` (NPC ở đâu, còn bao lâu, tiến độ). Admin: `/quest summon` (gọi NPC ngay cạnh mình với nhiệm vụ mới), `/quest skip` (NPC xuất hiện ngay ở ~1000 block), `/quest complete <dòng>`, `/quest reset`.

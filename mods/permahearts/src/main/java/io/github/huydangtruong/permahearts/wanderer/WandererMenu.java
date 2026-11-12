@@ -26,14 +26,23 @@ import java.util.function.IntSupplier;
  */
 public class WandererMenu extends AbstractContainerMenu {
 	public static final int LINES = 4;
-	public static final int PANEL_W = 230;
-	public static final int PANEL_H = 222;
+	/*
+	 * Layout like the villager trade screen: a quest panel on the left, and on the right a vanilla-sized
+	 * 176x166 inventory panel with the player inventory at the usual place (8, 84).
+	 */
+	public static final int QUEST_W = 170;
+	public static final int INV_PANEL_X = QUEST_W + 2;
+	public static final int INV_PANEL_W = 176;
+	public static final int PANEL_W = INV_PANEL_X + INV_PANEL_W;
+	public static final int PANEL_H = 166;
+	/** Top of the first quest row; each row is LINE_STEP high. */
+	public static final int LINE_TOP = 18;
+	public static final int LINE_STEP = 36;
 	/** Left edge of the item area of the per-line slot (the drawn square is one pixel larger on each side). */
-	public static final int LINE_SLOT_X = 204;
-	public static final int LINE_SLOT_Y0 = 30;
-	public static final int LINE_STEP = 27;
-	public static final int INV_X = 34;
-	public static final int INV_Y = 140;
+	public static final int LINE_SLOT_X = QUEST_W - 6 - 17;
+	public static final int LINE_SLOT_Y0 = LINE_TOP + (LINE_STEP - 18) / 2 + 1;
+	public static final int INV_X = INV_PANEL_X + 8;
+	public static final int INV_Y = 84;
 
 	private static final int REWARD_BASE = LINES;
 	private static final int INV_START = 2 * LINES;
