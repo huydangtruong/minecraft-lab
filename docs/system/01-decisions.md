@@ -18,3 +18,4 @@
 | D14 | Phần thưởng | Mỗi dòng xong thành **1 ô chứa 1 linh dược**, dùng chung: **ai lấy trước được**, người kia không thấy nữa | 2026-11-12 |
 | D15 | Linh dược | Uống: +1 cấp chỉ số **vĩnh viễn, không trần, chết không mất**. Sức mạnh +0.5 sát thương, Cuồng Phong +10% tốc đánh, Thần Tốc +5% tốc chạy, Kim Cang +1 giáp, Trường Thủ +0.5 tầm với, Khai Sơn +10% tốc đào. Công tắc tắt: chỉ số không có tác dụng (vẫn lưu) | 2026-11-12 |
 | D16 | Ngôn ngữ trong game | Mọi chữ của mod (màn hình, nút, thanh HeartXP, tên linh dược, tin nhắn) **chỉ tiếng Anh**, kể cả khi game để tiếng Việt. Bỏ `vi_vn.json`. Tên đồ/quái của game gốc vẫn theo ngôn ngữ game | 2026-11-12 |
+| D17 | Giao diện nhiệm vụ | Bố cục giống màn hình đổi đồ với dân làng: **túi đồ giữ nguyên kiểu vanilla ở bên phải** (trên có hình Lữ Khách và số dòng đã xong), **nhiệm vụ ở khung bên trái** (mỗi dòng: biểu tượng, chữ, ô đồ hoặc nút) | 2026-11-12 |

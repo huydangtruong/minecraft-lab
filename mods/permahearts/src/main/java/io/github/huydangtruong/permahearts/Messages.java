@@ -113,6 +113,18 @@ public final class Messages {
 			"I am a traveller of many realms. Help me with a few tasks and I will give you cultivation elixirs.");
 	}
 
+	public static Component questsTitle() {
+		return Component.translatableWithFallback("permahearts.wanderer.quests_title", "Quests");
+	}
+
+	public static Component questOffer() {
+		return Component.translatableWithFallback("permahearts.wanderer.offer", "Rewards are shared: first come, first served.");
+	}
+
+	public static Component questSummary(int done, int total) {
+		return Component.translatableWithFallback("permahearts.wanderer.summary", "Done: %s/%s\nRewards: first come, first served", done, total);
+	}
+
 	public static Component accept() {
 		return Component.translatableWithFallback("permahearts.wanderer.accept", "Accept");
 	}
