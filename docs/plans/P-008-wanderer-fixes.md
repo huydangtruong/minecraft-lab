@@ -6,7 +6,7 @@
 > 3. Nút **Give up** chữ đỏ ở cuối danh sách nhiệm vụ. Bấm 2 lần để xác nhận thì Lữ Khách bỏ đi.
 > 4. Lữ Khách chỉ ở lại **2 ngày Minecraft**. Bên phải màn hình, dưới dòng giới thiệu, có đếm ngược thời gian trước khi rời đi.
 
-- **Status:** done, awaiting review
+- **Status:** merged
 - **Mod / decision:** `permahearts`, D19, D20 (new)
 - **Branch:** `feat/P-008-wanderer-fixes`
 - **Depends on:** P-007 (merged, 0.7.0)
