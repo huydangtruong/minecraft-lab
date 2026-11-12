@@ -126,6 +126,11 @@ public final class QuestGenerator {
 		return 3 + rng.nextInt(3);
 	}
 
+	/** 5..7 days inclusive: the wait after a Wanderer left (time up, Give up or all lines claimed). */
+	public static int daysUntilReturn(RandomGenerator rng) {
+		return 5 + rng.nextInt(3);
+	}
+
 	/** {dx, dz}: random direction, distance 900..1100. */
 	public static double[] planOffset(RandomGenerator rng) {
 		double angle = rng.nextDouble() * Math.PI * 2;

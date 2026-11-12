@@ -21,6 +21,7 @@ public final class WandererNpc {
 		}
 		npc.snapTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, yaw, 0f);
 		npc.setNoAi(true);
+		npc.setPermanentlyInvulnerable(true); // mobs never target an invulnerable entity (canBeSeenAsEnemy)
 		npc.setPersistenceRequired();
 		npc.setDespawnDelay(0);
 		npc.setCustomName(Messages.wandererName());

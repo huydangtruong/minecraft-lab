@@ -1,5 +1,6 @@
 package io.github.huydangtruong.permahearts.wanderer;
 
+import io.github.huydangtruong.permahearts.Messages;
 import io.github.huydangtruong.permahearts.PermaHearts;
 import java.util.List;
 import java.util.Optional;
@@ -40,6 +41,10 @@ public final class WandererScheduler {
 		ServerLevel overworld = server.overworld();
 		WandererData d = Wanderer.data(server);
 		long day = Wanderer.currentDay(server);
+		if ((d.phase() == Phase.PLANNED || d.phase() == Phase.PRESENT) && checkStay(server, d)) {
+			return;
+		}
+		d = Wanderer.data(server);
 		switch (d.phase()) {
 			case WAITING -> {
 				if (d.nextDay() < 0) {
@@ -71,6 +76,25 @@ public final class WandererScheduler {
 				}
 			}
 		}
+	}
+
+	/** The 2-day stay (D20). Returns true when the Wanderer left in this pass. */
+	private static boolean checkStay(MinecraftServer server, WandererData d) {
+		long clock = Wanderer.clockTime(server);
+		if (d.leaveAt() < 0) {
+			// A 0.7.0 save: the stay starts now.
+			d = d.withLeaveAt(clock + Wanderer.STAY_TICKS);
+			Wanderer.save(server, d);
+		}
+		if (!d.warned() && clock >= d.leaveAt() - Wanderer.WARN_TICKS) {
+			Wanderer.save(server, d.withWarned(true));
+			server.getPlayerList().broadcastSystemMessage(Messages.leavingSoon(), false);
+		}
+		if (clock >= d.leaveAt() && !BloodMoon.running(server) && !QuestBoss.bossAlive(server)) {
+			Wanderer.leave(server, Messages.leftAfterStay());
+			return true;
+		}
+		return false;
 	}
 
 	private static void arrive(ServerLevel level, WandererData d) {

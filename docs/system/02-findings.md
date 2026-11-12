@@ -109,3 +109,13 @@ Tên và chữ ký dưới đây lấy từ `javap` jar 26.3 và mã Fabric API 
 - Per-entity flags travel on the render state with Fabric's `RenderStateDataKey.create(Supplier<String>)` + `((FabricRenderState) state).setData/getDataOrDefault`.
 - The Wanderer texture `assets/permahearts/textures/entity/wanderer.png` is the vanilla trader texture with the blue robe hue-shifted to crimson (pixels with hue 170–260°).
 - `GuiGraphicsExtractor#textWithWordWrap` draws with a drop shadow; on a light grey vanilla panel that looks smudged. Split with `font.split` and draw `text(..., false)` instead.
+
+## Thêm (khi làm P-008)
+
+- **Heightmap trong hang**: `level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z)` trả mặt đất phía TRÊN hang, có thể cao hàng chục block; thanh boss chỉ hiện trong 64 block nên trùm "mất tích". Dùng `SpawnSpots.standSpot(level, origin, dx, dz)`: tìm tại Y của điểm gốc ±4, cần khối đặc bên dưới + 2 khối trống.
+- `Entity#setPermanentlyInvulnerable(boolean)` (không có `setInvulnerable`). `TargetingConditions#test(ServerLevel, LivingEntity, LivingEntity)` gọi `LivingEntity#canBeSeenAsEnemy()` (javap -c xác nhận), mà hàm này là `!isInvulnerable() && canBeSeenByAnyone()`: NPC bất tử vĩnh viễn thì quái không nhắm được (game test `npcIsNotATarget`). Hệ quả: `/kill` không giết được NPC; `/quest reset` vẫn xóa.
+- `ItemStack#set(DataComponents.UNBREAKABLE, net.minecraft.util.Unit.INSTANCE)`: mũ không vỡ nên zombie/skeleton không cháy nắng.
+- Game test chạy chung một server, đồng thời, dùng chung trạng thái Lữ Khách: chỉ để test ngắn (≤40 tick); kiểm 100+ tick làm trong client game test.
+- `ServerEntityEvents.ENTITY_LOAD` bắn ngay trong `addFreshEntity`: phải lưu `BossState` TRƯỚC khi thêm trùm, nếu không hook xóa trùm lạ sẽ xóa chính nó.
+- Client test: nút chuột trái trong `MouseButtonInfo` là **1** (`AbstractWidget#isValidClickButton` so `button() == 1`); `mc.gui.screen()` thay `mc.screen`. `TestServerContext#runCommand` không có người thực thi: `@s` chọn không ai (lệnh "No player was found"), dùng `@p` hoặc `runOnServer`.
+- **Kết quả kiểm "boss biến mất sau ~40 tick" (flat world)**: không tái hiện được khi người chơi còn sống. Cả 5 loại trùm (zombie, skeleton, evoker, blaze, vindicator) còn sống sau 200 tick, `ENTITY_UNLOAD` chỉ bắn khi test tự xóa trùm. Nguyên nhân khả dĩ: người chơi trong test ở chế độ sinh tồn (`gamemode creative @s` qua `runCommand` không chọn ai) bị trùm giết ("Player0 was slain by Zombie") → không còn người chơi giữ chunk → chunk đổi trạng thái → `stopTracking`, `removalReason == null`, đúng chữ ký đã thấy. Khi đó thấy `player=null` trong log.

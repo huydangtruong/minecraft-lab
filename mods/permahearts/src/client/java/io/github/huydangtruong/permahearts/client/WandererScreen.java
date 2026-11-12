@@ -5,6 +5,7 @@ import io.github.huydangtruong.permahearts.ElixirStat;
 import io.github.huydangtruong.permahearts.Messages;
 import io.github.huydangtruong.permahearts.wanderer.QuestSnapshot;
 import io.github.huydangtruong.permahearts.wanderer.QuestType;
+import io.github.huydangtruong.permahearts.wanderer.StayTime;
 import io.github.huydangtruong.permahearts.wanderer.Wanderer;
 import io.github.huydangtruong.permahearts.wanderer.WandererMenu;
 import java.util.Comparator;
@@ -14,6 +15,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
@@ -59,6 +61,11 @@ public class WandererScreen extends AbstractContainerScreen<WandererMenu> {
 	private static final int PREVIEW_W = 50;
 	private static final int PREVIEW_H = 56;
 
+	/** Client ticks left in which a second Give up click confirms (0 = not armed). */
+	private static final int CONFIRM_TICKS = 60;
+	private int confirmTicks;
+	private Button giveUpButton;
+
 	private boolean shownAccepted;
 	private final Button[] eventButtons = new Button[WandererMenu.LINES];
 
@@ -70,6 +77,9 @@ public class WandererScreen extends AbstractContainerScreen<WandererMenu> {
 	protected void init() {
 		super.init();
 		shownAccepted = menu.isAccepted();
+		giveUpButton = addRenderableWidget(Button.builder(giveUpLabel(), b -> onGiveUp())
+			.bounds(leftPos + (WandererMenu.QUEST_W - WandererMenu.GIVE_UP_W) / 2, topPos + WandererMenu.GIVE_UP_Y,
+				WandererMenu.GIVE_UP_W, WandererMenu.GIVE_UP_H).build());
 		if (!shownAccepted) {
 			addRenderableWidget(Button.builder(Messages.accept(),
 					b -> minecraft.gameMode.handleInventoryButtonClick(menu.containerId, 0))
@@ -89,6 +99,21 @@ public class WandererScreen extends AbstractContainerScreen<WandererMenu> {
 			}
 		}
 		updateButtons();
+	}
+
+	private Component giveUpLabel() {
+		return (confirmTicks > 0 ? Messages.giveUpConfirm() : Messages.giveUp()).copy().withStyle(ChatFormatting.RED);
+	}
+
+	/** First click arms the button for 3 seconds, the second click sends Give up to the server. */
+	private void onGiveUp() {
+		if (confirmTicks > 0) {
+			confirmTicks = 0;
+			minecraft.gameMode.handleInventoryButtonClick(menu.containerId, WandererMenu.GIVE_UP_BUTTON);
+		} else {
+			confirmTicks = CONFIRM_TICKS;
+			giveUpButton.setMessage(giveUpLabel());
+		}
 	}
 
 	private static boolean hasButton(QuestType type) {
@@ -117,6 +142,9 @@ public class WandererScreen extends AbstractContainerScreen<WandererMenu> {
 	@Override
 	protected void containerTick() {
 		super.containerTick();
+		if (confirmTicks > 0 && --confirmTicks == 0 && giveUpButton != null) {
+			giveUpButton.setMessage(giveUpLabel());
+		}
 		if (menu.isAccepted() != shownAccepted) {
 			rebuildWidgets(); // swaps the Accept button for the quest rows
 		}
@@ -197,7 +225,7 @@ public class WandererScreen extends AbstractContainerScreen<WandererMenu> {
 		int infoW = WandererMenu.INV_PANEL_X + WandererMenu.INV_PANEL_W - 8 - infoX;
 		if (!menu.isAccepted()) {
 			wrapped(g, Messages.wandererIntro(), 8, 24, WandererMenu.QUEST_W - 16, TEXT);
-			wrapped(g, Messages.questOffer(), infoX, PREVIEW_Y + 2, infoW, TEXT);
+			leavesIn(g, wrapped(g, Messages.questOffer(), infoX, PREVIEW_Y + 2, infoW, TEXT), infoX, infoW);
 			return;
 		}
 		QuestSnapshot snap = menu.snapshot();
@@ -209,15 +237,23 @@ public class WandererScreen extends AbstractContainerScreen<WandererMenu> {
 				done++;
 			}
 		}
-		wrapped(g, Messages.questSummary(done, rows), infoX, PREVIEW_Y + 2, infoW, TEXT);
+		leavesIn(g, wrapped(g, Messages.questSummary(done, rows), infoX, PREVIEW_Y + 2, infoW, TEXT), infoX, infoW);
 	}
 
-	/** Word-wrapped text without drop shadow (the shadowed variant looks smudged on the light grey panel). */
-	private void wrapped(GuiGraphicsExtractor g, Component text, int x, int y, int width, int color) {
+	/** The countdown under the info text; y is the first free line. Must end above the "Inventory" label. */
+	private void leavesIn(GuiGraphicsExtractor g, int y, int infoX, int infoW) {
+		// "Leaves in" / "2 days 0 h" / "(≈ 40 min)": explicit breaks so a unit never wraps alone onto the next line.
+		String time = StayTime.format(menu.ticksLeft()).replace(" (", "\n(");
+		wrapped(g, Messages.leavesIn("\n" + time), infoX, y + 3, infoW, TEXT_DIM);
+	}
+
+	/** Word-wrapped text without drop shadow (the shadowed variant looks smudged on the light grey panel). Returns the y after the last line. */
+	private int wrapped(GuiGraphicsExtractor g, Component text, int x, int y, int width, int color) {
 		for (FormattedCharSequence line : font.split(text, width)) {
 			g.text(font, line, x, y, color, false);
 			y += 9;
 		}
+		return y;
 	}
 
 	private void extractRow(GuiGraphicsExtractor g, int i, QuestSnapshot.LineView line) {

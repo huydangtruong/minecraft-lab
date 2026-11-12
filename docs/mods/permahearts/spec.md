@@ -49,3 +49,15 @@
   - **Hạ thủ lĩnh** (0.6.0): nút Triệu hồi → trùm to gấp đôi, 150 máu, 4 đệ tử, cạnh NPC. Trùm: Zombie, Skeleton, Evoker (đệ tử là Vindicator), Blaze, Vindicator Chieftain.
 - Dòng xong → ô thưởng có 1 linh dược ngẫu nhiên; ai lấy trước được. Xong hết + lấy hết thưởng → NPC chào và đi, đếm lại 3–5 ngày.
 - Lệnh: `/quest` (NPC ở đâu, còn bao lâu, tiến độ). Admin: `/quest summon` (gọi NPC ngay cạnh mình với nhiệm vụ mới), `/quest skip` (NPC xuất hiện ngay ở ~1000 block), `/quest complete <dòng>`, `/quest reset`.
+
+## 0.7.1 (P-008, D19, D20)
+
+- **Give up**: nút chữ đỏ ở cuối danh sách nhiệm vụ (cả trước và sau Nhận). Bấm 2 lần trong 3 giây: dừng sự kiện, xóa quái/trùm/đệ tử, Lữ Khách đi, thưởng chưa lấy mất. Ai cũng bấm được.
+- **Lữ Khách không bị quái nhắm** (bất tử vĩnh viễn nên quái bỏ qua).
+- Trùm và quái Trăng máu **xuất hiện ngang tầm** người chơi / Lữ Khách (kể cả trong hang), tìm chỗ đứng quanh Y đó chứ không lấy mặt đất.
+- Trùm bị mất (rơi, unload) thì nút quay về **Summon**; summon lại được, bản cũ nếu trở lại sẽ bị xóa.
+- **Ở 3 ngày Minecraft** kể từ lúc báo tọa độ; màn hình có dòng đếm ngược "Leaves in"; chat báo trước ~2 phút thực; không rời khi Trăng máu hoặc trùm đang chạy. Rời đi (hết giờ, Give up, xong hết) thì 5–7 ngày sau mới có Lữ Khách mới; chuyến đầu tiên của world vẫn 3–5 ngày.
+- Thủ lĩnh và đệ tử không bị mặt trời thiêu (mũ không vỡ).
+- `/quest` in thêm thời gian còn lại.
+
+- Tên hiển thị của Lữ Khách: **Crimson Master** (D21).

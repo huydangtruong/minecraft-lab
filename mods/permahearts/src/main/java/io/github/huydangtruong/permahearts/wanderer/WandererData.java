@@ -4,11 +4,16 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
 
+/**
+ * leaveAt: overworld clock time when this visit ends (-1 = not set yet, e.g. a 0.7.0 save). warned: the
+ * "leaving soon" chat line was already sent for this visit.
+ */
 public record WandererData(Phase phase, long nextDay, int x, int y, int z, Optional<String> npcUuid,
 						   Optional<Quest> quest, long questCounter,
-						   Optional<BloodMoonState> bloodMoon, Optional<BossState> boss) {
+						   Optional<BloodMoonState> bloodMoon, Optional<BossState> boss,
+						   long leaveAt, boolean warned) {
 	public static final WandererData DEFAULT = new WandererData(Phase.WAITING, -1, 0, 0, 0, Optional.empty(), Optional.empty(), 0,
-		Optional.empty(), Optional.empty());
+		Optional.empty(), Optional.empty(), -1L, false);
 
 	private static final Codec<Phase> PHASE_CODEC = Codec.STRING.xmap(Phase::valueOf, Phase::name);
 
@@ -22,38 +27,48 @@ public record WandererData(Phase phase, long nextDay, int x, int y, int z, Optio
 		Quest.CODEC.optionalFieldOf("quest").forGetter(WandererData::quest),
 		Codec.LONG.optionalFieldOf("quest_counter", 0L).forGetter(WandererData::questCounter),
 		BloodMoonState.CODEC.optionalFieldOf("blood_moon").forGetter(WandererData::bloodMoon),
-		BossState.CODEC.optionalFieldOf("boss").forGetter(WandererData::boss)
+		BossState.CODEC.optionalFieldOf("boss").forGetter(WandererData::boss),
+		Codec.LONG.optionalFieldOf("leave_at", -1L).forGetter(WandererData::leaveAt),
+		Codec.BOOL.optionalFieldOf("leave_warned", false).forGetter(WandererData::warned)
 	).apply(i, WandererData::new));
 
 	public WandererData withPhase(Phase p) {
-		return new WandererData(p, nextDay, x, y, z, npcUuid, quest, questCounter, bloodMoon, boss);
+		return new WandererData(p, nextDay, x, y, z, npcUuid, quest, questCounter, bloodMoon, boss, leaveAt, warned);
 	}
 
 	public WandererData withNextDay(long d) {
-		return new WandererData(phase, d, x, y, z, npcUuid, quest, questCounter, bloodMoon, boss);
+		return new WandererData(phase, d, x, y, z, npcUuid, quest, questCounter, bloodMoon, boss, leaveAt, warned);
 	}
 
 	public WandererData withPos(int nx, int ny, int nz) {
-		return new WandererData(phase, nextDay, nx, ny, nz, npcUuid, quest, questCounter, bloodMoon, boss);
+		return new WandererData(phase, nextDay, nx, ny, nz, npcUuid, quest, questCounter, bloodMoon, boss, leaveAt, warned);
 	}
 
 	public WandererData withNpc(Optional<String> uuid) {
-		return new WandererData(phase, nextDay, x, y, z, uuid, quest, questCounter, bloodMoon, boss);
+		return new WandererData(phase, nextDay, x, y, z, uuid, quest, questCounter, bloodMoon, boss, leaveAt, warned);
 	}
 
 	public WandererData withQuest(Optional<Quest> q) {
-		return new WandererData(phase, nextDay, x, y, z, npcUuid, q, questCounter, bloodMoon, boss);
+		return new WandererData(phase, nextDay, x, y, z, npcUuid, q, questCounter, bloodMoon, boss, leaveAt, warned);
 	}
 
 	public WandererData withQuestCounter(long c) {
-		return new WandererData(phase, nextDay, x, y, z, npcUuid, quest, c, bloodMoon, boss);
+		return new WandererData(phase, nextDay, x, y, z, npcUuid, quest, c, bloodMoon, boss, leaveAt, warned);
 	}
 
 	public WandererData withBloodMoon(Optional<BloodMoonState> s) {
-		return new WandererData(phase, nextDay, x, y, z, npcUuid, quest, questCounter, s, boss);
+		return new WandererData(phase, nextDay, x, y, z, npcUuid, quest, questCounter, s, boss, leaveAt, warned);
 	}
 
 	public WandererData withBoss(Optional<BossState> s) {
-		return new WandererData(phase, nextDay, x, y, z, npcUuid, quest, questCounter, bloodMoon, s);
+		return new WandererData(phase, nextDay, x, y, z, npcUuid, quest, questCounter, bloodMoon, s, leaveAt, warned);
+	}
+
+	public WandererData withLeaveAt(long t) {
+		return new WandererData(phase, nextDay, x, y, z, npcUuid, quest, questCounter, bloodMoon, boss, t, warned);
+	}
+
+	public WandererData withWarned(boolean w) {
+		return new WandererData(phase, nextDay, x, y, z, npcUuid, quest, questCounter, bloodMoon, boss, leaveAt, w);
 	}
 }
