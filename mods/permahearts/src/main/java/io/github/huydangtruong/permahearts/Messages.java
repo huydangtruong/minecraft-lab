@@ -101,11 +101,11 @@ public final class Messages {
 	// ---- Wanderer (0.5.0) ----
 
 	public static Component wandererName() {
-		return Component.translatableWithFallback("permahearts.wanderer.name", "Wanderer");
+		return Component.translatableWithFallback("permahearts.wanderer.name", "Crimson Master");
 	}
 
 	public static Component wandererPlanned(int x, int z) {
-		return Component.translatableWithFallback("permahearts.wanderer.planned", "A Wanderer is waiting at X %s, Z %s", x, z);
+		return Component.translatableWithFallback("permahearts.wanderer.planned", "The Crimson Master is waiting at X %s, Z %s", x, z);
 	}
 
 	public static Component wandererIntro() {
@@ -151,11 +151,11 @@ public final class Messages {
 
 	public static Component lineCompleted(Component name) {
 		return Component.translatableWithFallback("permahearts.wanderer.line_completed",
-			"Quest line done: %s. Reward waits at the Wanderer", name);
+			"Quest line done: %s. Reward waits at the Crimson Master", name);
 	}
 
 	public static Component farewell() {
-		return Component.translatableWithFallback("permahearts.wanderer.farewell", "The Wanderer thanks you and moves on");
+		return Component.translatableWithFallback("permahearts.wanderer.farewell", "The Crimson Master thanks you and moves on");
 	}
 
 	public static Component giveUp() {
@@ -167,7 +167,7 @@ public final class Messages {
 	}
 
 	public static Component gaveUp(Component player) {
-		return Component.translatableWithFallback("permahearts.wanderer.gave_up", "%s gave up the Wanderer's quests. The Wanderer moves on", player);
+		return Component.translatableWithFallback("permahearts.wanderer.gave_up", "%s gave up the Crimson Master's quests. The Crimson Master moves on", player);
 	}
 
 	public static Component leavesIn(String time) {
@@ -175,23 +175,23 @@ public final class Messages {
 	}
 
 	public static Component leavingSoon() {
-		return Component.translatableWithFallback("permahearts.wanderer.leaving_soon", "The Wanderer will leave soon");
+		return Component.translatableWithFallback("permahearts.wanderer.leaving_soon", "The Crimson Master will leave soon");
 	}
 
 	public static Component leftAfterStay() {
-		return Component.translatableWithFallback("permahearts.wanderer.left_after_stay", "The Wanderer's time is up. The Wanderer moves on");
+		return Component.translatableWithFallback("permahearts.wanderer.left_after_stay", "The Crimson Master's time is up. The Crimson Master moves on");
 	}
 
 	public static Component questWhere(int x, int z, int distance) {
-		return Component.translatableWithFallback("permahearts.wanderer.where", "Wanderer at X %s, Z %s (%s blocks away)", x, z, distance);
+		return Component.translatableWithFallback("permahearts.wanderer.where", "Crimson Master at X %s, Z %s (%s blocks away)", x, z, distance);
 	}
 
 	public static Component questNext(long days) {
-		return Component.translatableWithFallback("permahearts.wanderer.next", "Next Wanderer in about %s day(s)", days);
+		return Component.translatableWithFallback("permahearts.wanderer.next", "Next Crimson Master in about %s day(s)", days);
 	}
 
 	public static Component questNoLines() {
-		return Component.translatableWithFallback("permahearts.wanderer.not_accepted", "Quest not accepted yet: talk to the Wanderer");
+		return Component.translatableWithFallback("permahearts.wanderer.not_accepted", "Quest not accepted yet: talk to the Crimson Master");
 	}
 
 	public static Component questLineStatus(int number, Component text) {
@@ -265,7 +265,7 @@ public final class Messages {
 	}
 
 	public static Component eventNotHere() {
-		return Component.translatableWithFallback("permahearts.wanderer.event_not_here", "This can only be started in the Overworld, near the Wanderer");
+		return Component.translatableWithFallback("permahearts.wanderer.event_not_here", "This can only be started in the Overworld, near the Crimson Master");
 	}
 
 	/** id is a structure id or "#tag" id, e.g. "#minecraft:village". */

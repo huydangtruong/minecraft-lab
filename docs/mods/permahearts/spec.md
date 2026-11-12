@@ -59,3 +59,5 @@
 - **Ở 3 ngày Minecraft** kể từ lúc báo tọa độ; màn hình có dòng đếm ngược "Leaves in"; chat báo trước ~2 phút thực; không rời khi Trăng máu hoặc trùm đang chạy. Rời đi (hết giờ, Give up, xong hết) thì 5–7 ngày sau mới có Lữ Khách mới; chuyến đầu tiên của world vẫn 3–5 ngày.
 - Thủ lĩnh và đệ tử không bị mặt trời thiêu (mũ không vỡ).
 - `/quest` in thêm thời gian còn lại.
+
+- Tên hiển thị của Lữ Khách: **Crimson Master** (D21).
