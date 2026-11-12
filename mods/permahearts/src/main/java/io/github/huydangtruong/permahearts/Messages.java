@@ -188,8 +188,8 @@ public final class Messages {
 		return Component.translatableWithFallback("permahearts.wanderer.line_explore", "Reach %s", name);
 	}
 
-	public static Component lineBloodMoon() {
-		return Component.translatableWithFallback("permahearts.wanderer.line_blood_moon", "Survive the Blood Moon night");
+	public static Component lineBloodMoon(Component mob) {
+		return Component.translatableWithFallback("permahearts.wanderer.line_blood_moon", "Survive the %s Blood Moon", mob);
 	}
 
 	public static Component lineBoss(Component name) {
@@ -212,8 +212,8 @@ public final class Messages {
 		return Component.translatableWithFallback("permahearts.wanderer.fighting", "Fighting…");
 	}
 
-	public static Component bloodMoonStarted() {
-		return Component.translatableWithFallback("permahearts.wanderer.blood_moon_started", "The Blood Moon rises! Survive until dawn");
+	public static Component bloodMoonStarted(Component mob) {
+		return Component.translatableWithFallback("permahearts.wanderer.blood_moon_started", "The %s Blood Moon rises! Survive until dawn", mob);
 	}
 
 	public static Component bloodMoonFailed(Component player) {
@@ -224,8 +224,8 @@ public final class Messages {
 		return Component.translatableWithFallback("permahearts.wanderer.blood_moon_no_sleep", "You cannot sleep under the Blood Moon");
 	}
 
-	public static Component bloodMoonBar() {
-		return Component.translatableWithFallback("permahearts.wanderer.blood_moon_bar", "Blood Moon");
+	public static Component bloodMoonBar(Component mob) {
+		return Component.translatableWithFallback("permahearts.wanderer.blood_moon_bar", "%s Blood Moon", mob);
 	}
 
 	public static Component bossName(Component entity) {

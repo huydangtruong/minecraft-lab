@@ -20,10 +20,10 @@ import net.minecraft.server.level.ServerPlayer;
 public class QuestScreenClientTest implements FabricClientGameTest {
 	private static Quest quest() {
 		return new Quest(1, List.of(
-			new QuestLine(QuestType.COLLECT, "minecraft:iron_ingot", 10, 0, "strength", false),
-			new QuestLine(QuestType.KILL, "minecraft:zombie", 2, 0, "fury", false),
-			new QuestLine(QuestType.BLOOD_MOON, "", 1, 0, "swiftness", false),
-			new QuestLine(QuestType.BOSS, "minecraft:zombie", 1, 0, "iron_skin", false)), false);
+			new QuestLine(QuestType.COLLECT, "minecraft:iron_ingot", 64, 0, "strength", false),
+			new QuestLine(QuestType.KILL, "minecraft:zombie", 16, 0, "fury", false),
+			new QuestLine(QuestType.BLOOD_MOON, "minecraft:piglin_brute", 1, 0, "swiftness", false),
+			new QuestLine(QuestType.BOSS, "minecraft:evoker", 1, 0, "iron_skin", false)), false);
 	}
 
 	@Override

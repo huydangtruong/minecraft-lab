@@ -97,6 +97,26 @@ class QuestLogicTest {
 	}
 
 	@Test
+	void bloodMoonMobDefaultsToZombie() {
+		assertEquals("minecraft:zombie", QuestGenerator.bloodMoonMob(""));
+		assertEquals("minecraft:creeper", QuestGenerator.bloodMoonMob("minecraft:creeper"));
+	}
+
+	@Test
+	void generatorAmounts() {
+		for (int seed = 0; seed < 500; seed++) {
+			for (QuestLine l : QuestGenerator.generate(seed, new Random(seed)).lines()) {
+				if (l.type() == QuestType.KILL) {
+					assertEquals(l.target().equals("minecraft:witch") ? 8 : 16, l.required(), l.target());
+				}
+				if (l.type() == QuestType.COLLECT) {
+					assertTrue(List.of(16, 32, 48, 64).contains(l.required()), l.target());
+				}
+			}
+		}
+	}
+
+	@Test
 	void generatorWithAllTypes() {
 		var seen = new HashSet<QuestType>();
 		for (int seed = 0; seed < 1000; seed++) {
@@ -109,11 +129,12 @@ class QuestLogicTest {
 				assertTrue(targets.add(l.target()), "duplicate target, seed " + seed);
 				if (l.type() == QuestType.BLOOD_MOON) {
 					moons++;
-					assertEquals("", l.target());
+					assertTrue(QuestGenerator.BLOOD_MOON.contains(l.target()), l.target());
 				}
 				if (l.type() == QuestType.BOSS) {
 					bosses++;
-					assertTrue(l.target().equals("minecraft:zombie") || l.target().equals("minecraft:skeleton"));
+					assertTrue(List.of("minecraft:zombie", "minecraft:skeleton", "minecraft:evoker", "minecraft:blaze",
+						"minecraft:vindicator").contains(l.target()), l.target());
 				}
 				if (l.type().isEvent()) {
 					assertEquals(1, l.required());

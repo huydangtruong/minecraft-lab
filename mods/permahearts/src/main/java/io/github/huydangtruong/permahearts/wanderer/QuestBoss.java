@@ -21,6 +21,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.monster.illager.Vindicator;
+import net.minecraft.world.entity.monster.skeleton.AbstractSkeleton;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -28,7 +31,8 @@ import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.levelgen.Heightmap;
 
 /**
- * The quest boss: a giant zombie or skeleton with 150 health and four minions. The boss UUID is saved in
+ * The quest boss: a giant zombie, skeleton, evoker, blaze or vindicator with 150 health and four minions
+ * (an evoker brings vindicators, so the fight is not a swarm of vexes). The boss UUID is saved in
  * WandererData.boss; the boss bar is runtime only. tick() runs once per second from the scheduler.
  */
 public final class QuestBoss {
@@ -113,9 +117,10 @@ public final class QuestBoss {
 		boss.addTag(TAG);
 		boss.setTarget(by);
 		ow.addFreshEntity(boss);
+		EntityType<?> minionType = type == EntityTypes.EVOKER ? EntityTypes.VINDICATOR : type;
 		for (int i = 0; i < MINIONS; i++) {
 			BlockPos m = surface(ow, spot.getX() + (RNG.nextDouble() * 6 - 3), spot.getZ() + (RNG.nextDouble() * 6 - 3));
-			if (type.create(ow, EntitySpawnReason.EVENT) instanceof Mob minion) {
+			if (minionType.create(ow, EntitySpawnReason.EVENT) instanceof Mob minion) {
 				minion.snapTo(m.getX() + 0.5, m.getY(), m.getZ() + 0.5, RNG.nextFloat() * 360f, 0f);
 				minion.finalizeSpawn(ow, ow.getCurrentDifficultyAt(m), EntitySpawnReason.EVENT, null);
 				if (minion instanceof Zombie z) {
@@ -147,14 +152,20 @@ public final class QuestBoss {
 		}
 	}
 
-	/** Iron armour with a diamond helmet (a helmet also stops sun burning); a sword for zombies, a bow for skeletons. */
+	/**
+	 * Iron armour with a diamond helmet (a helmet also stops sun burning; armour still protects mobs whose model does
+	 * not draw it); a sword for zombies, a bow for skeletons, an axe for vindicators, empty hands for casters/blazes.
+	 */
 	private static void equip(Mob boss) {
 		boss.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.DIAMOND_HELMET));
 		boss.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.IRON_CHESTPLATE));
 		boss.setItemSlot(EquipmentSlot.LEGS, new ItemStack(Items.IRON_LEGGINGS));
 		boss.setItemSlot(EquipmentSlot.FEET, new ItemStack(Items.IRON_BOOTS));
-		boss.setItemSlot(EquipmentSlot.MAINHAND,
-			new ItemStack(boss instanceof Zombie ? Items.IRON_SWORD : Items.BOW));
+		ItemStack weapon = boss instanceof Zombie ? new ItemStack(Items.IRON_SWORD)
+			: boss instanceof AbstractSkeleton ? new ItemStack(Items.BOW)
+			: boss instanceof Vindicator ? new ItemStack(Items.DIAMOND_AXE)
+			: ItemStack.EMPTY;
+		boss.setItemSlot(EquipmentSlot.MAINHAND, weapon);
 		for (EquipmentSlot s : new EquipmentSlot[] {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS,
 			EquipmentSlot.FEET, EquipmentSlot.MAINHAND}) {
 			boss.setDropChance(s, 0f);
