@@ -32,7 +32,7 @@ Tạo world Survival mới (Creative bật cheat nếu cần lệnh). Kịch b�
 
 ## Chụp màn hình tự động
 
-Không cần chơi: một bài test mở Minecraft thật trong world tạm, mở Lữ Khách bằng chuột phải thật và chụp màn hình (nhận nhiệm vụ, các dòng, dòng đã xong, tooltip phần thưởng; tiếng Anh và tiếng Việt `-vi`).
+Không cần chơi: một bài test mở Minecraft thật trong world tạm, mở Lữ Khách bằng chuột phải thật và chụp màn hình (nhận nhiệm vụ, các dòng, dòng đã xong, tooltip phần thưởng).
 
 ```sh
 export JAVA_HOME=$(/usr/libexec/java_home -v 25)

@@ -24,7 +24,7 @@ export JAVA_HOME=$(/usr/libexec/java_home -v 25)
 ./gradlew :permahearts:runClientGameTest
 ```
 
-A Minecraft window opens (~30 s). PNGs land in `mods/permahearts/build/run/clientGameTest/screenshots/` (gitignored via `build/`): `00-world-view`, `01-quest-offer`, `02-quest-lines`, `03-line-completed`, `04-reward-tooltip`, then the same with suffix `-vi` (Vietnamese).
+A Minecraft window opens (~30 s). PNGs land in `mods/permahearts/build/run/clientGameTest/screenshots/` (gitignored via `build/`): `00-world-view`, `01-quest-offer`, `02-quest-lines`, `03-line-completed`, `04-reward-tooltip`. English only (D16).
 
 ## Done when
 

@@ -6,7 +6,6 @@ import io.github.huydangtruong.permahearts.wanderer.QuestType;
 import io.github.huydangtruong.permahearts.wanderer.Wanderer;
 import io.github.huydangtruong.permahearts.wanderer.WandererMenu;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
@@ -35,17 +34,7 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 			server.runCommand("time set day");
 			server.runCommand("weather clear");
 			context.waitTicks(40);
-			shots(context, server, "");
-			// Vietnamese
-			context.runOnClient(mc -> {
-				mc.options.languageCode = "vi_vn";
-				mc.getLanguageManager().setSelected("vi_vn");
-			});
-			// Never join() on the render thread: wait for the reload from the test thread instead.
-			CompletableFuture<Void> reload = context.computeOnClient(mc -> mc.reloadResourcePacks());
-			context.waitFor(mc -> reload.isDone());
-			context.waitTicks(100); // the Mojang loading overlay fades out first and blocks input
-			shots(context, server, "-vi");
+			shots(context, server, ""); // the mod's text is English only (D16)
 		}
 	}
 

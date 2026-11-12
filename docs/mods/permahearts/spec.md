@@ -8,7 +8,7 @@
 - **Thanh HeartXP** (D9): góc dưới bên trái (cách mép trái và mép dưới 8px), chữ "HeartXP 320/500" (ở trần: "HeartXP MAX") trên một thanh đỏ. Ẩn khi Creative/Spectator và khi tắt HUD (F1). Chỉ thấy khi client cũng cài mod.
 - Dữ liệu lưu theo người chơi trong save của world (Essential: save của máy host), đồng bộ xuống client của chính người đó.
 - Lệnh: `/hearts` (tim, HeartXP, tổng kill, số lần chết); `/hearts set <targets> <1..50>` và `/hearts xp <targets> <0..499>` cần quyền gamemaster.
-- Tin nhắn có en_us và vi_vn; người không cài mod vẫn đọc được bản tiếng Anh.
+- Mọi chữ của mod (giao diện, tên item, tin nhắn) chỉ có **tiếng Anh** (D16). Tên đồ/quái của game gốc vẫn theo ngôn ngữ game.
 - Host và bạn phải cài **cùng phiên bản** mod.
 
 ## Bật/tắt theo world (0.3.0, D10)
@@ -26,12 +26,12 @@
 
 | Item | Tên VN | Mỗi bình | Thuộc tính |
 |---|---|---|---|
-| `permahearts:elixir_strength` | Linh Dược Sức Mạnh | +0.5 sát thương | `ATTACK_DAMAGE` cộng |
-| `permahearts:elixir_fury` | Linh Dược Cuồng Phong | +10% tốc đánh | `ATTACK_SPEED` ×base |
-| `permahearts:elixir_swiftness` | Linh Dược Thần Tốc | +5% tốc chạy | `MOVEMENT_SPEED` ×base |
-| `permahearts:elixir_iron_skin` | Linh Dược Kim Cang | +1 giáp | `ARMOR` cộng |
-| `permahearts:elixir_reach` | Linh Dược Trường Thủ | +0.5 tầm với | `BLOCK_INTERACTION_RANGE` + `ENTITY_INTERACTION_RANGE` cộng |
-| `permahearts:elixir_mining` | Linh Dược Khai Sơn | +10% tốc đào | `BLOCK_BREAK_SPEED` ×base |
+| `permahearts:elixir_strength` | Elixir of Strength | +0.5 sát thương | `ATTACK_DAMAGE` cộng |
+| `permahearts:elixir_fury` | Elixir of Fury | +10% tốc đánh | `ATTACK_SPEED` ×base |
+| `permahearts:elixir_swiftness` | Elixir of Swiftness | +5% tốc chạy | `MOVEMENT_SPEED` ×base |
+| `permahearts:elixir_iron_skin` | Elixir of Iron Skin | +1 giáp | `ARMOR` cộng |
+| `permahearts:elixir_reach` | Elixir of Reach | +0.5 tầm với | `BLOCK_INTERACTION_RANGE` + `ENTITY_INTERACTION_RANGE` cộng |
+| `permahearts:elixir_mining` | Elixir of Mining | +10% tốc đào | `BLOCK_BREAK_SPEED` ×base |
 
 - Uống như bình thuốc (trả lại chai rỗng), có hiệu ứng lấp lánh, xếp chồng 16. Không trần, lưu theo người chơi, chết không mất.
 - Công tắc tắt: uống không được (báo cách bật), chỉ số đã có không tác dụng nhưng vẫn lưu.
