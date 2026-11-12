@@ -2,7 +2,7 @@
 
 > **Tóm tắt cho Huy:** thêm một bài test mở Minecraft thật trong world tạm và tự chụp màn hình quest (nhận nhiệm vụ, các dòng, dòng đã xong, tooltip phần thưởng; cả tiếng Anh và tiếng Việt). Chạy riêng, không chạy khi `build`.
 
-- **Status:** merged-pending
+- **Status:** merged
 - **Mod / decision:** `permahearts` · **Branch:** `feat/P-007-client-screenshots` · **Depends on:** P-006
 
 ## Goal
