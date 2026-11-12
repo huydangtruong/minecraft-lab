@@ -196,8 +196,8 @@ public class WandererScreen extends AbstractContainerScreen<WandererMenu> {
 		int infoX = PREVIEW_X + PREVIEW_W + 6;
 		int infoW = WandererMenu.INV_PANEL_X + WandererMenu.INV_PANEL_W - 8 - infoX;
 		if (!menu.isAccepted()) {
-			g.textWithWordWrap(font, Messages.wandererIntro(), 8, 24, WandererMenu.QUEST_W - 16, TEXT);
-			g.textWithWordWrap(font, Messages.questOffer(), infoX, PREVIEW_Y + 2, infoW, TEXT_DIM);
+			wrapped(g, Messages.wandererIntro(), 8, 24, WandererMenu.QUEST_W - 16, TEXT);
+			wrapped(g, Messages.questOffer(), infoX, PREVIEW_Y + 2, infoW, TEXT);
 			return;
 		}
 		QuestSnapshot snap = menu.snapshot();
@@ -209,7 +209,15 @@ public class WandererScreen extends AbstractContainerScreen<WandererMenu> {
 				done++;
 			}
 		}
-		g.textWithWordWrap(font, Messages.questSummary(done, rows), infoX, PREVIEW_Y + 2, infoW, TEXT_DIM);
+		wrapped(g, Messages.questSummary(done, rows), infoX, PREVIEW_Y + 2, infoW, TEXT);
+	}
+
+	/** Word-wrapped text without drop shadow (the shadowed variant looks smudged on the light grey panel). */
+	private void wrapped(GuiGraphicsExtractor g, Component text, int x, int y, int width, int color) {
+		for (FormattedCharSequence line : font.split(text, width)) {
+			g.text(font, line, x, y, color, false);
+			y += 9;
+		}
 	}
 
 	private void extractRow(GuiGraphicsExtractor g, int i, QuestSnapshot.LineView line) {

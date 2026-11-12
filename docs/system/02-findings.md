@@ -102,3 +102,10 @@ Tên và chữ ký dưới đây lấy từ `javap` jar 26.3 và mã Fabric API 
 - `tp @s … facing entity …` ngay sau khi spawn không xoay đúng người chơi; dùng `mc.player.setYRot/setXRot` trong `runOnClient` rồi chờ ~20 tick cho `mc.hitResult` bắt được entity.
 - Đổi ngôn ngữ giữa chừng: `mc.options.languageCode = "vi_vn"` + `mc.getLanguageManager().setSelected("vi_vn")` + `mc.reloadResourcePacks()`. KHÔNG `join()` trong `runOnClient` (treo luồng render): lấy future bằng `computeOnClient`, `waitFor(mc -> f.isDone())`, rồi `waitTicks(~100)` cho màn Mojang tan (đang hiện thì chặn input). Tin nhắn từ server tích hợp vẫn tiếng Anh.
 - `Minecraft#setScreen` không còn (có `setScreenAndShow`); đóng menu bằng `mc.player.closeContainer()`. Cửa sổ test mặc định 854x480.
+
+## Entity renderer swap (26.3, Fabric API 0.166.2)
+
+- `EntityRendererRegistry.register(EntityTypes.WANDERING_TRADER, WandererRenderer::new)` replaces the vanilla renderer; `WandererRenderer extends WanderingTraderRenderer` overrides `extractRenderState(WanderingTrader, VillagerRenderState, float)` and `getTextureLocation(VillagerRenderState)`.
+- Per-entity flags travel on the render state with Fabric's `RenderStateDataKey.create(Supplier<String>)` + `((FabricRenderState) state).setData/getDataOrDefault`.
+- The Wanderer texture `assets/permahearts/textures/entity/wanderer.png` is the vanilla trader texture with the blue robe hue-shifted to crimson (pixels with hue 170–260°).
+- `GuiGraphicsExtractor#textWithWordWrap` draws with a drop shadow; on a light grey vanilla panel that looks smudged. Split with `font.split` and draw `text(..., false)` instead.
