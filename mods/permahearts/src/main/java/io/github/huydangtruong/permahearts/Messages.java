@@ -118,11 +118,11 @@ public final class Messages {
 	}
 
 	public static Component questOffer() {
-		return Component.translatableWithFallback("permahearts.wanderer.offer", "Rewards are shared: first come, first served.");
+		return Component.translatableWithFallback("permahearts.wanderer.offer", "First come, first served.");
 	}
 
 	public static Component questSummary(int done, int total) {
-		return Component.translatableWithFallback("permahearts.wanderer.summary", "Done: %s/%s\nRewards: first come, first served", done, total);
+		return Component.translatableWithFallback("permahearts.wanderer.summary", "Done: %s/%s", done, total);
 	}
 
 	public static Component accept() {
@@ -156,6 +156,30 @@ public final class Messages {
 
 	public static Component farewell() {
 		return Component.translatableWithFallback("permahearts.wanderer.farewell", "The Wanderer thanks you and moves on");
+	}
+
+	public static Component giveUp() {
+		return Component.translatableWithFallback("permahearts.wanderer.give_up", "Give up");
+	}
+
+	public static Component giveUpConfirm() {
+		return Component.translatableWithFallback("permahearts.wanderer.give_up_confirm", "Sure? Click again");
+	}
+
+	public static Component gaveUp(Component player) {
+		return Component.translatableWithFallback("permahearts.wanderer.gave_up", "%s gave up the Wanderer's quests. The Wanderer moves on", player);
+	}
+
+	public static Component leavesIn(String time) {
+		return Component.translatableWithFallback("permahearts.wanderer.leaves_in", "Leaves in %s", time);
+	}
+
+	public static Component leavingSoon() {
+		return Component.translatableWithFallback("permahearts.wanderer.leaving_soon", "The Wanderer will leave soon");
+	}
+
+	public static Component leftAfterStay() {
+		return Component.translatableWithFallback("permahearts.wanderer.left_after_stay", "The Wanderer's time is up. The Wanderer moves on");
 	}
 
 	public static Component questWhere(int x, int z, int distance) {

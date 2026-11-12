@@ -71,6 +71,10 @@ public final class QuestCommand {
 				src.sendSuccess(() -> Messages.questNext(days), false);
 			}
 		}
+		if (d.phase() == Phase.PLANNED || d.phase() == Phase.PRESENT) {
+			String left = StayTime.format(Wanderer.ticksLeft(server));
+			src.sendSuccess(() -> Messages.leavesIn(left), false);
+		}
 		if (d.phase() == Phase.PRESENT && d.quest().isPresent()) {
 			Quest q = d.quest().get();
 			if (!q.accepted()) {

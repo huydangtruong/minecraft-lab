@@ -91,6 +91,15 @@ public class PermaHearts implements ModInitializer {
 					&& d.npcUuid().get().equals(entity.getUUID().toString());
 				if (!current) {
 					entity.discard();
+				} else {
+					entity.setPermanentlyInvulnerable(true); // NPCs from 0.7.0 worlds: mobs must not target them
+				}
+			}
+			// A boss that is not the saved one (a lost boss came back after a re-summon) is a stale copy.
+			if (entity.entityTags().contains(QuestBoss.TAG)) {
+				var boss = Wanderer.data(level.getServer()).boss();
+				if (boss.isEmpty() || !boss.get().bossUuid().equals(entity.getUUID().toString())) {
+					entity.discard();
 				}
 			}
 		});

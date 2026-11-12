@@ -37,7 +37,13 @@ public class WandererMenu extends AbstractContainerMenu {
 	public static final int PANEL_H = 166;
 	/** Top of the first quest row; each row is LINE_STEP high. */
 	public static final int LINE_TOP = 18;
-	public static final int LINE_STEP = 36;
+	public static final int LINE_STEP = 32;
+	/** The red Give up button sits under the last row. */
+	public static final int GIVE_UP_Y = LINE_TOP + LINES * LINE_STEP;
+	public static final int GIVE_UP_W = 100;
+	public static final int GIVE_UP_H = 16;
+	/** Menu button id of Give up. */
+	public static final int GIVE_UP_BUTTON = 99;
 	/** Left edge of the item area of the per-line slot (the drawn square is one pixel larger on each side). */
 	public static final int LINE_SLOT_X = QUEST_W - 6 - 17;
 	public static final int LINE_SLOT_Y0 = LINE_TOP + (LINE_STEP - 18) / 2 + 1;
@@ -57,6 +63,8 @@ public class WandererMenu extends AbstractContainerMenu {
 	private final DataSlot[] claimed = new DataSlot[LINES];
 	/** Per event line: 1 while the blood moon / boss of that line is running. */
 	private final DataSlot[] eventState = new DataSlot[LINES];
+	/** Seconds of real time until the Wanderer leaves (capped: data slots travel as shorts). */
+	private final DataSlot secondsLeft;
 	private final Container deposit;
 	private final Container rewards;
 	private boolean processing;
@@ -74,6 +82,8 @@ public class WandererMenu extends AbstractContainerMenu {
 		this.player = inv.player;
 		this.accepted = addDataSlot(server == null ? DataSlot.standalone()
 			: live(() -> quest(snapshot.questId(), q -> q.accepted() ? 1 : 0)));
+		this.secondsLeft = addDataSlot(server == null ? DataSlot.standalone()
+			: live(() -> (int) Math.min(32767L, Wanderer.ticksLeft(server) / 20L)));
 		for (int i = 0; i < LINES; i++) {
 			int line = i;
 			progress[i] = addDataSlot(server == null ? DataSlot.standalone()
@@ -131,6 +141,11 @@ public class WandererMenu extends AbstractContainerMenu {
 
 	public boolean isAccepted() {
 		return accepted.get() != 0;
+	}
+
+	/** Ticks until the Wanderer leaves, as last synced (whole seconds). */
+	public long ticksLeft() {
+		return secondsLeft.get() * 20L;
 	}
 
 	public int progressOf(int line) {
@@ -251,6 +266,10 @@ public class WandererMenu extends AbstractContainerMenu {
 
 	@Override
 	public boolean clickMenuButton(Player p, int id) {
+		if (server != null && id == GIVE_UP_BUTTON && p instanceof ServerPlayer sp) {
+			Wanderer.giveUp(server, sp);
+			return true;
+		}
 		if (server != null && id == 0) {
 			Wanderer.accept(server);
 			return true;

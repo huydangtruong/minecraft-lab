@@ -32,6 +32,10 @@ import net.minecraft.world.item.ItemStack;
  * The NPC and everything about it lives in the Overworld. Not thread-safe; call from the server thread.
  */
 public final class Wanderer {
+	/** The visit lasts 3 Minecraft days of the overworld clock (D20). */
+	public static final long STAY_TICKS = 3 * 24000L;
+	/** One chat warning goes out this many ticks before the Wanderer leaves. */
+	public static final long WARN_TICKS = 2400L;
 	private static final RandomGenerator RNG = new java.util.Random();
 	private static final Map<Long, RewardContainer> REWARDS = new HashMap<>();
 
@@ -45,6 +49,10 @@ public final class Wanderer {
 
 	public static void save(MinecraftServer server, WandererData d) {
 		WandererSavedData.of(server).set(d);
+	}
+
+	public static long clockTime(MinecraftServer server) {
+		return server.overworld().getOverworldClockTime();
 	}
 
 	public static long currentDay(MinecraftServer server) {
@@ -84,7 +92,8 @@ public final class Wanderer {
 		double[] off = QuestGenerator.planOffset(RNG);
 		int x = (int) Math.round(near.getX() + off[0]);
 		int z = (int) Math.round(near.getZ() + off[1]);
-		save(server, data(server).withPhase(Phase.PLANNED).withPos(x, 0, z).withNpc(Optional.empty()).withQuest(Optional.empty()));
+		save(server, data(server).withPhase(Phase.PLANNED).withPos(x, 0, z).withNpc(Optional.empty()).withQuest(Optional.empty())
+			.withLeaveAt(clockTime(server) + STAY_TICKS).withWarned(false));
 		server.getPlayerList().broadcastSystemMessage(Messages.wandererPlanned(x, z), false);
 	}
 
@@ -103,8 +112,11 @@ public final class Wanderer {
 			return null;
 		}
 		// Store the UUID before adding: the ENTITY_LOAD listener discards wanderers that are not the stored one.
-		save(server, data(server).withPhase(Phase.PRESENT).withPos(pos.getX(), pos.getY(), pos.getZ())
-			.withNpc(Optional.of(npc.getUUID().toString())).withQuest(Optional.of(quest)));
+		WandererData cur = data(server);
+		// Summoned or respawned NPCs keep the planned leave time; with none yet the 2-day stay starts now.
+		long leaveAt = cur.leaveAt() >= 0 ? cur.leaveAt() : clockTime(server) + STAY_TICKS;
+		save(server, cur.withPhase(Phase.PRESENT).withPos(pos.getX(), pos.getY(), pos.getZ())
+			.withNpc(Optional.of(npc.getUUID().toString())).withQuest(Optional.of(quest)).withLeaveAt(leaveAt));
 		level.addFreshEntity(npc);
 		return npc;
 	}
@@ -193,7 +205,8 @@ public final class Wanderer {
 	public static int eventState(MinecraftServer server, int line) {
 		WandererData d = data(server);
 		boolean moon = d.bloodMoon().isPresent() && d.bloodMoon().get().line() == line;
-		boolean boss = d.boss().isPresent() && d.boss().get().line() == line;
+		// A boss that was lost (unloaded, fell out of the world) does not block the Summon button.
+		boolean boss = d.boss().isPresent() && d.boss().get().line() == line && QuestBoss.bossAlive(server);
 		return moon || boss ? 1 : 0;
 	}
 
@@ -308,8 +321,46 @@ public final class Wanderer {
 		}
 		REWARDS.remove(d.quest().get().id());
 		save(server, d.withPhase(Phase.WAITING).withNpc(Optional.empty()).withQuest(Optional.empty())
-			.withNextDay(currentDay(server) + QuestGenerator.daysUntilNext(RNG)));
+			.withLeaveAt(-1L).withWarned(false)
+			.withNextDay(currentDay(server) + QuestGenerator.daysUntilReturn(RNG)));
 		server.getPlayerList().broadcastSystemMessage(Messages.farewell(), false);
+	}
+
+	// ---- leaving: give up and the end of the 2-day stay ----
+
+	/** Ticks of the overworld clock until the Wanderer leaves; 0 when the visit has no end time yet. */
+	public static long ticksLeft(MinecraftServer server) {
+		long at = data(server).leaveAt();
+		return at < 0 ? 0 : Math.max(0, at - clockTime(server));
+	}
+
+	/** Anyone can give up while the Wanderer is planned or present. Returns false in the other phases. */
+	public static boolean giveUp(MinecraftServer server, ServerPlayer by) {
+		Phase phase = data(server).phase();
+		if (phase != Phase.PLANNED && phase != Phase.PRESENT) {
+			return false;
+		}
+		leave(server, Messages.gaveUp(by.getDisplayName()));
+		return true;
+	}
+
+	/**
+	 * The visit ends: events stop (no fail message), their mobs, the boss and the minions go, the NPC leaves with all
+	 * unclaimed rewards, and the next Wanderer comes in 3..5 days.
+	 */
+	public static void leave(MinecraftServer server, Component message) {
+		WandererData d = data(server);
+		Entity npc = npc(server);
+		if (npc != null) {
+			npc.discard();
+		}
+		d.quest().ifPresent(q -> REWARDS.remove(q.id()));
+		BloodMoon.onReset(server);
+		QuestBoss.onReset(server);
+		save(server, d.withPhase(Phase.WAITING).withNpc(Optional.empty()).withQuest(Optional.empty())
+			.withBloodMoon(Optional.empty()).withBoss(Optional.empty()).withLeaveAt(-1L).withWarned(false)
+			.withNextDay(currentDay(server) + QuestGenerator.daysUntilReturn(RNG)));
+		server.getPlayerList().broadcastSystemMessage(message, false);
 	}
 
 	/** Removes the NPC and forgets everything (admin and tests). */

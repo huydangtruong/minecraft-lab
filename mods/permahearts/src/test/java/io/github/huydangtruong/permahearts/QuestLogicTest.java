@@ -73,6 +73,8 @@ class QuestLogicTest {
 		for (int i = 0; i < 200; i++) {
 			int d = QuestGenerator.daysUntilNext(r);
 			assertTrue(d >= 3 && d <= 5);
+			int back = QuestGenerator.daysUntilReturn(r);
+			assertTrue(back >= 5 && back <= 7, "return " + back);
 			double[] o = QuestGenerator.planOffset(r);
 			double dist = Math.hypot(o[0], o[1]);
 			assertTrue(dist >= 899.9 && dist <= 1100.1, "dist " + dist);
@@ -82,7 +84,7 @@ class QuestLogicTest {
 	@Test
 	void dataRoundTrips() {
 		var d = new WandererData(Phase.PRESENT, 12, 5, 70, -9, Optional.of("abc"), Optional.of(quest(true)), 3,
-			Optional.of(new BloodMoonState(1, "uuid-1", 5000L)), Optional.of(new BossState(2, "uuid-2")));
+			Optional.of(new BloodMoonState(1, "uuid-1", 5000L)), Optional.of(new BossState(2, "uuid-2")), 99000L, true);
 		var json = WandererData.CODEC.encodeStart(JsonOps.INSTANCE, d).getOrThrow();
 		assertEquals(d, WandererData.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow());
 		assertEquals(WandererData.DEFAULT, WandererData.CODEC.parse(JsonOps.INSTANCE, new com.google.gson.JsonObject()).getOrThrow());

@@ -28,7 +28,6 @@ import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.entity.EntityTypeTest;
-import net.minecraft.world.level.levelgen.Heightmap;
 
 /**
  * The quest boss: a giant zombie, skeleton, evoker, blaze or vindicator with 150 health and four minions
@@ -50,6 +49,12 @@ public final class QuestBoss {
 
 	public static boolean running(MinecraftServer server) {
 		return Wanderer.data(server).boss().isPresent();
+	}
+
+	/** True while the saved boss entity exists and is alive. */
+	public static boolean bossAlive(MinecraftServer server) {
+		Optional<BossState> st = Wanderer.data(server).boss();
+		return st.isPresent() && liveBoss(server, st.get()) != null;
 	}
 
 	/** The live boss entity, or null (not spawned yet, unloaded, or dead). */
@@ -84,7 +89,7 @@ public final class QuestBoss {
 			return false;
 		}
 		EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.parse(q.lines().get(line).target()));
-		// 5 blocks from the NPC, towards the summoner when possible.
+		// 3..5 blocks from the NPC, towards the summoner, at the NPC's height (caves included).
 		double dx = by.getX() - npc.getX();
 		double dz = by.getZ() - npc.getZ();
 		double len = Math.hypot(dx, dz);
@@ -93,7 +98,8 @@ public final class QuestBoss {
 			dz = 0;
 			len = 1;
 		}
-		BlockPos spot = surface(ow, npc.getX() + dx / len * 5, npc.getZ() + dz / len * 5);
+		double reach = 3 + RNG.nextDouble() * 2;
+		BlockPos spot = SpawnSpots.standSpot(ow, npc.blockPosition(), (int) Math.round(dx / len * reach), (int) Math.round(dz / len * reach));
 		if (!(type.create(ow, EntitySpawnReason.EVENT) instanceof Mob boss)) {
 			return false;
 		}
@@ -116,33 +122,39 @@ public final class QuestBoss {
 		boss.setCustomNameVisible(true);
 		boss.addTag(TAG);
 		boss.setTarget(by);
-		ow.addFreshEntity(boss);
+		// Save the boss first: the ENTITY_LOAD hook discards tagged bosses that are not the saved one.
+		Optional<BossState> previous = d.boss();
+		Wanderer.save(server, Wanderer.data(server).withBoss(Optional.of(new BossState(line, boss.getUUID().toString()))));
+		if (!ow.addFreshEntity(boss)) {
+			Wanderer.save(server, Wanderer.data(server).withBoss(previous));
+			return false;
+		}
 		EntityType<?> minionType = type == EntityTypes.EVOKER ? EntityTypes.VINDICATOR : type;
 		for (int i = 0; i < MINIONS; i++) {
-			BlockPos m = surface(ow, spot.getX() + (RNG.nextDouble() * 6 - 3), spot.getZ() + (RNG.nextDouble() * 6 - 3));
+			BlockPos m = SpawnSpots.standSpot(ow, spot, RNG.nextInt(7) - 3, RNG.nextInt(7) - 3);
 			if (minionType.create(ow, EntitySpawnReason.EVENT) instanceof Mob minion) {
 				minion.snapTo(m.getX() + 0.5, m.getY(), m.getZ() + 0.5, RNG.nextFloat() * 360f, 0f);
 				minion.finalizeSpawn(ow, ow.getCurrentDifficultyAt(m), EntitySpawnReason.EVENT, null);
 				if (minion instanceof Zombie z) {
 					z.setBaby(false);
 				}
-				minion.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
+				minion.setItemSlot(EquipmentSlot.HEAD, helmet(Items.IRON_HELMET));
 				minion.setDropChance(EquipmentSlot.HEAD, 0f);
 				minion.addTag(MINION_TAG);
 				minion.setTarget(by);
 				ow.addFreshEntity(minion);
 			}
 		}
-		Wanderer.save(server, Wanderer.data(server).withBoss(Optional.of(new BossState(line, boss.getUUID().toString()))));
 		clearBar();
 		server.getPlayerList().broadcastSystemMessage(Messages.bossSummoned(Messages.bossName(typeName)), false);
 		return true;
 	}
 
-	private static BlockPos surface(ServerLevel level, double x, double z) {
-		int bx = (int) Math.floor(x);
-		int bz = (int) Math.floor(z);
-		return new BlockPos(bx, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, bx, bz), bz);
+	/** An unbreakable helmet: sunlight damages helmets of zombies and skeletons, and they burn once it breaks. */
+	static ItemStack helmet(net.minecraft.world.item.Item item) {
+		ItemStack h = new ItemStack(item);
+		h.set(net.minecraft.core.component.DataComponents.UNBREAKABLE, net.minecraft.util.Unit.INSTANCE);
+		return h;
 	}
 
 	private static void set(LivingEntity e, net.minecraft.core.Holder<net.minecraft.world.entity.ai.attributes.Attribute> attr, double v) {
@@ -157,7 +169,7 @@ public final class QuestBoss {
 	 * not draw it); a sword for zombies, a bow for skeletons, an axe for vindicators, empty hands for casters/blazes.
 	 */
 	private static void equip(Mob boss) {
-		boss.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.DIAMOND_HELMET));
+		boss.setItemSlot(EquipmentSlot.HEAD, helmet(Items.DIAMOND_HELMET));
 		boss.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.IRON_CHESTPLATE));
 		boss.setItemSlot(EquipmentSlot.LEGS, new ItemStack(Items.IRON_LEGGINGS));
 		boss.setItemSlot(EquipmentSlot.FEET, new ItemStack(Items.IRON_BOOTS));

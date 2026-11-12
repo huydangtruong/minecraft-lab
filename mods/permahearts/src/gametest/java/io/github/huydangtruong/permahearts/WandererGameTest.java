@@ -30,6 +30,8 @@ import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.phys.AABB;
 import java.util.Optional;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 
 /**
  * Wanderer logic without any UI. The tests share one server and one saved Wanderer state, so each one resets it
@@ -173,7 +175,7 @@ public class WandererGameTest {
 			context.assertTrue(npc.isRemoved(), "NPC should be gone");
 			context.assertTrue(d.phase() == Phase.WAITING, "phase should be WAITING, was " + d.phase());
 			long days = d.nextDay() - Wanderer.currentDay(s);
-			context.assertTrue(days >= 3 && days <= 5, "next visit in 3..5 days, was " + days);
+			context.assertTrue(days >= 5 && days <= 7, "next visit in 5..7 days, was " + days);
 			context.succeed();
 		} finally {
 			Wanderer.reset(s);
@@ -399,6 +401,132 @@ public class WandererGameTest {
 			var lines = Wanderer.data(s).quest().orElseThrow().lines();
 			context.assertTrue(lines.get(0).done(), "village line should be done");
 			context.assertTrue(!lines.get(1).done(), "fortress line must stay open");
+			context.succeed();
+		} finally {
+			Wanderer.reset(s);
+		}
+	}
+	// ---- P-008 ----
+
+	private static Quest bossQuest(String boss) {
+		return eventQuest(new QuestLine(QuestType.BOSS, boss, 1, 0, "fury", false), testQuest().lines().get(0));
+	}
+
+	@GameTest(maxTicks = 40)
+	public void npcIsNotATarget(GameTestHelper context) {
+		MinecraftServer s = context.getLevel().getServer();
+		try {
+			enable(context, true);
+			Entity npc = start(context);
+			Zombie zombie = EntityTypes.ZOMBIE.create(context.getLevel(), EntitySpawnReason.EVENT);
+			zombie.snapTo(npc.getX() + 1, npc.getY(), npc.getZ(), 0f, 0f);
+			context.getLevel().addFreshEntity(zombie);
+			context.assertTrue(npc.isInvulnerable(), "NPC should be permanently invulnerable");
+			boolean can = TargetingConditions.forCombat().test(context.getLevel(), zombie, (LivingEntity) npc);
+			context.assertTrue(!can, "a zombie must not be able to target the NPC");
+			zombie.discard();
+			context.succeed();
+		} finally {
+			Wanderer.reset(s);
+		}
+	}
+
+	@GameTest(maxTicks = 40)
+	public void giveUpEndsTheVisit(GameTestHelper context) {
+		MinecraftServer s = context.getLevel().getServer();
+		try {
+			enable(context, true);
+			Wanderer.startQuestForTest(context.getLevel(), context.absolutePos(new BlockPos(1, 1, 1)), bossQuest("minecraft:zombie"));
+			Wanderer.accept(s);
+			ServerPlayer p = testPlayer(context);
+			context.assertTrue(Wanderer.startEvent(s, 0, p), "summon should work");
+			Entity npc = Wanderer.npc(s);
+			context.assertTrue(Wanderer.giveUp(s, p), "give up should be accepted");
+			WandererData d = Wanderer.data(s);
+			context.assertTrue(d.phase() == Phase.WAITING, "phase should be WAITING, was " + d.phase());
+			context.assertTrue(npc.isRemoved() && d.npcUuid().isEmpty(), "NPC should be gone");
+			context.assertTrue(d.quest().isEmpty() && d.boss().isEmpty() && d.bloodMoon().isEmpty(), "no quest, boss state or event");
+			context.assertTrue(tagged(s, QuestBoss.TAG).isEmpty() && tagged(s, QuestBoss.MINION_TAG).isEmpty(), "boss and minions gone");
+			long days = d.nextDay() - Wanderer.currentDay(s);
+			context.assertTrue(days >= 5 && days <= 7, "next visit in 5..7 days, was " + days);
+			context.assertTrue(!Wanderer.giveUp(s, p), "give up while WAITING does nothing");
+			context.succeed();
+		} finally {
+			Wanderer.reset(s);
+		}
+	}
+
+	@GameTest(maxTicks = 40)
+	public void visitExpires(GameTestHelper context) {
+		MinecraftServer s = context.getLevel().getServer();
+		try {
+			enable(context, true);
+			Entity npc = start(context);
+			WandererData d = Wanderer.data(s);
+			context.assertTrue(d.leaveAt() > Wanderer.clockTime(s), "leave time should be set in the future");
+			context.assertTrue(Wanderer.ticksLeft(s) > 0, "ticks left should be positive");
+			// Still inside the stay: nothing happens.
+			WandererScheduler.work(s, false);
+			context.assertTrue(Wanderer.data(s).phase() == Phase.PRESENT, "still present before the end");
+			// Past the end, but a boss is alive: it stays.
+			Wanderer.save(s, Wanderer.data(s).withQuest(Optional.of(bossQuest("minecraft:zombie"))).withLeaveAt(Wanderer.clockTime(s) - 1));
+			Wanderer.accept(s);
+			ServerPlayer p = testPlayer(context);
+			context.assertTrue(Wanderer.startEvent(s, 0, p), "summon should work");
+			WandererScheduler.work(s, false);
+			context.assertTrue(Wanderer.data(s).phase() == Phase.PRESENT, "does not leave during a boss fight");
+			context.assertTrue(Wanderer.data(s).warned(), "warning was sent");
+			// Boss gone: it leaves.
+			Wanderer.save(s, Wanderer.data(s).withBoss(Optional.empty()));
+			tagged(s, QuestBoss.TAG).forEach(Mob::discard);
+			WandererScheduler.work(s, false);
+			d = Wanderer.data(s);
+			context.assertTrue(d.phase() == Phase.WAITING, "phase should be WAITING, was " + d.phase());
+			context.assertTrue(npc.isRemoved(), "NPC should be gone");
+			long days = d.nextDay() - Wanderer.currentDay(s);
+			context.assertTrue(days >= 5 && days <= 7, "next visit in 5..7 days, was " + days);
+			context.succeed();
+		} finally {
+			Wanderer.reset(s);
+		}
+	}
+
+	@GameTest(maxTicks = 40)
+	public void lostBossCanBeResummoned(GameTestHelper context) {
+		MinecraftServer s = context.getLevel().getServer();
+		try {
+			enable(context, true);
+			Wanderer.startQuestForTest(context.getLevel(), context.absolutePos(new BlockPos(1, 1, 1)), bossQuest("minecraft:zombie"));
+			Wanderer.accept(s);
+			ServerPlayer p = testPlayer(context);
+			context.assertTrue(Wanderer.startEvent(s, 0, p), "summon should work");
+			context.assertTrue(Wanderer.eventState(s, 0) == 1 && QuestBoss.bossAlive(s), "boss alive, line running");
+			tagged(s, QuestBoss.TAG).forEach(Mob::discard);
+			context.assertTrue(Wanderer.eventState(s, 0) == 0, "lost boss: line is not running");
+			context.assertTrue(Wanderer.startEvent(s, 0, p), "summon again should work");
+			context.assertTrue(tagged(s, QuestBoss.TAG).size() == 1, "one new boss");
+			context.succeed();
+		} finally {
+			Wanderer.reset(s);
+		}
+	}
+
+	@GameTest(maxTicks = 40)
+	public void bossHelmetsAreUnbreakable(GameTestHelper context) {
+		MinecraftServer s = context.getLevel().getServer();
+		try {
+			enable(context, true);
+			Wanderer.startQuestForTest(context.getLevel(), context.absolutePos(new BlockPos(1, 1, 1)), bossQuest("minecraft:zombie"));
+			Wanderer.accept(s);
+			context.assertTrue(Wanderer.startEvent(s, 0, testPlayer(context)), "summon should work");
+			var all = new java.util.ArrayList<Mob>(tagged(s, QuestBoss.TAG));
+			all.addAll(tagged(s, QuestBoss.MINION_TAG));
+			context.assertTrue(all.size() == 5, "boss + 4 minions, found " + all.size());
+			for (Mob m : all) {
+				ItemStack head = m.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.HEAD);
+				context.assertTrue(!head.isEmpty() && head.has(net.minecraft.core.component.DataComponents.UNBREAKABLE),
+					"helmet must be unbreakable");
+			}
 			context.succeed();
 		} finally {
 			Wanderer.reset(s);

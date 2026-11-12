@@ -22,7 +22,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
 import net.minecraft.world.level.entity.EntityTypeTest;
-import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.clock.ClockTimeMarkers;
 import net.minecraft.world.clock.WorldClock;
 import net.minecraft.world.clock.WorldClocks;
@@ -213,14 +212,12 @@ public final class BloodMoon {
 	private static boolean spawn(ServerLevel ow, EntityType<?> type, ServerPlayer target) {
 		double angle = RNG.nextDouble() * Math.PI * 2;
 		double dist = 3 + RNG.nextDouble() * 3;
-		int x = (int) Math.floor(target.getX() + Math.cos(angle) * dist);
-		int z = (int) Math.floor(target.getZ() + Math.sin(angle) * dist);
-		int y = ow.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+		BlockPos pos = SpawnSpots.standSpot(ow, target.blockPosition(), (int) Math.round(Math.cos(angle) * dist),
+			(int) Math.round(Math.sin(angle) * dist));
 		if (!(type.create(ow, EntitySpawnReason.EVENT) instanceof Mob mob)) {
 			return false;
 		}
-		BlockPos pos = new BlockPos(x, y, z);
-		mob.snapTo(x + 0.5, y, z + 0.5, RNG.nextFloat() * 360f, 0f);
+		mob.snapTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, RNG.nextFloat() * 360f, 0f);
 		mob.finalizeSpawn(ow, ow.getCurrentDifficultyAt(pos), EntitySpawnReason.EVENT, null);
 		if (mob instanceof AbstractPiglin piglin) {
 			piglin.setImmuneToZombification(true); // piglin brutes would turn into zombified piglins in the overworld
