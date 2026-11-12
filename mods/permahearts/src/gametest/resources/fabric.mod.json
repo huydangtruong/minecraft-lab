@@ -5,6 +5,7 @@
 	"name": "PermaHearts tests",
 	"environment": "*",
 	"entrypoints": {
+		"fabric-client-gametest": ["io.github.huydangtruong.permahearts.QuestScreenClientTest"],
 		"fabric-gametest": ["io.github.huydangtruong.permahearts.PermaHeartsGameTest", "io.github.huydangtruong.permahearts.WandererGameTest"]
 	},
 	"depends": {
