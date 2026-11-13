@@ -43,6 +43,7 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 			announcement(context, server);
 			bossesLiveOnTheSurface(context, server);
 			caveBoss(context, server);
+			statsPanel(context, server);
 		}
 	}
 
@@ -65,6 +66,48 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 			throw new AssertionError("boss bar still shown after the Crimson Master left");
 		}
 		server.runOnServer(Wanderer::reset);
+	}
+
+	/**
+	 * D31: the inventory gets a stats button next to the recipe book button; it opens a panel on the left with each stat
+	 * as "total (base +gear +cultivation)", food healing and the respawn point.
+	 */
+	private static void statsPanel(ClientGameTestContext context, TestServerContext server) {
+		context.runOnClient(mc -> mc.player.closeContainer());
+		server.runCommand("gamemode survival @a"); // the creative inventory is another screen
+		server.runCommand("clear @a");
+		server.runCommand("give @a diamond_sword");
+		server.runCommand("give @a iron_chestplate");
+		server.runCommand("spawnpoint @a 120 70 -45");
+		server.runCommand("effect give @a speed 120 0 true");
+		server.runOnServer(s -> {
+			ServerPlayer p = s.getPlayerList().getPlayers().get(0);
+			HeartsAttachment.set(p, new HeartsData(5, 0, 0, 0));
+			HealthApplier.apply(p, true);
+			HeartsAttachment.setCultivation(p, CultivationData.DEFAULT.plus(ElixirStat.STRENGTH, 2).plus(ElixirStat.FURY, 1)
+				.plus(ElixirStat.SWIFTNESS, 2).plus(ElixirStat.REACH, 1).plus(ElixirStat.VITALITY, 2));
+			StatApplier.apply(p);
+		});
+		context.waitTicks(30); // stats sync once a second
+		context.setScreen(() -> new net.minecraft.client.gui.screens.inventory.InventoryScreen(
+			net.minecraft.client.Minecraft.getInstance().player));
+		context.waitTicks(5);
+		context.takeScreenshot("08-inventory-stats-button");
+		context.clickScreenButton("Stats");
+		context.waitTicks(5);
+		boolean open = context.computeOnClient(mc -> {
+			try {
+				return (Boolean) Class.forName("io.github.huydangtruong.permahearts.client.StatsPanel").getMethod("isOpen").invoke(null);
+			} catch (ReflectiveOperationException e) {
+				throw new RuntimeException(e);
+			}
+		});
+		if (!open) {
+			throw new AssertionError("the stats button did not open the panel");
+		}
+		context.takeScreenshot("09-stats-panel");
+		context.runOnClient(mc -> mc.player.closeContainer());
+		server.runCommand("gamemode creative @a");
 	}
 
 	private static Quest bossQuest(String type) {

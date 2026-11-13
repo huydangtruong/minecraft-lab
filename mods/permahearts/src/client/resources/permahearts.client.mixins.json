@@ -1,0 +1,14 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "io.github.huydangtruong.permahearts.client.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"client": [
+		"ContainerScreenAccess",
+		"RecipeBookScreenAccess",
+		"RecipeBookScreenMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}
