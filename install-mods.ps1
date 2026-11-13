@@ -124,10 +124,10 @@ function Get-Releases {
     Write-Host 'Fetching the list of mods from GitHub...'
     try {
         if ($env:MCLAB_RELEASES) {
-            $raw = [IO.File]::ReadAllText($env:MCLAB_RELEASES)
-            $all = @($raw | ConvertFrom-Json)
+            # (No pipeline and no @(): Windows PowerShell 5.1 emits a JSON array as ONE object; foreach below unrolls it.)
+            $all = ConvertFrom-Json -InputObject ([IO.File]::ReadAllText($env:MCLAB_RELEASES))
         } else {
-            $all = @(Invoke-RestMethod -Uri $ApiUrl -Headers @{ 'User-Agent' = 'minecraft-lab-installer'; 'Accept' = 'application/vnd.github+json' })
+            $all = Invoke-RestMethod -Uri $ApiUrl -Headers @{ 'User-Agent' = 'minecraft-lab-installer'; 'Accept' = 'application/vnd.github+json' }
         }
     } catch {
         Write-Host 'Could not download the release list from GitHub.'

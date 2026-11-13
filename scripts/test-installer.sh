@@ -34,7 +34,7 @@ make_minecraft() { # fabric(1|0)
 	rm -rf "$MC"; mkdir -p "$PROFILE_DIR/mods"
 	if [ "$1" = 1 ]; then
 		cat > "$MC/launcher_profiles.json" <<JSON
-{"profiles":{"aaa111":{"name":"26.3 Fabric Essential","lastVersionId":"fabric-loader-0.20.1-26.3","gameDir":"$PROFILE_DIR","icon":"Furnace"},
+{"profiles":{"Essential-installer-2026-11-11T15:39:43.477440Z":{"name":"26.3 Fabric Essential","lastVersionId":"fabric-loader-0.20.1-26.3","gameDir":"$PROFILE_DIR","icon":"Furnace"},
 "bbb222":{"name":"","lastVersionId":"26.3","type":"latest-release"}},"settings":{"locale":"en-us"},"version":3}
 JSON
 	else

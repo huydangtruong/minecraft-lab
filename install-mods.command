@@ -121,19 +121,29 @@ find_profiles() {
 	P_NAME=(); P_DIR=()
 	local f="$MC_ROOT/launcher_profiles.json" k lv gd nm
 	[ -f "$f" ] || return 0
-	plutil -extract profiles xml1 -o - "$f" 2>/dev/null \
-		| sed -n "s/^${TAB}<key>\\(.*\\)<\\/key>\$/\\1/p" > "$TMP/pkeys"
-	while IFS= read -r k; do
-		case "$k" in *.*|*\&*) continue ;; esac   # key paths cannot hold dots
-		lv="$(jget "profiles.$k.lastVersionId" "$f")" || continue
+	# Profile keys can contain dots (the Essential installer names its profile
+	# "Essential-installer-<timestamp with dots>"), which plutil key paths cannot address.
+	# So read the whole "profiles" dict once as XML and walk it: one line per profile, key/lastVersionId/gameDir/name.
+	plutil -extract profiles xml1 -o - "$f" 2>/dev/null | awk -v T="$TAB" '
+		function unxml(s) { gsub(/&lt;/, "<", s); gsub(/&gt;/, ">", s); gsub(/&quot;/, "\"", s); gsub(/&apos;/, "\047", s); gsub(/&amp;/, "\\&", s); return s }
+		function val(s) { sub(/^[\t ]*<string>/, "", s); sub(/<\/string>[\t ]*$/, "", s); return unxml(s) }
+		function flush() { if (key != "") printf "%s\037%s\037%s\037%s\n", key, lv, gd, nm; key = lv = gd = nm = "" }
+		index($0, T "<key>") == 1 && substr($0, 2, 1) != T { flush(); k = $0; sub(/^\t<key>/, "", k); sub(/<\/key>$/, "", k); key = unxml(k); want = ""; next }
+		index($0, T T "<key>") == 1 && substr($0, 3, 1) != T { want = $0; sub(/^\t\t<key>/, "", want); sub(/<\/key>$/, "", want); next }
+		index($0, T T "<string>") == 1 {
+			if (want == "lastVersionId") lv = val($0); else if (want == "gameDir") gd = val($0); else if (want == "name") nm = val($0)
+			want = ""; next
+		}
+		{ if (substr($0, 3, 1) != T) want = "" }
+		END { flush() }
+	' > "$TMP/profiles"
+	while IFS="$SEP" read -r k lv gd nm; do
 		case "$lv" in fabric-loader-*-"$1") ;; *) continue ;; esac
-		gd="$(jget "profiles.$k.gameDir" "$f")"
-		nm="$(jget "profiles.$k.name" "$f")"
 		[ -n "$nm" ] || nm="$k"
 		[ -n "$gd" ] || gd="$MC_ROOT"
 		P_NAME[${#P_NAME[@]}]="$nm"
 		P_DIR[${#P_DIR[@]}]="$gd"
-	done < "$TMP/pkeys"
+	done < "$TMP/profiles"
 }
 
 # choose_profile <minecraft>: sets PROFILE_NAME, PROFILE_MC and MODS_DIR. Returns 1 when the user gives up.
