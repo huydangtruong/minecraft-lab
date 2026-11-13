@@ -4,7 +4,7 @@
 |---|---|---|---|
 | D1 | Sàn tim (PermaHearts) | Tối thiểu **1 tim**. Chết khi đang 1 tim: không mất thêm, không bị loại, hồi sinh bình thường | 2026-11-11 |
 | D2 | Trần tim | ~~Tối đa 20 tim~~ → thay bởi D6. Cũ: tối đa **20 tim**. Đạt 100 kill khi đã 20 tim: tiến độ về 0, báo "đã tối đa" | 2026-11-11 |
-| D3 | Repo | GitHub **private** `huydangtruong/minecraft-lab` (tài khoản cá nhân, không phải huytruongrt) | 2026-11-11 |
+| D3 | Repo | ~~private~~ → **public** từ D22. GitHub `huydangtruong/minecraft-lab` (tài khoản cá nhân, không phải huytruongrt) | 2026-11-11 |
 | D4 | Cấu trúc | Một Gradle build chung, mỗi mod một thư mục `mods/<id>/`; docs, plan `P-NNN`, team Opus (manager) + Sonnet (dev) theo kiểu AllSeeing | 2026-11-11 |
 | D5 | Mod đầu tiên | PermaHearts: chết −1 tim vĩnh viễn; giết 100 mob hostile +1 tim vĩnh viễn ("Đơn giản là thế") | 2026-11-11 |
 | D6 | Trần tim (thay D2) | ~~Tối đa 30 tim~~ → thay bởi D7. Cũ: tối đa **30 tim**. Đạt 100 kill khi đã 30 tim: tiến độ về 0, báo "đã tối đa" | 2026-11-11 |
@@ -23,3 +23,6 @@
 | D19 | Give up và NPC không bị quái nhắm | Ai cũng bấm được nút **Give up** (chữ đỏ, cuối danh sách, bấm 2 lần trong 3 giây để xác nhận): sự kiện đang chạy dừng, quái/trùm/đệ tử bị xóa, Lữ Khách đi, thưởng chưa lấy và đồ đã bỏ vào mất. Quái không bao giờ nhắm Lữ Khách. Thủ lĩnh và quái Trăng máu xuất hiện **ngang tầm người chơi / Lữ Khách** (kể cả trong hang), không còn trên mặt đất phía trên. Thủ lĩnh bị mất thì nút quay về "Summon". Thủ lĩnh và đệ tử không bị mặt trời thiêu (mũ không vỡ) | 2026-11-12 |
 | D20 | Lữ Khách chỉ ở 3 ngày | Lữ Khách rời đi sau **3 ngày Minecraft** (72000 tick đồng hồ Overworld) kể từ lúc báo tọa độ; không ai tới kịp thì chuyến thăm hết hạn. Báo trước 1 lần ~2 phút thực (2400 tick). Không rời đi khi Trăng máu hoặc trận trùm đang chạy: rời ngay khi xong. Màn hình nhiệm vụ đếm ngược "Leaves in". Lần xuất hiện **kế tiếp cách 5–7 ngày** sau khi Lữ Khách rời đi (hết giờ, Give up hay xong hết nhiệm vụ); chuyến đầu tiên của world vẫn 3–5 ngày. Ngủ hoặc Trăng máu làm đồng hồ nhảy nên cũng rút ngắn thời gian ở | 2026-11-12 |
 | D21 | Tên NPC | Người giao nhiệm vụ tên **Crimson Master** (trong code vẫn gọi là Wanderer). NPC đang đứng trong world cũ tự đổi tên theo | 2026-11-12 |
+| D22 | Repo public (thay D3) | Repo `huydangtruong/minecraft-lab` để **public** (đổi ngày 2026-11-13) để bạn chơi cùng tải mod từ GitHub Releases, không cần gửi file jar qua Drive. Code, docs và lịch sử commit ai cũng xem được | 2026-11-13 |
+| D23 | Tên mod | PermaHearts đổi tên hiển thị thành **Immortal Cultivation** (từ 0.8.0, jar `immortal-cultivation-<bản>.jar`). Id bên trong giữ `permahearts` để save cũ không mất tim, linh dược, nhiệm vụ | 2026-11-13 |
+| D24 | Phát hành và cài mod | Mỗi bản mod là một **GitHub Release** (tag `<id>-v<bản>`, bản sửa nhỏ là pre-release). Người chơi chạy file `install-mods` ở gốc repo (Mac `.command`, Windows `.bat`/`.ps1`): chọn mod → chọn 1 trong **6 bản gần nhất** (bản đang có ghi `Installed`) → script tự tải, kiểm tra, tìm thư mục mods của profile Fabric 26.3 và cài, kèm Fabric API nếu thiếu. Không đụng save và mod khác | 2026-11-13 |
