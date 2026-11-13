@@ -32,3 +32,7 @@ Mã Fabric API: `gh api "repos/FabricMC/fabric-api/contents/<path>?ref=26.3" --j
 ## Chạy thử không đụng save thật
 
 `./gradlew :<mod>:runClient` dùng thư mục `mods/<mod>/run/` (save và settings riêng, gitignored). Game test server: `./gradlew :<mod>:build`.
+
+## Git / GitHub account
+
+Repo `huydangtruong/minecraft-lab` belongs to Huy's personal account. The repo's local git config (shared by all worktrees) commits as `huydangtruong <58614464+huydangtruong@users.noreply.github.com>` and pushes with that account's token (`credential.https://github.com.helper` calls `gh auth token -u huydangtruong`). The machine's global git identity and gh's active account are the work account `huytruongrt`: never change them. For `gh` commands on this repo use `GH_TOKEN="$(gh auth token -u huydangtruong)" gh …`.

@@ -44,7 +44,7 @@ Old saves keep working because nothing under `permahearts:` changes. State this 
 1. Refuse unless: on `main`, working tree clean, `HEAD` equals `origin/main`, tag does not exist (`gh release view` / `git ls-remote --tags`).
 2. `./gradlew :<id>:build` (tests must pass).
 3. Write `build/release/<id>/release.json` (sha256 via `shasum -a 256`).
-4. `gh release create <tag> --repo huydangtruong/minecraft-lab --target "$(git rev-parse HEAD)" --title "<name> <ver>" --notes "<notes or default>" [--prerelease] <jar> release.json`. gh's active account `huytruongrt` has push access; do not switch accounts.
+4. `gh release create <tag> --repo huydangtruong/minecraft-lab --target "$(git rev-parse HEAD)" --title "<name> <ver>" --notes "<notes or default>" [--prerelease] <jar> release.json`, run with `GH_TOKEN="$(gh auth token -u huydangtruong)"` so the release is made by Huy's personal account (gh's active account is the work one `huytruongrt`; never run `gh auth switch`).
 5. Print the release URL.
 
 Dev: write and dry-run it with `--dry-run` (prints the gh command, creates nothing). Do not run it for real.
