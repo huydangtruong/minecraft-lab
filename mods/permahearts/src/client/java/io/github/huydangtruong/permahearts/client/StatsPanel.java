@@ -19,6 +19,7 @@ import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
@@ -28,7 +29,7 @@ import net.minecraft.world.item.ItemStack;
  * the inventory moves right, and opening one closes the other. Data comes from the server (StatsSync), once a second.
  */
 public final class StatsPanel {
-	public static final int W = 172;
+	public static final int W = 192;
 	public static final int H = 166;
 	private static final int GAP = 2;
 	private static final int LINE = 11;
@@ -37,7 +38,7 @@ public final class StatsPanel {
 	private static final int TOTAL = 0xFF202020;
 	private static final int BASE = 0xFF707070;
 	private static final int GEAR = 0xFF1F4FB8;
-	private static final int BONUS = 0xFF8B1FA8;
+	private static final int BONUS = 0xFFC85A00; // orange (D31)
 
 	private static final Map<String, String> LABELS = Map.of(
 		"hearts", "Hearts", "damage", "Damage", "attack_speed", "Atk speed", "speed", "Speed", "armor", "Armor",
@@ -150,43 +151,48 @@ public final class StatsPanel {
 
 		int tx = x0 + 7;
 		int right = x1 - 7;
-		g.text(font, "Stats", tx, y0 + 7, TEXT, false);
+		g.text(font, Component.literal("Stats").withStyle(ChatFormatting.BOLD), tx, y0 + 7, TEXT, false);
 		var player = Minecraft.getInstance().player;
 		PlayerStats stats = player == null ? null : player.getAttached(StatsSync.STATS);
 		if (stats == null) {
 			g.text(font, "Needs the mod on the server", tx, y0 + 22, TEXT, false);
 			return;
 		}
+		// second column: left-aligned, right after the widest label
+		int vx = tx + labelWidth(font) + 6;
 		int y = y0 + 21;
 		for (PlayerStats.Row r : stats.rows()) {
 			g.text(font, LABELS.getOrDefault(r.id(), r.id()), tx, y, TEXT, false);
 			String[] p = StatMath.parts(r);
-			drawRight(g, font, right, y, new String[] {p[0], " (", p[1], " ", p[2], " ", p[3], ")"},
+			drawLeft(g, font, vx, y, new String[] {p[0], " (", p[1], " ", p[2], " ", p[3], ")"},
 				new int[] {TOTAL, BASE, BASE, BASE, GEAR, BASE, BONUS, BASE});
 			y += LINE;
 		}
 		g.text(font, "Food heal", tx, y, TEXT, false);
 		String heal = "+" + StatMath.num(ElixirStat.VITALITY.bonus(stats.vitality()) * 100) + "%";
-		drawRight(g, font, right, y, new String[] {heal}, new int[] {stats.vitality() > 0 ? BONUS : BASE});
+		drawLeft(g, font, vx, y, new String[] {heal}, new int[] {stats.vitality() > 0 ? BONUS : BASE});
 		y += LINE + 1;
-		drawRight(g, font, right, y, new String[] {"base ", "+gear ", "+cultivation"}, new int[] {BASE, GEAR, BONUS});
+		drawLeft(g, font, vx, y, new String[] {"base ", "+gear ", "+cultivation"}, new int[] {BASE, GEAR, BONUS});
 		y += LINE + 2;
 		g.fill(tx, y, right, y + 1, 0xFF8B8B8B);
 		y += 4;
 		PlayerStats.Spawn s = stats.spawn();
 		g.text(font, "Spawn", tx, y, TEXT, false);
-		drawRight(g, font, right, y, new String[] {(s.personal() ? "bed/anchor" : "world spawn") + " · " + dimension(s.dimension())},
+		drawLeft(g, font, vx, y, new String[] {(s.personal() ? "bed/anchor" : "world spawn") + " · " + dimension(s.dimension())},
 			new int[] {BASE});
 		y += LINE;
-		g.text(font, "X " + s.x() + "   Y " + s.y() + "   Z " + s.z(), tx, y, TOTAL, false);
+		drawLeft(g, font, vx, y, new String[] {"X " + s.x() + "   Y " + s.y() + "   Z " + s.z()}, new int[] {TOTAL});
 	}
 
-	private static void drawRight(GuiGraphicsExtractor g, Font font, int right, int y, String[] parts, int[] colors) {
-		int width = 0;
-		for (String s : parts) {
-			width += font.width(s);
+	private static int labelWidth(Font font) {
+		int w = font.width("Food heal");
+		for (String l : LABELS.values()) {
+			w = Math.max(w, font.width(l));
 		}
-		int x = right - width;
+		return Math.max(w, font.width("Spawn"));
+	}
+
+	private static void drawLeft(GuiGraphicsExtractor g, Font font, int x, int y, String[] parts, int[] colors) {
 		for (int i = 0; i < parts.length; i++) {
 			g.text(font, parts[i], x, y, colors[i], false);
 			x += font.width(parts[i]);

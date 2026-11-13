@@ -66,7 +66,7 @@
 ## Bảng chỉ số (0.8.2, D31)
 
 - Nút bình linh dược cạnh nút sách công thức trong túi đồ Survival (không có trong túi đồ Creative). Bấm: bảng bên trái, túi đồ dời phải; mở sách công thức thì bảng đóng và ngược lại; game nhớ bảng đang mở cho tới khi tắt game.
-- Mỗi dòng `tổng (gốc +đồ +tu luyện)`; Hearts tính bằng tim; Speed và Mining tính % so với gốc. "Đồ" là mọi thứ không phải của mod (đồ, hiệu ứng thuốc, mod khác); "tu luyện" là linh dược + tim thêm (HeartXP/chết).
+- Hai cột: tên chỉ số, rồi giá trị canh trái `tổng (gốc +đồ +tu luyện)` (gốc xám, đồ xanh dương, tu luyện cam); chữ Stats in đậm; Hearts tính bằng tim; Speed và Mining tính % so với gốc. "Đồ" là mọi thứ không phải của mod (đồ, hiệu ứng thuốc, mod khác); "tu luyện" là linh dược + tim thêm (HeartXP/chết).
 - Food heal: +25% mỗi bình Vitality (D30).
 - Cuối bảng: Spawn — `bed/anchor` (điểm hồi sinh riêng, có thể đã mất nếu giường bị phá) hoặc `world spawn`, thế giới, X Y Z.
 - Server tính và gửi mỗi giây (attachment `permahearts:stats`, chỉ gửi cho chính người đó). Server không có mod: bảng báo "Needs the mod on the server".
