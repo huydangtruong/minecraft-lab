@@ -131,10 +131,10 @@ public final class QuestGenerator {
 		return 5 + rng.nextInt(3);
 	}
 
-	/** {dx, dz}: random direction, distance 900..1100. */
+	/** {dx, dz}: random direction, distance 450..550 (D27). */
 	public static double[] planOffset(RandomGenerator rng) {
 		double angle = rng.nextDouble() * Math.PI * 2;
-		double dist = 900 + rng.nextDouble() * 200;
+		double dist = 450 + rng.nextDouble() * 100;
 		return new double[] {Math.cos(angle) * dist, Math.sin(angle) * dist};
 	}
 }
