@@ -1,10 +1,10 @@
 #!/bin/bash
-# Fixture test for install-mods.command. No network, never touches the real Minecraft folder:
+# Fixture test for minecraft-lab.command. No network, never touches the real Minecraft folder:
 # HOME, MC_DIR, MCLAB_RELEASES and MCLAB_TTY all point into a temp dir, and pgrep is a stub.
 # Usage: scripts/test-installer.sh [--screens <dir>]   (--screens also saves console text of each step)
 cd "$(dirname "$0")/.." || exit 1
 ROOT="$(pwd)"
-INSTALLER="$ROOT/install-mods.command"
+INSTALLER="$ROOT/minecraft-lab.command"
 SCREENS=""
 [ "${1:-}" = "--screens" ] && SCREENS="${2:?--screens needs a folder}"
 

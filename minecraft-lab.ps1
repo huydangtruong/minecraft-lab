@@ -1,6 +1,6 @@
 # Minecraft Lab mod installer for Windows (Windows PowerShell 5.1 or newer).
-# Run it through install-mods.bat, or paste in PowerShell:
-#   irm https://raw.githubusercontent.com/huydangtruong/minecraft-lab/main/install-mods.ps1 | iex
+# Run it through minecraft-lab.bat, or paste in PowerShell:
+#   irm https://raw.githubusercontent.com/huydangtruong/minecraft-lab/main/minecraft-lab.ps1 | iex
 #
 # Test overrides (environment variables): MCLAB_RELEASES (local releases JSON instead of the GitHub API),
 # MC_DIR (Minecraft root folder).

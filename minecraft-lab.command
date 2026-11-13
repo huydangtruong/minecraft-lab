@@ -1,6 +1,6 @@
 #!/bin/bash
 # Minecraft Lab mod installer for macOS.
-# Run in Terminal:  bash <(curl -fsSL https://raw.githubusercontent.com/huydangtruong/minecraft-lab/main/install-mods.command)
+# Run in Terminal:  bash <(curl -fsSL https://raw.githubusercontent.com/huydangtruong/minecraft-lab/main/minecraft-lab.command)
 # or double-click this file. Needs only stock macOS tools: curl, unzip, shasum, plutil (macOS 12+).
 # Written for the stock bash 3.2 (no mapfile, no associative arrays).
 #
@@ -388,7 +388,7 @@ mods_menu() {
 # ---------------------------------------------------------------- main
 
 if [ "$(uname -s)" != "Darwin" ]; then
-	echo "This installer is for macOS. On Windows use install-mods.bat." >&2
+	echo "This installer is for macOS. On Windows use minecraft-lab.bat." >&2
 	exit 1
 fi
 command -v plutil >/dev/null 2>&1 || { echo "plutil not found (needs macOS 12 or newer)." >&2; exit 1; }

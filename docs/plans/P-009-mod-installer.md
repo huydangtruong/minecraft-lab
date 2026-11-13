@@ -1,6 +1,6 @@
 # P-009 — Mod installer from GitHub Releases + rename to Immortal Cultivation
 
-> **Tóm tắt cho Huy (VN, ≤ 3 dòng):** đổi tên hiển thị PermaHearts → **Immortal Cultivation** (giữ id để không mất save). Mỗi bản mod thành một GitHub Release. File `install-mods` ở gốc repo (Mac + Windows): chọn mod → chọn 1 trong 6 bản gần nhất (có chữ Installed) → script tự tải, kiểm tra, tìm đúng thư mục mods và cài.
+> **Tóm tắt cho Huy (VN, ≤ 3 dòng):** đổi tên hiển thị PermaHearts → **Immortal Cultivation** (giữ id để không mất save). Mỗi bản mod thành một GitHub Release. File `minecraft-lab` ở gốc repo (Mac + Windows): chọn mod → chọn 1 trong 6 bản gần nhất (có chữ Installed) → script tự tải, kiểm tra, tìm đúng thư mục mods và cài.
 
 - **Status:** ready
 - **Mod / decision:** `permahearts`, D22, D23, D24 · **Branch:** `feat/P-009-mod-installer` · **Depends on:** none
@@ -9,7 +9,7 @@
 
 1. The mod shows as **Immortal Cultivation** everywhere a player sees a mod name (Mod Menu / mod list, jar file name, release title), version **0.8.0**. Internal id stays `permahearts` (D23).
 2. `scripts/release.sh` publishes a mod version as a GitHub Release on `huydangtruong/minecraft-lab` (public).
-3. Root installers for players: `install-mods.command` (macOS), `install-mods.ps1` + `install-mods.bat` (Windows). Interactive, numbered menus, Enter to confirm.
+3. Root installers for players: `minecraft-lab.command` (macOS), `minecraft-lab.ps1` + `minecraft-lab.bat` (Windows). Interactive, numbered menus, Enter to confirm.
 
 ## Scope
 
@@ -81,24 +81,24 @@ Constants at the top: `REPO=huydangtruong/minecraft-lab`. Overrides for tests: `
    - Print `Installed Immortal Cultivation 0.8.0 into <mods folder>. Start Minecraft with the "<profile>" profile.` then return to Menu 1.
 7. Text in English (players include the friend). No colors required; keep it readable in a plain console.
 
-### macOS — `install-mods.command`
+### macOS — `minecraft-lab.command`
 
 - `#!/bin/bash`, must run on the stock **bash 3.2** (no `mapfile`, no associative arrays, no `${x,,}`) and stock tools only: `curl`, `unzip`, `shasum`, `plutil` (`plutil -extract <keypath> raw -o - -` parses JSON, macOS 12+). No `jq`, no `python3` (it may trigger the Xcode tools prompt).
 - All prompts go through one `ask` function reading from `${MCLAB_TTY:-/dev/tty}`, so `bash <(curl -fsSL …)` works.
 - Executable bit committed (`git update-index --chmod=+x`).
 
-### Windows — `install-mods.ps1` + `install-mods.bat`
+### Windows — `minecraft-lab.ps1` + `minecraft-lab.bat`
 
 - Must run on **Windows PowerShell 5.1** (built into Windows 10/11): `Invoke-RestMethod`, `ConvertFrom-Json`, `Get-FileHash`, `System.IO.Compression.ZipFile` (`Add-Type -AssemblyName System.IO.Compression.FileSystem`) to read `fabric.mod.json` from jars. Force TLS 1.2: `[Net.ServicePointManager]::SecurityProtocol = 'Tls12'`. Avoid PowerShell 7-only syntax (`??`, `?:`, `-Parallel`, `&&`).
-- `install-mods.bat`: self-contained, so the friend only keeps this one file. It runs `powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/huydangtruong/minecraft-lab/main/install-mods.ps1 | iex"` and then `pause`.
+- `minecraft-lab.bat`: self-contained, so the friend only keeps this one file. It runs `powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/huydangtruong/minecraft-lab/main/minecraft-lab.ps1 | iex"` and then `pause`.
 - `.gitattributes`: `*.bat` and `*.ps1` use `eol=crlf`; `*.command` uses `eol=lf`.
 
 ## Files
 
 | File | Where | Change |
 |---|---|---|
-| `install-mods.command` | root | new |
-| `install-mods.ps1`, `install-mods.bat` | root | new |
+| `minecraft-lab.command` | root | new |
+| `minecraft-lab.ps1`, `minecraft-lab.bat` | root | new |
 | `LICENSE` | root | new, MIT, "Copyright (c) 2026 Huy" |
 | `scripts/release.sh` | scripts | new |
 | `scripts/test-installer.sh` | scripts | new, fixture test (below) |
@@ -118,7 +118,7 @@ Constants at the top: `REPO=huydangtruong/minecraft-lab`. Overrides for tests: `
   - fake releases JSON (`MCLAB_RELEASES`) with 7 versions of `permahearts` incl. one pre-release; asset URLs are `file://` paths to fake jars + `release.json` (curl reads `file://`);
   - answers file (`MCLAB_TTY`): `1`, `1`, (Enter), `0`.
   Assert: menu shows `installed 0.7.1`, versions list shows exactly 6 lines with `(pre-release)` and `(Installed)` on the right ones; after install the mods folder has the new jar, no `permahearts-0.7.1.jar`, Essential and Fabric API untouched. Second case: a release.json with a wrong sha256 → exit non-zero and mods folder unchanged. Third case: no Fabric profile → the Fabric message.
-- PowerShell: if `pwsh` exists, run `install-mods.ps1` against the same fixture (`$env:MCLAB_RELEASES`, `$env:MC_DIR`, answers piped). If not (current state), say so in the report; the manager arranges a check.
+- PowerShell: if `pwsh` exists, run `minecraft-lab.ps1` against the same fixture (`$env:MCLAB_RELEASES`, `$env:MC_DIR`, answers piped). If not (current state), say so in the report; the manager arranges a check.
 
 ## Verify
 
@@ -128,7 +128,7 @@ export JAVA_HOME=$(/usr/libexec/java_home -v 25)
 unzip -p mods/permahearts/build/libs/immortal-cultivation-0.8.0.jar fabric.mod.json
 scripts/test-installer.sh
 scripts/release.sh permahearts --dry-run
-bash -n install-mods.command
+bash -n minecraft-lab.command
 ```
 
 ## Docs
@@ -150,7 +150,7 @@ Small commits on `feat/P-009-mod-installer`: rename · release script · macOS i
 
 ## Risks / ask first
 
-- macOS marks a downloaded `.command` as quarantined (Gatekeeper warning on double-click). README offers the Terminal one-liner `bash <(curl -fsSL https://raw.githubusercontent.com/huydangtruong/minecraft-lab/main/install-mods.command)` as the main path, and "right-click → Open" for the file.
+- macOS marks a downloaded `.command` as quarantined (Gatekeeper warning on double-click). README offers the Terminal one-liner `bash <(curl -fsSL https://raw.githubusercontent.com/huydangtruong/minecraft-lab/main/minecraft-lab.command)` as the main path, and "right-click → Open" for the file.
 - Windows SmartScreen may warn on the downloaded `.bat` ("More info → Run anyway"); say so in README.
 - Do not install `pwsh`, `jq` or anything else (downloads need Huy's go-ahead).
 - If `plutil` cannot read GitHub's releases JSON (size, unicode in notes), fall back to `osascript -l JavaScript` (JXA `JSON.parse`), also stock. Record which one was used in 02-findings.

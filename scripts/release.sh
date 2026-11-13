@@ -57,7 +57,7 @@ cat > "$OUT/release.json" <<JSON
 JSON
 
 if [ -z "$NOTES" ]; then
-	NOTES="$NAME $VER for Minecraft $MC_VER (Fabric Loader $LOADER_VER, Fabric API $FABRIC_API_VERSION). Install with install-mods.command (Mac) or install-mods.bat (Windows) from the repository root."
+	NOTES="$NAME $VER for Minecraft $MC_VER (Fabric Loader $LOADER_VER, Fabric API $FABRIC_API_VERSION). Install with minecraft-lab.command (Mac) or minecraft-lab.bat (Windows) from the repository root."
 fi
 
 # 4. Create the release as the personal account (never switch gh's active account).

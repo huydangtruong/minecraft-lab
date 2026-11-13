@@ -19,14 +19,14 @@ Cần sẵn: Minecraft Launcher có profile **Fabric Loader cho Minecraft 26.3**
 Mở **Terminal** (Cmd+Space, gõ Terminal), dán một dòng này rồi Enter:
 
 ```sh
-bash <(curl -fsSL https://raw.githubusercontent.com/huydangtruong/minecraft-lab/main/install-mods.command)
+bash <(curl -fsSL https://raw.githubusercontent.com/huydangtruong/minecraft-lab/main/minecraft-lab.command)
 ```
 
-Hoặc tải file [`install-mods.command`](install-mods.command) về, chuột phải → **Open** → Open (lần đầu macOS sẽ cảnh báo vì file tải từ mạng).
+Hoặc tải file [`minecraft-lab.command`](minecraft-lab.command) về, chuột phải → **Open** → Open (lần đầu macOS sẽ cảnh báo vì file tải từ mạng).
 
 ### Windows
 
-Tải file [`install-mods.bat`](install-mods.bat) (chỉ cần file này), bấm đúp để chạy. Nếu Windows SmartScreen hiện cảnh báo: bấm **More info** → **Run anyway**.
+Tải file [`minecraft-lab.bat`](minecraft-lab.bat) (chỉ cần file này), bấm đúp để chạy. Nếu Windows SmartScreen hiện cảnh báo: bấm **More info** → **Run anyway**.
 
 ### Dùng script
 

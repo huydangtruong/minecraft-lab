@@ -1,6 +1,6 @@
 # Phát hành một bản mod (D24)
 
-Mỗi bản mod là một GitHub Release trên `huydangtruong/minecraft-lab`. Bạn chơi cài bằng `install-mods` (xem README gốc).
+Mỗi bản mod là một GitHub Release trên `huydangtruong/minecraft-lab`. Bạn chơi cài bằng `minecraft-lab` (xem README gốc).
 
 ## Các bước
 
@@ -17,7 +17,7 @@ Mỗi bản mod là một GitHub Release trên `huydangtruong/minecraft-lab`. B�
 
 ## Ghi chú cho bản 0.8.0
 
-Nên ghi trong `--notes`: mod đổi tên PermaHearts → Immortal Cultivation, id bên trong giữ nguyên nên save cũ vẫn giữ tim, linh dược, nhiệm vụ. Người chơi chạy `install-mods` sẽ tự xoá `permahearts-*.jar` cũ.
+Nên ghi trong `--notes`: mod đổi tên PermaHearts → Immortal Cultivation, id bên trong giữ nguyên nên save cũ vẫn giữ tim, linh dược, nhiệm vụ. Người chơi chạy `minecraft-lab` sẽ tự xoá `permahearts-*.jar` cũ.
 
 ## Nếu sai
 
