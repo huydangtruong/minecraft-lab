@@ -31,3 +31,4 @@
 | D27 | Crimson Master gần hơn | Crimson Master xuất hiện cách một người chơi **~500 block** (450–550, hướng ngẫu nhiên) thay vì ~1000 (sửa D12) | 2026-11-14 |
 | D28 | Lệnh /quest giveup | Ai cũng gõ được `/quest giveup` ở bất cứ đâu, làm giống nút **Give up**: Crimson Master rời đi, báo cho mọi người, lần sau cách 5–7 ngày. Khác `/quest skip` (admin: bỏ qua thời gian chờ, gọi Master mới ngay) và `/quest summon` (admin: gọi Master ngay cạnh mình) | 2026-11-14 |
 | D29 | Thêm loại Trăng máu | Trăng máu có thêm **Skeleton**, **Spider** và **Zombie Horseman** (zombie cầm giáo sắt cưỡi ngựa zombie), thành 6 loại cùng Zombie, Piglin Brute, Creeper | 2026-11-14 |
+| D30 | Linh dược Vitality | Linh dược thứ 7 **Elixir of Vitality**: mỗi bình làm mỗi lần ăn hồi ngay thêm máu bằng **25% điểm no** của món (bít tết: +1 tim mỗi bình). Vĩnh viễn, không trần, chết không mất như D15; có trong phần thưởng của Crimson Master; công tắc tắt thì không tác dụng | 2026-11-14 |

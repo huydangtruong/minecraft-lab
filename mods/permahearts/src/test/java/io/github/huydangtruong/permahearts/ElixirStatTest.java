@@ -16,6 +16,16 @@ class ElixirStatTest {
 	}
 
 	@Test
+	void vitalityFoodHeal() {
+		assertEquals(0f, ElixirStat.foodHeal(8, 0), 1e-6);
+		assertEquals(2f, ElixirStat.foodHeal(8, 1), 1e-6); // steak, 1 bottle: +1 heart
+		assertEquals(8f, ElixirStat.foodHeal(8, 4), 1e-6);
+		assertEquals(1f, ElixirStat.foodHeal(4, 1), 1e-6); // apple
+		assertEquals("+25%", ElixirStat.VITALITY.format(ElixirStat.VITALITY.bonus(1)));
+		assertEquals(ElixirStat.VITALITY, ElixirStat.byId("vitality").orElseThrow());
+	}
+
+	@Test
 	void byId() {
 		assertEquals(ElixirStat.REACH, ElixirStat.byId("reach").orElseThrow());
 		assertTrue(ElixirStat.byId("nope").isEmpty());
