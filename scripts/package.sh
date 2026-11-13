@@ -23,7 +23,7 @@ Cần sẵn: profile Fabric 26.3 có Essential (cài bằng Essential Installer,
    (tạo mới nếu chưa có).
    Thường là: Mac     ~/Library/Application Support/minecraft/installations/26.3 Fabric Essential/mods
               Windows %APPDATA%\\.minecraft\\installations\\26.3 Fabric Essential\\mods
-3. Xoá bản cũ của các mod này nếu có (ví dụ permahearts-0.1.1.jar), rồi chép TẤT CẢ file .jar
+3. Xoá bản cũ của các mod này nếu có (ví dụ permahearts-0.7.1.jar hoặc immortal-cultivation-0.8.0.jar cũ), rồi chép TẤT CẢ file .jar
    trong thư mục "mods" của gói này vào đó. Không xoá file Essential.
 4. Mở Launcher, chọn profile "26.3 Fabric Essential", bấm Play.
 

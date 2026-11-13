@@ -23,11 +23,33 @@ mod_ids() {
 	done
 }
 
-# Path of the built (remapped-free) jar for a mod id: mods/<id>/build/libs/<id>-<version>.jar
+# Value of a key in mods/<id>/gradle.properties (empty if missing).
+mod_prop() {
+	{ grep "^$2=" "$ROOT/mods/$1/gradle.properties" || true; } | head -1 | cut -d= -f2-
+}
+
+# Path of the built jar for a mod id: mods/<id>/build/libs/<mod_file or id>-<version>.jar
 mod_jar() {
-	local id="$1" ver
-	ver="$(grep '^mod_version=' "$ROOT/mods/$id/gradle.properties" | cut -d= -f2)"
-	echo "$ROOT/mods/$id/build/libs/${id}-${ver}.jar"
+	local id="$1" ver file
+	ver="$(mod_prop "$id" mod_version)"
+	file="$(mod_prop "$id" mod_file)"
+	echo "$ROOT/mods/$id/build/libs/${file:-$id}-${ver}.jar"
+}
+
+# Mod id declared in a jar's fabric.mod.json (empty if none).
+jar_mod_id() {
+	{ unzip -p "$1" fabric.mod.json 2>/dev/null || true; } | tr -d '\n\r' \
+		| { grep -o '"id"[[:space:]]*:[[:space:]]*"[^"]*"' || true; } | head -1 \
+		| sed 's/.*:[[:space:]]*"\(.*\)"/\1/'
+}
+
+# Delete jars in <dir> whose fabric.mod.json id equals <mod_id>; other jars are never touched.
+remove_mod_jars() {
+	local dir="$1" id="$2" j
+	for j in "$dir"/*.jar; do
+		[ -f "$j" ] || continue
+		if [ "$(jar_mod_id "$j")" = "$id" ]; then rm -f "$j"; fi
+	done
 }
 
 # Download Fabric API into $1 (a directory) if missing, verifying its sha1 from Maven.

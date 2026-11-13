@@ -1,4 +1,4 @@
-# PermaHearts — luật chơi (0.2.0)
+# Immortal Cultivation (id `permahearts`, tên cũ PermaHearts) — luật chơi (0.2.0, tên mới từ 0.8.0)
 
 - Mỗi người chơi bắt đầu **10 tim** (20 máu).
 - **Chết**: −1 tim tối đa vĩnh viễn, sàn **1 tim** (D1). Chết ở 1 tim: không mất thêm, báo "đã ở mức thấp nhất". Hồi sinh với máu đầy theo mức mới. HeartXP và thống kê giữ nguyên.
