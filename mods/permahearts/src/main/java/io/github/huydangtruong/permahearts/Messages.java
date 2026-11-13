@@ -277,6 +277,14 @@ public final class Messages {
 		return Component.translatableWithFallback("permahearts.wanderer.zombie_horseman", "Zombie Horseman");
 	}
 
+	public static Component bloodMoonHeldIn() {
+		return Component.translatableWithFallback("permahearts.wanderer.blood_moon_held_in", "The Blood Moon holds you near the Crimson Master until dawn");
+	}
+
+	public static Component bloodMoonKeptOut() {
+		return Component.translatableWithFallback("permahearts.wanderer.blood_moon_kept_out", "The Blood Moon keeps you out until dawn");
+	}
+
 	public static Component bloodMoonBar(Component mob) {
 		return Component.translatableWithFallback("permahearts.wanderer.blood_moon_bar", "%s Blood Moon", mob);
 	}
