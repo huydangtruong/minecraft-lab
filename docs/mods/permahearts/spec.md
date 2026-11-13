@@ -40,7 +40,7 @@
 
 ## Lữ Khách và nhiệm vụ (0.5.0–0.6.0, D12–D14)
 
-- Mỗi 3–5 ngày Minecraft (ngẫu nhiên): chọn một người chơi ở Overworld, lấy điểm cách ~450–550 block (D27) hướng ngẫu nhiên, báo mọi người "Một Lữ Khách đang chờ ở X, Z". NPC hiện khi có người trong ~96 block. Trên mặt nước: đặt bè gỗ 3×3.
+- Đúng **4 ngày Minecraft** (D32): chọn một người chơi ở Overworld, lấy điểm cách ~450–550 block (D27) hướng ngẫu nhiên, báo mọi người "Một Lữ Khách đang chờ ở X, Z". NPC hiện khi có người trong ~96 block. Trên mặt nước: đặt bè gỗ 3×3.
 - NPC: Wandering Trader đứng yên, bất tử, không biến mất, tên "Lữ Khách". Bấm vào: màn hình nhiệm vụ (không phải bảng trao đổi).
 - Màn hình: lời giới thiệu + **Nhận** → danh sách 2–4 dòng. Mọi người thấy cùng tiến độ.
   - **Thu thập**: "Tìm 64 Sắt" + ô bỏ đồ; bỏ vào là trừ đồ, cộng tiến độ, dư trả lại. Số lượng (D18): 64 sắt / than / redstone / lapis / cà rốt / khoai tây / lúa mì / gỗ sồi · 48 vàng / thịt cừu / thịt bò / xương / tơ / da · 32 thuốc súng / ngọc ender · 16 kim cương / ngọc lục bảo.
@@ -48,8 +48,8 @@
   - **Trăng máu** (0.6.0): ngẫu nhiên 1 trong 6 loại (D29): đêm **Zombie**, **Piglin Brute** (không biến thành zombie piglin), **Creeper**, **Skeleton**, **Spider** hoặc **Zombie Horseman** (zombie cầm giáo sắt cưỡi ngựa zombie, như bản gốc; một kỵ sĩ tính là 1 con trong giới hạn 30; dòng này không đi cùng dòng giết zombie hay trùm zombie). Nút Bắt đầu → trời thành đêm, mỗi 10 giây 5 con loại đó quanh mỗi người chơi ở Overworld (tối đa 30 con sống), không ngủ được; người bấm sống tới sáng là xong, chết thì dòng quay về chưa làm.
   - **Thám hiểm** (0.6.0): "Đặt chân tới một Làng/Đền sa mạc/…".
   - **Hạ thủ lĩnh** (0.6.0): nút Triệu hồi → trùm to gấp đôi, 150 máu, 4 đệ tử, cạnh NPC. Trùm: Zombie, Skeleton, Evoker (đệ tử là Vindicator), Blaze, Vindicator Chieftain.
-- Dòng xong → ô thưởng có 1 linh dược ngẫu nhiên; ai lấy trước được. Xong hết + lấy hết thưởng → NPC chào và đi, đếm lại 3–5 ngày.
-- Lệnh: `/quest` (NPC ở đâu, còn bao lâu, tiến độ), `/quest giveup` (ai cũng dùng được, như nút Give up: Master rời đi, lần sau 5–7 ngày; D28). Admin: `/quest summon` (gọi NPC ngay cạnh mình với nhiệm vụ mới), `/quest skip` (NPC xuất hiện ngay ở ~500 block), `/quest complete <dòng>`, `/quest reset`.
+- Dòng xong → ô thưởng có 1 linh dược ngẫu nhiên; ai lấy trước được. Xong hết + lấy hết thưởng → NPC chào và đi, đếm lại 4 ngày (D32).
+- Lệnh: `/quest` (NPC ở đâu, còn bao lâu, tiến độ), `/quest giveup` (ai cũng dùng được, như nút Give up: Master rời đi, lần sau 4 ngày; D28). Admin: `/quest summon` (gọi NPC ngay cạnh mình với nhiệm vụ mới), `/quest skip` (NPC xuất hiện ngay ở ~500 block), `/quest complete <dòng>`, `/quest reset`.
 
 ## 0.7.1 (P-008, D19, D20)
 
@@ -57,7 +57,7 @@
 - **Lữ Khách không bị quái nhắm** (bất tử vĩnh viễn nên quái bỏ qua).
 - Trùm và quái Trăng máu **xuất hiện ngang tầm** người chơi / Lữ Khách (kể cả trong hang), tìm chỗ đứng quanh Y đó chứ không lấy mặt đất.
 - Trùm bị mất (rơi, unload) thì nút quay về **Summon**; summon lại được, bản cũ nếu trở lại sẽ bị xóa.
-- **Ở 3 ngày Minecraft** kể từ lúc báo tọa độ; màn hình có dòng đếm ngược "Leaves in"; chat báo trước ~2 phút thực; không rời khi Trăng máu hoặc trùm đang chạy. Rời đi (hết giờ, Give up, xong hết) thì 5–7 ngày sau mới có Lữ Khách mới; chuyến đầu tiên của world vẫn 3–5 ngày.
+- **Ở 2 ngày Minecraft** (D32) kể từ lúc báo tọa độ; màn hình có dòng đếm ngược "Leaves in"; chat báo trước ~2 phút thực; không rời khi Trăng máu hoặc trùm đang chạy. Rời đi (hết giờ, Give up, xong hết) thì 4 ngày sau mới có Lữ Khách mới; chuyến đầu tiên của world vẫn 3–5 ngày.
 - Thủ lĩnh và đệ tử không bị mặt trời thiêu (mũ không vỡ).
 - `/quest` in thêm thời gian còn lại.
 

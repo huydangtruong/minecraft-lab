@@ -55,7 +55,7 @@ public final class QuestCommand {
 				})));
 	}
 
-	/** Anyone, like the Give up button (D28): the Crimson Master leaves, the next one comes in 5..7 days. */
+	/** Anyone, like the Give up button (D28): the Crimson Master leaves, the next one comes in 4 days. */
 	private static int giveUp(CommandSourceStack src) {
 		MinecraftServer server = src.getServer();
 		if (!io.github.huydangtruong.permahearts.PermaHearts.enabled(server)) {
