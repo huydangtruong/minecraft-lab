@@ -24,6 +24,8 @@ public final class QuestCommand {
 					ctx.getSource().sendSuccess(() -> Messages.questAdmin("Summoned"), true);
 					return 1;
 				}))
+			.then(Commands.literal("giveup")
+				.executes(ctx -> giveUp(ctx.getSource())))
 			.then(Commands.literal("skip")
 				.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 				.executes(ctx -> {
@@ -51,6 +53,23 @@ public final class QuestCommand {
 					ctx.getSource().sendSuccess(() -> Messages.questAdmin("Wanderer reset"), true);
 					return 1;
 				})));
+	}
+
+	/** Anyone, like the Give up button (D28): the Crimson Master leaves, the next one comes in 5..7 days. */
+	private static int giveUp(CommandSourceStack src) {
+		MinecraftServer server = src.getServer();
+		if (!io.github.huydangtruong.permahearts.PermaHearts.enabled(server)) {
+			src.sendFailure(Messages.disabledHint());
+			return 0;
+		}
+		Component who = src.getDisplayName();
+		Phase phase = Wanderer.data(server).phase();
+		if (phase != Phase.PLANNED && phase != Phase.PRESENT) {
+			src.sendFailure(Messages.nothingToGiveUp());
+			return 0;
+		}
+		Wanderer.leave(server, Messages.gaveUp(who));
+		return 1;
 	}
 
 	private static int status(CommandSourceStack src) {

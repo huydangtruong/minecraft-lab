@@ -67,6 +67,7 @@
   "permahearts.wanderer.event_not_here": "This can only be started in the Overworld, near the Crimson Master",
   "permahearts.wanderer.give_up": "Give up",
   "permahearts.wanderer.give_up_confirm": "Sure? Click again",
+  "permahearts.wanderer.nothing_to_give_up": "There is no Crimson Master to give up right now",
   "permahearts.wanderer.gave_up": "%s gave up the Crimson Master's quests. The Crimson Master moves on",
   "permahearts.wanderer.leaves_in": "Leaves in %s",
   "permahearts.wanderer.leaving_soon": "The Crimson Master will leave soon",

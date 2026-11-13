@@ -457,6 +457,32 @@ public class WandererGameTest {
 	}
 
 	@GameTest(maxTicks = 40)
+	public void giveUpCommand(GameTestHelper context) {
+		MinecraftServer s = context.getLevel().getServer();
+		try {
+			enable(context, true);
+			Wanderer.startQuestForTest(context.getLevel(), context.absolutePos(new BlockPos(1, 1, 1)), bossQuest("minecraft:zombie"));
+			Entity npc = Wanderer.npc(s);
+			ServerPlayer p = testPlayer(context);
+			// Not an operator: /quest giveup is for everyone, like the Give up button.
+			net.minecraft.commands.CommandSourceStack src = p.createCommandSourceStack();
+			int r = s.getCommands().getDispatcher().execute("quest giveup", src);
+			WandererData d = Wanderer.data(s);
+			context.assertTrue(r == 1 && d.phase() == Phase.WAITING, "giveup should end the visit, phase " + d.phase());
+			context.assertTrue(npc.isRemoved(), "NPC should be gone");
+			long days = d.nextDay() - Wanderer.currentDay(s);
+			context.assertTrue(days >= 5 && days <= 7, "next visit in 5..7 days, was " + days);
+			int again = s.getCommands().getDispatcher().execute("quest giveup", src);
+			context.assertTrue(again == 0, "nothing to give up while WAITING");
+			context.succeed();
+		} catch (com.mojang.brigadier.exceptions.CommandSyntaxException e) {
+			throw new RuntimeException(e);
+		} finally {
+			Wanderer.reset(s);
+		}
+	}
+
+	@GameTest(maxTicks = 40)
 	public void visitExpires(GameTestHelper context) {
 		MinecraftServer s = context.getLevel().getServer();
 		try {
