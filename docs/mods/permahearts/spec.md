@@ -61,3 +61,13 @@
 - `/quest` in thêm thời gian còn lại.
 
 - Tên hiển thị của Lữ Khách: **Crimson Master** (D21).
+
+## Death Match (0.9.0, P-010, D25)
+
+- Loại nhiệm vụ mới của Crimson Master. Chỉ có trong danh sách khi lúc tạo nhiệm vụ có **từ 2 người online**; tối đa 1 dòng Death Match mỗi nhiệm vụ.
+- Nút **Start**: số người phải gục = nửa số người online lúc bấm, làm tròn lên (2 → 1, 3 → 2, 4 → 2, 5 → 3). Dưới 2 người online hoặc PvP tắt: nút xám, rê chuột vào thấy lý do ("Needs at least 2 players online" / "PvP is off on this server").
+- Mỗi **người khác nhau** bị **người chơi khác** giết trong lúc trận chạy tính 1 (chết nhiều lần vẫn tính 1; mọi chiều không gian). Đủ số thì dòng xong, nhận thưởng như các dòng khác.
+- Chết do người chơi giết trong trận: **không mất tim, không rơi đồ, giữ XP**, kể cả cái chết kết thúc trận và lần chết thứ hai của người đã tính. Chết vì quái, ngã... vẫn như thường và không tính. Hết trận (xong, Give up, Crimson Master đi, `/quest reset`) thì chết bình thường trở lại.
+- Trận không giữ Crimson Master ở lại (khác Trăng máu / trùm). Người thoát game không làm trận dừng.
+- Kỹ thuật: cờ `permahearts:dm_protected` trên người chơi được đặt lúc ALLOW_DEATH; mixin `PlayerMixin` bỏ qua `Player#dropEquipment` và `Player#getBaseExperienceReward`; đồ và XP chép sang người mới ở COPY_FROM; tim giữ nguyên ở AFTER_RESPAWN.
+
