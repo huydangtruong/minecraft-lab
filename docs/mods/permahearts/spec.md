@@ -32,6 +32,7 @@
 | `permahearts:elixir_iron_skin` | Elixir of Iron Skin | +1 giáp | `ARMOR` cộng |
 | `permahearts:elixir_reach` | Elixir of Reach | +0.5 tầm với | `BLOCK_INTERACTION_RANGE` + `ENTITY_INTERACTION_RANGE` cộng |
 | `permahearts:elixir_mining` | Elixir of Mining | +10% tốc đào | `BLOCK_BREAK_SPEED` ×base |
+| `permahearts:elixir_vitality` | Elixir of Vitality | +25% "healing from food": mỗi lần ăn hồi **ngay** thêm máu = điểm no của món × 25% mỗi bình (bít tết 8 điểm: 1 bình +1 tim, 4 bình +4 tim). D30 | mixin `FoodProperties#onConsume` (không phải attribute) |
 
 - Uống như bình thuốc (trả lại chai rỗng), có hiệu ứng lấp lánh, xếp chồng 16. Không trần, lưu theo người chơi, chết không mất.
 - Công tắc tắt: uống không được (báo cách bật), chỉ số đã có không tác dụng nhưng vẫn lưu.

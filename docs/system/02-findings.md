@@ -135,3 +135,7 @@ Tên và chữ ký dưới đây lấy từ `javap` jar 26.3 và mã Fabric API 
 
 - `ZombieHorse` (`net.minecraft.world.entity.animal.equine`): `finalizeSpawn` with `EntitySpawnReason.NATURAL` creates the rider itself: `EntityTypes.ZOMBIE.create(level, JOCKEY)`, `snapTo`, `finalizeSpawn`, `setItemSlot(MAINHAND, new ItemStack(Items.IRON_SPEAR))`, `startRiding(horse, false, false)`. With `EVENT` no rider is made, so the Blood Moon builds it the same way and adds both with `ServerLevel#tryAddFreshEntityWithPassengers`.
 - Spears: `Items.WOODEN_SPEAR` … `NETHERITE_SPEAR`; zombies use them through `SpearUseGoal`.
+
+## Eating hook (26.3)
+
+- Food is applied in `FoodProperties#onConsume(Level, LivingEntity, ItemStack, Consumable)` (a `ConsumableListener`): it calls `player.getFoodData().eat(this)`. Fabric API 0.166.2 has no "player ate" event, so `FoodPropertiesMixin` injects at `TAIL` (first mixin of the mod, `permahearts.mixins.json`). Runs on both sides: check `instanceof ServerPlayer`. A game test can eat with `item.finishUsingItem(new ItemStack(item), level, player)`.

@@ -44,6 +44,17 @@ public class PermaHearts implements ModInitializer {
 		.category(GameRuleCategory.PLAYER)
 		.buildAndRegister(Identifier.fromNamespaceAndPath(MOD_ID, "immortal_cultivation"));
 
+	/** A player finished eating (FoodPropertiesMixin): Vitality elixirs heal extra (D30). */
+	public static void onAte(ServerPlayer p, int nutrition) {
+		if (!enabled(p.level().getServer()) || !p.isAlive()) {
+			return;
+		}
+		float extra = ElixirStat.foodHeal(nutrition, HeartsAttachment.getCultivation(p).level(ElixirStat.VITALITY));
+		if (extra > 0) {
+			p.heal(extra);
+		}
+	}
+
 	public static boolean enabled(MinecraftServer server) {
 		return server.getGameRules().get(ENABLED);
 	}

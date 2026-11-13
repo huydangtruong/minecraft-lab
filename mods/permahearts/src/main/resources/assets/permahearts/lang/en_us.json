@@ -26,6 +26,8 @@
   "permahearts.stat.reach": "reach",
   "item.permahearts.elixir_mining": "Elixir of Mining",
   "permahearts.stat.mining": "mining speed",
+  "item.permahearts.elixir_vitality": "Elixir of Vitality",
+  "permahearts.stat.vitality": "healing from food",
   "permahearts.msg.elixir_drunk": "%s %s! Total: %s",
   "permahearts.elixir.tooltip": "%s %s, permanent",
   "permahearts.msg.elixir_disabled": "ImmortalCultivation is off in this world",

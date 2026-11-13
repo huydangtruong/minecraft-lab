@@ -10,7 +10,9 @@ public enum ElixirStat {
 	SWIFTNESS("swiftness", 0.05, true),
 	IRON_SKIN("iron_skin", 1.0, false),
 	REACH("reach", 0.5, false),
-	MINING("mining", 0.10, true);
+	MINING("mining", 0.10, true),
+	/** Not an attribute: each meal heals extra health = food points x bonus (D30). */
+	VITALITY("vitality", 0.25, true);
 
 	private final String id;
 	private final double step;
@@ -45,6 +47,11 @@ public enum ElixirStat {
 			return "+" + Math.round(bonus * 100) + "%";
 		}
 		return "+" + String.format(Locale.ROOT, "%.1f", bonus);
+	}
+
+	/** Extra health (half-hearts) a meal of the given food points heals at this Vitality level. */
+	public static float foodHeal(int nutrition, int vitalityLevel) {
+		return (float) (Math.max(0, nutrition) * VITALITY.bonus(Math.max(0, vitalityLevel)));
 	}
 
 	public static Optional<ElixirStat> byId(String id) {

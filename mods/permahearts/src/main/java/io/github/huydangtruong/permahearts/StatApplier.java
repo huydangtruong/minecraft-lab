@@ -21,6 +21,7 @@ public final class StatApplier {
 			case IRON_SKIN -> List.of(Attributes.ARMOR);
 			case REACH -> List.of(Attributes.BLOCK_INTERACTION_RANGE, Attributes.ENTITY_INTERACTION_RANGE);
 			case MINING -> List.of(Attributes.BLOCK_BREAK_SPEED);
+			case VITALITY -> List.of(); // handled when eating, see PermaHearts#onAte
 		};
 	}
 

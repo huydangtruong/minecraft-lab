@@ -253,6 +253,36 @@ public class PermaHeartsGameTest {
 		context.succeed();
 	}
 
+	/** Eats one item the vanilla way (Item#finishUsingItem runs the food's onConsume, where the mixin hooks in). */
+	private static void eat(ServerPlayer p, Item item) {
+		item.finishUsingItem(new ItemStack(item), p.level(), p);
+	}
+
+	@GameTest(maxTicks = 100)
+	public void vitalityHealsWhenEating(GameTestHelper context) {
+		try {
+			enable(context, true);
+			ServerPlayer p = context.makeMockServerPlayerInLevel();
+			HeartsAttachment.setCultivation(p, CultivationData.DEFAULT);
+			p.getFoodData().setFoodLevel(0);
+			p.setHealth(4f);
+			eat(p, net.minecraft.world.item.Items.COOKED_BEEF);
+			near(context, 4f, p.getHealth(), "no elixir: eating does not heal at once");
+			drink(p, ElixirStat.VITALITY);
+			drink(p, ElixirStat.VITALITY);
+			p.getFoodData().setFoodLevel(0);
+			eat(p, net.minecraft.world.item.Items.COOKED_BEEF); // 8 food points x 50% = 4 health
+			near(context, 8f, p.getHealth(), "2 Vitality: steak heals 4 more");
+			enable(context, false);
+			p.getFoodData().setFoodLevel(0);
+			eat(p, net.minecraft.world.item.Items.COOKED_BEEF);
+			near(context, 8f, p.getHealth(), "switch off: no extra healing");
+			context.succeed();
+		} finally {
+			enable(context, true);
+		}
+	}
+
 	@GameTest(maxTicks = 100)
 	public void elixirMultiplierStats(GameTestHelper context) {
 		enable(context, true);
