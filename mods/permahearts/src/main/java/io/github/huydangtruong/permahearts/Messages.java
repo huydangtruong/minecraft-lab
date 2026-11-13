@@ -273,6 +273,10 @@ public final class Messages {
 		return Component.translatableWithFallback("permahearts.wanderer.blood_moon_no_sleep", "You cannot sleep under the Blood Moon");
 	}
 
+	public static Component zombieHorseman() {
+		return Component.translatableWithFallback("permahearts.wanderer.zombie_horseman", "Zombie Horseman");
+	}
+
 	public static Component bloodMoonBar(Component mob) {
 		return Component.translatableWithFallback("permahearts.wanderer.blood_moon_bar", "%s Blood Moon", mob);
 	}

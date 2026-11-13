@@ -44,7 +44,7 @@
 - Màn hình: lời giới thiệu + **Nhận** → danh sách 2–4 dòng. Mọi người thấy cùng tiến độ.
   - **Thu thập**: "Tìm 64 Sắt" + ô bỏ đồ; bỏ vào là trừ đồ, cộng tiến độ, dư trả lại. Số lượng (D18): 64 sắt / than / redstone / lapis / cà rốt / khoai tây / lúa mì / gỗ sồi · 48 vàng / thịt cừu / thịt bò / xương / tơ / da · 32 thuốc súng / ngọc ender · 16 kim cương / ngọc lục bảo.
   - **Giết**: "Giết 16 Zombie" + số đếm; ai giết cũng tính. 16 zombie / skeleton / nhện / creeper / enderman / drowned · 8 phù thủy.
-  - **Trăng máu** (0.6.0): ngẫu nhiên 1 trong 3 loại: đêm **Zombie**, đêm **Piglin Brute** (không biến thành zombie piglin) hoặc đêm **Creeper**. Nút Bắt đầu → trời thành đêm, mỗi 10 giây 5 con loại đó quanh mỗi người chơi ở Overworld (tối đa 30 con sống), không ngủ được; người bấm sống tới sáng là xong, chết thì dòng quay về chưa làm.
+  - **Trăng máu** (0.6.0): ngẫu nhiên 1 trong 6 loại (D29): đêm **Zombie**, **Piglin Brute** (không biến thành zombie piglin), **Creeper**, **Skeleton**, **Spider** hoặc **Zombie Horseman** (zombie cầm giáo sắt cưỡi ngựa zombie, như bản gốc; một kỵ sĩ tính là 1 con trong giới hạn 30; dòng này không đi cùng dòng giết zombie hay trùm zombie). Nút Bắt đầu → trời thành đêm, mỗi 10 giây 5 con loại đó quanh mỗi người chơi ở Overworld (tối đa 30 con sống), không ngủ được; người bấm sống tới sáng là xong, chết thì dòng quay về chưa làm.
   - **Thám hiểm** (0.6.0): "Đặt chân tới một Làng/Đền sa mạc/…".
   - **Hạ thủ lĩnh** (0.6.0): nút Triệu hồi → trùm to gấp đôi, 150 máu, 4 đệ tử, cạnh NPC. Trùm: Zombie, Skeleton, Evoker (đệ tử là Vindicator), Blaze, Vindicator Chieftain.
 - Dòng xong → ô thưởng có 1 linh dược ngẫu nhiên; ai lấy trước được. Xong hết + lấy hết thưởng → NPC chào và đi, đếm lại 3–5 ngày.

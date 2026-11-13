@@ -4,6 +4,7 @@ import io.github.huydangtruong.permahearts.wanderer.BloodMoon;
 import io.github.huydangtruong.permahearts.wanderer.BloodMoonState;
 import io.github.huydangtruong.permahearts.wanderer.Phase;
 import io.github.huydangtruong.permahearts.wanderer.QuestBoss;
+import io.github.huydangtruong.permahearts.wanderer.QuestGenerator;
 import io.github.huydangtruong.permahearts.wanderer.Quest;
 import io.github.huydangtruong.permahearts.wanderer.QuestLine;
 import io.github.huydangtruong.permahearts.wanderer.QuestType;
@@ -263,7 +264,7 @@ public class WandererGameTest {
 		MinecraftServer s = context.getLevel().getServer();
 		try {
 			enable(context, true);
-			for (String mob : List.of("minecraft:piglin_brute", "minecraft:creeper")) {
+			for (String mob : List.of("minecraft:piglin_brute", "minecraft:creeper", "minecraft:skeleton", "minecraft:spider")) {
 				Wanderer.reset(s);
 				Wanderer.startQuestForTest(context.getLevel(), context.absolutePos(new BlockPos(1, 1, 1)),
 					eventQuest(new QuestLine(QuestType.BLOOD_MOON, mob, 1, 0, "strength", false), testQuest().lines().get(1)));
@@ -279,6 +280,38 @@ public class WandererGameTest {
 				}
 				BloodMoon.moveClock(s, false);
 			}
+			context.succeed();
+		} finally {
+			BloodMoon.moveClock(s, false);
+			Wanderer.reset(s);
+		}
+	}
+
+	@GameTest(maxTicks = 100)
+	public void bloodMoonHorsemen(GameTestHelper context) {
+		MinecraftServer s = context.getLevel().getServer();
+		try {
+			enable(context, true);
+			Wanderer.startQuestForTest(context.getLevel(), context.absolutePos(new BlockPos(1, 1, 1)),
+				eventQuest(new QuestLine(QuestType.BLOOD_MOON, QuestGenerator.HORSEMAN, 1, 0, "strength", false), testQuest().lines().get(1)));
+			Wanderer.accept(s);
+			ServerPlayer p = testPlayer(context);
+			context.assertTrue(Wanderer.startEvent(s, 0, p), "start should work");
+			BloodMoon.wave(s, List.of(p));
+			List<? extends Mob> spawned = tagged(s, BloodMoon.TAG);
+			long horses = spawned.stream().filter(m -> m instanceof net.minecraft.world.entity.animal.equine.ZombieHorse).count();
+			context.assertTrue(horses == BloodMoon.PER_WAVE, "a wave should bring 5 zombie horses, got " + horses);
+			for (Mob m : spawned) {
+				if (m instanceof net.minecraft.world.entity.animal.equine.ZombieHorse h) {
+					context.assertTrue(h.getFirstPassenger() instanceof net.minecraft.world.entity.monster.zombie.Zombie z
+						&& z.getMainHandItem().is(net.minecraft.world.item.Items.IRON_SPEAR) && z.entityTags().contains(BloodMoon.TAG),
+						"each horse carries a tagged zombie with an iron spear");
+				}
+			}
+			context.assertTrue(Wanderer.lineText(QuestType.BLOOD_MOON, QuestGenerator.HORSEMAN, 1, 0).getString().contains("Zombie Horseman"),
+				"line text names the horseman");
+			Wanderer.reset(s);
+			context.assertTrue(tagged(s, BloodMoon.TAG).isEmpty(), "reset removes horses and riders");
 			context.succeed();
 		} finally {
 			BloodMoon.moveClock(s, false);

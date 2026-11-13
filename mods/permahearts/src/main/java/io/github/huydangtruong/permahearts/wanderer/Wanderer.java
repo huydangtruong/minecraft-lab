@@ -401,7 +401,7 @@ public final class Wanderer {
 			case COLLECT -> Component.translatable(BuiltInRegistries.ITEM.getValue(Identifier.parse(target)).getDescriptionId());
 			case KILL -> BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.parse(target)).getDescription();
 			case EXPLORE -> Messages.structureName(target);
-			case BLOOD_MOON -> Messages.bloodMoonBar(BloodMoon.mobType(target).getDescription());
+			case BLOOD_MOON -> Messages.bloodMoonBar(BloodMoon.mobName(target));
 			case BOSS -> Messages.bossName(BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.parse(target)).getDescription());
 		};
 	}
@@ -412,7 +412,7 @@ public final class Wanderer {
 			case COLLECT -> Messages.lineCollect(required, name, progress);
 			case KILL -> Messages.lineKill(required, name, progress);
 			case EXPLORE -> Messages.lineExplore(name);
-			case BLOOD_MOON -> Messages.lineBloodMoon(BloodMoon.mobType(target).getDescription());
+			case BLOOD_MOON -> Messages.lineBloodMoon(BloodMoon.mobName(target));
 			case BOSS -> Messages.lineBoss(name);
 		};
 	}

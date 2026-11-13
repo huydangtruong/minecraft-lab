@@ -41,7 +41,19 @@ public final class QuestGenerator {
 		new Weighted("minecraft:evoker", 1), new Weighted("minecraft:blaze", 1), new Weighted("minecraft:vindicator", 1));
 
 	/** Blood Moon variants: the mob that comes in waves. */
-	public static final List<String> BLOOD_MOON = List.of("minecraft:zombie", "minecraft:piglin_brute", "minecraft:creeper");
+	public static final List<String> BLOOD_MOON = List.of("minecraft:zombie", "minecraft:piglin_brute", "minecraft:creeper",
+		"minecraft:skeleton", "minecraft:spider", QuestGenerator.HORSEMAN);
+
+	/** Blood Moon target for zombie horsemen: a zombie with an iron spear riding a zombie horse (D29). */
+	public static final String HORSEMAN = "minecraft:zombie_horse";
+
+	/**
+	 * Ids a line takes for the no-duplicate rule. Horsemen are zombies on zombie horses, so they also take the zombie:
+	 * no kill-zombie line or zombie boss in the same quest (their riders would count / mix with the minions).
+	 */
+	public static List<String> claims(QuestType type, String target) {
+		return type == QuestType.BLOOD_MOON && HORSEMAN.equals(target) ? List.of(HORSEMAN, "minecraft:zombie") : List.of(target);
+	}
 
 	/** The Blood Moon mob of a line target; quests saved before 0.6.0's variants have "" and mean zombies. */
 	public static String bloodMoonMob(String target) {
@@ -111,9 +123,11 @@ public final class QuestGenerator {
 			if ((type == QuestType.BOSS && bossUsed) || (type == QuestType.BLOOD_MOON && moonUsed)) {
 				continue;
 			}
-			if (!used.add(target)) {
+			List<String> claims = claims(type, target);
+			if (claims.stream().anyMatch(used::contains)) {
 				continue;
 			}
+			used.addAll(claims);
 			bossUsed |= type == QuestType.BOSS;
 			moonUsed |= type == QuestType.BLOOD_MOON;
 			lines.add(new QuestLine(type, target, required, 0, stats[rng.nextInt(stats.length)].id(), false));

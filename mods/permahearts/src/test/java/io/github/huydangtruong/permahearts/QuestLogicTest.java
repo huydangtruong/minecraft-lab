@@ -128,7 +128,9 @@ class QuestLogicTest {
 			var targets = new HashSet<String>();
 			for (QuestLine l : q.lines()) {
 				seen.add(l.type());
-				assertTrue(targets.add(l.target()), "duplicate target, seed " + seed);
+				for (String c : QuestGenerator.claims(l.type(), l.target())) {
+					assertTrue(targets.add(c), "duplicate target " + c + ", seed " + seed);
+				}
 				if (l.type() == QuestType.BLOOD_MOON) {
 					moons++;
 					assertTrue(QuestGenerator.BLOOD_MOON.contains(l.target()), l.target());
