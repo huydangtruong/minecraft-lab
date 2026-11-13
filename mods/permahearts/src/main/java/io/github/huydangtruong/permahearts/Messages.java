@@ -170,6 +170,10 @@ public final class Messages {
 		return Component.translatableWithFallback("permahearts.wanderer.gave_up", "%s gave up the Crimson Master's quests. The Crimson Master moves on", player);
 	}
 
+	public static Component nothingToGiveUp() {
+		return Component.translatableWithFallback("permahearts.wanderer.nothing_to_give_up", "There is no Crimson Master to give up right now");
+	}
+
 	public static Component leavesIn(String time) {
 		return Component.translatableWithFallback("permahearts.wanderer.leaves_in", "Leaves in %s", time);
 	}
