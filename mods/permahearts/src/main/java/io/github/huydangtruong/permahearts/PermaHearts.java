@@ -68,6 +68,7 @@ public class PermaHearts implements ModInitializer {
 		ElixirItems.init();
 		WandererMenus.init();
 		WandererScheduler.register();
+		io.github.huydangtruong.permahearts.stats.StatsSync.register();
 		GameRuleEvents.changeCallback(ENABLED).register((Boolean value, MinecraftServer server) -> {
 			for (ServerPlayer p : server.getPlayerList().getPlayers()) {
 				HeartsAttachment.setActive(p, value);

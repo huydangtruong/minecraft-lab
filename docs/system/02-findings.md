@@ -139,3 +139,11 @@ Tên và chữ ký dưới đây lấy từ `javap` jar 26.3 và mã Fabric API 
 ## Eating hook (26.3)
 
 - Food is applied in `FoodProperties#onConsume(Level, LivingEntity, ItemStack, Consumable)` (a `ConsumableListener`): it calls `player.getFoodData().eat(this)`. Fabric API 0.166.2 has no "player ate" event, so `FoodPropertiesMixin` injects at `TAIL` (first mixin of the mod, `permahearts.mixins.json`). Runs on both sides: check `instanceof ServerPlayer`. A game test can eat with `item.finishUsingItem(new ItemStack(item), level, player)`.
+
+## Inventory screen (26.3)
+
+- Drawing is `GuiGraphicsExtractor` (`fill`, `text(font, String, x, y, color, shadow)`, `item(stack, x, y)`); widgets implement `extractContents`. `Button` is abstract: subclass with `super(x, y, w, h, msg, onPress, DEFAULT_NARRATION)` and call `extractDefaultSprite(g)`.
+- Fabric screen API 5.2.4: `ScreenEvents.AFTER_INIT`, per-screen `afterBackground/afterExtract/beforeTick`, `Screens.getWidgets(screen)` (mutable, adding registers the widget).
+- `InventoryScreen extends AbstractRecipeBookScreen`: field `recipeBookComponent` (`isVisible`, `toggleVisibility`, `updateScreenPosition`), recipe button at `(leftPos + 104, height / 2 - 22)`; `leftPos`, `topPos`, `imageWidth` on `AbstractContainerScreen` (client accessors in `permahearts.client.mixins.json`). `hasClickedOutside(double, double, int, int)` decides item drops.
+- Minecraft: the current screen is `mc.gui.screen()`; `Minecraft#setScreen`. A creative player opening `InventoryScreen` gets `CreativeModeInventoryScreen`. Client test: `context.setScreen(supplier)`, `context.clickScreenButton(label)`.
+- Respawn: `ServerPlayer#getRespawnConfig()` (null = none) → `respawnData()` (`pos()`, `dimension()`); world spawn `MinecraftServer#getRespawnData()`. Attribute modifier ops in order `ADD_VALUE`, `ADD_MULTIPLIED_BASE` (multiplies base + flat adds), `ADD_MULTIPLIED_TOTAL`.
