@@ -23,10 +23,15 @@ public final class WandererScheduler {
 	private WandererScheduler() {}
 
 	public static void register() {
+		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(s -> WandererBar.forget());
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			int t = server.getTickCount();
+			if (t % 20 == 0 && !PermaHearts.enabled(server)) {
+				WandererBar.hide(); // switch off: no Crimson Master bar
+			}
 			if (t % 20 == 0 && PermaHearts.enabled(server)) {
 				work(server, t % 100 == 0);
+				WandererBar.tick(server);
 				BloodMoon.tick(server);
 				QuestBoss.tick(server);
 				if (t % 40 == 0) {
@@ -89,6 +94,7 @@ public final class WandererScheduler {
 		if (!d.warned() && clock >= d.leaveAt() - Wanderer.WARN_TICKS) {
 			Wanderer.save(server, d.withWarned(true));
 			server.getPlayerList().broadcastSystemMessage(Messages.leavingSoon(), false);
+			WandererBar.announceLeavingSoon(server, d.x(), d.z());
 		}
 		if (clock >= d.leaveAt() && !BloodMoon.running(server) && !QuestBoss.bossAlive(server)) {
 			Wanderer.leave(server, Messages.leftAfterStay());
