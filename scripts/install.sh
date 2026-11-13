@@ -18,7 +18,7 @@ fi
 for id in "${IDS[@]}"; do
 	jar="$(mod_jar "$id")"
 	[ -f "$jar" ] || { echo "Missing $jar" >&2; exit 1; }
-	rm -f "$MODS_DIR/${id}-"*.jar   # old versions of this mod only
+	remove_mod_jars "$MODS_DIR" "$id"   # old versions of this mod only (matched by mod id, any file name)
 	cp "$jar" "$MODS_DIR/"
 	echo "Installed $(basename "$jar")"
 done

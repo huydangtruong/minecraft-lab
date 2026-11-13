@@ -9,7 +9,7 @@ subprojects {
 
 	group = rootProject.maven_group
 	version = project.mod_version
-	base.archivesName = project.mod_id
+	base.archivesName = project.findProperty('mod_file') ?: project.mod_id
 
 	loom {
 		splitEnvironmentSourceSets()
