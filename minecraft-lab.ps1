@@ -250,15 +250,15 @@ function Install-Release($release) {
 
         Write-Host 'Downloading release.json...'
         $url = Get-AssetUrl $release 'release.json'
-        if (-not $url) { Write-Host 'ERROR: this release has no release.json.'; return $false }
+        if (-not $url) { Write-Host 'ERROR: this release has no release.json.' -ForegroundColor Red; return $false }
         $metaFile = Join-Path $work 'release.json'
         Get-File $url $metaFile
         $meta = [IO.File]::ReadAllText($metaFile) | ConvertFrom-Json
         $jarName = [string]$meta.jar
         $want = ([string]$meta.sha256).ToLower()
-        if ($jarName -eq '' -or $want -eq '') { Write-Host 'ERROR: release.json is incomplete.'; return $false }
+        if ($jarName -eq '' -or $want -eq '') { Write-Host 'ERROR: release.json is incomplete.' -ForegroundColor Red; return $false }
         if ($jarName.Contains('/') -or $jarName.Contains('\') -or $jarName.Contains('..')) {
-            Write-Host 'ERROR: release.json has a bad jar name.'; return $false
+            Write-Host 'ERROR: release.json has a bad jar name.' -ForegroundColor Red; return $false
         }
 
         if ($meta.minecraft -and $meta.minecraft -ne $script:ProfileMc) {
@@ -269,7 +269,7 @@ function Install-Release($release) {
 
         Write-Host ('Downloading {0}...' -f $jarName)
         $jarUrl = Get-AssetUrl $release $jarName
-        if (-not $jarUrl) { Write-Host ('ERROR: the release has no file {0}.' -f $jarName); return $false }
+        if (-not $jarUrl) { Write-Host ('ERROR: the release has no file {0}.' -f $jarName) -ForegroundColor Red; return $false }
         $jarFile = Join-Path $work $jarName
         Get-File $jarUrl $jarFile
 
@@ -277,7 +277,7 @@ function Install-Release($release) {
         $got = (Get-FileHash -Algorithm SHA256 -LiteralPath $jarFile).Hash.ToLower()
         if ($got -ne $want) {
             Remove-Item -LiteralPath $jarFile -Force
-            Write-Host ('ERROR: sha256 mismatch for {0}' -f $jarName)
+            Write-Host ('ERROR: sha256 mismatch for {0}' -f $jarName) -ForegroundColor Red
             Write-Host ('  expected {0}' -f $want)
             Write-Host ('  got      {0}' -f $got)
             Write-Host 'The download is damaged or was changed. Nothing was installed and your mods folder is untouched.'
@@ -295,7 +295,7 @@ function Install-Release($release) {
             $wantSha1 = (Get-Text "$fabUrl.sha1").Trim().ToLower()
             $gotSha1 = (Get-FileHash -Algorithm SHA1 -LiteralPath $fabFile).Hash.ToLower()
             if ($wantSha1 -eq '' -or $gotSha1 -ne $wantSha1) {
-                Write-Host 'ERROR: sha1 mismatch for Fabric API. Nothing was installed.'
+                Write-Host 'ERROR: sha1 mismatch for Fabric API. Nothing was installed.' -ForegroundColor Red
                 return $false
             }
             Copy-Item -LiteralPath $fabFile -Destination (Join-Path $script:ModsDir $fabJar) -Force
@@ -306,10 +306,13 @@ function Install-Release($release) {
         Remove-ModJars $release.Mod
         Write-Host ('Copying {0} to the mods folder...' -f $jarName)
         Copy-Item -LiteralPath $jarFile -Destination (Join-Path $script:ModsDir $jarName) -Force
-        Write-Host ('Installed {0} {1} into {2}. Start Minecraft with the "{3}" profile.' -f $release.Title, $release.Version, $script:ModsDir, $script:ProfileName)
+        Write-Host ''
+        Write-Host ('SUCCESS! {0} {1} is installed.' -f $release.Title, $release.Version) -ForegroundColor Green
+        Write-Host ('Mods folder: {0}' -f $script:ModsDir)
+        Write-Host ('Start Minecraft with the "{0}" profile.' -f $script:ProfileName)
         return $true
     } catch {
-        Write-Host ('ERROR: ' + $_.Exception.Message)
+        Write-Host ('ERROR: ' + $_.Exception.Message) -ForegroundColor Red
         return $false
     } finally {
         Remove-Item -LiteralPath $work -Recurse -Force -ErrorAction SilentlyContinue
@@ -337,7 +340,17 @@ function Show-VersionsMenu([string]$modId, [string]$title) {
             $ok = Install-Release $versions[[int]$a - 1]
             if (-not $ok) { $script:Failed = $true }
             Update-Installed
-            return
+            # Do not jump straight back into a menu: let the player read the result first.
+            Write-Host ''
+            Write-Host '  1) Back to the version list'
+            Write-Host '  0) Exit'
+            while ($true) {
+                $b = Ask 'Choose and press Enter'
+                if ($b -eq '1') { break }
+                if ($b -eq '0') { if ($script:Failed) { exit 1 } else { exit 0 } }
+                Write-Host 'Please type 1 or 0.'
+            }
+            continue
         }
         Write-Host 'Please type a number from the list.'
     }

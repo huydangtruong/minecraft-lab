@@ -93,24 +93,35 @@ make_minecraft 1
 ESS="$(sum_of "$PROFILE_DIR/mods/Essential-1.5.2-26.3.jar")"
 API="$(sum_of "$PROFILE_DIR/mods/fabric-api-0.166.2+26.3.jar")"
 touch "$T/running"   # also exercises the "Minecraft is running" prompt (needs the extra Enter)
-run_installer "$T/releases.json" $'1\n1\n\n0'
+run_installer "$T/releases.json" $'1\n1\n\n1\n0\n0'   # mod, version, Enter (running), back to versions, back to mods, exit
 rm -f "$T/running"
 [ -n "$SCREENS" ] && printf '%s\n' "$OUT" > "$T/case1.out"
 check "exit code 0" test "$RC" -eq 0
 check "menu shows installed 0.7.1" grep -q 'Immortal Cultivation   installed 0.7.1' <<<"$OUT"
-VMENU="$(printf '%s\n' "$OUT" | awk '/^Immortal Cultivation$/{f=1;next} /^  0\) Back/{f=0} f')"
+VMENU="$(printf '%s\n' "$OUT" | awk '/^Immortal Cultivation$/{f=1;next} /^  0\) Back/{if(f)exit} f')"
 check "versions menu has exactly 6 versions" test "$(printf '%s\n' "$VMENU" | grep -c '^  [0-9])')" -eq 6
 check "0.7.2 is marked (pre-release)" grep -q '^  2) 0.7.2  (pre-release)$' <<<"$VMENU"
 check "0.7.1 is marked (Installed)" grep -q '^  3) 0.7.1  (Installed)$' <<<"$VMENU"
 check "0.4.0 is not offered" bash -c '! grep -q "0.4.0" <<<"$1"' _ "$VMENU"
 check "warned that Minecraft is running" grep -q 'Minecraft seems to be running' <<<"$OUT"
-check "final message printed" grep -q 'Installed Immortal Cultivation 0.8.0 into .*mods. Start Minecraft with the "26.3 Fabric Essential" profile.' <<<"$OUT"
+check "success line printed" grep -q '^SUCCESS! Immortal Cultivation 0.8.0 is installed.$' <<<"$OUT"
+check "profile hint printed" grep -q '^Start Minecraft with the "26.3 Fabric Essential" profile.$' <<<"$OUT"
+check "asks back-or-exit right after the result" bash -c 'grep -A3 "^Start Minecraft with" <<<"$1" | grep -q "1) Back to the version list"' _ "$OUT"
+check "version list shows 0.8.0 (Installed) after going back" grep -q '^  1) 0.8.0  (Installed)$' <<<"$OUT"
 check "new jar present" test -f "$PROFILE_DIR/mods/immortal-cultivation-0.8.0.jar"
 check "old permahearts-0.7.1.jar removed" test ! -e "$PROFILE_DIR/mods/permahearts-0.7.1.jar"
 check "Essential untouched" test "$(sum_of "$PROFILE_DIR/mods/Essential-1.5.2-26.3.jar")" = "$ESS"
 check "Fabric API untouched" test "$(sum_of "$PROFILE_DIR/mods/fabric-api-0.166.2+26.3.jar")" = "$API"
 check "mods folder has exactly 3 jars" test "$(mods | wc -l | tr -d ' ')" -eq 3
 check "menu shows installed 0.8.0 afterwards" grep -q 'installed 0.8.0' <<<"$OUT"
+
+# ---- case 1b: exit right after installing
+echo "Case 1b: exit after installing"
+make_minecraft 1
+run_installer "$T/releases.json" $'1\n1\n0'
+check "exit code 0" test "$RC" -eq 0
+check "no menu printed after the result" bash -c '! sed -n "/^SUCCESS!/,\$p" <<<"$1" | grep -q "^Minecraft Lab mods"' _ "$OUT"
+check "new jar present" test -f "$PROFILE_DIR/mods/immortal-cultivation-0.8.0.jar"
 
 # ---- case 2: wrong sha256
 echo "Case 2: wrong checksum"
@@ -141,9 +152,9 @@ if [ -n "$SCREENS" ]; then
 	run_installer "$T/releases.json" $'1\n0\n0'
 	printf '%s\n' "$OUT" | awk '{print} /^Choose a version and press Enter: 0$/{exit}' > "$SCREENS/02-versions-menu.txt"
 	make_minecraft 1
-	run_installer "$T/releases.json" $'1\n1\n0'
+	run_installer "$T/releases.json" $'1\n1\n1\n0\n0'
 	printf '%s\n' "$OUT" > "$T/walk.out"
-	awk '/^Choose a version and press Enter: 1$/{f=1} f{print} /^Installed Immortal Cultivation/{exit}' "$T/walk.out" > "$SCREENS/03-installing.txt"
+	awk '/^Choose a version and press Enter: 1$/{f=1} f{print} /^Choose and press Enter/{exit}' "$T/walk.out" > "$SCREENS/03-installing.txt"
 	awk '/^Minecraft Lab mods/{buf=""} {buf=buf $0 "\n"} END{printf "%s", buf}' "$T/walk.out" > "$SCREENS/04-mods-menu-after.txt"
 	cp "$T/case3.out" "$SCREENS/05-no-fabric.txt"
 	awk '/^Choose a version and press Enter: 1$/{f=1} /^Minecraft Lab mods/{if(f&&seen){exit}} f{print} /^Minecraft Lab mods/{seen=1}' "$T/case2.out" > "$SCREENS/06-bad-checksum.txt"
