@@ -1,25 +1,55 @@
 # Minecraft Lab
 
-Nơi Huy code các mod Fabric cho Minecraft Java **26.3** (Fabric Loader 0.20.1) để chơi chung với bạn qua Essential.
+Các mod Fabric cho Minecraft Java **26.3** (Fabric Loader 0.20.1) do Huy làm để chơi chung với bạn bè.
 
 ## Có gì
 
-| Mod | Làm gì | Trạng thái |
+| Mod | Làm gì | Bản mới nhất |
 |---|---|---|
-| [permahearts](docs/mods/permahearts/spec.md) | Chết mất 1 tim vĩnh viễn; giết 100 mob hostile được +1 tim | Khung build xong, [P-001](docs/plans/P-001-permahearts.md) chờ code |
+| **Immortal Cultivation** (id `permahearts`, [luật chơi](docs/mods/permahearts/spec.md)) | Tu tiên: chết mất 1 tim vĩnh viễn, giết quái được HeartXP để lấy lại tim, linh dược, Lữ Khách áo đỏ giao nhiệm vụ | [Releases](https://github.com/huydangtruong/minecraft-lab/releases) |
 
-## Dùng
+Tên cũ là PermaHearts. Từ 0.8.0 mod đổi tên hiển thị, nhưng save cũ vẫn chạy bình thường (id bên trong không đổi).
 
-Cần JDK 25 (đã cài ở `~/Library/Java/JavaVirtualMachines/temurin-25.jdk`).
+## Cài mod cho người chơi
+
+Cần sẵn: Minecraft Launcher có profile **Fabric Loader cho Minecraft 26.3** (ví dụ cài bằng Essential Installer, chọn Fabric 26.3). Script sẽ tự tìm profile đó, tải mod, kiểm tra file, cài kèm Fabric API nếu thiếu. Script không đụng save và các mod khác (như Essential). Hãy thoát Minecraft trước khi cài.
+
+### Mac
+
+Mở **Terminal** (Cmd+Space, gõ Terminal), dán một dòng này rồi Enter:
 
 ```sh
-scripts/install.sh            # build + cài vào profile "26.3 Fabric Essential" (khởi động lại game sau đó)
-scripts/package.sh            # tạo dist/minecraft-lab-<ngày>.zip gửi bạn (kèm Fabric API và hướng dẫn cài)
-./gradlew :permahearts:runClient   # chạy Minecraft thử riêng, không đụng save thật
+bash <(curl -fsSL https://raw.githubusercontent.com/huydangtruong/minecraft-lab/main/install-mods.command)
 ```
 
-Chơi chung: người host world chạy mod; bạn cần cài **cùng bộ jar** (gói từ `package.sh`). Chi tiết: [docs/README.md](docs/README.md).
+Hoặc tải file [`install-mods.command`](install-mods.command) về, chuột phải → **Open** → Open (lần đầu macOS sẽ cảnh báo vì file tải từ mạng).
 
-## Thêm mod mới
+### Windows
 
-[docs/workflow/new-mod.md](docs/workflow/new-mod.md).
+Tải file [`install-mods.bat`](install-mods.bat) (chỉ cần file này), bấm đúp để chạy. Nếu Windows SmartScreen hiện cảnh báo: bấm **More info** → **Run anyway**.
+
+### Dùng script
+
+1. Chọn mod trong danh sách (gõ số, Enter).
+2. Chọn một trong 6 bản gần nhất. Bản đang cài có chữ `(Installed)`, bản thử nghiệm có chữ `(pre-release)`.
+3. Script tải, kiểm tra, xoá bản cũ của mod đó và chép bản mới vào thư mục `mods` của profile.
+4. Mở Launcher, chọn đúng profile (ví dụ "26.3 Fabric Essential"), bấm Play.
+
+Chơi chung: host và bạn phải cài **cùng phiên bản** mod.
+
+Không dùng được script? Vào [Releases](https://github.com/huydangtruong/minecraft-lab/releases), tải file `.jar` và chép vào thư mục `mods` của profile (kèm Fabric API cùng bản).
+
+## Cho người làm mod (Huy)
+
+Cần JDK 25 (xem [docs/system/00-environment.md](docs/system/00-environment.md)).
+
+```sh
+./gradlew :permahearts:build         # build + test, jar ở mods/permahearts/build/libs/
+./gradlew :permahearts:runClient     # chạy Minecraft thử riêng, không đụng save thật
+scripts/install.sh                   # build + cài vào profile "26.3 Fabric Essential" của Huy
+scripts/release.sh permahearts [--pre]   # đăng một GitHub Release (xem docs/workflow/release.md)
+scripts/test-installer.sh            # thử script cài trên dữ liệu giả, không mạng
+scripts/package.sh                   # zip gửi bạn (cách cũ, dự phòng)
+```
+
+Tài liệu: [docs/README.md](docs/README.md). Thêm mod mới: [docs/workflow/new-mod.md](docs/workflow/new-mod.md). Giấy phép: [MIT](LICENSE).
