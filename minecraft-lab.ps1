@@ -356,6 +356,21 @@ function Show-VersionsMenu([string]$modId, [string]$title) {
     }
 }
 
+# True when version $a is newer than $b (numeric parts, "0.10.0" > "0.9.1"; text after a number is ignored).
+function Test-VersionNewer([string]$a, [string]$b) {
+    $pa = $a.Split('.')
+    $pb = $b.Split('.')
+    $n = [Math]::Max($pa.Count, $pb.Count)
+    for ($i = 0; $i -lt $n; $i++) {
+        $x = 0; $y = 0
+        if ($i -lt $pa.Count -and $pa[$i] -match '^(\d+)') { $x = [long]$Matches[1] }
+        if ($i -lt $pb.Count -and $pb[$i] -match '^(\d+)') { $y = [long]$Matches[1] }
+        if ($x -gt $y) { return $true }
+        if ($x -lt $y) { return $false }
+    }
+    return $false
+}
+
 function Show-ModsMenu {
     while ($true) {
         $mods = @()
@@ -363,7 +378,8 @@ function Show-ModsMenu {
         foreach ($r in $script:Releases) {
             if (-not $seen.ContainsKey($r.Mod)) {
                 $seen[$r.Mod] = $true
-                $mods += New-Object psobject -Property @{ Id = $r.Mod; Title = $r.Title }
+                # Releases are sorted newest first, so the first one seen is the latest version.
+                $mods += New-Object psobject -Property @{ Id = $r.Mod; Title = $r.Title; Latest = $r.Version }
             }
         }
         $width = 0
@@ -371,9 +387,13 @@ function Show-ModsMenu {
         Write-Host ''
         Write-Host ('Minecraft Lab mods  (profile: {0})' -f $script:ProfileName)
         for ($i = 0; $i -lt $mods.Count; $i++) {
+            # Only say something when there is something to do: nothing when up to date.
             $inst = Get-InstalledVersion $mods[$i].Id
-            if ($inst -ne '') {
-                Write-Host ('  {0}) {1}   installed {2}' -f ($i + 1), $mods[$i].Title.PadRight($width), $inst)
+            if ($inst -eq '') {
+                Write-Host ('  {0}) {1}   (not installed)' -f ($i + 1), $mods[$i].Title.PadRight($width))
+            } elseif (Test-VersionNewer $mods[$i].Latest $inst) {
+                Write-Host ('  {0}) {1}   ' -f ($i + 1), $mods[$i].Title.PadRight($width)) -NoNewline
+                Write-Host 'New version' -ForegroundColor Green
             } else {
                 Write-Host ('  {0}) {1}' -f ($i + 1), $mods[$i].Title)
             }

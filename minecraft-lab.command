@@ -319,15 +319,32 @@ install_release() {
 
 # ---------------------------------------------------------------- menus
 
+# version_gt a b: true when version a is newer than b (numeric parts, "0.10.0" > "0.9.1"; text after a number is ignored).
+version_gt() {
+	local IFS=. i=0 x y
+	local -a A B
+	A=($1); B=($2)
+	while [ "$i" -lt "${#A[@]}" ] || [ "$i" -lt "${#B[@]}" ]; do
+		x="${A[$i]:-0}"; y="${B[$i]:-0}"
+		x="${x%%[!0-9]*}"; y="${y%%[!0-9]*}"
+		x=$((10#${x:-0})); y=$((10#${y:-0}))
+		[ "$x" -gt "$y" ] && return 0
+		[ "$x" -lt "$y" ] && return 1
+		i=$((i + 1))
+	done
+	return 1
+}
+
 # Prints the distinct mod ids (newest first) into MOD_IDS[] and titles into MOD_TITLES[].
 list_mods() {
-	MOD_IDS=(); MOD_TITLES=()
+	MOD_IDS=(); MOD_TITLES=(); MOD_LATEST=()
 	local i=0 seen=" "
 	while [ "$i" -lt "${#RT_MOD[@]}" ]; do
 		case "$seen" in *" ${RT_MOD[$i]} "*) ;; *)
 			seen="$seen${RT_MOD[$i]} "
 			MOD_IDS[${#MOD_IDS[@]}]="${RT_MOD[$i]}"
 			MOD_TITLES[${#MOD_TITLES[@]}]="${RT_TITLE[$i]}"
+			MOD_LATEST[${#MOD_LATEST[@]}]="${RT_VER[$i]}"   # releases are newest first, so the first one is the latest
 		;; esac
 		i=$((i + 1))
 	done
@@ -389,8 +406,11 @@ mods_menu() {
 		i=0
 		while [ "$i" -lt "${#MOD_IDS[@]}" ]; do
 			inst="$(installed_version "${MOD_IDS[$i]}")"
-			if [ -n "$inst" ]; then
-				printf '  %d) %-*s   installed %s\n' "$((i + 1))" "$width" "${MOD_TITLES[$i]}" "$inst"
+			# Only say something when there is something to do: nothing when up to date.
+			if [ -z "$inst" ]; then
+				printf '  %d) %-*s   %s\n' "$((i + 1))" "$width" "${MOD_TITLES[$i]}" "(not installed)"
+			elif version_gt "${MOD_LATEST[$i]}" "$inst"; then
+				printf '  %d) %-*s   %sNew version%s\n' "$((i + 1))" "$width" "${MOD_TITLES[$i]}" "$GREEN" "$RESET"
 			else
 				printf '  %d) %s\n' "$((i + 1))" "${MOD_TITLES[$i]}"
 			fi

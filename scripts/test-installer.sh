@@ -97,7 +97,8 @@ run_installer "$T/releases.json" $'1\n1\n\n1\n0\n0'   # mod, version, Enter (run
 rm -f "$T/running"
 [ -n "$SCREENS" ] && printf '%s\n' "$OUT" > "$T/case1.out"
 check "exit code 0" test "$RC" -eq 0
-check "menu shows installed 0.7.1" grep -q 'Immortal Cultivation   installed 0.7.1' <<<"$OUT"
+check "menu says New version (0.7.1 installed, 0.8.0 out)" grep -q '^  1) Immortal Cultivation   New version$' <<<"$OUT"
+check "menu does not show the installed version" bash -c '! grep -q "installed 0" <<<"$1"' _ "$OUT"
 VMENU="$(printf '%s\n' "$OUT" | awk '/^Immortal Cultivation$/{f=1;next} /^  0\) Back/{if(f)exit} f')"
 check "versions menu has exactly 6 versions" test "$(printf '%s\n' "$VMENU" | grep -c '^  [0-9])')" -eq 6
 check "0.7.2 is marked (pre-release)" grep -q '^  2) 0.7.2  (pre-release)$' <<<"$VMENU"
@@ -113,7 +114,7 @@ check "old permahearts-0.7.1.jar removed" test ! -e "$PROFILE_DIR/mods/permahear
 check "Essential untouched" test "$(sum_of "$PROFILE_DIR/mods/Essential-1.5.2-26.3.jar")" = "$ESS"
 check "Fabric API untouched" test "$(sum_of "$PROFILE_DIR/mods/fabric-api-0.166.2+26.3.jar")" = "$API"
 check "mods folder has exactly 3 jars" test "$(mods | wc -l | tr -d ' ')" -eq 3
-check "menu shows installed 0.8.0 afterwards" grep -q 'installed 0.8.0' <<<"$OUT"
+check "menu is plain once up to date" bash -c 'sed -n "/^SUCCESS!/,\$p" <<<"$1" | grep -q "^  1) Immortal Cultivation\$"' _ "$OUT"
 
 # ---- case 1b: exit right after installing
 echo "Case 1b: exit after installing"
