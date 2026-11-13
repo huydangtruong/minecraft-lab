@@ -57,7 +57,7 @@
 - **Lữ Khách không bị quái nhắm** (bất tử vĩnh viễn nên quái bỏ qua).
 - Trùm và quái Trăng máu **xuất hiện ngang tầm** người chơi / Lữ Khách (kể cả trong hang), tìm chỗ đứng quanh Y đó chứ không lấy mặt đất.
 - Trùm bị mất (rơi, unload) thì nút quay về **Summon**; summon lại được, bản cũ nếu trở lại sẽ bị xóa.
-- **Ở 2 ngày Minecraft** (D32) kể từ lúc báo tọa độ; màn hình có dòng đếm ngược "Leaves in"; chat báo trước ~2 phút thực; không rời khi Trăng máu hoặc trùm đang chạy. Rời đi (hết giờ, Give up, xong hết) thì 4 ngày sau mới có Lữ Khách mới; chuyến đầu tiên của world vẫn 3–5 ngày.
+- **Ở 2 ngày Minecraft** (D32) kể từ lúc báo tọa độ; màn hình có dòng đếm ngược "Leaves in"; chat báo trước ~2 phút thực; không rời khi Trăng máu hoặc trùm đang chạy. Rời đi (hết giờ, Give up, xong hết) thì 4 ngày sau mới có Lữ Khách mới; chuyến đầu tiên của world cũng 4 ngày.
 - Thủ lĩnh và đệ tử không bị mặt trời thiêu (mũ không vỡ).
 - `/quest` in thêm thời gian còn lại.
 
