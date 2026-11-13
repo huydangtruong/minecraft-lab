@@ -39,7 +39,7 @@
 
 ## Lữ Khách và nhiệm vụ (0.5.0–0.6.0, D12–D14)
 
-- Mỗi 3–5 ngày Minecraft (ngẫu nhiên): chọn một người chơi ở Overworld, lấy điểm cách ~900–1100 block hướng ngẫu nhiên, báo mọi người "Một Lữ Khách đang chờ ở X, Z". NPC hiện khi có người trong ~96 block. Trên mặt nước: đặt bè gỗ 3×3.
+- Mỗi 3–5 ngày Minecraft (ngẫu nhiên): chọn một người chơi ở Overworld, lấy điểm cách ~450–550 block (D27) hướng ngẫu nhiên, báo mọi người "Một Lữ Khách đang chờ ở X, Z". NPC hiện khi có người trong ~96 block. Trên mặt nước: đặt bè gỗ 3×3.
 - NPC: Wandering Trader đứng yên, bất tử, không biến mất, tên "Lữ Khách". Bấm vào: màn hình nhiệm vụ (không phải bảng trao đổi).
 - Màn hình: lời giới thiệu + **Nhận** → danh sách 2–4 dòng. Mọi người thấy cùng tiến độ.
   - **Thu thập**: "Tìm 64 Sắt" + ô bỏ đồ; bỏ vào là trừ đồ, cộng tiến độ, dư trả lại. Số lượng (D18): 64 sắt / than / redstone / lapis / cà rốt / khoai tây / lúa mì / gỗ sồi · 48 vàng / thịt cừu / thịt bò / xương / tơ / da · 32 thuốc súng / ngọc ender · 16 kim cương / ngọc lục bảo.
@@ -48,7 +48,7 @@
   - **Thám hiểm** (0.6.0): "Đặt chân tới một Làng/Đền sa mạc/…".
   - **Hạ thủ lĩnh** (0.6.0): nút Triệu hồi → trùm to gấp đôi, 150 máu, 4 đệ tử, cạnh NPC. Trùm: Zombie, Skeleton, Evoker (đệ tử là Vindicator), Blaze, Vindicator Chieftain.
 - Dòng xong → ô thưởng có 1 linh dược ngẫu nhiên; ai lấy trước được. Xong hết + lấy hết thưởng → NPC chào và đi, đếm lại 3–5 ngày.
-- Lệnh: `/quest` (NPC ở đâu, còn bao lâu, tiến độ). Admin: `/quest summon` (gọi NPC ngay cạnh mình với nhiệm vụ mới), `/quest skip` (NPC xuất hiện ngay ở ~1000 block), `/quest complete <dòng>`, `/quest reset`.
+- Lệnh: `/quest` (NPC ở đâu, còn bao lâu, tiến độ). Admin: `/quest summon` (gọi NPC ngay cạnh mình với nhiệm vụ mới), `/quest skip` (NPC xuất hiện ngay ở ~500 block), `/quest complete <dòng>`, `/quest reset`.
 
 ## 0.7.1 (P-008, D19, D20)
 

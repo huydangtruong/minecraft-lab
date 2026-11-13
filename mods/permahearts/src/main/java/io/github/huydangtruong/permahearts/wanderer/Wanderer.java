@@ -87,7 +87,7 @@ public final class Wanderer {
 
 	// ---- life cycle ----
 
-	/** WAITING -> PLANNED at a point 900..1100 blocks from the given player. */
+	/** WAITING -> PLANNED at a point 450..550 blocks from the given player. */
 	public static void plan(MinecraftServer server, ServerPlayer near) {
 		double[] off = QuestGenerator.planOffset(RNG);
 		int x = (int) Math.round(near.getX() + off[0]);

@@ -201,11 +201,11 @@ public class WandererGameTest {
 			boolean ok = false;
 			for (ServerPlayer q : s.overworld().players()) {
 				double dist = Math.hypot(q.getX() - d.x(), q.getZ() - d.z());
-				ok |= dist >= 899 && dist <= 1101;
+				ok |= dist >= 449 && dist <= 551;
 			}
 			double own = Math.hypot(p.getX() - d.x(), p.getZ() - d.z());
-			ok |= own >= 899 && own <= 1101;
-			context.assertTrue(ok, "planned point should be 900..1100 blocks from a player");
+			ok |= own >= 449 && own <= 551;
+			context.assertTrue(ok, "planned point should be 450..550 blocks from a player");
 			context.succeed();
 		} finally {
 			Wanderer.reset(s);

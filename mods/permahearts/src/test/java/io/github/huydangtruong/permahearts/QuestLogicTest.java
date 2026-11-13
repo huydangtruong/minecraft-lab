@@ -77,7 +77,7 @@ class QuestLogicTest {
 			assertTrue(back >= 5 && back <= 7, "return " + back);
 			double[] o = QuestGenerator.planOffset(r);
 			double dist = Math.hypot(o[0], o[1]);
-			assertTrue(dist >= 899.9 && dist <= 1100.1, "dist " + dist);
+			assertTrue(dist >= 449.9 && dist <= 550.1, "dist " + dist);
 		}
 	}
 
