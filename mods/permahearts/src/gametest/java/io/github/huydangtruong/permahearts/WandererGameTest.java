@@ -176,7 +176,7 @@ public class WandererGameTest {
 			context.assertTrue(npc.isRemoved(), "NPC should be gone");
 			context.assertTrue(d.phase() == Phase.WAITING, "phase should be WAITING, was " + d.phase());
 			long days = d.nextDay() - Wanderer.currentDay(s);
-			context.assertTrue(days >= 5 && days <= 7, "next visit in 5..7 days, was " + days);
+			context.assertTrue(days == 4, "next visit in 4 days, was " + days);
 			context.succeed();
 		} finally {
 			Wanderer.reset(s);
@@ -481,7 +481,7 @@ public class WandererGameTest {
 			context.assertTrue(d.quest().isEmpty() && d.boss().isEmpty() && d.bloodMoon().isEmpty(), "no quest, boss state or event");
 			context.assertTrue(tagged(s, QuestBoss.TAG).isEmpty() && tagged(s, QuestBoss.MINION_TAG).isEmpty(), "boss and minions gone");
 			long days = d.nextDay() - Wanderer.currentDay(s);
-			context.assertTrue(days >= 5 && days <= 7, "next visit in 5..7 days, was " + days);
+			context.assertTrue(days == 4, "next visit in 4 days, was " + days);
 			context.assertTrue(!Wanderer.giveUp(s, p), "give up while WAITING does nothing");
 			context.succeed();
 		} finally {
@@ -504,7 +504,7 @@ public class WandererGameTest {
 			context.assertTrue(r == 1 && d.phase() == Phase.WAITING, "giveup should end the visit, phase " + d.phase());
 			context.assertTrue(npc.isRemoved(), "NPC should be gone");
 			long days = d.nextDay() - Wanderer.currentDay(s);
-			context.assertTrue(days >= 5 && days <= 7, "next visit in 5..7 days, was " + days);
+			context.assertTrue(days == 4, "next visit in 4 days, was " + days);
 			int again = s.getCommands().getDispatcher().execute("quest giveup", src);
 			context.assertTrue(again == 0, "nothing to give up while WAITING");
 			context.succeed();
@@ -543,7 +543,7 @@ public class WandererGameTest {
 			context.assertTrue(d.phase() == Phase.WAITING, "phase should be WAITING, was " + d.phase());
 			context.assertTrue(npc.isRemoved(), "NPC should be gone");
 			long days = d.nextDay() - Wanderer.currentDay(s);
-			context.assertTrue(days >= 5 && days <= 7, "next visit in 5..7 days, was " + days);
+			context.assertTrue(days == 4, "next visit in 4 days, was " + days);
 			context.succeed();
 		} finally {
 			Wanderer.reset(s);

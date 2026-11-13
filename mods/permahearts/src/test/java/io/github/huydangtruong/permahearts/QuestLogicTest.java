@@ -72,9 +72,9 @@ class QuestLogicTest {
 		Random r = new Random(7);
 		for (int i = 0; i < 200; i++) {
 			int d = QuestGenerator.daysUntilNext(r);
-			assertTrue(d >= 3 && d <= 5);
+			assertTrue(d == 4, "next " + d);
 			int back = QuestGenerator.daysUntilReturn(r);
-			assertTrue(back >= 5 && back <= 7, "return " + back);
+			assertTrue(back == 4, "return " + back);
 			double[] o = QuestGenerator.planOffset(r);
 			double dist = Math.hypot(o[0], o[1]);
 			assertTrue(dist >= 449.9 && dist <= 550.1, "dist " + dist);

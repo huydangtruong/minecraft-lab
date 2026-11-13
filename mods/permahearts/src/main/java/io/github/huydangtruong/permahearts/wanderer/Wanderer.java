@@ -33,7 +33,7 @@ import net.minecraft.world.item.ItemStack;
  */
 public final class Wanderer {
 	/** The visit lasts 3 Minecraft days of the overworld clock (D20). */
-	public static final long STAY_TICKS = 3 * 24000L;
+	public static final long STAY_TICKS = 2 * 24000L; // 2 Minecraft days (D32)
 	/** One chat warning goes out this many ticks before the Wanderer leaves. */
 	public static final long WARN_TICKS = 2400L;
 	private static final RandomGenerator RNG = new java.util.Random();
@@ -311,7 +311,7 @@ public final class Wanderer {
 		return new ItemStack(ElixirItems.get(stat.get()));
 	}
 
-	/** If every line is done and claimed: the NPC says goodbye and leaves, and the next visit is 3..5 days away. */
+	/** If every line is done and claimed: the NPC says goodbye and leaves, and the next visit is 4 days away. */
 	public static void farewellIfFinished(MinecraftServer server) {
 		WandererData d = data(server);
 		if (d.phase() != Phase.PRESENT || d.quest().isEmpty() || !d.quest().get().allDoneAndClaimed()) {
@@ -348,7 +348,7 @@ public final class Wanderer {
 
 	/**
 	 * The visit ends: events stop (no fail message), their mobs, the boss and the minions go, the NPC leaves with all
-	 * unclaimed rewards, and the next Wanderer comes in 3..5 days.
+	 * unclaimed rewards, and the next Wanderer comes in 4 days.
 	 */
 	public static void leave(MinecraftServer server, Component message) {
 		WandererData d = data(server);

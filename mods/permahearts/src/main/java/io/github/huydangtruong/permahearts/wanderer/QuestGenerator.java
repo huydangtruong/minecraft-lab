@@ -135,14 +135,14 @@ public final class QuestGenerator {
 		return new Quest(id, List.copyOf(lines), false);
 	}
 
-	/** 3..5 days inclusive. */
+	/** Always 4 days (D32); rng kept so callers and saves stay the same. */
 	public static int daysUntilNext(RandomGenerator rng) {
-		return 3 + rng.nextInt(3);
+		return 4;
 	}
 
-	/** 5..7 days inclusive: the wait after a Wanderer left (time up, Give up or all lines claimed). */
+	/** 4 days (D32): the wait after a Wanderer left (time up, Give up or all lines claimed). */
 	public static int daysUntilReturn(RandomGenerator rng) {
-		return 5 + rng.nextInt(3);
+		return 4;
 	}
 
 	/** {dx, dz}: random direction, distance 450..550 (D27). */
