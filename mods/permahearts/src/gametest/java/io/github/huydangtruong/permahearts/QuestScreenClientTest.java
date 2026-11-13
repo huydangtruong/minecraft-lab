@@ -44,6 +44,7 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 			bossesLiveOnTheSurface(context, server);
 			caveBoss(context, server);
 			statsPanel(context, server);
+			bloodMoonEdge(context, server);
 		}
 	}
 
@@ -107,6 +108,31 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 		}
 		context.takeScreenshot("09-stats-panel");
 		context.runOnClient(mc -> mc.player.closeContainer());
+		server.runCommand("gamemode creative @a");
+	}
+
+	/** D33: during a Blood Moon the 96 x 96 arena edge around the Crimson Master shows as red dust near the player. */
+	private static void bloodMoonEdge(ClientGameTestContext context, TestServerContext server) {
+		server.runCommand("gamemode survival @a");
+		server.runCommand("difficulty peaceful"); // no attackers in the picture: only the edge
+		server.runOnServer(s -> {
+			ServerPlayer p = s.getPlayerList().getPlayers().get(0);
+			Wanderer.startQuestForTest(s.overworld(), p.blockPosition(), new Quest(3, List.of(
+				new QuestLine(QuestType.BLOOD_MOON, "minecraft:zombie", 1, 0, "strength", false)), false));
+			Wanderer.accept(s);
+			Wanderer.startEvent(s, 0, p);
+			var d = Wanderer.data(s);
+			int x = d.x() + 44;
+			int y = s.overworld().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, d.z());
+			p.teleportTo(s.overworld(), x + 0.5, y, d.z() + 0.5, java.util.Set.of(), -90f, 10f, false);
+		});
+		context.waitTicks(60);
+		context.takeScreenshot("10-blood-moon-edge");
+		server.runOnServer(s -> {
+			io.github.huydangtruong.permahearts.wanderer.BloodMoon.moveClock(s, false);
+			Wanderer.reset(s);
+		});
+		server.runCommand("difficulty normal");
 		server.runCommand("gamemode creative @a");
 	}
 

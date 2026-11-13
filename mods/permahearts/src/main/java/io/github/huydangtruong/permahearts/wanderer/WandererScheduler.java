@@ -29,6 +29,9 @@ public final class WandererScheduler {
 			if (t % 20 == 0 && !PermaHearts.enabled(server)) {
 				WandererBar.hide(); // switch off: no Crimson Master bar
 			}
+			if (PermaHearts.enabled(server)) {
+				BloodMoon.barrierTick(server); // every tick, so nobody slips across the arena edge (D33)
+			}
 			if (t % 20 == 0 && PermaHearts.enabled(server)) {
 				work(server, t % 100 == 0);
 				WandererBar.tick(server);

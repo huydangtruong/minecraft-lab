@@ -134,6 +134,7 @@ public class PermaHearts implements ModInitializer {
 		});
 		// Fabric copies attachments old -> new player in its own AFTER_RESPAWN listener (default phase). Run after it,
 		// or that copy overwrites what we set (docs/system/02-findings.md). Data is read from the old player anyway.
+		ServerPlayerEvents.AFTER_RESPAWN.register((old, p, alive) -> BloodMoon.onRespawn(p));
 		ServerPlayerEvents.AFTER_RESPAWN.addPhaseOrdering(Event.DEFAULT_PHASE, AFTER_ATTACHMENT_COPY);
 		ServerPlayerEvents.AFTER_RESPAWN.register(AFTER_ATTACHMENT_COPY, (old, p, alive) -> {
 			HeartsData before = HeartsAttachment.get(old);

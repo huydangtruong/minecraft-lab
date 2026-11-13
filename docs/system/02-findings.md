@@ -147,3 +147,8 @@ Tên và chữ ký dưới đây lấy từ `javap` jar 26.3 và mã Fabric API 
 - `InventoryScreen extends AbstractRecipeBookScreen`: field `recipeBookComponent` (`isVisible`, `toggleVisibility`, `updateScreenPosition`), recipe button at `(leftPos + 104, height / 2 - 22)`; `leftPos`, `topPos`, `imageWidth` on `AbstractContainerScreen` (client accessors in `permahearts.client.mixins.json`). `hasClickedOutside(double, double, int, int)` decides item drops.
 - Minecraft: the current screen is `mc.gui.screen()`; `Minecraft#setScreen`. A creative player opening `InventoryScreen` gets `CreativeModeInventoryScreen`. Client test: `context.setScreen(supplier)`, `context.clickScreenButton(label)`.
 - Respawn: `ServerPlayer#getRespawnConfig()` (null = none) → `respawnData()` (`pos()`, `dimension()`); world spawn `MinecraftServer#getRespawnData()`. Attribute modifier ops in order `ADD_VALUE`, `ADD_MULTIPLIED_BASE` (multiplies base + flat adds), `ADD_MULTIPLIED_TOTAL`.
+
+## Blood Moon arena (D33)
+
+- `GameTestHelper#makeMockServerPlayerInLevel` players always answer `isCreative() == true`, whatever `setGameMode` says; code that skips creative players needs a test switch (`BloodMoon.barrier(server, players, checkGameMode)`).
+- Keeping a player in place: `ServerPlayer#teleportTo(ServerLevel, x, y, z, Set.of(), yRot, xRot, false)` after `stopRiding()`, then `setDeltaMovement(Vec3.ZERO)`. Red dust: `new DustParticleOptions(0xRRGGBB, scale)` with `ServerLevel#sendParticles`.

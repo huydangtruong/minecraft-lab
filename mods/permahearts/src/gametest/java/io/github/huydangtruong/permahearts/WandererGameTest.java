@@ -288,6 +288,44 @@ public class WandererGameTest {
 	}
 
 	@GameTest(maxTicks = 100)
+	public void bloodMoonArenaBarrier(GameTestHelper context) {
+		MinecraftServer s = context.getLevel().getServer();
+		try {
+			enable(context, true);
+			Wanderer.startQuestForTest(context.getLevel(), context.absolutePos(new BlockPos(1, 1, 1)),
+				eventQuest(new QuestLine(QuestType.BLOOD_MOON, "minecraft:zombie", 1, 0, "strength", false), testQuest().lines().get(1)));
+			Wanderer.accept(s);
+			ServerPlayer p = testPlayer(context);
+			context.assertTrue(Wanderer.startEvent(s, 0, p), "start should work");
+			WandererData d = Wanderer.data(s);
+			context.assertTrue(io.github.huydangtruong.permahearts.wanderer.BloodMoonArena.inside(p.getX(), p.getZ(), d.x(), d.z()),
+				"the starter stands in the arena");
+			double x0 = p.getX();
+			double z0 = p.getZ();
+			BloodMoon.barrier(s, List.of(p), false); // first sight: inside
+			p.teleportTo(x0 + 100, p.getY(), z0);
+			BloodMoon.barrier(s, List.of(p), false);
+			context.assertTrue(Math.abs(p.getX() - x0) < 1 && Math.abs(p.getZ() - z0) < 1, "a player inside is put back, at x " + p.getX());
+			// respawned far away: kept out
+			BloodMoon.onRespawn(p);
+			p.teleportTo(x0 + 100, p.getY(), z0);
+			BloodMoon.barrier(s, List.of(p), false);
+			p.teleportTo(x0, p.getY(), z0);
+			BloodMoon.barrier(s, List.of(p), false);
+			context.assertTrue(Math.abs(p.getX() - (x0 + 100)) < 1, "a player outside cannot come in, at x " + p.getX());
+			// after the event everyone is free
+			BloodMoon.moveClock(s, false);
+			Wanderer.reset(s);
+			p.teleportTo(x0, p.getY(), z0);
+			BloodMoon.barrier(s, List.of(p), false);
+			context.succeed();
+		} finally {
+			BloodMoon.moveClock(s, false);
+			Wanderer.reset(s);
+		}
+	}
+
+	@GameTest(maxTicks = 100)
 	public void bloodMoonHorsemen(GameTestHelper context) {
 		MinecraftServer s = context.getLevel().getServer();
 		try {
@@ -300,7 +338,7 @@ public class WandererGameTest {
 			BloodMoon.wave(s, List.of(p));
 			List<? extends Mob> spawned = tagged(s, BloodMoon.TAG);
 			long horses = spawned.stream().filter(m -> m instanceof net.minecraft.world.entity.animal.equine.ZombieHorse).count();
-			context.assertTrue(horses == BloodMoon.PER_WAVE, "a wave should bring 5 zombie horses, got " + horses);
+			context.assertTrue(horses == BloodMoon.PER_WAVE, "a wave should bring " + BloodMoon.PER_WAVE + " zombie horses, got " + horses);
 			for (Mob m : spawned) {
 				if (m instanceof net.minecraft.world.entity.animal.equine.ZombieHorse h) {
 					context.assertTrue(h.getFirstPassenger() instanceof net.minecraft.world.entity.monster.zombie.Zombie z
