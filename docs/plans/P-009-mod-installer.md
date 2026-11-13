@@ -2,7 +2,7 @@
 
 > **Tóm tắt cho Huy (VN, ≤ 3 dòng):** đổi tên hiển thị PermaHearts → **Immortal Cultivation** (giữ id để không mất save). Mỗi bản mod thành một GitHub Release. File `minecraft-lab` ở gốc repo (Mac + Windows): chọn mod → chọn 1 trong 6 bản gần nhất (có chữ Installed) → script tự tải, kiểm tra, tìm đúng thư mục mods và cài.
 
-- **Status:** ready
+- **Status:** merged
 - **Mod / decision:** `permahearts`, D22, D23, D24 · **Branch:** `feat/P-009-mod-installer` · **Depends on:** none
 
 ## Goal
