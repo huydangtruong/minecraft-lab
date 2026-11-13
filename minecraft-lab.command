@@ -14,6 +14,14 @@ MC_ROOT="${MC_DIR:-$HOME/Library/Application Support/minecraft}"
 TAB="$(printf "\t")"
 SEP=$'\037'
 
+# Colours only on a real terminal (tests capture plain text).
+if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
+	GREEN=$'\033[1;32m'; RED=$'\033[1;31m'; RESET=$'\033[0m'
+else
+	GREEN=""; RED=""; RESET=""
+fi
+err() { printf '%s%s%s\n' "$RED" "$*" "$RESET" >&2; }
+
 TMP="$(mktemp -d "${TMPDIR:-/tmp}/mclab-installer.XXXXXX")" || { echo "Cannot create a temp folder." >&2; exit 1; }
 trap 'rm -rf "$TMP"' EXIT
 RJSON="$TMP/releases.json"
@@ -253,12 +261,12 @@ install_release() {
 	echo
 	echo "Installing $title $ver"
 	echo "Downloading release.json..."
-	url="$(asset_url "$idx" "release.json")" || { echo "ERROR: this release has no release.json." >&2; return 1; }
-	curl -fsSL -o "$work/release.json" "$url" || { echo "ERROR: could not download release.json." >&2; return 1; }
+	url="$(asset_url "$idx" "release.json")" || { err "ERROR: this release has no release.json."; return 1; }
+	curl -fsSL -o "$work/release.json" "$url" || { err "ERROR: could not download release.json."; return 1; }
 	jar="$(jget jar "$work/release.json")"; want="$(jget sha256 "$work/release.json")"
 	mc="$(jget minecraft "$work/release.json")"; fab="$(jget fabric_api "$work/release.json")"
-	if [ -z "$jar" ] || [ -z "$want" ]; then echo "ERROR: release.json is incomplete." >&2; return 1; fi
-	case "$jar" in */*|*..*) echo "ERROR: release.json has a bad jar name." >&2; return 1 ;; esac
+	if [ -z "$jar" ] || [ -z "$want" ]; then err "ERROR: release.json is incomplete."; return 1; fi
+	case "$jar" in */*|*..*) err "ERROR: release.json has a bad jar name."; return 1 ;; esac
 
 	if [ -n "$mc" ] && [ "$mc" != "$PROFILE_MC" ]; then
 		echo "This version is for Minecraft $mc. Pick the matching profile."
@@ -267,15 +275,15 @@ install_release() {
 	fi
 
 	echo "Downloading $jar..."
-	url="$(asset_url "$idx" "$jar")" || { echo "ERROR: the release has no file $jar." >&2; return 1; }
-	curl -fsSL -o "$work/$jar" "$url" || { echo "ERROR: could not download $jar." >&2; return 1; }
+	url="$(asset_url "$idx" "$jar")" || { err "ERROR: the release has no file $jar."; return 1; }
+	curl -fsSL -o "$work/$jar" "$url" || { err "ERROR: could not download $jar."; return 1; }
 
 	echo "Verifying checksum (sha256)..."
 	got="$(shasum -a 256 "$work/$jar" | cut -d' ' -f1)"
 	want="$(printf '%s' "$want" | tr 'A-F' 'a-f')"
 	if [ "$got" != "$want" ]; then
 		rm -f "$work/$jar"
-		echo "ERROR: sha256 mismatch for $jar" >&2
+		err "ERROR: sha256 mismatch for $jar"
 		echo "  expected $want" >&2
 		echo "  got      $got" >&2
 		echo "The download is damaged or was changed. Nothing was installed and your mods folder is untouched." >&2
@@ -287,22 +295,25 @@ install_release() {
 		fabjar="fabric-api-$fab.jar"
 		url="https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/$fab/$fabjar"
 		echo "Fabric API is missing. Downloading $fabjar..."
-		curl -fsSL -o "$work/$fabjar" "$url" || { echo "ERROR: could not download Fabric API." >&2; return 1; }
+		curl -fsSL -o "$work/$fabjar" "$url" || { err "ERROR: could not download Fabric API."; return 1; }
 		fabsha="$(curl -fsSL "$url.sha1" | tr -d ' \r\n')"
 		got="$(shasum -a 1 "$work/$fabjar" | cut -d' ' -f1)"
 		if [ -z "$fabsha" ] || [ "$got" != "$fabsha" ]; then
-			echo "ERROR: sha1 mismatch for Fabric API. Nothing was installed." >&2
+			err "ERROR: sha1 mismatch for Fabric API. Nothing was installed."
 			return 1
 		fi
-		cp "$work/$fabjar" "$MODS_DIR/" || { echo "ERROR: cannot write to $MODS_DIR" >&2; return 1; }
+		cp "$work/$fabjar" "$MODS_DIR/" || { err "ERROR: cannot write to $MODS_DIR"; return 1; }
 		echo "Installed $fabjar."
 	fi
 
 	echo "Removing old versions of $title..."
 	remove_mod_jars "$MODS_DIR" "$mod"
 	echo "Copying $jar to the mods folder..."
-	cp "$work/$jar" "$MODS_DIR/$jar" || { echo "ERROR: cannot write to $MODS_DIR" >&2; return 1; }
-	echo "Installed $title $ver into $MODS_DIR. Start Minecraft with the \"$PROFILE_NAME\" profile."
+	cp "$work/$jar" "$MODS_DIR/$jar" || { err "ERROR: cannot write to $MODS_DIR"; return 1; }
+	echo
+	printf '%sSUCCESS! %s %s is installed.%s\n' "$GREEN" "$title" "$ver" "$RESET"
+	echo "Mods folder: $MODS_DIR"
+	echo "Start Minecraft with the \"$PROFILE_NAME\" profile."
 	return 0
 }
 
@@ -347,7 +358,18 @@ versions_menu() { # mod id, title
 			pos="${VPOS[$((REPLY - 1))]}"
 			install_release "$pos" || INSTALL_FAILED=1
 			scan_installed
-			return 0
+			# Do not jump straight back into a menu: let the player read the result first.
+			echo
+			echo "  1) Back to the version list"
+			echo "  0) Exit"
+			while :; do
+				ask "Choose and press Enter: "
+				case "$REPLY" in
+					1) continue 2 ;;
+					0) exit "$INSTALL_FAILED" ;;
+				esac
+				echo "Please type 1 or 0."
+			done
 		fi
 		echo "Please type a number from the list."
 	done
