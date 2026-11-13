@@ -178,6 +178,27 @@ public final class Messages {
 		return Component.translatableWithFallback("permahearts.wanderer.leaving_soon", "The Crimson Master will leave soon");
 	}
 
+	// ---- Crimson Master announcements (0.8.1, D26) ----
+
+	public static Component masterTitle() {
+		return Component.translatableWithFallback("permahearts.wanderer.title", "Crimson Master")
+			.withStyle(net.minecraft.ChatFormatting.DARK_RED, net.minecraft.ChatFormatting.BOLD);
+	}
+
+	public static Component masterArrivedSubtitle(int x, int z) {
+		return Component.translatableWithFallback("permahearts.wanderer.title_arrived", "is waiting at X %s, Z %s", x, z)
+			.withStyle(net.minecraft.ChatFormatting.GOLD);
+	}
+
+	public static Component masterLeavingSubtitle(int x, int z) {
+		return Component.translatableWithFallback("permahearts.wanderer.title_leaving", "leaves soon! X %s, Z %s", x, z)
+			.withStyle(net.minecraft.ChatFormatting.GOLD);
+	}
+
+	public static Component masterBar(int x, int z, String timeLeft) {
+		return Component.translatableWithFallback("permahearts.wanderer.bar", "Crimson Master: X %s, Z %s · leaves in %s", x, z, timeLeft);
+	}
+
 	public static Component leftAfterStay() {
 		return Component.translatableWithFallback("permahearts.wanderer.left_after_stay", "The Crimson Master's time is up. The Crimson Master moves on");
 	}

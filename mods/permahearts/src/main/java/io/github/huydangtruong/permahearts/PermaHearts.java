@@ -116,6 +116,7 @@ public class PermaHearts implements ModInitializer {
 		});
 		ServerPlayerEvents.JOIN.register(p -> {
 			BloodMoon.onJoin(p);
+			Wanderer.onJoin(p);
 			HeartsAttachment.setActive(p, enabled(p.level().getServer()));
 			HealthApplier.apply(p, false);
 		});

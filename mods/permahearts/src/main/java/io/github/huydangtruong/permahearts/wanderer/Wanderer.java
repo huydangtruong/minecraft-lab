@@ -95,6 +95,8 @@ public final class Wanderer {
 		save(server, data(server).withPhase(Phase.PLANNED).withPos(x, 0, z).withNpc(Optional.empty()).withQuest(Optional.empty())
 			.withLeaveAt(clockTime(server) + STAY_TICKS).withWarned(false));
 		server.getPlayerList().broadcastSystemMessage(Messages.wandererPlanned(x, z), false);
+		WandererBar.announceArrival(server, x, z);
+		WandererBar.tick(server);
 	}
 
 	public static Quest newQuest(MinecraftServer server) {
@@ -357,10 +359,20 @@ public final class Wanderer {
 		d.quest().ifPresent(q -> REWARDS.remove(q.id()));
 		BloodMoon.onReset(server);
 		QuestBoss.onReset(server);
+		WandererBar.hide();
 		save(server, d.withPhase(Phase.WAITING).withNpc(Optional.empty()).withQuest(Optional.empty())
 			.withBloodMoon(Optional.empty()).withBoss(Optional.empty()).withLeaveAt(-1L).withWarned(false)
 			.withNextDay(currentDay(server) + QuestGenerator.daysUntilReturn(RNG)));
 		server.getPlayerList().broadcastSystemMessage(message, false);
+	}
+
+	/** A player joins during a visit: repeat where the Crimson Master is (the bar follows on the next pass). */
+	public static void onJoin(ServerPlayer p) {
+		MinecraftServer server = p.level().getServer();
+		WandererData d = data(server);
+		if (io.github.huydangtruong.permahearts.PermaHearts.enabled(server) && (d.phase() == Phase.PLANNED || d.phase() == Phase.PRESENT)) {
+			p.sendSystemMessage(Messages.wandererPlanned(d.x(), d.z()));
+		}
 	}
 
 	/** Removes the NPC and forgets everything (admin and tests). */
@@ -372,6 +384,7 @@ public final class Wanderer {
 		REWARDS.clear();
 		BloodMoon.onReset(server);
 		QuestBoss.onReset(server);
+		WandererBar.hide();
 		save(server, WandererData.DEFAULT);
 	}
 

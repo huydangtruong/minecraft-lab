@@ -40,9 +40,31 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 			server.runCommand("weather clear");
 			context.waitTicks(40);
 			shots(context, server, ""); // the mod's text is English only (D16)
+			announcement(context, server);
 			bossesLiveOnTheSurface(context, server);
 			caveBoss(context, server);
 		}
+	}
+
+	/** D26: when a visit is planned every player gets a big title and a boss bar with the coordinates; leaving hides the bar. */
+	private static void announcement(ClientGameTestContext context, TestServerContext server) {
+		context.runOnClient(mc -> mc.player.closeContainer());
+		server.runOnServer(s -> {
+			Wanderer.reset(s);
+			Wanderer.plan(s, s.getPlayerList().getPlayers().get(0));
+		});
+		context.waitTicks(25);
+		context.takeScreenshot("07-master-announced");
+		String bar = server.computeOnServer(s -> io.github.huydangtruong.permahearts.wanderer.WandererBar.text());
+		if (!bar.startsWith("Crimson Master: X ")) {
+			throw new AssertionError("boss bar missing or wrong: \"" + bar + "\"");
+		}
+		server.runOnServer(s -> Wanderer.leave(s, net.minecraft.network.chat.Component.literal("test")));
+		context.waitTicks(25);
+		if (server.computeOnServer(s -> io.github.huydangtruong.permahearts.wanderer.WandererBar.shown())) {
+			throw new AssertionError("boss bar still shown after the Crimson Master left");
+		}
+		server.runOnServer(Wanderer::reset);
 	}
 
 	private static Quest bossQuest(String type) {
