@@ -40,7 +40,27 @@ public final class HeartsAttachment {
 		Identifier.fromNamespaceAndPath(PermaHearts.MOD_ID, "wanderer"),
 		b -> b.persistent(Codec.BOOL).syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()));
 
+	/**
+	 * Death Match: this player's current death fell to another player during a match, so hearts, items and XP are kept.
+	 * Saved and copied on death (a host that quits on the death screen still respawns correctly); cleared after respawn.
+	 */
+	public static final AttachmentType<Boolean> DM_PROTECTED = AttachmentRegistry.create(
+		Identifier.fromNamespaceAndPath(PermaHearts.MOD_ID, "dm_protected"),
+		b -> b.persistent(Codec.BOOL).copyOnDeath().initializer(() -> false));
+
 	private HeartsAttachment() {}
+
+	public static boolean isDeathMatchProtected(ServerPlayer p) {
+		return p.getAttachedOrElse(DM_PROTECTED, false);
+	}
+
+	public static void setDeathMatchProtected(ServerPlayer p, boolean on) {
+		if (on) {
+			p.setAttached(DM_PROTECTED, true);
+		} else {
+			p.removeAttached(DM_PROTECTED);
+		}
+	}
 
 	public static CultivationData getCultivation(ServerPlayer p) {
 		return p.getAttachedOrCreate(CULTIVATION);

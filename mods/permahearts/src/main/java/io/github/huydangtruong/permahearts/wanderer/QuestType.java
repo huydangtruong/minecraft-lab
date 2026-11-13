@@ -6,7 +6,8 @@ public enum QuestType {
 	KILL,
 	BLOOD_MOON,
 	EXPLORE,
-	BOSS;
+	BOSS,
+	DEATH_MATCH;
 
 	/** Event lines have no item slot; they are started or completed by something happening in the world. */
 	public boolean isEvent() {

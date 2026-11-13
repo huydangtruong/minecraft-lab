@@ -50,8 +50,11 @@ public final class QuestGenerator {
 
 	private QuestGenerator() {}
 
-	private static QuestType pickType(RandomGenerator rng) {
-		int r = rng.nextInt(30 + 30 + 15 + 12 + 13);
+	/** Weight of a Death Match line (same as a Blood Moon line); only in the draw when 2+ players are online. */
+	private static final int DEATH_MATCH_WEIGHT = 12;
+
+	private static QuestType pickType(RandomGenerator rng, boolean offerDeathMatch) {
+		int r = rng.nextInt(30 + 30 + 15 + 12 + 13 + (offerDeathMatch ? DEATH_MATCH_WEIGHT : 0));
 		if (r < 30) {
 			return QuestType.COLLECT;
 		} else if (r < 60) {
@@ -61,7 +64,7 @@ public final class QuestGenerator {
 		} else if (r < 87) {
 			return QuestType.BLOOD_MOON;
 		}
-		return QuestType.BOSS;
+		return r < 100 ? QuestType.BOSS : QuestType.DEATH_MATCH;
 	}
 
 	private static String pickWeighted(List<Weighted> pool, RandomGenerator rng) {
@@ -79,7 +82,14 @@ public final class QuestGenerator {
 		return pool.get(0).id();
 	}
 
+	/** Same as generate(id, rng, 1): no Death Match line. */
 	public static Quest generate(long id, RandomGenerator rng) {
+		return generate(id, rng, 1);
+	}
+
+	/** online = players online now; a Death Match line is only possible with 2 or more. */
+	public static Quest generate(long id, RandomGenerator rng, int online) {
+		boolean offerDeathMatch = DeathMatchRules.canOffer(online);
 		int n = 2 + rng.nextInt(3);
 		List<QuestLine> lines = new ArrayList<>();
 		Set<String> used = new HashSet<>();
@@ -87,7 +97,7 @@ public final class QuestGenerator {
 		boolean bossUsed = false;
 		boolean moonUsed = false;
 		while (lines.size() < n) {
-			QuestType type = pickType(rng);
+			QuestType type = pickType(rng, offerDeathMatch);
 			String target;
 			int required = 1;
 			switch (type) {
@@ -104,6 +114,7 @@ public final class QuestGenerator {
 				case EXPLORE -> target = pickWeighted(EXPLORE, rng);
 				case BOSS -> target = pickWeighted(BOSS, rng);
 				case BLOOD_MOON -> target = BLOOD_MOON.get(rng.nextInt(BLOOD_MOON.size()));
+				case DEATH_MATCH -> target = DeathMatchRules.TARGET;
 				default -> throw new IllegalStateException();
 			}
 			// No duplicate targets (so a zombie boss, a zombie Blood Moon and a kill-zombie line never meet, and

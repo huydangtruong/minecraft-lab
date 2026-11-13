@@ -24,6 +24,11 @@ public record QuestLine(QuestType type, String target, int required, int progres
 		return new QuestLine(type, target, required, Math.min(required, p), reward, claimed);
 	}
 
+	/** Death Match: the number of kills needed is only known when the match starts. Progress restarts at 0. */
+	QuestLine withRequired(int r) {
+		return new QuestLine(type, target, r, 0, reward, claimed);
+	}
+
 	QuestLine withClaimed(boolean c) {
 		return new QuestLine(type, target, required, progress, reward, c);
 	}

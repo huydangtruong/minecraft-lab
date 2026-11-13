@@ -11,9 +11,9 @@ import java.util.Optional;
 public record WandererData(Phase phase, long nextDay, int x, int y, int z, Optional<String> npcUuid,
 						   Optional<Quest> quest, long questCounter,
 						   Optional<BloodMoonState> bloodMoon, Optional<BossState> boss,
-						   long leaveAt, boolean warned) {
+						   long leaveAt, boolean warned, Optional<DeathMatchState> deathMatch) {
 	public static final WandererData DEFAULT = new WandererData(Phase.WAITING, -1, 0, 0, 0, Optional.empty(), Optional.empty(), 0,
-		Optional.empty(), Optional.empty(), -1L, false);
+		Optional.empty(), Optional.empty(), -1L, false, Optional.empty());
 
 	private static final Codec<Phase> PHASE_CODEC = Codec.STRING.xmap(Phase::valueOf, Phase::name);
 
@@ -29,46 +29,51 @@ public record WandererData(Phase phase, long nextDay, int x, int y, int z, Optio
 		BloodMoonState.CODEC.optionalFieldOf("blood_moon").forGetter(WandererData::bloodMoon),
 		BossState.CODEC.optionalFieldOf("boss").forGetter(WandererData::boss),
 		Codec.LONG.optionalFieldOf("leave_at", -1L).forGetter(WandererData::leaveAt),
-		Codec.BOOL.optionalFieldOf("leave_warned", false).forGetter(WandererData::warned)
+		Codec.BOOL.optionalFieldOf("leave_warned", false).forGetter(WandererData::warned),
+		DeathMatchState.CODEC.optionalFieldOf("death_match").forGetter(WandererData::deathMatch)
 	).apply(i, WandererData::new));
 
 	public WandererData withPhase(Phase p) {
-		return new WandererData(p, nextDay, x, y, z, npcUuid, quest, questCounter, bloodMoon, boss, leaveAt, warned);
+		return new WandererData(p, nextDay, x, y, z, npcUuid, quest, questCounter, bloodMoon, boss, leaveAt, warned, deathMatch);
 	}
 
 	public WandererData withNextDay(long d) {
-		return new WandererData(phase, d, x, y, z, npcUuid, quest, questCounter, bloodMoon, boss, leaveAt, warned);
+		return new WandererData(phase, d, x, y, z, npcUuid, quest, questCounter, bloodMoon, boss, leaveAt, warned, deathMatch);
 	}
 
 	public WandererData withPos(int nx, int ny, int nz) {
-		return new WandererData(phase, nextDay, nx, ny, nz, npcUuid, quest, questCounter, bloodMoon, boss, leaveAt, warned);
+		return new WandererData(phase, nextDay, nx, ny, nz, npcUuid, quest, questCounter, bloodMoon, boss, leaveAt, warned, deathMatch);
 	}
 
 	public WandererData withNpc(Optional<String> uuid) {
-		return new WandererData(phase, nextDay, x, y, z, uuid, quest, questCounter, bloodMoon, boss, leaveAt, warned);
+		return new WandererData(phase, nextDay, x, y, z, uuid, quest, questCounter, bloodMoon, boss, leaveAt, warned, deathMatch);
 	}
 
 	public WandererData withQuest(Optional<Quest> q) {
-		return new WandererData(phase, nextDay, x, y, z, npcUuid, q, questCounter, bloodMoon, boss, leaveAt, warned);
+		return new WandererData(phase, nextDay, x, y, z, npcUuid, q, questCounter, bloodMoon, boss, leaveAt, warned, deathMatch);
 	}
 
 	public WandererData withQuestCounter(long c) {
-		return new WandererData(phase, nextDay, x, y, z, npcUuid, quest, c, bloodMoon, boss, leaveAt, warned);
+		return new WandererData(phase, nextDay, x, y, z, npcUuid, quest, c, bloodMoon, boss, leaveAt, warned, deathMatch);
 	}
 
 	public WandererData withBloodMoon(Optional<BloodMoonState> s) {
-		return new WandererData(phase, nextDay, x, y, z, npcUuid, quest, questCounter, s, boss, leaveAt, warned);
+		return new WandererData(phase, nextDay, x, y, z, npcUuid, quest, questCounter, s, boss, leaveAt, warned, deathMatch);
 	}
 
 	public WandererData withBoss(Optional<BossState> s) {
-		return new WandererData(phase, nextDay, x, y, z, npcUuid, quest, questCounter, bloodMoon, s, leaveAt, warned);
+		return new WandererData(phase, nextDay, x, y, z, npcUuid, quest, questCounter, bloodMoon, s, leaveAt, warned, deathMatch);
 	}
 
 	public WandererData withLeaveAt(long t) {
-		return new WandererData(phase, nextDay, x, y, z, npcUuid, quest, questCounter, bloodMoon, boss, t, warned);
+		return new WandererData(phase, nextDay, x, y, z, npcUuid, quest, questCounter, bloodMoon, boss, t, warned, deathMatch);
 	}
 
 	public WandererData withWarned(boolean w) {
-		return new WandererData(phase, nextDay, x, y, z, npcUuid, quest, questCounter, bloodMoon, boss, leaveAt, w);
+		return new WandererData(phase, nextDay, x, y, z, npcUuid, quest, questCounter, bloodMoon, boss, leaveAt, w, deathMatch);
+	}
+
+	public WandererData withDeathMatch(Optional<DeathMatchState> s) {
+		return new WandererData(phase, nextDay, x, y, z, npcUuid, quest, questCounter, bloodMoon, boss, leaveAt, warned, s);
 	}
 }

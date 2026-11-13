@@ -3,6 +3,7 @@ package io.github.huydangtruong.permahearts.client;
 import io.github.huydangtruong.permahearts.ElixirItems;
 import io.github.huydangtruong.permahearts.ElixirStat;
 import io.github.huydangtruong.permahearts.Messages;
+import io.github.huydangtruong.permahearts.wanderer.DeathMatchRules;
 import io.github.huydangtruong.permahearts.wanderer.QuestSnapshot;
 import io.github.huydangtruong.permahearts.wanderer.QuestType;
 import io.github.huydangtruong.permahearts.wanderer.StayTime;
@@ -12,6 +13,7 @@ import java.util.Comparator;
 import java.util.List;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -117,7 +119,7 @@ public class WandererScreen extends AbstractContainerScreen<WandererMenu> {
 	}
 
 	private static boolean hasButton(QuestType type) {
-		return type == QuestType.BLOOD_MOON || type == QuestType.BOSS;
+		return type == QuestType.BLOOD_MOON || type == QuestType.BOSS || type == QuestType.DEATH_MATCH;
 	}
 
 	private Component buttonLabel(int i) {
@@ -128,12 +130,23 @@ public class WandererScreen extends AbstractContainerScreen<WandererMenu> {
 		return type == QuestType.BOSS ? Messages.summon() : Messages.start();
 	}
 
+	/** Why the Death Match cannot start now (shown as the tooltip of the inactive button), or null. */
+	private Component deathMatchRefusal() {
+		if (menu.playersOnline() < DeathMatchRules.MIN_ONLINE) {
+			return Messages.deathMatchNeedPlayers();
+		}
+		return menu.pvpOn() ? null : Messages.deathMatchPvpOff();
+	}
+
 	private void updateButtons() {
 		for (int i = 0; i < WandererMenu.LINES; i++) {
 			Button b = eventButtons[i];
 			if (b != null) {
 				b.visible = !menu.isDone(i); // a done row shows the reward slot instead
-				b.active = !menu.eventRunning(i);
+				QuestType type = menu.snapshot().lines().get(i).type();
+				Component refusal = type == QuestType.DEATH_MATCH && !menu.eventRunning(i) ? deathMatchRefusal() : null;
+				b.active = !menu.eventRunning(i) && refusal == null;
+				b.setTooltip(refusal == null ? null : Tooltip.create(refusal));
 				b.setMessage(buttonLabel(i));
 			}
 		}
@@ -270,13 +283,14 @@ public class WandererScreen extends AbstractContainerScreen<WandererMenu> {
 			color = TEXT_DONE;
 			icon = ElixirStat.byId(line.reward()).map(s -> new ItemStack(ElixirItems.get(s))).orElse(ItemStack.EMPTY);
 		} else {
-			text = Wanderer.lineText(line.type(), line.target(), line.required(), menu.progressOf(i));
+			text = Wanderer.lineText(line.type(), line.target(), menu.requiredOf(i), menu.progressOf(i), menu.eventRunning(i));
 			icon = switch (line.type()) {
 				case COLLECT -> new ItemStack(BuiltInRegistries.ITEM.getValue(Identifier.parse(line.target())));
 				case KILL -> new ItemStack(Items.IRON_SWORD);
 				case EXPLORE -> new ItemStack(Items.COMPASS);
 				case BLOOD_MOON -> new ItemStack(Items.CLOCK);
 				case BOSS -> new ItemStack(Items.DIAMOND_HELMET);
+				case DEATH_MATCH -> new ItemStack(Items.IRON_SWORD);
 			};
 		}
 		if (!icon.isEmpty()) {
