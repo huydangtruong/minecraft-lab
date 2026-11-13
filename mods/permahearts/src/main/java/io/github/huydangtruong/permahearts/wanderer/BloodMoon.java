@@ -21,6 +21,12 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
+import net.minecraft.world.entity.monster.zombie.Zombie;
+import net.minecraft.world.entity.animal.equine.ZombieHorse;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.clock.ClockTimeMarkers;
 import net.minecraft.world.clock.WorldClock;
@@ -61,6 +67,16 @@ public final class BloodMoon {
 	/** The mob type of a Blood Moon line target (zombie, piglin brute or creeper; "" = zombie). */
 	public static EntityType<?> mobType(String target) {
 		return BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.parse(QuestGenerator.bloodMoonMob(target)));
+	}
+
+	/** Display name of a Blood Moon mob: "Zombie Horseman" for horsemen, else the entity name. */
+	public static net.minecraft.network.chat.Component mobName(String target) {
+		return QuestGenerator.HORSEMAN.equals(QuestGenerator.bloodMoonMob(target)) ? Messages.zombieHorseman() : mobType(target).getDescription();
+	}
+
+	/** The mob name of the running event. */
+	private static net.minecraft.network.chat.Component runningName(MinecraftServer server) {
+		return mobName(EntityType.getKey(runningMob(server)).toString());
 	}
 
 	/** The mob of the running event (zombie if the line is gone). */
@@ -105,7 +121,7 @@ public final class BloodMoon {
 		for (ServerPlayer p : ow.players()) {
 			bar.addPlayer(p);
 		}
-		server.getPlayerList().broadcastSystemMessage(Messages.bloodMoonStarted(runningMob(server).getDescription()), false);
+		server.getPlayerList().broadcastSystemMessage(Messages.bloodMoonStarted(runningName(server)), false);
 		return true;
 	}
 
@@ -123,7 +139,7 @@ public final class BloodMoon {
 
 	private static void ensureBar(MinecraftServer server) {
 		if (bar == null) {
-			bar = new ServerBossEvent(UUID.randomUUID(), Messages.bloodMoonBar(runningMob(server).getDescription()), BossEvent.BossBarColor.RED,
+			bar = new ServerBossEvent(UUID.randomUUID(), Messages.bloodMoonBar(runningName(server)), BossEvent.BossBarColor.RED,
 				BossEvent.BossBarOverlay.PROGRESS);
 			bar.setDarkenScreen(true);
 			bar.setCreateWorldFog(true);
@@ -151,7 +167,12 @@ public final class BloodMoon {
 		}
 	}
 
-	/** Living Blood Moon mobs (any variant). Public for the game tests. */
+	/** Blood Moon attackers for the 30 cap: a horse that still carries its rider does not count twice. */
+	private static int attackers(ServerLevel ow) {
+		return (int) alive(ow).stream().filter(m -> !m.isVehicle()).count();
+	}
+
+	/** Living Blood Moon mobs (any variant, horses included). Public for the game tests. */
 	public static List<? extends Mob> alive(ServerLevel ow) {
 		return ow.getEntities(EntityTypeTest.forClass(Mob.class), e -> e.entityTags().contains(TAG));
 	}
@@ -195,7 +216,7 @@ public final class BloodMoon {
 	public static void wave(MinecraftServer server, Collection<ServerPlayer> players) {
 		ServerLevel ow = server.overworld();
 		EntityType<?> type = runningMob(server);
-		int alive = alive(ow).size();
+		int alive = attackers(ow);
 		for (ServerPlayer p : players) {
 			if (p.level() != ow) {
 				continue;
@@ -224,7 +245,29 @@ public final class BloodMoon {
 		}
 		mob.addTag(TAG);
 		mob.setTarget(target);
+		if (mob instanceof ZombieHorse horse) {
+			return horseman(ow, horse, target);
+		}
 		return ow.addFreshEntity(mob);
+	}
+
+	/**
+	 * A zombie horseman, like vanilla's natural one (ZombieHorse#finalizeSpawn with NATURAL): a zombie with an iron
+	 * spear rides the horse. Both carry the tag so give up / reset removes them.
+	 */
+	private static boolean horseman(ServerLevel ow, ZombieHorse horse, ServerPlayer target) {
+		Zombie rider = EntityTypes.ZOMBIE.create(ow, EntitySpawnReason.JOCKEY);
+		if (rider == null) {
+			return ow.addFreshEntity(horse);
+		}
+		rider.snapTo(horse.getX(), horse.getY(), horse.getZ(), horse.getYRot(), 0f);
+		rider.finalizeSpawn(ow, ow.getCurrentDifficultyAt(horse.blockPosition()), EntitySpawnReason.JOCKEY, null);
+		rider.setBaby(false); // a baby would not hold the spear on a horse well
+		rider.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SPEAR));
+		rider.addTag(TAG);
+		rider.setTarget(target);
+		rider.startRiding(horse, false, false);
+		return ow.tryAddFreshEntityWithPassengers(horse);
 	}
 
 	// ---- failure and join hooks ----
