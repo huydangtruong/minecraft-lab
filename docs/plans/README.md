@@ -22,4 +22,4 @@ Quy trình: [workflow/team.md](../workflow/team.md); mẫu: [TEMPLATE.md](TEMPLA
 | [P-020](P-020-blade-golems.md) | Huyết Kiếm chảy máu + đánh văng; chiêu Violet Guardian (golem tím) | merged | Sonnet subagent |
 | [P-021](P-021-warrior-angel.md) | Golem giết tính cho chủ, chiêu Warrior Angel (D62, D63) | merged | Sonnet subagent |
 | [P-022](P-022-aqua-marine.md) | Chiêu Aqua Marine (D64) | merged | Sonnet subagent |
-| [P-023](P-023-aqua-faster-clear.md) | Aqua Marine: bơi nhanh hơn, nhìn rõ dưới nước (D69) | ready | Sonnet subagent |
+| [P-023](P-023-aqua-faster-clear.md) | Aqua Marine: bơi nhanh hơn, nhìn rõ dưới nước (D69) | merged | Sonnet subagent |
