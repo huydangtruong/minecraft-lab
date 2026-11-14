@@ -71,7 +71,7 @@
   "permahearts.wanderer.boss_already_here": "The chieftain is already here",
   "permahearts.wanderer.event_not_here": "This can only be started in the Overworld, near the Crimson Master",
   "permahearts.wanderer.death_match": "Death Match",
-  "permahearts.wanderer.line_death_match": "Death Match: half the players must fall to another player",
+  "permahearts.wanderer.line_death_match": "Death Match (PvP)",
   "permahearts.wanderer.line_death_match_running": "Death Match %s/%s fallen",
   "permahearts.wanderer.death_match_started": "Death Match! %1$s of %2$s players must fall to another player. Deaths in this match cost no hearts and no items.",
   "permahearts.wanderer.death_match_fell": "%1$s fell to %2$s (Death Match %3$s/%4$s)",

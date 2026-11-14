@@ -308,7 +308,7 @@ public final class Messages {
 	}
 
 	public static Component lineDeathMatch() {
-		return Component.translatableWithFallback("permahearts.wanderer.line_death_match", "Death Match: half the players must fall to another player");
+		return Component.translatableWithFallback("permahearts.wanderer.line_death_match", "Death Match (PvP)");
 	}
 
 	public static Component lineDeathMatchRunning(int fallen, int needed) {
