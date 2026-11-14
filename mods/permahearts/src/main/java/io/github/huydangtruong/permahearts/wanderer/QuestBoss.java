@@ -223,6 +223,8 @@ public final class QuestBoss {
 	private static void set(LivingEntity e, net.minecraft.core.Holder<net.minecraft.world.entity.ai.attributes.Attribute> attr, double v) {
 		AttributeInstance a = e.getAttribute(attr);
 		if (a != null) {
+			// finalizeSpawn may add random bonuses (a "leader" zombie, 5%, gets up to x4 max health): drop them
+			a.removeModifiers();
 			a.setBaseValue(v);
 		}
 	}
