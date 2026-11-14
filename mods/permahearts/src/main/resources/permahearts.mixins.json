@@ -9,6 +9,7 @@
 		"FoodDataMixin",
 		"FoodPropertiesMixin",
 		"GhastShootFireballGoalMixin",
+		"LivingEntityXpMixin",
 		"PlayerMixin",
 		"PlayerPhaseMixin"
 	],

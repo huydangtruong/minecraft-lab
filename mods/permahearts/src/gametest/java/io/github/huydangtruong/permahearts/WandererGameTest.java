@@ -65,6 +65,24 @@ public class WandererGameTest {
 		e.hurtServer(level, level.damageSources().playerAttack(p), 1000f);
 	}
 
+	/** D65: a chieftain drops 3 times the XP of the same mob without the boss tag. */
+	@GameTest(maxTicks = 100)
+	public void chieftainDropsTripleXp(GameTestHelper context) {
+		ServerLevel level = context.getLevel();
+		ServerPlayer p = context.makeMockServerPlayerInLevel();
+		Zombie plain = context.spawn(EntityTypes.ZOMBIE, new BlockPos(1, 1, 1));
+		Zombie boss = context.spawn(EntityTypes.ZOMBIE, new BlockPos(3, 1, 1));
+		boss.addTag(QuestBoss.TAG);
+		int normal = plain.getExperienceReward(level, p);
+		int chief = boss.getExperienceReward(level, p);
+		context.assertTrue(normal > 0, "a zombie should give XP, gave " + normal);
+		context.assertTrue(chief == normal * QuestBoss.XP_MULTIPLIER,
+			"chieftain XP should be " + QuestBoss.XP_MULTIPLIER + "x " + normal + ", was " + chief);
+		plain.discard();
+		boss.discard();
+		context.succeed();
+	}
+
 	@GameTest(maxTicks = 100)
 	public void summonSpawnsWanderer(GameTestHelper context) {
 		MinecraftServer s = context.getLevel().getServer();
