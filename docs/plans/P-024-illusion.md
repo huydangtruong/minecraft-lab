@@ -3,7 +3,7 @@
 > Tóm tắt (VN): chiêu thứ 13 **Illusion**: tạo phân thân giống hệt bạn (skin, tên, đồ), đánh quái và đánh kẻ bạn đánh / kẻ đánh bạn (kể cả người chơi, kể cả khi tắt PvP). Sát thương và máu 20% → 40% của bản thật; 1 / 2 / 3 phân thân ở Lv 1 / 10 / 20; tồn tại 20 → 40 giây; hồi 100 giây.
 > Decision: D71. Branch: dev on `feat/P-024-dev`, merges into `feat/P-024-illusion`.
 
-- **Status:** ready
+- **Status:** merged
 - **Dev:** one Sonnet subagent
 
 ## Numbers (pure Java in `TechniqueRules`, JUnit-tested)

@@ -2,7 +2,7 @@
 
 > Tóm tắt cho Huy: file này ghi việc đang làm dở và bước tiếp theo, để một phiên Claude mới đọc là làm tiếp được.
 > Manager cập nhật file này cuối mỗi đợt việc (merge, phát hành, quyết định mới).
-> Snapshot: 2026-11-15, after release 0.12.0.
+> Snapshot: 2026-11-15, after release 0.12.0 and the P-024 Illusion merge.
 
 A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [workflow/team.md](../workflow/team.md) → the plan of the work in flight. Do not read the whole repo.
 
@@ -12,13 +12,11 @@ A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [w
 |---|---|
 | Last release | `permahearts-v0.12.0` (GitHub Releases on `huydangtruong/minecraft-lab`), `mod_version=0.12.0` |
 | 0.12.0 contains | Warrior Angel (P-021, D62, D63), Aqua Marine (P-022, P-023, D64, D69), chieftain XP x10 and damage x2 (D65, D66), stronger Strength/Swiftness/Mining elixirs (D67), gold quest 64 (D68) |
-| On `main`, not released | Shorter Death Match quest line "Death Match (PvP)"; Strength elixir +2 damage (D70). Next version 0.12.1, release when Huy says |
+| On `main`, not released | Shorter Death Match quest line "Death Match (PvP)"; Strength elixir +2 damage (D70); **Illusion** technique (P-024, D71); fix: a zombie chieftain could roll the leader bonus (~450 max health instead of 150). New technique, so next version 0.13.0, release when Huy says |
 
 Release steps: [workflow/release.md](../workflow/release.md). Release **only when Huy says so**.
 
 ## In flight
-
-- **P-024 Illusion** (D71): plan `docs/plans/P-024-illusion.md`, branch `feat/P-024-illusion`, a Sonnet dev works on `feat/P-024-dev` in a worktree under `.claude/worktrees/`. If the session dies: check that worktree for commits, else start a new dev from the plan.
 
 - **Windows installer bug** (reported by Huy's friend): picking a profile other than "26.3 Fabric Essential" says SUCCESS, but that profile's mods folder still has the old jar. Reading `minecraft-lab.ps1` (`Find-Profiles` / `Select-Profile`) found nothing yet. Waiting for the friend's `Mods folder:` line and that profile's Game directory.
 
@@ -30,6 +28,7 @@ Release steps: [workflow/release.md](../workflow/release.md). Release **only whe
   - Whether a technique kill counts in Death Match with PvP off. The code says yes, since the caster is the damage source.
   - Violet Guardian in survival.
   - Warrior Angel and Aqua Marine (speed, underwater view) in survival.
+  - Illusion: clones fighting mobs, and with a second real player (PvP off, does it confuse who is real).
 - **Huy's game profile** "26.3 Fabric Essential" has an older build. Run `scripts/install.sh` only when Huy asks in that message.
 - **Many old merged branches** exist locally and on origin. They are harmless; delete them only if Huy asks.
 
