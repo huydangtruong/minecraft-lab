@@ -83,17 +83,17 @@ TEXTURED = {
         "....c....",
         ".........",
     ], {"k": "1b2a35", "t": "0d4a5a", "a": "1aa6c4", "c": "3ff2ff", "w": "e6ffff"}),
-    14: ("crimson lava", [  # 281-300, the top tier (D38: Huy's pick F, with a second bright dot on the right)
+    14: ("crimson lava drop", [  # 281-300, the top tier (D38: Huy's pick "Giot nham": cooled crust on top, glowing below)
         ".........",
-        "..mR.RO..",
-        ".mROYORm.",
-        ".ROYLOLm.",
-        ".mROYYRm.",
-        "..mROOm..",
-        "...mRm...",
-        "....m....",
+        "..Km.mK..",
+        ".KmKKmKK.",
+        ".mRmRMRm.",
+        ".RrRrRrR.",
+        "..rOrOr..",
+        "...OYO...",
+        "....Y....",
         ".........",
-    ], {"m": "8a0a2a", "R": "d4143c", "O": "ff5a3a", "Y": "ffb36b", "L": "ffe0c0"}),
+    ], {"K": "1f0208", "m": "5c0418", "M": "8a0a2a", "R": "c4103a", "r": "e8264a", "O": "ff5a3a", "Y": "ffb36b"}),
 }
 
 CLEAR = (0, 0, 0, 0)

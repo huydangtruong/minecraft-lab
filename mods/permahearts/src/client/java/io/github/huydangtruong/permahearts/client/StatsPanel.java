@@ -1,6 +1,5 @@
 package io.github.huydangtruong.permahearts.client;
 
-import io.github.huydangtruong.permahearts.ElixirItems;
 import io.github.huydangtruong.permahearts.ElixirStat;
 import io.github.huydangtruong.permahearts.client.mixin.ContainerScreenAccess;
 import io.github.huydangtruong.permahearts.client.mixin.RecipeBookScreenAccess;
@@ -21,17 +20,25 @@ import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * Stats panel (D31): a button next to the recipe book button in the survival inventory opens a panel on the left with
- * each stat as "total (base +gear +cultivation)", the Vitality bonus and the respawn point. Works like the recipe book:
- * the inventory moves right, and opening one closes the other. Data comes from the server (StatsSync), once a second.
+ * Cultivation panel (D31, D39): a rounded taiji button next to the recipe book button in the survival inventory opens a
+ * panel on the left with tabs like the recipe book's. Stats tab: each stat as "total (base +gear +cultivation)", the
+ * Vitality bonus and the respawn point. Techniques tab: empty for now. Works like the recipe book: the inventory moves
+ * right, and opening one closes the other. Data comes from the server (StatsSync), once a second.
  */
 public final class StatsPanel {
 	public static final int W = 192;
 	public static final int H = 166;
 	private static final int GAP = 2;
+	/** Tabs stick out this far left of the panel (the selected one 2 more), like the recipe book's. */
+	private static final int TAB_OUT = 32;
+	private static final int TAB_W = 35;
+	private static final int TAB_H = 27;
 	private static final int LINE = 11;
 
 	private static final int TEXT = 0xFF404040;
@@ -44,8 +51,25 @@ public final class StatsPanel {
 		"hearts", "Hearts", "damage", "Damage", "attack_speed", "Atk speed", "speed", "Speed", "armor", "Armor",
 		"reach", "Reach", "hit_range", "Hit range", "mining", "Mining");
 
+	private static final Identifier BUTTON = Identifier.fromNamespaceAndPath("permahearts", "stats/button");
+	private static final Identifier BUTTON_HOVER = Identifier.fromNamespaceAndPath("permahearts", "stats/button_highlighted");
+	private static final Identifier TAIJI = Identifier.fromNamespaceAndPath("permahearts", "stats/icon");
+
+	/** Panel tabs, top to bottom. */
+	public enum Tab {
+		STATS("Stats"),
+		TECHNIQUES("Techniques");
+
+		final String label;
+
+		Tab(String label) {
+			this.label = label;
+		}
+	}
+
 	/** Remembered while the game runs, like the recipe book. */
 	private static boolean open;
+	private static Tab tab = Tab.STATS;
 	private static StatsButton button;
 
 	private StatsPanel() {}
@@ -61,12 +85,22 @@ public final class StatsPanel {
 			StatsButton b = new StatsButton(inv);
 			button = b;
 			Screens.getWidgets(inv).add(b);
+			TabButton[] tabs = new TabButton[Tab.values().length];
+			for (Tab t : Tab.values()) {
+				tabs[t.ordinal()] = new TabButton(t);
+				Screens.getWidgets(inv).add(tabs[t.ordinal()]);
+			}
 			layout(inv);
 			ScreenEvents.afterBackground(inv).register((s, g, mx, my, delta) -> {
 				if (open && recipeBook(inv).isVisible()) {
 					open = false; // the recipe book button was pressed: it moved the inventory already
 				}
 				b.setPosition(left(inv) + 126, inv.height / 2 - 22);
+				int top = ((ContainerScreenAccess) inv).permahearts$topPos();
+				for (TabButton t : tabs) {
+					t.visible = open;
+					t.setPosition(panelX(inv) - TAB_OUT + 2, top + 3 + t.tab.ordinal() * TAB_H);
+				}
 				if (open) {
 					draw(inv, g);
 				}
@@ -76,6 +110,11 @@ public final class StatsPanel {
 
 	public static boolean isOpen() {
 		return open;
+	}
+
+	/** Selected tab (tests). */
+	public static Tab tab() {
+		return tab;
 	}
 
 	/** GUI position of the button (tests). */
@@ -92,7 +131,7 @@ public final class StatsPanel {
 	}
 
 	private static boolean fits(InventoryScreen inv) {
-		return inv.width >= ((ContainerScreenAccess) inv).permahearts$imageWidth() + W + GAP + 8;
+		return inv.width >= ((ContainerScreenAccess) inv).permahearts$imageWidth() + W + GAP + TAB_OUT + 8;
 	}
 
 	private static void toggle(InventoryScreen inv) {
@@ -111,7 +150,7 @@ public final class StatsPanel {
 			return; // the recipe book placed it
 		}
 		int imageW = a.permahearts$imageWidth();
-		int left = open && fits(inv) ? (inv.width - (imageW + W + GAP)) / 2 + W + GAP : (inv.width - imageW) / 2;
+		int left = open && fits(inv) ? (inv.width - (imageW + W + GAP + TAB_OUT)) / 2 + TAB_OUT + W + GAP : (inv.width - imageW) / 2;
 		a.permahearts$setLeftPos(left);
 		for (AbstractWidget w : Screens.getWidgets(inv)) {
 			if (w instanceof ImageButton) {
@@ -127,7 +166,8 @@ public final class StatsPanel {
 		}
 		int x0 = panelX(inv);
 		int y0 = ((ContainerScreenAccess) inv).permahearts$topPos();
-		return x >= x0 && x < x0 + W && y >= y0 && y < y0 + H;
+		boolean onTabs = x >= x0 - TAB_OUT && x < x0 && y >= y0 + 3 && y < y0 + 3 + Tab.values().length * TAB_H;
+		return onTabs || x >= x0 && x < x0 + W && y >= y0 && y < y0 + H;
 	}
 
 	private static int panelX(InventoryScreen inv) {
@@ -151,7 +191,11 @@ public final class StatsPanel {
 
 		int tx = x0 + 7;
 		int right = x1 - 7;
-		g.text(font, Component.literal("Stats").withStyle(ChatFormatting.BOLD), tx, y0 + 7, TEXT, false);
+		g.text(font, Component.literal(tab.label).withStyle(ChatFormatting.BOLD), tx, y0 + 7, TEXT, false);
+		if (tab == Tab.TECHNIQUES) {
+			g.text(font, "No techniques yet", tx, y0 + 22, BASE, false); // D39: Huy describes them later
+			return;
+		}
 		var player = Minecraft.getInstance().player;
 		PlayerStats stats = player == null ? null : player.getAttached(StatsSync.STATS);
 		if (stats == null) {
@@ -208,19 +252,42 @@ public final class StatsPanel {
 		};
 	}
 
-	/** Same size as the recipe book button; shows an elixir bottle. */
+	/** Same size and rounded style as the recipe book button, with a taiji (tools/make_stats_sprites.py). */
 	private static final class StatsButton extends Button {
-		private static final ItemStack ICON = new ItemStack(ElixirItems.get(ElixirStat.STRENGTH));
-
 		StatsButton(InventoryScreen inv) {
-			super(0, 0, 20, 18, Component.literal("Stats"), b -> toggle(inv), DEFAULT_NARRATION);
-			setTooltip(Tooltip.create(Component.literal("Stats")));
+			super(0, 0, 20, 18, Component.literal("Cultivation"), b -> toggle(inv), DEFAULT_NARRATION);
+			setTooltip(Tooltip.create(Component.literal("Cultivation")));
 		}
 
 		@Override
 		protected void extractContents(GuiGraphicsExtractor g, int mouseX, int mouseY, float delta) {
-			extractDefaultSprite(g);
-			g.item(ICON, getX() + 2, getY() + 1);
+			g.blitSprite(RenderPipelines.GUI_TEXTURED, isHoveredOrFocused() ? BUTTON_HOVER : BUTTON, getX(), getY(), 20, 18);
+		}
+	}
+
+	/** A tab on the panel's left edge, drawn with the vanilla recipe book tab sprites. */
+	private static final class TabButton extends Button {
+		private static final ItemStack BOOK = new ItemStack(Items.ENCHANTED_BOOK);
+		private final Tab tab;
+
+		TabButton(Tab t) {
+			super(0, 0, TAB_W, TAB_H, Component.literal(t.label), b -> StatsPanel.tab = t, DEFAULT_NARRATION);
+			this.tab = t;
+			setTooltip(Tooltip.create(Component.literal(t.label)));
+			visible = false;
+		}
+
+		@Override
+		protected void extractContents(GuiGraphicsExtractor g, int mouseX, int mouseY, float delta) {
+			boolean selected = StatsPanel.tab == tab;
+			int x = getX() - (selected ? 2 : 0);
+			g.blitSprite(RenderPipelines.GUI_TEXTURED,
+				Identifier.withDefaultNamespace(selected ? "recipe_book/tab_selected" : "recipe_book/tab"), x, getY(), TAB_W, TAB_H);
+			if (tab == Tab.STATS) {
+				g.blitSprite(RenderPipelines.GUI_TEXTURED, TAIJI, x + 9, getY() + 5, 16, 16);
+			} else {
+				g.fakeItem(BOOK, x + 9, getY() + 5);
+			}
 		}
 	}
 }
