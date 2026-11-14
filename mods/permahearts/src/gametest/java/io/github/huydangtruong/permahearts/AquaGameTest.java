@@ -88,11 +88,14 @@ public class AquaGameTest {
 	}
 
 	@GameTest(maxTicks = 40)
-	public void swimSpeedMatchesDolphinsGraceAtLevel1AndDoublesTheBonusAtLevel20(GameTestHelper c) {
+	public void swimSpeedMatchesDolphinsGraceAtLevel1AndReachesTheTargetAtLevel20(GameTestHelper c) {
 		ServerPlayer p = diver(c);
 		c.assertTrue(p.isInWater(), "the diver is in water");
-		for (boolean sprint : new boolean[] {true, false}) {
-			{
+		for (double y : new double[] {3, 1}) { // open water, then near the floor
+			FlightBladeGameTest.place(c, p, 5.5, y, 5.5, 0f, 0f);
+			p.baseTick();
+			p.baseTick();
+			for (boolean sprint : new boolean[] {true, false}) {
 				p.setSprinting(sprint);
 				double plain = swimSpeed(p);
 				p.addEffect(new MobEffectInstance(MobEffects.DOLPHINS_GRACE, 100000, 0));
@@ -104,13 +107,13 @@ public class AquaGameTest {
 				TechniqueCasts.cast(p, Technique.AQUA, 20, 1f);
 				double lv20 = swimSpeed(p);
 				AquaMarine.end(p);
-				double bonus = dolphin - plain;
-				String label = " (sprint=" + sprint + ")";
-				System.out.println("AQUA-MEASURE sprint=" + sprint + " plain=" + plain + " dolphin=" + dolphin
-					+ " lv1=" + lv1 + " lv20=" + lv20 + " dolphinBonus=" + bonus + " lv20bonus/dolphinBonus=" + (lv20 - plain) / bonus);
-				c.assertTrue(bonus > 0.05, "Dolphin's Grace is faster than plain swimming: " + plain + " -> " + dolphin + label);
+				String label = " (sprint=" + sprint + ", y=" + y + ", ground=" + p.onGround() + ")";
+				System.out.println("AQUA-MEASURE y=" + y + " sprint=" + sprint + " ground=" + p.onGround() + " plain=" + plain
+					+ " dolphin=" + dolphin + " lv1=" + lv1 + " lv20=" + lv20);
+				double want = sprint ? 1.2 : 1.0;
+				c.assertTrue(dolphin - plain > 0.05, "Dolphin's Grace is faster than plain swimming: " + plain + " -> " + dolphin + label);
 				c.assertTrue(Math.abs(lv1 - dolphin) < 0.03 * dolphin, "level 1 = Dolphin's Grace speed: " + lv1 + " vs " + dolphin + label);
-				c.assertTrue(Math.abs((lv20 - plain) / bonus - 2.0) < 0.1, "level 20 bonus is 2 x Dolphin's Grace: " + (lv20 - plain) / bonus + label);
+				c.assertTrue(Math.abs(lv20 - want) < 0.02 * want, "level 20 steady speed " + want + ": " + lv20 + label);
 			}
 		}
 		FlightBladeGameTest.drop(c, p);
