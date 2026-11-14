@@ -2,6 +2,7 @@ package io.github.huydangtruong.permahearts;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.github.huydangtruong.permahearts.technique.Technique;
 import io.github.huydangtruong.permahearts.technique.TechniqueRules;
@@ -116,6 +117,30 @@ class TechniqueRulesTest {
 		assertEquals(60, TechniqueRules.ANGEL_SECONDS);
 		assertEquals("6", TechniqueRules.stats(Technique.ANGEL, 20).get(0).value());
 		assertEquals("60 s", TechniqueRules.stats(Technique.ANGEL, 1).get(3).value());
+		assertEquals(120, Technique.AQUA.cooldownSeconds());
+		assertEquals("Aqua Marine", Technique.AQUA.displayName());
+		assertEquals("aqua", Technique.AQUA.id());
+		assertArrayEquals(new double[] {30, 30 + 40.0 * 9 / 19, 70}, at(TechniqueRules::aquaSeconds), 1e-9);
+		assertArrayEquals(new double[] {1.0, 1.0 + 9 / 19.0, 2.0}, at(TechniqueRules::aquaSwimFactor), 1e-9);
+		assertArrayEquals(new double[] {1.0, 1.0 + 9 / 19.0, 2.0}, at(TechniqueRules::aquaMiningSpeed), 1e-9);
+		// swim physics: level 1 = Dolphin's Grace (no extra efficiency), level 20 = plain + 2 x the Dolphin's Grace bonus
+		for (boolean sprint : new boolean[] {false, true}) {
+			double plain = TechniqueRules.swimSpeed(sprint, false);
+			double dolphin = TechniqueRules.swimSpeed(sprint, true);
+			assertEquals(dolphin, TechniqueRules.aquaTargetSpeed(1, sprint), 1e-9);
+			assertEquals(plain + 2 * (dolphin - plain), TechniqueRules.aquaTargetSpeed(20, sprint), 1e-9);
+			for (boolean ground : new boolean[] {false, true}) {
+				assertEquals(0, TechniqueRules.aquaWaterEfficiency(1, sprint, ground), 1e-9);
+				assertTrue(TechniqueRules.aquaWaterEfficiency(20, sprint, ground) > TechniqueRules.aquaWaterEfficiency(10, sprint, ground));
+				assertTrue(TechniqueRules.aquaWaterEfficiency(20, sprint, ground) < 1);
+			}
+		}
+		assertEquals(0.5, TechniqueRules.swimSpeed(false, true), 1e-9);
+		assertEquals(0.2, TechniqueRules.swimSpeed(true, false), 1e-9);
+		assertEquals("30 s", TechniqueRules.stats(Technique.AQUA, 1).get(0).value());
+		assertEquals("70 s", TechniqueRules.stats(Technique.AQUA, 20).get(0).value());
+		assertEquals("\u00d71 dolphin", TechniqueRules.stats(Technique.AQUA, 1).get(1).value());
+		assertEquals("\u00d72 aqua affinity", TechniqueRules.stats(Technique.AQUA, 20).get(2).value());
 		assertEquals(16, Technique.FIRE.cooldownSeconds());
 		assertEquals(24, Technique.ICE.cooldownSeconds());
 		assertEquals(60, Technique.HEALING.cooldownSeconds());

@@ -169,3 +169,13 @@ Kiểm bằng máy: `./gradlew :permahearts:build` (game test `ThousandMileStepG
 3. Máu: bằng Vex ở cấp 1, gấp đôi ở cấp 20; sát thương: nửa Vex ở cấp 1, gấp đôi ở cấp 20. Tồn tại **60 giây** rồi biến mất kèm hạt vàng; bạn chết/thoát game hoặc dùng lại chiêu thì biến mất (dùng lại thì thay bộ mới). Hồi chiêu **120 giây**. Không rơi đồ, không cho XP.
 4. **Tính kill**: để Violet Guardian hoặc Warrior Angel giết một con quái địch: tiến độ HeartXP / 100 quái tăng và nhiệm vụ giết của Crimson Master (nếu đang làm) cũng tăng, giống sói đã thuần.
 5. Kiểm bằng máy: `./gradlew :permahearts:build` (`AngelGameTest`) và `runClientGameTest` (ảnh `80-angels-third-person`).
+
+## P-022: Aqua Marine (D64)
+
+1. **Aqua Marine** (chiêu thứ 12, `/technique set @s aqua 20`): bấm một lần, không gồng. Trang chi tiết có Lasts (30 s cấp 1 → 70 s cấp 20), Swim speed (×1 → ×2 cá heo), Underwater mining (×1 → ×2 Aqua Affinity), Cooldown 120 s.
+2. **Thở**: nhảy xuống nước sâu rồi dùng chiêu, bong bóng đầy lại và **không tụt** cho tới hết giờ; hết giờ thì bong bóng tụt lại như thường. Góc phải dưới hiện "Aqua N s" đếm ngược.
+3. **Bơi**: chạy bơi (Ctrl) dưới nước. Cấp 1 nhanh bằng Dolphin's Grace (so bằng cách uống thuốc cá heo ở creative), cấp 20 nhanh gấp đôi phần tăng của cá heo (nhanh hơn rõ).
+4. **Đào**: đào đá dưới nước, cấp 1 như có Aqua Affinity (đội mũ), cấp 20 nhanh gấp đôi. Hết giờ thì chậm lại như thường. Chưa chạm đất (bơi lơ lửng) vẫn bị phạt như vanilla.
+5. Hạt bong bóng nhẹ quanh người; cầm linh khí thì có bong bóng và nước bắn ở tay. Chết hoặc thoát game thì chiêu tắt ngay.
+6. Kiểm bằng máy: `./gradlew :permahearts:build` (`AquaGameTest`: đo tốc độ bơi cấp 1 = cá heo, cấp 20 = 2.000 lần phần tăng của cá heo) và `runClientGameTest` (ảnh `90-aqua-underwater-first-person`, `91-aqua-underwater-third-person`).
+

@@ -14,7 +14,8 @@ public enum Technique {
 	BLADE("blade", "Life Steal Blade", 12, false),
 	TELEPORT("teleport", "Thousand Mile Step", 60, true), // D58: charged throw like Fireball, then the caster teleports // D52: held like a weapon; each landed hit starts the 12 s cooldown
 	GOLEM("golem", "Violet Guardian", 180, false), // D60: summons loyal violet iron golems
-	ANGEL("angel", "Warrior Angel", 120, false); // D63: summons gold-and-white angels that fly through walls
+	ANGEL("angel", "Warrior Angel", 120, false), // D63: summons gold-and-white angels that fly through walls
+	AQUA("aqua", "Aqua Marine", 120, false); // D64: breathe, swim fast and dig fast underwater for a while
 
 	private final String id;
 	private final String displayName;

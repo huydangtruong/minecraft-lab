@@ -52,9 +52,11 @@ public final class TechniqueCasts {
 		WarriorAngel.init();
 		PhaseState.ATTACHMENT.identifier();
 		Flight.init();
+		AquaMarine.init();
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity instanceof ServerPlayer p) {
 				Flight.end(p);
+				AquaMarine.end(p);
 			}
 		});
 		OATH_UNTIL.identifier();
@@ -90,6 +92,9 @@ public final class TechniqueCasts {
 			case GOLEM -> {
 				VioletGuardian.summon(caster, lvl);
 				caster.level().playSound(null, caster.blockPosition(), SoundEvents.IRON_GOLEM_REPAIR, SoundSource.PLAYERS, 1f, 0.7f);
+			}
+			case AQUA -> {
+				return AquaMarine.start(caster, lvl);
 			}
 			case ANGEL -> {
 				WarriorAngel.summon(caster, lvl);
@@ -295,6 +300,7 @@ public final class TechniqueCasts {
 		long t = server.getTickCount();
 		for (ServerPlayer p : server.getPlayerList().getPlayers()) {
 			Flight.tick(p, t);
+			AquaMarine.tick(p, t);
 			PhaseState phase = p.getAttached(PhaseState.ATTACHMENT);
 			if (phase != null && phase.endTick() >= 0) {
 				if (!phase.active(p.level().getGameTime())) {
