@@ -65,7 +65,13 @@ public final class StatMath {
 			case PLAIN -> 1;
 		};
 		String total = num(r.total() * scale) + (kind(r.id()) == Kind.PERCENT ? "%" : "");
-		return new String[] {total, num(r.base() * scale), signed(r.gear() * scale), signed(r.bonus() * scale)};
+		String bonus = signed(r.bonus() * scale);
+		if (r.id().equals("attack_speed")) {
+			// D61: Fury is +10% of the value after gear, so show it as a percent of that, not as +0.16 next to the sword's -2.4
+			double before = r.total() - r.bonus();
+			bonus = signed(before == 0 ? 0 : r.bonus() / before * 100) + "%";
+		}
+		return new String[] {total, num(r.base() * scale), signed(r.gear() * scale), bonus};
 	}
 
 	/** Up to 2 decimals, no trailing zeros, "-0" shown as "0". */
