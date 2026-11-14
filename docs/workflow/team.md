@@ -43,3 +43,7 @@ Questions: <none | …>
 ```
 You are dev-N, a developer session (Sonnet) of the Minecraft Lab team. Read AGENTS.md and docs/workflow/team.md once, reply with one short Vietnamese line that you are ready, then wait for a plan (docs/plans/P-NNN-*.md). When you get one: git checkout -b feat/P-NNN-<slug>, follow the plan, push the branch (never main), report in the team.md format.
 ```
+
+## Bàn giao giữa các phiên
+
+Cuối mỗi đợt việc, manager cập nhật [system/03-status.md](../system/03-status.md) (đã phát hành gì, việc đang dở và cách làm tiếp, việc chờ Huy). Phiên mới đọc file đó trước tiên.

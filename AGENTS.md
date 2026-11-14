@@ -2,7 +2,9 @@
 
 ## Start here
 
-Read [docs/README.md](docs/README.md), then [docs/system/00-environment.md](docs/system/00-environment.md) (versions, paths, Java) and [docs/system/02-findings.md](docs/system/02-findings.md) (API names already verified on 26.3). Owner decisions: [docs/system/01-decisions.md](docs/system/01-decisions.md); don't reverse one without asking. If you are a dev session, read [docs/workflow/team.md](docs/workflow/team.md) and your plan in `docs/plans/` first and open only the files the plan names.
+**First read [docs/system/03-status.md](docs/system/03-status.md)**: what is released, what is in flight (branch, worktree, how to resume) and what is waiting on Huy. Keep it current at the end of every batch.
+
+Then read [docs/README.md](docs/README.md), then [docs/system/00-environment.md](docs/system/00-environment.md) (versions, paths, Java) and [docs/system/02-findings.md](docs/system/02-findings.md) (API names already verified on 26.3). Owner decisions: [docs/system/01-decisions.md](docs/system/01-decisions.md); don't reverse one without asking. If you are a dev session, read [docs/workflow/team.md](docs/workflow/team.md) and your plan in `docs/plans/` first and open only the files the plan names.
 
 ## Owner
 
