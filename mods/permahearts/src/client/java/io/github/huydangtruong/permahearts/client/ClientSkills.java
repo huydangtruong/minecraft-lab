@@ -15,22 +15,24 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.resources.Identifier;
 
 /**
- * Client side of the skill bar (P-011b): the selected entry, the skill key (tap = next, hold = wheel), charging with
- * right click, casting. The server validates every cast again; this only asks.
+ * Client side of the skill bar (P-011b): technique mode (key toggles; techniques take the first hotbar cells), charging
+ * with right click, casting. The server validates every cast again; this only asks.
  */
 public final class ClientSkills {
 	public static final KeyMapping KEY = KeyMappingHelper.registerKeyMapping(new KeyMapping(
-		"key.permahearts.technique", 82 /* GLFW_KEY_R */, KeyMapping.Category.register(Identifier.fromNamespaceAndPath("permahearts", "main"))));
+		"key.permahearts.technique", com.mojang.blaze3d.platform.InputConstants.KEY_R /* SDL scancode 21; 82 is Up Arrow */, KeyMapping.Category.register(Identifier.fromNamespaceAndPath("permahearts", "main"))));
 
-	/** Selected entry of the local player: -1 = the cross, 0..3 = a slot. */
+	/** Selected technique slot of the local player: -1 = a real item (or mode off), 0..3 = a slot. */
 	private static int selected = -1;
 	private static LocalPlayer lastPlayer;
-	private static int lastHotbar = -1;
-	private static boolean keyTracking;
-	private static int keyHeld;
+	/** Technique mode: hotbar cells 0..N-1 show the filled techniques, the items shift right. A view only. */
+	private static boolean mode;
+	/** Selected hotbar cell (0..8) while the mode is on. */
+	private static int cell;
 	private static boolean charging;
 	private static int chargeTicks;
 	private static boolean useWasDown;
@@ -88,19 +90,74 @@ public final class ClientSkills {
 	// ---- changes ----
 
 	public static void select(int index) {
+		boolean changed = selected != index;
 		selected = index;
-		charging = false;
-		if (Minecraft.getInstance().player != null) {
+		if (changed) {
+			charging = false;
+		}
+		if (changed && Minecraft.getInstance().player != null) {
 			ClientPlayNetworking.send(new TechniqueNet.SkillAction(TechniqueNet.SELECT, index, 0f));
 		}
 	}
 
-	/** Next entry like the skill key tap. */
-	public static void next(Minecraft mc) {
-		if (!available(mc)) {
-			return;
+	public static boolean mode() {
+		return mode;
+	}
+
+	public static int cell() {
+		return cell;
+	}
+
+	/** Slot numbers of the filled, usable techniques in slot order (the first cells of the hotbar in the mode). */
+	public static int[] modeSlots(Minecraft mc) {
+		TechniqueData d = data(mc.player);
+		boolean[] f = d.filledSlots();
+		for (int i = 0; i < f.length; i++) {
+			if (f[i]) {
+				f[i] = d.level(d.inSlot(i)) >= 1;
+			}
 		}
-		select(TechniqueRules.nextSelection(selected, data(mc.player).filledSlots()));
+		return SkillBarLogic.filledSlots(f);
+	}
+
+	/** The technique key: toggles technique mode. The selected cell index stays the same. */
+	public static void toggleMode(Minecraft mc) {
+		if (mode) {
+			setMode(mc, false);
+		} else if (available(mc) && modeSlots(mc).length > 0) {
+			setMode(mc, true);
+		}
+	}
+
+	private static void setMode(Minecraft mc, boolean on) {
+		Inventory inv = mc.player.getInventory();
+		if (on) {
+			cell = inv.getSelectedSlot();
+			mode = true;
+			applyCell(mc);
+		} else {
+			mode = false;
+			select(-1);
+			inv.setSelectedSlot(cell); // the cell index stays: the item of that cell is shown again
+		}
+	}
+
+	/** Mode on: scroll or a number key picked a hotbar cell (MouseHandler / Minecraft mixin). */
+	public static void setCell(int c) {
+		cell = Math.floorMod(c, 9);
+		applyCell(Minecraft.getInstance());
+	}
+
+	/** Cell < N selects that technique; a later cell selects item slot cell - N (synced like a normal hotbar change). */
+	private static void applyCell(Minecraft mc) {
+		int[] slots = modeSlots(mc);
+		int tech = SkillBarLogic.techniqueAtCell(cell, slots);
+		if (tech >= 0) {
+			select(tech);
+		} else {
+			select(-1);
+			mc.player.getInventory().setSelectedSlot(SkillBarLogic.itemSlotAtCell(cell, slots.length));
+		}
 	}
 
 	/** Casts the technique in a slot (asks the server). Returns false when it is on cooldown (message shown). */
@@ -146,14 +203,15 @@ public final class ClientSkills {
 			lastPlayer = p;
 			reset();
 		}
-		if (selected >= 0 && selectedTechnique(mc) == null) {
+		if (mode) {
+			if (!available(mc) || modeSlots(mc).length == 0) {
+				setMode(mc, false); // world switch off, creative or nothing slotted
+			} else {
+				applyCell(mc); // slots, levels or emeralds may have changed
+			}
+		} else if (selected >= 0) {
 			select(-1);
 		}
-		int hotbar = p.getInventory().getSelectedSlot();
-		if (lastHotbar != -1 && hotbar != lastHotbar && selected >= 0) {
-			select(-1); // scrolling the hotbar or pressing 1-9 goes back to the real item
-		}
-		lastHotbar = hotbar;
 
 		FocusParticles.tick(mc);
 		boolean inGame = mc.gui.screen() == null && available(mc);
@@ -164,37 +222,17 @@ public final class ClientSkills {
 	private static void reset() {
 		selected = -1;
 		charging = false;
-		keyTracking = false;
-		lastHotbar = -1;
+		mode = false;
 		useWasDown = false;
 	}
 
-	/** Skill key: tap (shorter than TAP_TICKS) = next entry, hold = the radial wheel. */
 	private static void tickKey(Minecraft mc, boolean inGame) {
 		boolean click = false;
 		while (KEY.consumeClick()) {
 			click = true;
 		}
-		if (!inGame) {
-			keyTracking = false;
-			return;
-		}
-		if (click && !keyTracking) {
-			keyTracking = true;
-			keyHeld = 0;
-		}
-		if (!keyTracking) {
-			return;
-		}
-		if (KEY.isDown()) {
-			keyHeld++;
-			if (keyHeld >= SkillBarLogic.TAP_TICKS) {
-				keyTracking = false;
-				mc.setScreenAndShow(new SkillWheelScreen());
-			}
-		} else {
-			keyTracking = false;
-			next(mc);
+		if (click && inGame) {
+			toggleMode(mc);
 		}
 	}
 

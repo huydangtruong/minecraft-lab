@@ -16,25 +16,23 @@ class SkillBarLogicTest {
 	}
 
 	@Test
-	void wheelEntriesAreCrossThenFilledSlots() {
-		assertArrayEquals(new int[] {-1}, SkillBarLogic.wheelEntries(new boolean[] {false, false, false, false}));
-		assertArrayEquals(new int[] {-1, 0, 2}, SkillBarLogic.wheelEntries(new boolean[] {true, false, true, false}));
+	void techniqueModeMapsCells() {
+		int[] slots = SkillBarLogic.filledSlots(new boolean[] {true, false, true, false});
+		assertArrayEquals(new int[] {0, 2}, slots);
+		assertEquals(0, SkillBarLogic.techniqueAtCell(0, slots));
+		assertEquals(2, SkillBarLogic.techniqueAtCell(1, slots));
+		assertEquals(-1, SkillBarLogic.techniqueAtCell(2, slots));
+		assertEquals(-1, SkillBarLogic.itemSlotAtCell(1, 2));
+		assertEquals(0, SkillBarLogic.itemSlotAtCell(2, 2));
+		assertEquals(6, SkillBarLogic.itemSlotAtCell(8, 2));
+		assertEquals(8, SkillBarLogic.itemSlotAtCell(8, 0));
 	}
 
 	@Test
-	void wheelIndexPicksByDirection() {
-		// 4 entries: top, right, bottom, left
-		assertEquals(0, SkillBarLogic.wheelIndex(0, -50, 4));
-		assertEquals(1, SkillBarLogic.wheelIndex(50, 0, 4));
-		assertEquals(2, SkillBarLogic.wheelIndex(0, 50, 4));
-		assertEquals(3, SkillBarLogic.wheelIndex(-50, 0, 4));
-		// just left of straight up still belongs to the top entry
-		assertEquals(0, SkillBarLogic.wheelIndex(-10, -50, 4));
-		// dead zone and empty wheel
-		assertEquals(-1, SkillBarLogic.wheelIndex(3, 3, 4));
-		assertEquals(-1, SkillBarLogic.wheelIndex(50, 0, 0));
-		// a wheel with one entry always gives it
-		assertEquals(0, SkillBarLogic.wheelIndex(40, 40, 1));
+	void scrollWrapsOverNineCells() {
+		assertEquals(1, SkillBarLogic.scrollCell(0, 1));
+		assertEquals(8, SkillBarLogic.scrollCell(0, -1));
+		assertEquals(0, SkillBarLogic.scrollCell(8, 3));
 	}
 
 	@Test
