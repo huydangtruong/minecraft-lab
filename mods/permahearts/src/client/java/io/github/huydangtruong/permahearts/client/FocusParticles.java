@@ -53,6 +53,7 @@ final class FocusParticles {
 				level.addParticle(ParticleTypes.CLOUD, x, y, z, Math.cos(a) * 0.04, 0.0, Math.sin(a) * 0.04);
 			}
 			case SACRIFICE -> level.addParticle(BLOOD, x, y, z, 0, 0.01, 0);
+			case TELEPORT -> level.addParticle(ParticleTypes.PORTAL, x, y, z, 0, 0.05, 0);
 			case FLIGHT -> {
 				level.addParticle(ParticleTypes.CLOUD, x, y, z, (rnd.nextDouble() - 0.5) * 0.02, -0.015, (rnd.nextDouble() - 0.5) * 0.02);
 				if (rnd.nextInt(3) == 0) {
