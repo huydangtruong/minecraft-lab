@@ -165,6 +165,26 @@ public class TechniqueEffectsGameTest {
 		fullChargeOrbLeavesItsField(c, Technique.FIRE, 5, -30);
 	}
 
+	/** D55: a fire orb thrown at a wooden wall sets it on fire, like a fire charge. */
+	@GameTest(maxTicks = 100)
+	public void fireOrbSetsWoodOnFire(GameTestHelper c) {
+		enable(c, true);
+		floor(c);
+		for (int y = 1; y <= 3; y++) {
+			for (int z = 3; z <= 5; z++) {
+				c.setBlock(new BlockPos(6, y, z), Blocks.OAK_LOG);
+			}
+		}
+		ServerPlayer p = c.makeMockServerPlayerInLevel();
+		place(c, p, 1.5, 1, 4.5, -90f, 0f); // looking along +X at the logs
+		TechniqueCasts.cast(p, Technique.FIRE, 1, 1f);
+		c.runAfterDelay(30, () -> {
+			c.assertTrue(fireBlocksIn(c), "the wooden wall should be on fire");
+			c.succeed();
+		});
+	}
+
+	/** Hitting a mob on stone: the mob burns, stone does not (no flammable block near). */
 	@GameTest(maxTicks = 100)
 	public void fireOrbBurnsAHuskAndPlacesNoFire(GameTestHelper c) {
 		enable(c, true);
@@ -177,7 +197,7 @@ public class TechniqueEffectsGameTest {
 			c.assertTrue(h.isOnFire() || h.getHealth() < h.getMaxHealth() - 3, "husk should burn, health " + h.getHealth());
 			c.assertTrue(h.getHealth() < h.getMaxHealth() - 3, "impact (4 damage) should have hurt it, health " + h.getHealth());
 			c.assertTrue(h.isOnFire(), "the field should have set the husk on fire");
-			c.assertTrue(!fireBlocksIn(c), "no fire block may be placed");
+			c.assertTrue(!fireBlocksIn(c), "no fire on plain stone when the orb hits a mob");
 			c.assertTrue(TechniqueFields.count() > 0, "the fire field should exist");
 			c.succeed();
 		});

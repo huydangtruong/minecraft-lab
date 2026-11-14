@@ -1,6 +1,10 @@
 package io.github.huydangtruong.permahearts.technique;
 
 import java.util.Optional;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.BaseFireBlock;
+import net.minecraft.world.phys.BlockHitResult;
 import java.util.UUID;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -21,7 +25,8 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * The thrown Flame Burst / Frost Orb. It is a vanilla Snowball (so every client already renders it, here as a fire
- * charge or a snowball) with its own impact: damage to the entity hit and a field at the impact point. Not saved.
+ * charge or a snowball) with its own impact: damage to the entity hit and a field at the impact point; a fire orb also
+ * sets the hit block side and flammable blocks in its field on fire (D55). Not saved.
  */
 public final class TechniqueOrb extends Snowball {
 	/** Slack around a target's box when sweeping, so a fast orb does not slip past (blocks). */
@@ -119,8 +124,38 @@ public final class TechniqueOrb extends Snowball {
 			TechniqueDamage.hurt(sl, target, caster, this, DamageTypes.MAGIC, (float) damage);
 			at = target.position();
 		}
+		if (technique == Technique.FIRE && hit instanceof BlockHitResult bh) {
+			// D55: like a fire charge, the block side that was hit catches fire
+			placeFire(sl, bh.getBlockPos().relative(bh.getDirection()));
+		}
 		impact(sl, caster, at);
 		discard();
+	}
+
+	/**
+	 * D55: real fire on flammable blocks (wood, leaves, wool...) inside the fire field, like vanilla fire: it can spread
+	 * and burn wooden builds (the doFireTick game rule stops spreading). Stone and other non-flammable blocks never burn.
+	 */
+	private static void igniteFlammable(ServerLevel sl, Vec3 at, double radius) {
+		BlockPos c = BlockPos.containing(at);
+		int r = (int) Math.ceil(radius);
+		for (BlockPos pos : BlockPos.betweenClosed(c.offset(-r, -1, -r), c.offset(r, 2, r))) {
+			if (pos.distToCenterSqr(at) > radius * radius || !sl.getBlockState(pos).isAir()) {
+				continue;
+			}
+			for (Direction d : Direction.values()) {
+				if (sl.getBlockState(pos.relative(d)).ignitedByLava()) {
+					placeFire(sl, pos.immutable());
+					break;
+				}
+			}
+		}
+	}
+
+	private static void placeFire(ServerLevel sl, BlockPos pos) {
+		if (sl.getBlockState(pos).isAir() && BaseFireBlock.canBePlacedAt(sl, pos, Direction.UP)) {
+			sl.setBlockAndUpdate(pos, BaseFireBlock.getState(sl, pos));
+		}
 	}
 
 	private void impact(ServerLevel sl, ServerPlayer caster, Vec3 at) {
@@ -128,6 +163,7 @@ public final class TechniqueOrb extends Snowball {
 		if (technique == Technique.FIRE) {
 			TechniqueFields.add(TechniqueFields.Kind.FIRE, sl, at, TechniqueRules.fireFieldRadius(techLevel),
 				TechniqueRules.fireFieldSeconds(techLevel), techLevel, owner);
+			igniteFlammable(sl, at, TechniqueRules.fireFieldRadius(techLevel));
 			sl.sendParticles(ParticleTypes.FLAME, at.x, at.y + 0.2, at.z, 40, 0.4, 0.3, 0.4, 0.08);
 			sl.playSound(null, at.x, at.y, at.z, SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 1f, 0.8f);
 		} else {

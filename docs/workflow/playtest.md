@@ -135,3 +135,8 @@ Survival, công tắc BẬT, `/technique set @s phase 1`. Đứng cạnh một v
 3. Ra khỏi đá (đứng ngoài trời hoặc trong hang) khi còn đang xuyên tường: sương mù trở lại bình thường như vanilla. Hết thời gian Xuyên tường cũng vậy.
 
 Kiểm bằng máy: `./gradlew :permahearts:runClientGameTest` (ảnh `27-phase-xray-cave` cấp 1 và `28-phase-xray-level-20`; test kiểm khoảng cách kết thúc sương 8 và 48).
+
+## Lửa đốt gỗ (D55)
+
+1. Ném Lửa vào một cây hoặc tường gỗ: chỗ trúng và gỗ quanh bãi lửa bắt lửa, lửa có thể lan như lửa thường.
+2. Ném vào mob trên nền đá: mob cháy, nền đá không có lửa.
