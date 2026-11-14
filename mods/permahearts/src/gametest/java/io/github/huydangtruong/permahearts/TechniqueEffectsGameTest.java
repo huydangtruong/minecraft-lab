@@ -102,6 +102,69 @@ public class TechniqueEffectsGameTest {
 		return false;
 	}
 
+	/** A long floor (x 0..59) so a full-charge orb can land far from the caster. */
+	private static void longFloor(GameTestHelper c) {
+		for (int x = 0; x < 60; x++) {
+			for (int z = 0; z < 12; z++) {
+				c.setBlock(x, 0, z, Blocks.STONE);
+			}
+		}
+	}
+
+	private static void fullChargeOrbLeavesItsField(GameTestHelper c, Technique t, int level, double pitch) {
+		enable(c, true);
+		longFloor(c);
+		ServerPlayer p = c.makeMockServerPlayerInLevel();
+		place(c, p, 1.5, 1, 4.5, -90f, (float) pitch);
+		int before = TechniqueFields.count();
+		TechniqueCasts.cast(p, t, level, 1f);
+		c.runAfterDelay(80, () -> {
+			c.assertTrue(TechniqueFields.count() > before, t + " orb at full charge (level " + level + ") must leave its field when it lands");
+			c.succeed();
+		});
+	}
+
+	@GameTest(maxTicks = 120, padding = 64)
+	public void fullChargeFireOrbLandsAndBurns(GameTestHelper c) {
+		fullChargeOrbLeavesItsField(c, Technique.FIRE, 1, 0);
+	}
+
+	@GameTest(maxTicks = 120, padding = 64)
+	public void fullChargeFireOrbAtMaxLevelLandsAndBurns(GameTestHelper c) {
+		fullChargeOrbLeavesItsField(c, Technique.FIRE, TechniqueRules.MAX_LEVEL, 0);
+	}
+
+	@GameTest(maxTicks = 120, padding = 64)
+	public void fullChargeIceOrbLandsAndFreezes(GameTestHelper c) {
+		fullChargeOrbLeavesItsField(c, Technique.ICE, 1, 0);
+	}
+
+	@GameTest(maxTicks = 120, padding = 64)
+	public void fullChargeOrbSplashingIntoDeepWaterStillLands(GameTestHelper c) {
+		enable(c, true);
+		longFloor(c);
+		for (int x = 6; x < 60; x++) {
+			for (int z = 0; z < 12; z++) {
+				for (int y = 1; y <= 3; y++) {
+					c.setBlock(x, y, z, Blocks.WATER);
+				}
+			}
+		}
+		ServerPlayer p = c.makeMockServerPlayerInLevel();
+		place(c, p, 1.5, 1, 4.5, -90f, 0f);
+		int before = TechniqueFields.count();
+		TechniqueCasts.cast(p, Technique.FIRE, 1, 1f);
+		c.runAfterDelay(80, () -> {
+			c.assertTrue(TechniqueFields.count() > before, "an orb ending in water must still leave its field");
+			c.succeed();
+		});
+	}
+
+	@GameTest(maxTicks = 120, padding = 64)
+	public void fullChargeOrbThrownUpStillLands(GameTestHelper c) {
+		fullChargeOrbLeavesItsField(c, Technique.FIRE, 5, -30);
+	}
+
 	@GameTest(maxTicks = 100)
 	public void fireOrbBurnsAHuskAndPlacesNoFire(GameTestHelper c) {
 		enable(c, true);
