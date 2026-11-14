@@ -95,7 +95,7 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 			net.minecraft.client.Minecraft.getInstance().player));
 		context.waitTicks(5);
 		context.takeScreenshot("08-inventory-stats-button");
-		context.clickScreenButton("Stats");
+		context.clickScreenButton("Cultivation");
 		context.waitTicks(5);
 		boolean open = context.computeOnClient(mc -> {
 			try {
@@ -105,9 +105,25 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 			}
 		});
 		if (!open) {
-			throw new AssertionError("the stats button did not open the panel");
+			throw new AssertionError("the cultivation button did not open the panel");
 		}
 		context.takeScreenshot("09-stats-panel");
+		// D39: the second tab (techniques) is empty for now
+		context.clickScreenButton("Techniques");
+		context.waitTicks(5);
+		String tab = context.computeOnClient(mc -> {
+			try {
+				return String.valueOf(Class.forName("io.github.huydangtruong.permahearts.client.StatsPanel").getMethod("tab").invoke(null));
+			} catch (ReflectiveOperationException e) {
+				throw new RuntimeException(e);
+			}
+		});
+		if (!tab.equals("TECHNIQUES")) {
+			throw new AssertionError("the Techniques tab was not selected: " + tab);
+		}
+		context.takeScreenshot("09b-techniques-tab");
+		context.clickScreenButton("Stats");
+		context.waitTicks(2);
 		context.runOnClient(mc -> mc.player.closeContainer());
 		server.runCommand("gamemode creative @a");
 	}

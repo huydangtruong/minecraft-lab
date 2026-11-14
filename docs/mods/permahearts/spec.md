@@ -78,3 +78,8 @@
 - D37: 101–200 san hô, đào, hồng phấn, oải hương, bạc hà; 201–300 hoa anh đào, thiên hà, lửa xanh lá, lửa linh hồn, huyết nham (D38). Sửa hình: `mods/permahearts/tools/make_heart_sprites.py` rồi chạy lại. Ảnh: `docs/screens/hearts-150-300-strip.png`.
 - Độc/wither/đóng băng: mọi tim theo màu vanilla của hiệu ứng. Tim vàng: các hàng phía trên. Giáp: ngay trên 2 hàng tim.
 - Ảnh: `docs/screens/hearts-57-full.png`, `hearts-57-hurt.png`, `hearts-100-full.png`.
+
+## Bảng tu luyện (D39)
+
+- Nút Thái cực bo góc cạnh nút sách công thức ("Cultivation"). Bảng trái có 2 tab kiểu sách công thức: **Stats** (D31) và **Techniques** (trống, chờ mô tả chiêu thức).
+- Ảnh: `docs/screens/stats-button.png`, `stats-panel.png`, `techniques-tab.png`.

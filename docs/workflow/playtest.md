@@ -57,3 +57,9 @@ Một cửa sổ Minecraft sẽ hiện ~30 giây rồi tự đóng. Ảnh nằm 
 2. `/hearts set @s 57`: hàng dưới 8 tim hồng đầu rồi cam, hàng trên cam. `/hearts set @s 100`: 20 tim xanh dương.
 3. Mặc giáp: thanh giáp nằm ngay trên 2 hàng tim. Ăn táo vàng: tim vàng ở hàng trên. Uống thuốc độc: mọi tim màu độc.
 4. D37: `/hearts set @s 150` → tim nhạt (hồng phấn trên nền đào). `/hearts set @s 300` → toàn huyết nham; bị đánh dần: lửa linh hồn, lửa xanh lá, thiên hà, hoa anh đào lần lượt lộ ra (D38).
+
+## Bảng tu luyện (D39)
+
+1. Mở túi đồ (Survival): cạnh nút sách công thức có nút Thái cực bo góc; rê chuột → nền xanh như nút bên cạnh, tooltip "Cultivation".
+2. Bấm: bảng trái mở, bên trái bảng có 2 tab. Tab Thái cực = Stats; tab sách = Techniques ("No techniques yet"). Bấm qua lại đổi nội dung.
+3. Cầm đồ trên chuột rồi bấm vào tab: đồ không bị rơi.
