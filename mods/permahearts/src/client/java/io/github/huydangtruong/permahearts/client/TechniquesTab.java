@@ -81,6 +81,7 @@ public final class TechniquesTab {
 			case FLIGHT -> "Fly freely like in creative, faster at higher levels. You glide down gently when it ends.";
 			case BLADE -> "Left click a target to cut it with a blood-stained blade. It bleeds and flies back, and you heal for the damage dealt.";
 			case GOLEM -> "Summon loyal violet iron golems that fight for you for 90 seconds. More and stronger at higher levels.";
+			case AQUA -> "Breathe, swim fast and dig freely underwater.";
 			case ANGEL -> "Summons warrior angels that fly through walls and fight for you.";
 		};
 	}

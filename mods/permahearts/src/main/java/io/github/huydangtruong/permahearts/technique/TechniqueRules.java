@@ -313,6 +313,64 @@ public final class TechniqueRules {
 	/** Seconds the angels stay (D63). */
 	public static final int ANGEL_SECONDS = 60;
 
+	// ---- Aqua Marine (D64) ----
+
+	/** Seconds Aqua Marine lasts: 30 at level 1 up to 70 at level 20 (rounded to ticks where it is used, like flightSeconds). */
+	public static double aquaSeconds(int level) {
+		return linear(level, 30, 70);
+	}
+
+	/** Swim bonus as a multiple of the Dolphin's Grace bonus: x1 at level 1, x2 at level 20. */
+	public static double aquaSwimFactor(int level) {
+		return linear(level, 1.0, 2.0);
+	}
+
+	/** Underwater mining speed attribute value: 1.0 (Aqua Affinity) at level 1, 2.0 at level 20. Vanilla base is 0.2. */
+	public static double aquaMiningSpeed(int level) {
+		return linear(level, 1.0, 2.0);
+	}
+
+	/** Vanilla submerged mining speed attribute without Aqua Affinity (Attributes.SUBMERGED_MINING_SPEED default). */
+	public static final double SUBMERGED_MINING_BASE = 0.2;
+
+	// Vanilla swimming physics (LivingEntity.travelInWater): each tick v = (v + accel) * drag and the player moves by
+	// v + accel, so the steady distance per tick is accel / (1 - drag). Plain swimming drag is 0.8 (0.9 while
+	// sprinting); Dolphin's Grace sets it to 0.96.
+	public static final double WATER_ACCEL = 0.02;
+	public static final double DRAG_PLAIN = 0.8;
+	public static final double DRAG_SPRINT = 0.9;
+	public static final double DRAG_DOLPHIN = 0.96;
+	/** Walking speed attribute and the sprint bonus (+30%): the base of the water movement efficiency blend. */
+	public static final double WALK_SPEED = 0.1;
+	public static final double SPRINT_FACTOR = 1.3;
+
+	/** Steady distance per tick (blocks) with this acceleration and drag. */
+	public static double steadySpeed(double accel, double drag) {
+		return accel / (1 - drag);
+	}
+
+	/** Steady swim speed in vanilla: plain or sprint-swimming, without or with Dolphin's Grace. */
+	public static double swimSpeed(boolean sprinting, boolean dolphin) {
+		return steadySpeed(WATER_ACCEL, dolphin ? DRAG_DOLPHIN : sprinting ? DRAG_SPRINT : DRAG_PLAIN);
+	}
+
+	/** The steady speed Aqua Marine aims for: plain speed plus aquaSwimFactor times the Dolphin's Grace bonus. */
+	public static double aquaTargetSpeed(int level, boolean sprinting) {
+		double plain = swimSpeed(sprinting, false);
+		return plain + aquaSwimFactor(level) * (swimSpeed(sprinting, true) - plain);
+	}
+
+	/**
+	 * Value to add to the WATER_MOVEMENT_EFFICIENCY attribute (on top of the real Dolphin's Grace effect, which fixes
+	 * the drag at 0.96) so that the steady swim speed reaches aquaTargetSpeed. Vanilla acceleration in water is
+	 * 0.02 + (movementSpeed - 0.02) * efficiency, and the efficiency is halved off the ground (open water). 0 at level 1.
+	 */
+	public static double aquaWaterEfficiency(int level, boolean sprinting, boolean onGround) {
+		double accel = aquaTargetSpeed(level, sprinting) * (1 - DRAG_DOLPHIN);
+		double speed = WALK_SPEED * (sprinting ? SPRINT_FACTOR : 1);
+		return Math.max(0, (accel - WATER_ACCEL) / ((speed - WATER_ACCEL) * (onGround ? 1 : 0.5)));
+	}
+
 	/** Unused since the blade got a 12 s cooldown (D52); kept for reference. */
 	public static final double BLADE_ATTACK_SPEED = 1.6;
 
@@ -397,6 +455,11 @@ public final class TechniqueRules {
 				new Stat("Health", num(angelHealth(level))),
 				new Stat("Damage", num(angelDamage(level))),
 				new Stat("Lasts", ANGEL_SECONDS + " s"),
+				new Stat("Cooldown", t.cooldownSeconds() + " s"));
+			case AQUA -> List.of(
+				new Stat("Lasts", num(aquaSeconds(level)) + " s"),
+				new Stat("Swim speed", "\u00d7" + num(aquaSwimFactor(level)) + " dolphin"),
+				new Stat("Underwater mining", "\u00d7" + num(aquaMiningSpeed(level)) + " aqua affinity"),
 				new Stat("Cooldown", t.cooldownSeconds() + " s"));
 			case SACRIFICE -> List.of(
 				new Stat("Costs", pct(sacrificeCost(level)) + " of current health"),

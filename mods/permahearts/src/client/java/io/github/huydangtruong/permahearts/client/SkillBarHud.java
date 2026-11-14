@@ -55,6 +55,12 @@ public class SkillBarHud implements HudElement {
 			Component fl = Component.literal("Flight " + SkillBarLogic.secondsLeft(flight) + " s");
 			g.text(mc.font, fl, g.guiWidth() - MARGIN - mc.font.width(fl), top - 24, flight < 100 ? 0xFFFF8080 : 0xFFDFF4FF, true);
 		}
+		long aqua = io.github.huydangtruong.permahearts.technique.AquaMarine.remaining(
+			mc.player.getAttached(io.github.huydangtruong.permahearts.technique.AquaMarine.END), now);
+		if (aqua > 0) { // remaining Aqua Marine time, above the flight line
+			Component aq = Component.literal("Aqua " + SkillBarLogic.secondsLeft(aqua) + " s");
+			g.text(mc.font, aq, g.guiWidth() - MARGIN - mc.font.width(aq), top - (flight > 0 ? 36 : 24), aqua < 100 ? 0xFFFF8080 : 0xFF9FF0E8, true);
+		}
 		Technique sel = ClientSkills.selectedTechnique(mc);
 		if (sel != null) {
 			Component name = Component.literal(sel.displayName() + "  Lv " + d.level(sel));

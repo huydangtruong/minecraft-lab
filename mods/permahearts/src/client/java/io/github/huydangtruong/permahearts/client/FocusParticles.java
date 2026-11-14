@@ -70,6 +70,12 @@ final class FocusParticles {
 					level.addParticle(ParticleTypes.END_ROD, x, y, z, (rnd.nextDouble() - 0.5) * 0.02, 0.02, (rnd.nextDouble() - 0.5) * 0.02);
 				}
 			}
+			case AQUA -> {
+				level.addParticle(ParticleTypes.BUBBLE_POP, x, y, z, 0, 0.02, 0);
+				if (rnd.nextInt(3) == 0) {
+					level.addParticle(ParticleTypes.SPLASH, x, y, z, (rnd.nextDouble() - 0.5) * 0.04, 0.03, (rnd.nextDouble() - 0.5) * 0.04);
+				}
+			}
 			case BLADE -> {
 				level.addParticle(DROP, x, y - 0.1, z, 0, -0.05, 0);
 				if (rnd.nextInt(2) == 0) {
