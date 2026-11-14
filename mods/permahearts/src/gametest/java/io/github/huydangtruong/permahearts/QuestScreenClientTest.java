@@ -45,6 +45,7 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 			caveBoss(context, server);
 			statsPanel(context, server);
 			bloodMoonEdge(context, server);
+			layeredHearts(context, server);
 		}
 	}
 
@@ -109,6 +110,43 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 		context.takeScreenshot("09-stats-panel");
 		context.runOnClient(mc -> mc.player.closeContainer());
 		server.runCommand("gamemode creative @a");
+	}
+
+	/** D36: more than 20 hearts stay in 2 rows, extra hearts in other colours over the first ones; armour sits above. */
+	private static void layeredHearts(ClientGameTestContext context, TestServerContext server) {
+		context.runOnClient(mc -> mc.player.closeContainer());
+		server.runCommand("gamemode survival @a");
+		server.runCommand("effect clear @a");
+		server.runCommand("item replace entity @a armor.chest with iron_chestplate");
+		server.runCommand("item replace entity @a armor.head with iron_helmet");
+		hearts(context, server, 57, -1);
+		context.takeScreenshot("12-hearts-57-full");
+		hearts(context, server, 57, 83); // 41.5 hearts left: layer 3 gone, half of heart 42
+		context.takeScreenshot("13-hearts-57-hurt");
+		hearts(context, server, 100, -1);
+		context.takeScreenshot("14-hearts-100-full");
+		int rows = server.computeOnServer(s -> io.github.huydangtruong.permahearts.HeartLayers.height(
+			s.getPlayerList().getPlayers().get(0).getMaxHealth(), 0));
+		if (rows != 20) {
+			throw new AssertionError("100 hearts should use 2 rows (20 px), got " + rows);
+		}
+		hearts(context, server, 10, -1);
+		server.runCommand("gamemode creative @a");
+	}
+
+	/** Sets max hearts (health full when health < 0, else that many health points) and waits for the client. */
+	private static void hearts(ClientGameTestContext context, TestServerContext server, int hearts, int health) {
+		server.runOnServer(s -> {
+			ServerPlayer p = s.getPlayerList().getPlayers().get(0);
+			HeartsAttachment.set(p, io.github.huydangtruong.permahearts.HeartRules.withHearts(HeartsData.DEFAULT, hearts));
+			HealthApplier.apply(p, true);
+			if (health >= 0) {
+				p.setHealth(health);
+			}
+		});
+		context.waitTicks(10);
+		context.runOnClient(mc -> mc.gui.hud.getChat().clearMessages(false)); // chat would cover the second row
+		context.waitTicks(2);
 	}
 
 	/** D33: during a Blood Moon the 96 x 96 arena edge around the Crimson Master shows as red dust near the player. */

@@ -26,7 +26,7 @@ public final class HeartsCommand {
 			.then(Commands.literal("set")
 				.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 				.then(Commands.argument("targets", EntityArgument.players())
-					.then(Commands.argument("n", IntegerArgumentType.integer(1, 50))
+					.then(Commands.argument("n", IntegerArgumentType.integer(1, HeartRules.MAX))
 						.executes(ctx -> {
 							int n = IntegerArgumentType.getInteger(ctx, "n");
 							var targets = EntityArgument.getPlayers(ctx, "targets");

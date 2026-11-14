@@ -121,17 +121,17 @@ public class PermaHeartsGameTest {
 	}
 
 	@GameTest(maxTicks = 100)
-	public void killAtCapKeepsFiftyHearts(GameTestHelper context) {
+	public void killAtCapKeepsHundredHearts(GameTestHelper context) {
 		enable(context, true);
 		ServerPlayer p = context.makeMockServerPlayerInLevel();
-		HeartsAttachment.set(p, HeartRules.withHearts(HeartsData.DEFAULT, 50));
+		HeartsAttachment.set(p, HeartRules.withHearts(HeartsData.DEFAULT, 100));
 		HealthApplier.apply(p, true);
-		context.assertTrue(p.getMaxHealth() == 100f, "50 hearts = 100 health, was " + p.getMaxHealth());
+		context.assertTrue(p.getMaxHealth() == 200f, "100 hearts = 200 health, was " + p.getMaxHealth());
 		kill(context, p, context.spawn(EntityTypes.ZOMBIE, 1, 1, 1));
 		HeartsData d = HeartsAttachment.get(p);
-		context.assertTrue(HeartRules.maxHearts(d) == 50, "cap is 50 hearts");
+		context.assertTrue(HeartRules.maxHearts(d) == 100, "cap is 100 hearts");
 		context.assertTrue(d.heartXp() == 0, "XP stays 0 at cap, was " + d.heartXp());
-		context.assertTrue(p.getMaxHealth() == 100f, "max health should stay 100");
+		context.assertTrue(p.getMaxHealth() == 200f, "max health should stay 200");
 		context.succeed();
 	}
 
@@ -168,12 +168,12 @@ public class PermaHeartsGameTest {
 		// Out of range is rejected, data unchanged.
 		boolean rejected = false;
 		try {
-			server.getCommands().getDispatcher().execute("hearts set " + name + " 51", admin);
+			server.getCommands().getDispatcher().execute("hearts set " + name + " 101", admin);
 		} catch (CommandSyntaxException e) {
 			rejected = true;
 		}
-		context.assertTrue(rejected, "hearts set 51 should be a syntax error");
-		context.assertTrue(HeartRules.maxHearts(HeartsAttachment.get(p)) == 45, "51 must be rejected");
+		context.assertTrue(rejected, "hearts set 101 should be a syntax error");
+		context.assertTrue(HeartRules.maxHearts(HeartsAttachment.get(p)) == 45, "101 must be rejected");
 		// Plain /hearts as the player runs without changing anything.
 		run(context, p.createCommandSourceStack(), "hearts");
 		context.assertTrue(HeartRules.maxHearts(HeartsAttachment.get(p)) == 45, "/hearts must not change data");

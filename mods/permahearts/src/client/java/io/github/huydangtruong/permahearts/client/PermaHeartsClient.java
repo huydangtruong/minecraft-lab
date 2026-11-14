@@ -16,6 +16,7 @@ public class PermaHeartsClient implements ClientModInitializer {
 			Identifier.fromNamespaceAndPath("permahearts", "heart_xp"), new HeartXpHud());
 		MenuScreens.register(WandererMenus.TYPE, WandererScreen::new);
 		StatsPanel.register();
+		LayeredHeartsHud.register();
 		// Replaces the wandering trader renderer; ordinary traders keep the vanilla texture.
 		EntityRendererRegistry.register(EntityTypes.WANDERING_TRADER, WandererRenderer::new);
 	}

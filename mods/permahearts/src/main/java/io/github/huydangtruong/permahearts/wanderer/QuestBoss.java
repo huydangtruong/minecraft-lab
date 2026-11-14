@@ -176,7 +176,7 @@ public final class QuestBoss {
 	 * Once a second: a Ghast boss that floated more than 24 blocks from the Crimson Master, or more than 16 above the
 	 * nearest player (or the ground, when the player is under it), is sent back to hover 8-12 blocks over that player.
 	 */
-	private static void leash(MinecraftServer server, Ghast ghast) {
+	public static void leash(MinecraftServer server, Ghast ghast) {
 		Entity npc = Wanderer.npc(server);
 		if (npc == null || npc.level() != ghast.level()) {
 			return;
