@@ -8,7 +8,8 @@
 		"EntityInWallMixin",
 		"FoodDataMixin",
 		"FoodPropertiesMixin",
-		"GhastShootFireballGoalMixin"
+		"GhastShootFireballGoalMixin",
+		"PlayerPhaseMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

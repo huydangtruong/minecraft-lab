@@ -244,6 +244,48 @@ public class TechniqueEffectsGameTest {
 	}
 
 	@GameTest(maxTicks = 100)
+	public void phaseWalkFloorFollowsFalls(GameTestHelper c) {
+		enable(c, true);
+		// A platform at y 2 with a hole (x 4..7) over lower ground at y 0, and a wall on that lower level.
+		for (int x = 0; x < 8; x++) {
+			for (int z = 0; z < 8; z++) {
+				c.setBlock(x, x < 4 ? 2 : 0, z, Blocks.STONE);
+			}
+		}
+		for (int y = 1; y <= 2; y++) {
+			c.setBlock(6, y, 4, Blocks.STONE);
+		}
+		ServerPlayer p = c.makeMockServerPlayerInLevel();
+		place(c, p, 3.5, 3, 4.5, -90f, 0f);
+		TechniqueCasts.cast(p, Technique.PHASE, 1, 1f);
+		int cast = p.getAttached(PhaseState.ATTACHMENT).floorY();
+		c.assertTrue(cast == c.absolutePos(new BlockPos(0, 3, 0)).getY(), "cast floor should be the feet level, was " + cast);
+		// Walk over the hole and fall (the mock does not run Player.tick, so do what it does).
+		p.move(MoverType.SELF, new Vec3(1.5, 0, 0));
+		for (int i = 0; i < 10; i++) {
+			p.move(MoverType.SELF, new Vec3(0, -0.8, 0));
+			PhaseState.followFall(p);
+		}
+		int lowFloor = c.absolutePos(new BlockPos(0, 1, 0)).getY();
+		c.assertTrue(p.onGround() && Math.abs(p.getY() - lowFloor) < 1e-6, "player should stand on the lower ground, y " + p.getY() + " expected " + lowFloor);
+		int floor = p.getAttached(PhaseState.ATTACHMENT).floorY();
+		c.assertTrue(floor == lowFloor, "floor should follow the fall to " + lowFloor + ", was " + floor);
+		// The wall on the lower level is passed, the ground below still holds.
+		double wallX = c.absoluteVec(new Vec3(6, 0, 0)).x;
+		p.move(MoverType.SELF, new Vec3(2, 0, 0));
+		c.assertTrue(p.getX() > wallX + 0.9, "player should pass the wall on the lower level, x " + p.getX() + " wall " + wallX);
+		double y0 = p.getY();
+		p.move(MoverType.SELF, new Vec3(0, -3, 0));
+		c.assertTrue(p.getY() > y0 - 0.5, "the lower ground should hold, y " + y0 + " -> " + p.getY());
+		// The floor never rises.
+		place(c, p, 3.5, 4, 4.5, 0f, 0f);
+		PhaseState.followFall(p);
+		c.assertTrue(p.getAttached(PhaseState.ATTACHMENT).floorY() == floor, "the floor must not rise");
+		TechniqueCasts.endPhase(p);
+		c.succeed();
+	}
+
+	@GameTest(maxTicks = 100)
 	public void phaseWalkDurationFollowsTheLevel(GameTestHelper c) {
 		enable(c, true);
 		ServerPlayer p = c.makeMockServerPlayerInLevel();

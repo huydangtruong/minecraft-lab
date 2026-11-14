@@ -9,7 +9,8 @@
 		"RecipeBookScreenMixin",
 		"MinecraftInputMixin",
 		"FirstPersonFocusMixin",
-		"AvatarFocusMixin"
+		"AvatarFocusMixin",
+		"ScreenEffectPhaseMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
