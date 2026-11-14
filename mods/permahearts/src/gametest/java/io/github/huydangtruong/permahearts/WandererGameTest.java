@@ -382,6 +382,90 @@ public class WandererGameTest {
 		}
 	}
 
+	/** D35: the Ghast boss floats above the ground with 4 phantoms, is pulled back when it strays, and fires faster. */
+	@GameTest(maxTicks = 100)
+	public void ghastBossLeashAndFireRate(GameTestHelper context) {
+		MinecraftServer s = context.getLevel().getServer();
+		try {
+			enable(context, true);
+			Entity npc = Wanderer.startQuestForTest(context.getLevel(), context.absolutePos(new BlockPos(1, 1, 1)),
+				eventQuest(new QuestLine(QuestType.BOSS, "minecraft:ghast", 1, 0, "fury", false), testQuest().lines().get(0)));
+			Wanderer.accept(s);
+			ServerPlayer p = testPlayer(context);
+			context.assertTrue(Wanderer.startEvent(s, 0, p), "summon should work");
+			List<? extends Mob> bosses = tagged(s, QuestBoss.TAG);
+			context.assertTrue(bosses.size() == 1 && bosses.get(0) instanceof net.minecraft.world.entity.monster.Ghast, "one ghast boss");
+			Mob ghast = bosses.get(0);
+			context.assertTrue(ghast.getMaxHealth() == 150f, "boss max health 150");
+			context.assertTrue(ghast.getY() >= npc.getY() + 5, "ghast floats above the ground, y=" + ghast.getY() + " npc y=" + npc.getY());
+			context.assertTrue(context.getLevel().noCollision(ghast), "ghast spawned in free air");
+			List<? extends Mob> minions = tagged(s, QuestBoss.MINION_TAG);
+			context.assertTrue(minions.size() == 4, "four minions, found " + minions.size());
+			for (Mob m : minions) {
+				context.assertTrue(m instanceof net.minecraft.world.entity.monster.Phantom && !m.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.HEAD).isEmpty(),
+					"ghast minions are phantoms with helmets");
+			}
+
+			// Strayed 40 blocks away: sent back within 24 blocks of the Crimson Master.
+			ghast.setPos(npc.getX() + 40, ghast.getY(), npc.getZ());
+			QuestBoss.tick(s);
+			var mc = ghast.getMoveControl();
+			double horizontal = Math.hypot(mc.getWantedX() - npc.getX(), mc.getWantedZ() - npc.getZ());
+			context.assertTrue(mc.hasWanted() && horizontal <= io.github.huydangtruong.permahearts.wanderer.GhastLeash.RADIUS,
+				"pulled back within 24 blocks, wanted " + horizontal);
+			// Floated 30 blocks above the player: sent back to 8..12 above.
+			ghast.setPos(p.getX(), p.getY() + 30, p.getZ());
+			QuestBoss.tick(s);
+			// (the reference is the player, or the ground above it when higher: tree tops, the test area's ceiling)
+			double ref = Math.max(p.getY(), context.getLevel().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING,
+				p.getBlockX(), p.getBlockZ()));
+			double above = mc.getWantedY() - ref;
+			context.assertTrue(above >= 8 && above <= 12, "pulled down to hover over the player, wanted " + above + " above");
+
+			// Fire rate: one charge step before the shot, the wait after it is 30 ticks (vanilla 40).
+			// (mock players count as creative and cannot be targeted: aim at a pig)
+			LivingEntity pig = context.spawn(net.minecraft.world.entity.EntityTypes.PIG, new BlockPos(2, 1, 2));
+			int bossWait = cooldownAfterShot(ghast, pig);
+			context.assertTrue(bossWait == -30, "boss ghast waits 30 ticks after a shot, got " + bossWait);
+			Mob plain = net.minecraft.world.entity.EntityTypes.GHAST.create(context.getLevel(), net.minecraft.world.entity.EntitySpawnReason.EVENT);
+			plain.snapTo(ghast.getX(), ghast.getY(), ghast.getZ(), 0f, 0f);
+			int plainWait = cooldownAfterShot(plain, pig);
+			context.assertTrue(plainWait == -40, "other ghasts keep the vanilla 40 ticks, got " + plainWait);
+			context.getLevel().getEntities(EntityTypeTest.forClass(net.minecraft.world.entity.projectile.hurtingprojectile.LargeFireball.class), e -> true)
+				.forEach(Entity::discard);
+			context.succeed();
+		} finally {
+			Wanderer.reset(s);
+		}
+	}
+
+	/** Runs the shoot goal's tick once at the moment it fires, then returns its charge counter (the wait, negative). */
+	private static int cooldownAfterShot(Mob ghast, LivingEntity target) {
+		try {
+			java.lang.reflect.Field sel = Mob.class.getDeclaredField("goalSelector");
+			sel.setAccessible(true);
+			var goals = ((net.minecraft.world.entity.ai.goal.GoalSelector) sel.get(ghast)).getAvailableGoals();
+			for (var w : goals) {
+				var goal = w.getGoal();
+				if (goal.getClass().getSimpleName().equals("GhastShootFireballGoal")) {
+					java.lang.reflect.Field charge = goal.getClass().getField("chargeTime");
+					charge.setAccessible(true);
+					target.setPos(ghast.getX() + 6, ghast.getY(), ghast.getZ()); // close, in sight
+					ghast.setTarget(target);
+					if (ghast.getTarget() != target) {
+						throw new AssertionError("ghast refused the target");
+					}
+					charge.setInt(goal, 19);
+					goal.tick();
+					return charge.getInt(goal);
+				}
+			}
+			throw new AssertionError("no GhastShootFireballGoal");
+		} catch (ReflectiveOperationException e) {
+			throw new AssertionError(e);
+		}
+	}
+
 	@GameTest(maxTicks = 100)
 	public void bloodMoonFailsOnStarterDeath(GameTestHelper context) {
 		MinecraftServer s = context.getLevel().getServer();

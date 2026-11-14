@@ -138,7 +138,7 @@ class QuestLogicTest {
 				if (l.type() == QuestType.BOSS) {
 					bosses++;
 					assertTrue(List.of("minecraft:zombie", "minecraft:skeleton", "minecraft:evoker", "minecraft:blaze",
-						"minecraft:vindicator").contains(l.target()), l.target());
+						"minecraft:vindicator", "minecraft:ghast").contains(l.target()), l.target());
 				}
 				if (l.type().isEvent()) {
 					assertEquals(1, l.required());
