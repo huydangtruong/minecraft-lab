@@ -47,10 +47,10 @@ def outline(img, color):
     return out
 
 
-FIRE = [  # one empty row at the bottom so the outline closes (Huy)
+FIRE = [  # 14 body rows with an empty row above and below, so the outline closes on both ends (Huy)
+    "................",
     "......r.........",
     ".....rr.........",
-    ".....rrr........",
     "....rrrr...r....",
     "....rryrr..rr...",
     "...rrryyr.rrr...",
