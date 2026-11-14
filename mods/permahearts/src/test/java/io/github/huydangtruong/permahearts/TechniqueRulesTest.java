@@ -58,7 +58,10 @@ class TechniqueRulesTest {
 		assertArrayEquals(new double[] {4, 13, 18}, at(TechniqueRules::fireImpactDamage));
 		assertEquals(1, TechniqueRules.fireBurnPerSecond(5));
 		assertEquals(2, TechniqueRules.fireBurnPerSecond(6));
-		assertArrayEquals(new double[] {0.20, 0.56, 0.86}, at(TechniqueRules::iceSlow), 1e-9);
+		assertArrayEquals(new double[] {0.40, 0.40 + 0.56 * 9 / 19, 0.96}, at(TechniqueRules::iceSlow), 1e-9);
+		assertArrayEquals(new double[] {0.40, 0.40 + 0.56 * 9 / 19, 0.96}, at(TechniqueRules::iceAttackSlow), 1e-9);
+		assertEquals(8, TechniqueRules.iceAreaSeconds(5));
+		assertEquals(4, TechniqueRules.iceLingerSeconds(5));
 		assertArrayEquals(new double[] {20, 56, 76}, at(TechniqueRules::healingTotal));
 		assertArrayEquals(new double[] {10, 14.5, 17}, at(TechniqueRules::phaseSeconds), 1e-9);
 		assertArrayEquals(new double[] {2, 6.5, 9}, at(TechniqueRules::repulseDamage), 1e-9);
@@ -69,12 +72,11 @@ class TechniqueRulesTest {
 		assertEquals(10, TechniqueRules.phaseSightRange(2));
 		assertEquals(27, TechniqueRules.phaseSightRange(10));
 		assertEquals(48, TechniqueRules.phaseSightRange(20));
-		assertArrayEquals(new double[] {20, 40, 60}, at(TechniqueRules::flightSeconds), 1e-9);
-		assertArrayEquals(new double[] {0, 0.5, 1.0}, at(TechniqueRules::flightSpeedBonus), 1e-9);
+		assertArrayEquals(new double[] {10, 10 + 20.0 * 9 / 19, 30}, at(TechniqueRules::flightSeconds), 1e-9);
+		assertArrayEquals(new double[] {-0.20, -0.20 + 1.2 * 9 / 19, 1.0}, at(TechniqueRules::flightSpeedBonus), 1e-9);
 		assertArrayEquals(new double[] {5, 9.5, 14.5}, at(TechniqueRules::bladeDamage), 1e-9);
-		assertEquals(0.05f, TechniqueRules.flyingSpeed(1), 1e-9f);
-		assertEquals(0.075f, TechniqueRules.flyingSpeed(10), 1e-6f);
-		assertEquals(0.1f, TechniqueRules.flyingSpeed(20), 1e-6f);
+		assertEquals(0.04f, TechniqueRules.flyingSpeed(1), 1e-6f); // 80% of creative (0.05)
+		assertEquals(0.1f, TechniqueRules.flyingSpeed(20), 1e-6f); // 200% of creative
 		assertEquals(120, Technique.FLIGHT.cooldownSeconds());
 		assertEquals(12, Technique.BLADE.cooldownSeconds());
 		assertEquals(16, Technique.FIRE.cooldownSeconds());

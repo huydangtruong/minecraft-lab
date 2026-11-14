@@ -148,22 +148,22 @@ public final class TechniqueRules {
 	}
 
 	public static double iceAreaSeconds(int level) {
-		return 6;
+		return 8; // D54: was 6
 	}
 
-	/** Move speed taken away inside the ice area (0.20 = -20%): 20% at level 1, 56% at 10, 86% at 20 (D47). */
+	/** Move speed taken away inside the ice area (D54): 40% at level 1 up to 96% at 20. */
 	public static double iceSlow(int level) {
-		return piecewise(level, 0.20, 0.56, 0.86);
+		return linear(level, 0.40, 0.96); // D54: 40% at level 1, 96% at 20
 	}
 
 	/** Attack speed taken away inside the ice area. */
 	public static double iceAttackSlow(int level) {
-		return scaled(0.15, 0.04, level);
+		return linear(level, 0.40, 0.96); // D54: same as the move slow
 	}
 
 	/** Frostbite lasts this long after leaving the area. */
 	public static double iceLingerSeconds(int level) {
-		return 3;
+		return 4; // D54: was 3
 	}
 
 	public static double healingRadius(int level) {
@@ -217,20 +217,26 @@ public final class TechniqueRules {
 		return piecewise(level, 5, 8, 10);
 	}
 
+	/** A straight line from (1, at1) to (20, at20). */
+	public static double linear(int level, double at1, double at20) {
+		int l = Math.max(1, Math.min(MAX_LEVEL, level));
+		return at1 + (at20 - at1) * (l - 1) / (MAX_LEVEL - 1.0);
+	}
+
 	/** Straight lines through (1, at1), (10, at10), (20, at20). */
 	public static double piecewise(int level, double at1, double at10, double at20) {
 		int l = Math.max(1, Math.min(MAX_LEVEL, level));
 		return l <= 10 ? at1 + (at10 - at1) * (l - 1) / 9.0 : at10 + (at20 - at10) * (l - 10) / 10.0;
 	}
 
-	/** Seconds of creative-like flight (D52): 20 at level 1, 40 at 10, 60 at 20. */
+	/** Seconds of creative-like flight (D54): 10 at level 1 up to 30 at 20. */
 	public static double flightSeconds(int level) {
-		return piecewise(level, 20, 40, 60);
+		return linear(level, 10, 30); // D54: 10 s at level 1, 30 s at 20
 	}
 
-	/** Flight speed on top of the creative flying speed (D52): +0% at level 1, +50% at 10, +100% at 20. */
+	/** Flight speed on top of the creative flying speed (D54): -20% (80% of creative) at level 1 up to +100% at 20. */
 	public static double flightSpeedBonus(int level) {
-		return piecewise(level, 0, 0.5, 1.0);
+		return linear(level, -0.20, 1.0); // D54: 80% of creative at level 1, 200% at 20
 	}
 
 	/** Life Steal Blade damage on top of the player's base attack (D52): an iron sword's (+5) at level 1, +0.5 per level. */
@@ -286,7 +292,7 @@ public final class TechniqueRules {
 				new Stat("Cooldown", t.cooldownSeconds() + " s"));
 			case FLIGHT -> List.of(
 				new Stat("Flight", num(flightSeconds(level)) + " s"),
-				new Stat("Speed", "+" + pct(flightSpeedBonus(level)) + " (creative = +0%)"),
+				new Stat("Speed", pct(1 + flightSpeedBonus(level)) + " of creative"),
 				new Stat("Cooldown", t.cooldownSeconds() + " s"));
 			case BLADE -> List.of(
 				new Stat("Damage", "base + " + num(bladeDamage(level)) + " + elixirs"),

@@ -88,11 +88,12 @@ public class FlightBladeGameTest {
 		place(c, p, 5.5, 1, 5.5, 0f, 0f);
 		c.assertTrue(TechniqueCasts.cast(p, Technique.FLIGHT, 10, 1f), "survival player can cast Flight");
 		c.assertTrue(p.getAbilities().mayfly && p.getAbilities().flying, "mayfly and flying on");
-		float want = (float) (0.05 * 1.5);
-		c.assertTrue(Math.abs(p.getAbilities().getFlyingSpeed() - want) < 1e-6, "speed x1.5, was " + p.getAbilities().getFlyingSpeed());
+		float want = io.github.huydangtruong.permahearts.technique.TechniqueRules.flyingSpeed(10);
+		c.assertTrue(Math.abs(p.getAbilities().getFlyingSpeed() - want) < 1e-6, "speed as TechniqueRules at level 10, was " + p.getAbilities().getFlyingSpeed());
 		long end = p.getAttached(Flight.END);
 		long left = end - p.level().getGameTime();
-		c.assertTrue(left == 800, "level 10 = 40 s = 800 ticks, was " + left);
+		long ticks = Math.round(io.github.huydangtruong.permahearts.technique.TechniqueRules.flightSeconds(10) * 20);
+		c.assertTrue(left == ticks, "level 10 flight = " + ticks + " ticks, was " + left);
 		c.assertTrue(Flight.active(p), "flight active");
 		p.setAttached(Flight.END, p.level().getGameTime() + 2); // fast-forward
 		c.runAfterDelay(6, () -> {

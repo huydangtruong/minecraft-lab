@@ -12,15 +12,15 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 
 /**
- * Frostbite (Frost Orb area): slows movement and attack speed. The amplifier is the movement slow in percent minus 1,
- * so amplifier + 1 = percent (20% at level 1); attack speed is 5 points less than that (15% at level 1), matching
- * TechniqueRules.iceSlow / iceAttackSlow.
+ * Frostbite (Frost Orb area): slows movement and attack speed. The amplifier is the slow in whole percent minus 1,
+ * so amplifier + 1 = percent (40% at level 1). Movement and attack speed are slowed the same (D54), matching
+ * TechniqueRules.iceSlow / iceAttackSlow rounded to whole percent.
  */
 public final class Frostbite extends MobEffect {
 	private static final Identifier MOVE_ID = Identifier.fromNamespaceAndPath(PermaHearts.MOD_ID, "frostbite_move");
 	private static final Identifier ATTACK_ID = Identifier.fromNamespaceAndPath(PermaHearts.MOD_ID, "frostbite_attack");
-	/** Attack speed is this many percentage points slowed less than movement. */
-	static final int ATTACK_OFFSET = 5;
+	/** Attack speed is this many percentage points slowed less than movement (0 since D54: the same slow). */
+	static final int ATTACK_OFFSET = 0;
 
 	public static final Holder<MobEffect> EFFECT = Registry.registerForHolder(
 		BuiltInRegistries.MOB_EFFECT, Identifier.fromNamespaceAndPath(PermaHearts.MOD_ID, "frostbite"), new Frostbite());

@@ -197,8 +197,8 @@ public class TechniqueEffectsGameTest {
 			int level10 = (int) Math.round(TechniqueRules.iceSlow(10) * 100) - 1;
 			c.assertTrue(effect.getAmplifier() == level10, "amplifier should be " + level10 + ", was " + effect.getAmplifier());
 			var move = h.getAttribute(Attributes.MOVEMENT_SPEED).getModifier(Identifier.fromNamespaceAndPath(PermaHearts.MOD_ID, "frostbite_move"));
-			c.assertTrue(move != null && Math.abs(move.amount() + TechniqueRules.iceSlow(10)) < 1e-9,
-				"move modifier should be -" + TechniqueRules.iceSlow(10) + ", was " + (move == null ? "missing" : move.amount()));
+			c.assertTrue(move != null && Math.abs(move.amount() + Frostbite.moveSlow(Frostbite.amplifierFor(TechniqueRules.iceSlow(10)))) < 1e-9,
+				"move modifier should be -" + Frostbite.moveSlow(Frostbite.amplifierFor(TechniqueRules.iceSlow(10))) + ", was " + (move == null ? "missing" : move.amount()));
 			c.assertTrue(h.getHealth() < h.getMaxHealth() - 1, "impact (2 damage) should have hurt it");
 			c.succeed();
 		});
@@ -216,10 +216,10 @@ public class TechniqueEffectsGameTest {
 		c.runAfterDelay(30, () -> {
 			try {
 				var atk = target.getAttribute(Attributes.ATTACK_SPEED).getModifier(Identifier.fromNamespaceAndPath(PermaHearts.MOD_ID, "frostbite_attack"));
-				c.assertTrue(atk != null && Math.abs(atk.amount() + TechniqueRules.iceAttackSlow(1)) < 1e-9,
+				c.assertTrue(atk != null && Math.abs(atk.amount() + Frostbite.attackSlow(Frostbite.amplifierFor(TechniqueRules.iceSlow(1)))) < 1e-9,
 					"attack modifier should be -0.15, was " + (atk == null ? "missing" : atk.amount()));
 				var mv = target.getAttribute(Attributes.MOVEMENT_SPEED).getModifier(Identifier.fromNamespaceAndPath(PermaHearts.MOD_ID, "frostbite_move"));
-				c.assertTrue(mv != null && Math.abs(mv.amount() + 0.20) < 1e-9, "move modifier should be -0.20");
+				c.assertTrue(mv != null && Math.abs(mv.amount() + TechniqueRules.iceSlow(1)) < 1e-9, "move modifier should be -" + TechniqueRules.iceSlow(1));
 				c.succeed();
 			} finally {
 				drop(c, target);
