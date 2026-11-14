@@ -18,6 +18,8 @@ Release steps: [workflow/release.md](../workflow/release.md). Release **only whe
 
 ## In flight
 
+- **P-024 Illusion** (D71): plan `docs/plans/P-024-illusion.md`, branch `feat/P-024-illusion`, a Sonnet dev works on `feat/P-024-dev` in a worktree under `.claude/worktrees/`. If the session dies: check that worktree for commits, else start a new dev from the plan.
+
 - **Windows installer bug** (reported by Huy's friend): picking a profile other than "26.3 Fabric Essential" says SUCCESS, but that profile's mods folder still has the old jar. Reading `minecraft-lab.ps1` (`Find-Profiles` / `Select-Profile`) found nothing yet. Waiting for the friend's `Mods folder:` line and that profile's Game directory.
 
 ## Open, not scheduled
