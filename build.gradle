@@ -45,6 +45,18 @@ subprojects {
 		useJUnitPlatform()
 	}
 
+	// The dev client (runClient) starts muted: Huy may be playing or asleep while agents test. Client game tests are
+	// muted by a mixin in the test mod (src/gametest).
+	tasks.matching { it.name == 'runClient' }.configureEach {
+		doFirst {
+			def f = project.file('run/options.txt')
+			f.parentFile.mkdirs()
+			def lines = f.exists() ? f.readLines().findAll { !it.startsWith('soundCategory_master:') } : []
+			lines << 'soundCategory_master:0.0'
+			f.text = lines.join('\n') + '\n'
+		}
+	}
+
 	processResources {
 		inputs.property 'version', project.version
 		filesMatching('fabric.mod.json') {
