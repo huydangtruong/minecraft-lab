@@ -2,7 +2,7 @@
 
 > **Tóm tắt cho Huy (VN, ≤ 3 dòng):** Chiêu thức: học/nâng bằng XP (tới Lv 20), mở tối đa 4 ô bằng ngọc lục bảo, gắn chiêu vào ô ở tab Techniques. Góc dưới phải có dãy ô ✕ + chiêu; bấm R để chuyển, giữ R hiện bảng tròn; chuột để dùng. 6 chiêu đầu: Lửa, Băng, Hồi máu, Xuyên tường, Hất tung, Hiến Tế. Làm 3 phần: A dữ liệu + bảng, B thanh chiêu + cách dùng, C các chiêu.
 
-- **Status:** in-dev (A and C merged into feat/P-011-techniques; B in dev)
+- **Status:** merged (A, B, C on main; playtest with two players still to do)
 - **Mod / decision:** `permahearts` (Immortal Cultivation), D43, D44, D45, D46 · **Branch:** `feat/P-011-techniques-a|b|c` · **Depends on:** none (P-010 Death Match is still unmerged; it will ship after 0.9.0, as 0.10.0 or later)
 - **Idea (Huy's words):** [techniques-idea.md](../mods/permahearts/techniques-idea.md)
 
