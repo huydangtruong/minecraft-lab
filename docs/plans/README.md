@@ -13,4 +13,5 @@ Quy trình: [workflow/team.md](../workflow/team.md); mẫu: [TEMPLATE.md](TEMPLA
 | [P-007](P-007-client-screenshots.md) | Test chụp màn hình tự động | merged | Opus |
 | [P-008](P-008-wanderer-fixes.md) | Sửa trùm trong hang, Give up, ở 3 ngày (0.7.1) | merged | Sonnet subagent |
 | [P-009](P-009-mod-installer.md) | Đổi tên Immortal Cultivation, GitHub Releases, script cài mod cho người chơi (0.8.0) | merged | Sonnet subagent |
-| [P-010](P-010-death-match.md) | Nhiệm vụ Death Match: nửa số người online phải bị người chơi giết, chết trong trận không mất tim/đồ (0.9.0) | in-dev | Sonnet subagent |
+| [P-010](P-010-death-match.md) | Nhiệm vụ Death Match: nửa số người online phải bị người chơi giết, chết trong trận không mất tim/đồ (sau 0.9.0) | in-dev | Sonnet subagent |
+| [P-011](P-011-techniques.md) | Chiêu thức: nâng bằng XP, 4 ô mở bằng ngọc lục bảo, thanh chiêu + phím chuyển, Lửa/Băng/Hồi máu | draft | — |
