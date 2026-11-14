@@ -42,3 +42,13 @@ Tóm tắt lời Huy, chưa phải quyết định cuối. Câu hỏi còn mở 
 - **Hồi máu**: vùng tròn khoảng 8×8 quanh mình sáng lên và hồi máu.
   - Khởi điểm 10 tim trong 10 giây, nâng cấp thì hồi nhiều hơn.
   - Mạnh nên hồi chiêu khoảng 60 giây.
+
+## Bổ sung (Huy, cùng ngày)
+
+- Hồi chiêu Lửa và Băng **gấp đôi**; màu lửa giữ nguyên. Lv tối đa **20**; số liệu Lv 10 như đề xuất là ổn.
+- XP: tới Lv 10 khoảng **80 level**, tới Lv 20 khoảng **200 level** (tôi hiểu là tổng cộng dồn).
+- Thêm 2 chiêu: **Xuyên tường** (10 giây đi xuyên mọi thứ từ độ cao đang đứng trở lên, không bị rơi) và **Hất tung** (đẩy văng mọi thứ xung quanh + sát thương nhỏ, thiên về phòng thủ).
+- Phím **R**; thích kiểu giữ R ra bảng tròn của Essential (như chat wheel Dota): rê chuột lên chiêu để chọn.
+- Hồi máu: hồi cho người chơi và cả sinh vật xung quanh (chó, động vật, kể cả kẻ thù nếu đứng trong vòng); vòng đứng yên.
+- Lửa: đốt sinh vật như lửa thường, không phá công trình. Chuột trái = ném ngay với lực tối đa.
+- Không bật PvP thì chiêu vẫn gây sát thương và ảnh hưởng người chơi khác như với quái.

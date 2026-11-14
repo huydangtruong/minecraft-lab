@@ -1,16 +1,27 @@
 # P-011 — Techniques (cultivation skills)
 
-> **Tóm tắt cho Huy (VN, ≤ 3 dòng):** Chiêu thức: học/nâng bằng XP, mở tối đa 4 ô bằng ngọc lục bảo, gắn chiêu vào ô ở tab Techniques. Bên phải thanh đồ có dãy ô ✕ + chiêu, bấm phím để chuyển, chuột để dùng. 3 chiêu đầu: Lửa, Băng, Hồi máu. Chia 3 phần (A: dữ liệu + bảng, B: thanh chiêu + cách dùng, C: 3 chiêu); cần Huy chốt các câu hỏi cuối trang trước khi code.
+> **Tóm tắt cho Huy (VN, ≤ 3 dòng):** Chiêu thức: học/nâng bằng XP (tới Lv 20), mở tối đa 4 ô bằng ngọc lục bảo, gắn chiêu vào ô ở tab Techniques. Góc dưới phải có dãy ô ✕ + chiêu; bấm R để chuyển, giữ R hiện bảng tròn; chuột để dùng. 5 chiêu đầu: Lửa, Băng, Hồi máu, Xuyên tường, Hất tung. Làm 3 phần: A dữ liệu + bảng, B thanh chiêu + cách dùng, C các chiêu.
 
-- **Status:** draft (waiting for Huy's answers)
-- **Mod / decision:** `permahearts` (Immortal Cultivation), D43+ (to record once answered) · **Branch:** `feat/P-011-techniques-a|b|c` · **Depends on:** none (P-010 Death Match is still unmerged; it will ship after 0.9.0, as 0.10.0 or later)
+- **Status:** in-dev (part A)
+- **Mod / decision:** `permahearts` (Immortal Cultivation), D43, D44, D45 · **Branch:** `feat/P-011-techniques-a|b|c` · **Depends on:** none (P-010 Death Match is still unmerged; it will ship after 0.9.0, as 0.10.0 or later)
 - **Idea (Huy's words):** [techniques-idea.md](../mods/permahearts/techniques-idea.md)
 
 ## Goal
 
 Every player has the same list of techniques. Experience levels learn and upgrade them, with costs rising per level; resetting refunds half. Emeralds unlock up to 4 technique slots. A skill bar right of the hotbar holds ✕ + the slotted techniques; a key cycles through them, and mouse buttons cast the selected one. The first three techniques are Fire, Ice and Healing.
 
-## Proposed rules (to confirm, see "Questions")
+## Answers (2026-11-14) — these override the tables below where they differ
+
+- Max level **20**; level 10 numbers below are kept; levels 11–20 add **half** the per-level step.
+- XP cost of the upgrade to level L: `round(5.8 + 0.4·L)` levels → 80 levels in total to level 10, 200 to level 20 (D43).
+- Fire and Ice cooldowns doubled: **16 s** and **24 s**. Fire keeps the normal fire colour at level 6+ (only the burn gets stronger).
+- Healing heals **every living entity** in the circle (players, pets, animals, and enemies standing in it); the circle stays where it was cast.
+- Key **R**: tap = cycle; hold = radial wheel (hover, release to pick), like Essential's emote wheel (Essential also uses R; one of the two must be rebound).
+- Left click = throw at once with full charge.
+- Techniques always affect other players like mobs, **even with PvP off** (damage must not be blocked by the server's PvP setting).
+- Two more techniques in the first version: **Phase Walk** (10 s: pass through every block at or above the feet level when cast, so the player does not fall) and **Repulse** (knock every living entity around away with a little damage; defensive).
+
+## Proposed rules (first draft; see Answers above)
 
 | Rule | Proposal |
 |---|---|
@@ -96,7 +107,16 @@ Decisions D43+ (one per answered question group), spec section "Chiêu thức", 
 - [ ] A, B and C merged, each with green tests and screenshots
 - [ ] Two players tested together (cast on each other, heal each other)
 
-## Questions for Huy (answer before coding)
+## Phase Walk and Repulse (first numbers)
+
+| Technique | Level 1 | Per level (half after 10) | Cooldown |
+|---|---|---|---|
+| Phase Walk | 10 s; blocks with bottom Y ≥ floor(feet Y at cast) have no collision for the caster (client and server movement checks), no suffocation | +0.5 s (Lv 10: 14.5 s, Lv 20: 17 s) | 90 s |
+| Repulse | Radius 4; push 1.0 (plus a little upward); 2 damage | +0.2 radius, +0.15 push, +0.5 damage (Lv 10: 5.8, 2.35, 6.5) | 20 s |
+
+Phase Walk ending inside blocks: the player is moved up to the first free space (never left suffocating). The camera inside a block shows the block overlay like vanilla; may be hidden while phasing.
+
+## Questions for Huy (answered 2026-11-14, see Answers)
 
 1. **Key**: Tab also opens the player list in multiplayer. Use **R** by default (rebindable), or really Tab?
 2. **XP cost**: max level 10 and `1 + 2L` levels per upgrade (3, 5 … 21; 120 levels for level 10)? Or cheaper or more expensive?
