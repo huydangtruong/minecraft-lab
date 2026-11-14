@@ -55,7 +55,7 @@ public class ThousandMileStepGameTest {
 		strip(c, from, to, Blocks.AIR);
 	}
 
-	@GameTest(maxTicks = 60, padding = 200)
+	@GameTest(maxTicks = 60, padding = 128)
 	public void fullChargeLandsAboutTheRangeAwayAndStartsTheCooldown(GameTestHelper c) {
 		enable(c);
 		strip(c, START_X - 2, START_X + REACH + 10, Blocks.STONE);
@@ -73,7 +73,7 @@ public class ThousandMileStepGameTest {
 		c.succeed();
 	}
 
-	@GameTest(maxTicks = 60, padding = 200)
+	@GameTest(maxTicks = 60, padding = 128)
 	public void lowChargeKeepsTheTwentyPercentFloor(GameTestHelper c) {
 		enable(c);
 		strip(c, START_X - 2, START_X + 50, Blocks.STONE);
@@ -85,7 +85,7 @@ public class ThousandMileStepGameTest {
 		c.succeed();
 	}
 
-	@GameTest(maxTicks = 60, padding = 200)
+	@GameTest(maxTicks = 60, padding = 128)
 	public void aWallStopsTheStep(GameTestHelper c) {
 		enable(c);
 		strip(c, START_X - 2, START_X + 80, Blocks.STONE);
@@ -124,7 +124,7 @@ public class ThousandMileStepGameTest {
 		}
 	}
 
-	@GameTest(maxTicks = 60, padding = 200)
+	@GameTest(maxTicks = 60, padding = 128)
 	public void lavaMeansNoCastAndNoCooldown(GameTestHelper c) {
 		enable(c);
 		strip(c, START_X - 2, START_X + 5, Blocks.STONE);
