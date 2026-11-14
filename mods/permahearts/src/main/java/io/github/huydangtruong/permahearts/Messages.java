@@ -254,7 +254,7 @@ public final class Messages {
 	}
 
 	public static Component running() {
-		return Component.translatableWithFallback("permahearts.wanderer.running", "In progress…");
+		return Component.translatableWithFallback("permahearts.wanderer.running", "Running…");
 	}
 
 	public static Component fighting() {
@@ -299,6 +299,42 @@ public final class Messages {
 
 	public static Component bossAlreadyHere() {
 		return Component.translatableWithFallback("permahearts.wanderer.boss_already_here", "The chieftain is already here");
+	}
+
+	// ---- Death Match (0.9.0, D25) ----
+
+	public static Component deathMatchName() {
+		return Component.translatableWithFallback("permahearts.wanderer.death_match", "Death Match");
+	}
+
+	public static Component lineDeathMatch() {
+		return Component.translatableWithFallback("permahearts.wanderer.line_death_match", "Death Match: half the players must fall to another player");
+	}
+
+	public static Component lineDeathMatchRunning(int fallen, int needed) {
+		return Component.translatableWithFallback("permahearts.wanderer.line_death_match_running", "Death Match %s/%s fallen", fallen, needed);
+	}
+
+	public static Component deathMatchStarted(int needed, int online) {
+		return Component.translatableWithFallback("permahearts.wanderer.death_match_started",
+			"Death Match! %1$s of %2$s players must fall to another player. Deaths in this match cost no hearts and no items.", needed, online);
+	}
+
+	public static Component deathMatchFell(Component victim, Component killer, int fallen, int needed) {
+		return Component.translatableWithFallback("permahearts.wanderer.death_match_fell",
+			"%1$s fell to %2$s (Death Match %3$s/%4$s)", victim, killer, fallen, needed);
+	}
+
+	public static Component deathMatchProtected() {
+		return Component.translatableWithFallback("permahearts.wanderer.death_match_protected", "You fell in the Death Match: no heart lost, items kept.");
+	}
+
+	public static Component deathMatchNeedPlayers() {
+		return Component.translatableWithFallback("permahearts.wanderer.death_match_need_players", "Needs at least 2 players online");
+	}
+
+	public static Component deathMatchPvpOff() {
+		return Component.translatableWithFallback("permahearts.wanderer.death_match_pvp_off", "PvP is off on this server");
 	}
 
 	public static Component eventNotHere() {

@@ -9,6 +9,7 @@
 		"FoodDataMixin",
 		"FoodPropertiesMixin",
 		"GhastShootFireballGoalMixin",
+		"PlayerMixin",
 		"PlayerPhaseMixin"
 	],
 	"injectors": {

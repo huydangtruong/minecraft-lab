@@ -1,6 +1,7 @@
 package io.github.huydangtruong.permahearts;
 
 import io.github.huydangtruong.permahearts.wanderer.BloodMoon;
+import io.github.huydangtruong.permahearts.wanderer.DeathMatch;
 import io.github.huydangtruong.permahearts.wanderer.BloodMoonState;
 import io.github.huydangtruong.permahearts.wanderer.Phase;
 import io.github.huydangtruong.permahearts.wanderer.QuestBoss;
@@ -716,6 +717,176 @@ public class WandererGameTest {
 			context.succeed();
 		} finally {
 			Wanderer.reset(s);
+		}
+	}
+
+	// ---- P-010 Death Match ----
+
+	private static final QuestLine DM_LINE = new QuestLine(QuestType.DEATH_MATCH, "minecraft:player", 1, 0, "strength", false);
+
+	/** Quest with a Death Match line (index 0), accepted, with this many players "online" (mock players are not in the player list). */
+	private static void startMatchQuest(GameTestHelper context, int online) {
+		MinecraftServer s = context.getLevel().getServer();
+		enable(context, true);
+		DeathMatch.setOnlineForTest(online);
+		Wanderer.startQuestForTest(context.getLevel(), context.absolutePos(new BlockPos(1, 1, 1)), eventQuest(DM_LINE, testQuest().lines().get(1)));
+		Wanderer.accept(s);
+	}
+
+	private static void endMatchTest(MinecraftServer s) {
+		DeathMatch.setOnlineForTest(null);
+		Wanderer.reset(s);
+	}
+
+	/**
+	 * A real death of a mock player. The mock is Creative and never "loaded", so it cannot be hurt; so we fire Fabric's
+	 * ALLOW_DEATH ourselves (exactly what LivingEntity#hurtServer does just before dying), then die() and respawn.
+	 */
+	private static ServerPlayer fall(GameTestHelper context, ServerPlayer victim, net.minecraft.world.damagesource.DamageSource source) {
+		MinecraftServer s = context.getLevel().getServer();
+		net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents.ALLOW_DEATH.invoker().allowDeath(victim, source, 1000f);
+		victim.setHealth(0f);
+		victim.die(source);
+		return s.getPlayerList().respawn(victim, false, Entity.RemovalReason.KILLED);
+	}
+
+	private static net.minecraft.world.damagesource.DamageSource byPlayer(GameTestHelper context, ServerPlayer killer) {
+		return context.getLevel().damageSources().playerAttack(killer);
+	}
+
+	private static int itemEntities(GameTestHelper context, ServerPlayer near) {
+		return context.getLevel().getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class,
+			new AABB(near.blockPosition()).inflate(6)).size();
+	}
+
+	@GameTest(maxTicks = 100)
+	public void deathMatchRefusedWithOnePlayer(GameTestHelper context) {
+		MinecraftServer s = context.getLevel().getServer();
+		try {
+			startMatchQuest(context, 1);
+			context.assertTrue(!Wanderer.startEvent(s, 0, testPlayer(context)), "start must be refused with 1 player online");
+			context.assertTrue(!DeathMatch.running(s) && Wanderer.eventState(s, 0) == 0, "no match must be running");
+			context.assertTrue(Wanderer.data(s).quest().orElseThrow().lines().get(0).required() == 1, "required unchanged");
+			context.succeed();
+		} finally {
+			endMatchTest(s);
+		}
+	}
+
+	@GameTest(maxTicks = 100)
+	public void deathMatchCountsDistinctVictims(GameTestHelper context) {
+		MinecraftServer s = context.getLevel().getServer();
+		try {
+			startMatchQuest(context, 3);
+			ServerPlayer a = testPlayer(context);
+			ServerPlayer b = testPlayer(context);
+			ServerPlayer c = testPlayer(context);
+			context.assertTrue(Wanderer.startEvent(s, 0, a), "start with 3 players");
+			context.assertTrue(Wanderer.data(s).quest().orElseThrow().lines().get(0).required() == 2, "3 players -> 2 must fall");
+			context.assertTrue(Wanderer.eventState(s, 0) == 1, "event state 1 while running");
+			context.assertTrue(!Wanderer.startEvent(s, 0, a), "no second start while running");
+			// a kills b: 1/2. b falls again after respawn: still 1.
+			ServerPlayer b2 = fall(context, b, byPlayer(context, a));
+			context.assertTrue(Wanderer.data(s).quest().orElseThrow().lines().get(0).progress() == 1, "progress 1 after first fall");
+			fall(context, b2, byPlayer(context, a));
+			context.assertTrue(Wanderer.data(s).quest().orElseThrow().lines().get(0).progress() == 1, "same victim counts once");
+			context.assertTrue(DeathMatch.running(s), "still running");
+			fall(context, c, byPlayer(context, a));
+			var line = Wanderer.data(s).quest().orElseThrow().lines().get(0);
+			context.assertTrue(line.done() && line.progress() == 2, "done with 2/2, was " + line.progress());
+			context.assertTrue(!DeathMatch.running(s), "state cleared when done");
+			context.assertTrue(Wanderer.eventState(s, 0) == 0, "event state 0 afterwards");
+			context.succeed();
+		} finally {
+			endMatchTest(s);
+		}
+	}
+
+	@GameTest(maxTicks = 100)
+	public void deathMatchPvpDeathKeepsHeartsItemsAndXp(GameTestHelper context) {
+		MinecraftServer s = context.getLevel().getServer();
+		try {
+			startMatchQuest(context, 4);
+			ServerPlayer a = testPlayer(context);
+			ServerPlayer b = testPlayer(context);
+			context.assertTrue(Wanderer.startEvent(s, 0, a), "start");
+			HeartsAttachment.set(b, new HeartsData(2, 100, 5, 1));
+			HealthApplier.apply(b, true);
+			b.getInventory().add(new ItemStack(Items.DIAMOND, 3));
+			b.giveExperienceLevels(5);
+			int level = b.experienceLevel;
+			ServerPlayer r = fall(context, b, byPlayer(context, a));
+			context.assertTrue(HeartsAttachment.get(r).equals(new HeartsData(2, 100, 5, 1)), "hearts unchanged, was " + HeartsAttachment.get(r));
+			context.assertTrue(r.getMaxHealth() == 24f && r.getHealth() == 24f, "full 12 hearts, was " + r.getHealth() + "/" + r.getMaxHealth());
+			context.assertTrue(r.getInventory().countItem(Items.DIAMOND) == 3, "items kept, had " + r.getInventory().countItem(Items.DIAMOND));
+			context.assertTrue(r.experienceLevel == level, "XP level kept (" + level + "), was " + r.experienceLevel);
+			context.assertTrue(itemEntities(context, r) == 0, "nothing dropped on the ground");
+			context.assertTrue(!HeartsAttachment.isDeathMatchProtected(r), "flag cleared on the new player");
+			context.succeed();
+		} finally {
+			endMatchTest(s);
+		}
+	}
+
+	@GameTest(maxTicks = 100)
+	public void deathMatchMobDeathIsNormal(GameTestHelper context) {
+		MinecraftServer s = context.getLevel().getServer();
+		try {
+			startMatchQuest(context, 4);
+			ServerPlayer a = testPlayer(context);
+			ServerPlayer b = testPlayer(context);
+			context.assertTrue(Wanderer.startEvent(s, 0, a), "start");
+			HeartsAttachment.set(b, new HeartsData(2, 100, 5, 1));
+			HealthApplier.apply(b, true);
+			b.getInventory().add(new ItemStack(Items.DIAMOND, 3));
+			Zombie z = context.spawn(EntityTypes.ZOMBIE, 1, 1, 1);
+			ServerPlayer r = fall(context, b, context.getLevel().damageSources().mobAttack(z));
+			context.assertTrue(HeartRules.maxHearts(HeartsAttachment.get(r)) == 11, "a heart is lost, hearts " + HeartRules.maxHearts(HeartsAttachment.get(r)));
+			context.assertTrue(r.getInventory().countItem(Items.DIAMOND) == 0, "inventory dropped as usual");
+			context.assertTrue(Wanderer.data(s).quest().orElseThrow().lines().get(0).progress() == 0, "does not count");
+			context.assertTrue(DeathMatch.running(s), "match goes on");
+			ServerPlayer r2 = fall(context, r, context.getLevel().damageSources().generic());
+			context.assertTrue(HeartRules.maxHearts(HeartsAttachment.get(r2)) == 10, "second normal death: another heart");
+			context.assertTrue(Wanderer.data(s).quest().orElseThrow().lines().get(0).progress() == 0, "still 0");
+			context.succeed();
+		} finally {
+			endMatchTest(s);
+		}
+	}
+
+	@GameTest(maxTicks = 100)
+	public void deathMatchPvpDeathOutsideMatchIsNormal(GameTestHelper context) {
+		MinecraftServer s = context.getLevel().getServer();
+		try {
+			startMatchQuest(context, 4); // the quest exists, but the match is never started
+			ServerPlayer a = testPlayer(context);
+			ServerPlayer b = testPlayer(context);
+			HeartsAttachment.set(b, new HeartsData(2, 100, 5, 1));
+			HealthApplier.apply(b, true);
+			b.getInventory().add(new ItemStack(Items.DIAMOND, 3));
+			ServerPlayer r = fall(context, b, byPlayer(context, a));
+			context.assertTrue(HeartRules.maxHearts(HeartsAttachment.get(r)) == 11, "no match running: a heart is lost");
+			context.assertTrue(r.getInventory().countItem(Items.DIAMOND) == 0, "no match running: items drop");
+			context.succeed();
+		} finally {
+			endMatchTest(s);
+		}
+	}
+
+	@GameTest(maxTicks = 100)
+	public void deathMatchGiveUpClearsIt(GameTestHelper context) {
+		MinecraftServer s = context.getLevel().getServer();
+		try {
+			startMatchQuest(context, 2);
+			ServerPlayer a = testPlayer(context);
+			context.assertTrue(Wanderer.startEvent(s, 0, a), "start");
+			context.assertTrue(DeathMatch.running(s), "running");
+			context.assertTrue(Wanderer.giveUp(s, a), "give up");
+			context.assertTrue(!DeathMatch.running(s), "give up ends the match");
+			context.assertTrue(Wanderer.data(s).quest().isEmpty(), "quest gone");
+			context.succeed();
+		} finally {
+			endMatchTest(s);
 		}
 	}
 }

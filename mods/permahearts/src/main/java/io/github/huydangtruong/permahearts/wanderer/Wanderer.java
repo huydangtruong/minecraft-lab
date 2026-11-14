@@ -103,7 +103,7 @@ public final class Wanderer {
 		WandererData d = data(server);
 		long id = d.questCounter() + 1;
 		save(server, d.withQuestCounter(id));
-		return QuestGenerator.generate(id, RNG);
+		return QuestGenerator.generate(id, RNG, DeathMatch.online(server));
 	}
 
 	/** Creates the NPC at pos and makes the phase PRESENT with the given quest. Returns it, or null on failure. */
@@ -182,7 +182,7 @@ public final class Wanderer {
 		announceIfDone(server, before, r.get().quest(), r.get().line());
 	}
 
-	private static void announceIfDone(MinecraftServer server, Quest before, Quest after, int line) {
+	static void announceIfDone(MinecraftServer server, Quest before, Quest after, int line) {
 		if (!before.lines().get(line).done() && after.lines().get(line).done()) {
 			server.getPlayerList().broadcastSystemMessage(Messages.lineCompleted(lineName(after.lines().get(line))), false);
 		}
@@ -199,6 +199,7 @@ public final class Wanderer {
 		return switch (q.get().lines().get(line).type()) {
 			case BLOOD_MOON -> BloodMoon.start(server, line, player);
 			case BOSS -> QuestBoss.summon(server, line, player);
+			case DEATH_MATCH -> DeathMatch.start(server, line, player);
 			default -> false;
 		};
 	}
@@ -209,7 +210,8 @@ public final class Wanderer {
 		boolean moon = d.bloodMoon().isPresent() && d.bloodMoon().get().line() == line;
 		// A boss that was lost (unloaded, fell out of the world) does not block the Summon button.
 		boolean boss = d.boss().isPresent() && d.boss().get().line() == line && QuestBoss.bossAlive(server);
-		return moon || boss ? 1 : 0;
+		boolean match = DeathMatch.runningFor(d, line);
+		return moon || boss || match ? 1 : 0;
 	}
 
 	/** An event finished by itself: mark the line done and tell everyone. */
@@ -361,7 +363,7 @@ public final class Wanderer {
 		QuestBoss.onReset(server);
 		WandererBar.hide();
 		save(server, d.withPhase(Phase.WAITING).withNpc(Optional.empty()).withQuest(Optional.empty())
-			.withBloodMoon(Optional.empty()).withBoss(Optional.empty()).withLeaveAt(-1L).withWarned(false)
+			.withBloodMoon(Optional.empty()).withBoss(Optional.empty()).withDeathMatch(Optional.empty()).withLeaveAt(-1L).withWarned(false)
 			.withNextDay(currentDay(server) + QuestGenerator.daysUntilReturn(RNG)));
 		server.getPlayerList().broadcastSystemMessage(message, false);
 	}
@@ -385,6 +387,7 @@ public final class Wanderer {
 		BloodMoon.onReset(server);
 		QuestBoss.onReset(server);
 		WandererBar.hide();
+		DeathMatch.onReset(server);
 		save(server, WandererData.DEFAULT);
 	}
 
@@ -403,10 +406,16 @@ public final class Wanderer {
 			case EXPLORE -> Messages.structureName(target);
 			case BLOOD_MOON -> Messages.bloodMoonBar(BloodMoon.mobName(target));
 			case BOSS -> Messages.bossName(BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.parse(target)).getDescription());
+			case DEATH_MATCH -> Messages.deathMatchName();
 		};
 	}
 
 	public static Component lineText(QuestType type, String target, int required, int progress) {
+		return lineText(type, target, required, progress, false);
+	}
+
+	/** running: only used by Death Match, whose text changes once the match has started. */
+	public static Component lineText(QuestType type, String target, int required, int progress, boolean running) {
 		Component name = targetName(type, target);
 		return switch (type) {
 			case COLLECT -> Messages.lineCollect(required, name, progress);
@@ -414,6 +423,7 @@ public final class Wanderer {
 			case EXPLORE -> Messages.lineExplore(name);
 			case BLOOD_MOON -> Messages.lineBloodMoon(BloodMoon.mobName(target));
 			case BOSS -> Messages.lineBoss(name);
+			case DEATH_MATCH -> running ? Messages.lineDeathMatchRunning(progress, required) : Messages.lineDeathMatch();
 		};
 	}
 

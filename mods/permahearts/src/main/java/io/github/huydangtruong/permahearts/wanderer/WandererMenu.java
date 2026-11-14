@@ -63,6 +63,11 @@ public class WandererMenu extends AbstractContainerMenu {
 	private final DataSlot[] claimed = new DataSlot[LINES];
 	/** Per event line: 1 while the blood moon / boss of that line is running. */
 	private final DataSlot[] eventState = new DataSlot[LINES];
+	/** Per line: the live "required" (a Death Match line only learns it when the match starts). */
+	private final DataSlot[] required = new DataSlot[LINES];
+	/** Death Match start checks: players online (capped) and whether PvP is on. */
+	private final DataSlot online;
+	private final DataSlot pvp;
 	/** Seconds of real time until the Wanderer leaves (capped: data slots travel as shorts). */
 	private final DataSlot secondsLeft;
 	private final Container deposit;
@@ -84,8 +89,14 @@ public class WandererMenu extends AbstractContainerMenu {
 			: live(() -> quest(snapshot.questId(), q -> q.accepted() ? 1 : 0)));
 		this.secondsLeft = addDataSlot(server == null ? DataSlot.standalone()
 			: live(() -> (int) Math.min(32767L, Wanderer.ticksLeft(server) / 20L)));
+		this.online = addDataSlot(server == null ? DataSlot.standalone()
+			: live(() -> Math.min(32767, DeathMatch.online(server))));
+		this.pvp = addDataSlot(server == null ? DataSlot.standalone()
+			: live(() -> DeathMatch.pvpAllowed(server) ? 1 : 0));
 		for (int i = 0; i < LINES; i++) {
 			int line = i;
+			required[i] = addDataSlot(server == null ? DataSlot.standalone()
+				: live(() -> line(snapshot.questId(), line, QuestLine::required)));
 			progress[i] = addDataSlot(server == null ? DataSlot.standalone()
 				: live(() -> line(snapshot.questId(), line, QuestLine::progress)));
 			claimed[i] = addDataSlot(server == null ? DataSlot.standalone()
@@ -152,12 +163,29 @@ public class WandererMenu extends AbstractContainerMenu {
 		return progress[line].get();
 	}
 
+	/** Kills/items needed for the line, live (differs from the snapshot once a Death Match has started). */
+	public int requiredOf(int line) {
+		if (!hasLine(line)) {
+			return 0;
+		}
+		int v = required[line].get();
+		return v > 0 ? v : snapshot.lines().get(line).required(); // 0 = not synced yet
+	}
+
+	public int playersOnline() {
+		return online.get();
+	}
+
+	public boolean pvpOn() {
+		return pvp.get() != 0;
+	}
+
 	public boolean hasLine(int line) {
 		return line >= 0 && line < snapshot.lines().size();
 	}
 
 	public boolean isDone(int line) {
-		return hasLine(line) && progress[line].get() >= snapshot.lines().get(line).required();
+		return hasLine(line) && progress[line].get() >= requiredOf(line);
 	}
 
 	public boolean isClaimed(int line) {

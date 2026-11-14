@@ -1,6 +1,8 @@
 package io.github.huydangtruong.permahearts;
 
 import io.github.huydangtruong.permahearts.technique.Technique;
+import io.github.huydangtruong.permahearts.wanderer.DeathMatch;
+import io.github.huydangtruong.permahearts.wanderer.DeathMatchRules;
 import io.github.huydangtruong.permahearts.wanderer.Quest;
 import io.github.huydangtruong.permahearts.wanderer.QuestLine;
 import io.github.huydangtruong.permahearts.wanderer.QuestType;
@@ -27,7 +29,7 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 	private static Quest quest() {
 		return new Quest(1, List.of(
 			new QuestLine(QuestType.COLLECT, "minecraft:iron_ingot", 64, 0, "strength", false),
-			new QuestLine(QuestType.KILL, "minecraft:zombie", 16, 0, "fury", false),
+			new QuestLine(QuestType.DEATH_MATCH, DeathMatchRules.TARGET, 1, 0, "fury", false),
 			new QuestLine(QuestType.BLOOD_MOON, "minecraft:piglin_brute", 1, 0, "swiftness", false),
 			new QuestLine(QuestType.BOSS, "minecraft:evoker", 1, 0, "iron_skin", false)), false);
 	}
@@ -508,6 +510,27 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 		context.runOnClient(mc -> mc.gameMode.handleInventoryButtonClick(mc.player.containerMenu.containerId, 0));
 		context.waitTicks(20);
 		context.takeScreenshot("02-quest-lines" + suffix);
+
+		// Death Match (line 2, row index 1): one player online, so the Start button is inactive; hover it for the reason.
+		double[] dm = context.computeOnClient(mc -> {
+			double scale = mc.getWindow().getGuiScale();
+			int left = (mc.getWindow().getGuiScaledWidth() - WandererMenu.PANEL_W) / 2;
+			int top = (mc.getWindow().getGuiScaledHeight() - WandererMenu.PANEL_H) / 2;
+			return new double[] {(left + WandererMenu.QUEST_W - 6 - 31) * scale,
+				(top + WandererMenu.LINE_SLOT_Y0 + WandererMenu.LINE_STEP + 8) * scale};
+		});
+		context.getInput().setCursorPos(dm[0], dm[1]);
+		context.waitTicks(30);
+		context.takeScreenshot("02b-death-match-needs-players" + suffix);
+		// Pretend three players are online (a second real client is not available here), then press Start.
+		server.runOnServer(s -> DeathMatch.setOnlineForTest(3));
+		context.waitTicks(5);
+		context.runOnClient(mc -> mc.gameMode.handleInventoryButtonClick(mc.player.containerMenu.containerId, 11));
+		context.waitTicks(20);
+		context.getInput().setCursorPos(10, 10);
+		context.waitTicks(5);
+		context.takeScreenshot("02c-death-match-running" + suffix);
+		server.runOnServer(s -> DeathMatch.setOnlineForTest(null));
 
 		// First Give up click: the label turns into the confirm text (a second click would send the NPC away).
 		double[] giveUp = context.computeOnClient(mc -> {

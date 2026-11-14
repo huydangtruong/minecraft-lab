@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.entity.event.v1.EntitySleepEvents;
 import net.fabricmc.fabric.api.event.Event;
 import io.github.huydangtruong.permahearts.wanderer.BloodMoon;
+import io.github.huydangtruong.permahearts.wanderer.DeathMatch;
 import io.github.huydangtruong.permahearts.wanderer.QuestBoss;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
@@ -76,6 +77,7 @@ public class PermaHearts implements ModInitializer {
 		io.github.huydangtruong.permahearts.technique.TechniqueAttachment.TECHNIQUES.identifier();
 		io.github.huydangtruong.permahearts.technique.TechniqueNet.register();
 		io.github.huydangtruong.permahearts.technique.TechniqueSelection.init();
+		HeartsAttachment.DM_PROTECTED.identifier();
 		ElixirItems.init();
 		io.github.huydangtruong.permahearts.technique.FocusItems.init();
 		io.github.huydangtruong.permahearts.technique.TechniqueCasts.init(); // P-011 part C: technique effects
@@ -140,6 +142,26 @@ public class PermaHearts implements ModInitializer {
 				QuestBoss.onDeath(level.getServer(), entity);
 			}
 		});
+		// Death Match (D25): mark a death that fell to another player during the match. Set to the computed value on every
+		// player death (not only to true), so a stale flag can never protect a later, normal death. Never cancels the death.
+		ServerLivingEntityEvents.ALLOW_DEATH.register((entity, source, amount) -> {
+			if (entity instanceof ServerPlayer sp) {
+				HeartsAttachment.setDeathMatchProtected(sp,
+					DeathMatch.isProtectedDeath(sp.level().getServer(), sp, source));
+			}
+			return true;
+		});
+		// Items and XP: the Player mixin skips the drops while the flag is set; here they come back to the new player.
+		// COPY_FROM runs inside PlayerList.respawn, after vanilla restoreFrom and before AFTER_RESPAWN.
+		ServerPlayerEvents.COPY_FROM.register((old, p, alive) -> {
+			if (!alive && HeartsAttachment.isDeathMatchProtected(old)) {
+				p.getInventory().replaceWith(old.getInventory());
+				p.experienceLevel = old.experienceLevel;
+				p.totalExperience = old.totalExperience;
+				p.experienceProgress = old.experienceProgress;
+				p.setScore(old.getScore());
+			}
+		});
 		ServerPlayerEvents.JOIN.register(p -> {
 			BloodMoon.onJoin(p);
 			Wanderer.onJoin(p);
@@ -154,6 +176,10 @@ public class PermaHearts implements ModInitializer {
 			HeartsData before = HeartsAttachment.get(old);
 			boolean on = enabled(p.level().getServer());
 			HeartsAttachment.setActive(p, on);
+			// Death Match: the death fell to another player during the match. The flag was copied onto the new player;
+			// clear it on every path so it never outlives this respawn.
+			boolean protectedDeath = !alive && HeartsAttachment.isDeathMatchProtected(old);
+			HeartsAttachment.setDeathMatchProtected(p, false);
 			if (!on) {
 				// World switched off: no heart lost, no message; keep the data so turning it on again restores everything.
 				HeartsAttachment.set(p, before);
@@ -165,6 +191,12 @@ public class PermaHearts implements ModInitializer {
 				HealthApplier.apply(p, false);
 				return;
 			}
+			if (protectedDeath) {
+				HeartsAttachment.set(p, before); // no heart lost
+				HealthApplier.apply(p, true);
+				p.sendSystemMessage(Messages.deathMatchProtected());
+				return;
+			}
 			HeartRules.DeathResult r = HeartRules.onDeath(before);
 			HeartsAttachment.set(p, r.data());
 			HealthApplier.apply(p, true);
@@ -173,6 +205,9 @@ public class PermaHearts implements ModInitializer {
 				: Messages.floor());
 		});
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
+			if (entity instanceof ServerPlayer victim) {
+				DeathMatch.onPlayerKilled(victim.level().getServer(), victim, source);
+			}
 			if (entity.getKillCredit() instanceof ServerPlayer killer && enabled(killer.level().getServer())) {
 				Wanderer.onKill(killer.level().getServer(), killer, entity.getType());
 			}

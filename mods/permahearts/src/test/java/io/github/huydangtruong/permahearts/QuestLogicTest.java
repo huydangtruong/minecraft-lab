@@ -84,7 +84,8 @@ class QuestLogicTest {
 	@Test
 	void dataRoundTrips() {
 		var d = new WandererData(Phase.PRESENT, 12, 5, 70, -9, Optional.of("abc"), Optional.of(quest(true)), 3,
-			Optional.of(new BloodMoonState(1, "uuid-1", 5000L)), Optional.of(new BossState(2, "uuid-2")), 99000L, true);
+			Optional.of(new BloodMoonState(1, "uuid-1", 5000L)), Optional.of(new BossState(2, "uuid-2")), 99000L, true,
+			Optional.of(new DeathMatchState(0, List.of("uuid-3"))));
 		var json = WandererData.CODEC.encodeStart(JsonOps.INSTANCE, d).getOrThrow();
 		assertEquals(d, WandererData.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow());
 		assertEquals(WandererData.DEFAULT, WandererData.CODEC.parse(JsonOps.INSTANCE, new com.google.gson.JsonObject()).getOrThrow());

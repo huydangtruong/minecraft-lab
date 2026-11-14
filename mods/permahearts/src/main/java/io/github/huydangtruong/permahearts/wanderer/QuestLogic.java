@@ -76,6 +76,23 @@ public final class QuestLogic {
 		return Optional.empty();
 	}
 
+	/** Death Match started: the line now needs this many fallen players, progress 0. */
+	public static Quest deathMatchStarted(Quest q, int line, int needed) {
+		if (line < 0 || line >= q.lines().size()) {
+			return q;
+		}
+		return q.withLine(line, q.lines().get(line).withRequired(Math.max(1, needed)));
+	}
+
+	/** Death Match progress = number of distinct players fallen so far (capped at required). */
+	public static Quest deathMatchProgress(Quest q, int line, int fallen) {
+		if (line < 0 || line >= q.lines().size()) {
+			return q;
+		}
+		QuestLine l = q.lines().get(line);
+		return q.withLine(line, l.withProgress(fallen));
+	}
+
 	/** Marks an event line (blood moon, explore, boss) done. Unchanged if the quest is not accepted or the line is done. */
 	public static Quest eventDone(Quest q, int line) {
 		if (!q.accepted() || line < 0 || line >= q.lines().size() || q.lines().get(line).done()) {
