@@ -1,6 +1,7 @@
 package io.github.huydangtruong.permahearts.technique;
 
 import com.mojang.serialization.Codec;
+import java.util.Set;
 import io.github.huydangtruong.permahearts.PermaHearts;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
@@ -48,6 +49,10 @@ public final class Flight {
 		a.flying = true;
 		a.setFlyingSpeed(TechniqueRules.flyingSpeed(level));
 		p.onUpdateAbilities();
+		// the client drops "flying" while the player stands on the ground, so lift off at once
+		if (p.onGround() && sl.noCollision(p, p.getBoundingBox().move(0, 0.6, 0))) {
+			p.teleportTo(sl, p.getX(), p.getY() + 0.6, p.getZ(), Set.of(), p.getYRot(), p.getXRot(), false);
+		}
 		sl.sendParticles(ParticleTypes.CLOUD, p.getX(), p.getY() + 0.2, p.getZ(), 20, 0.4, 0.1, 0.4, 0.03);
 		sl.playSound(null, p.blockPosition(), SoundEvents.ELYTRA_FLYING, SoundSource.PLAYERS, 0.8f, 1.4f);
 		return true;

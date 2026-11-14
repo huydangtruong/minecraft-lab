@@ -1,5 +1,6 @@
 package io.github.huydangtruong.permahearts;
 
+import io.github.huydangtruong.permahearts.technique.Technique;
 import io.github.huydangtruong.permahearts.wanderer.Quest;
 import io.github.huydangtruong.permahearts.wanderer.QuestLine;
 import io.github.huydangtruong.permahearts.wanderer.QuestType;
@@ -133,10 +134,10 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 	private static final int HS_SLOT = 0;
 	private static final int HS_EMERALD = 4;
 	private static final int HS_ROW = 5;
-	private static final int HS_CHECK = 11;
-	private static final int HS_UPGRADE = 17;
-	private static final int HS_RESET = 18;
-	private static final int HS_BACK = 19;
+	private static final int HS_CHECK = HS_ROW + Technique.values().length;
+	private static final int HS_UPGRADE = HS_ROW + 2 * Technique.values().length;
+	private static final int HS_RESET = HS_UPGRADE + 1;
+	private static final int HS_BACK = HS_UPGRADE + 2;
 
 	@SuppressWarnings("unchecked")
 	private static java.util.List<int[]> hotspots(ClientGameTestContext context) {

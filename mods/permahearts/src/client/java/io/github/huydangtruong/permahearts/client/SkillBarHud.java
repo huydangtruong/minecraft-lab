@@ -51,9 +51,9 @@ public class SkillBarHud implements HudElement {
 		}
 		long flight = io.github.huydangtruong.permahearts.technique.Flight.remaining(
 			mc.player.getAttached(io.github.huydangtruong.permahearts.technique.Flight.END), now);
-		if (flight > 0) { // remaining flight time, small, above the hotbar
+		if (flight > 0) { // remaining flight time, right side, above the technique name
 			Component fl = Component.literal("Flight " + SkillBarLogic.secondsLeft(flight) + " s");
-			g.centeredText(mc.font, fl, g.guiWidth() / 2, g.guiHeight() - 72, flight < 100 ? 0xFFFF8080 : 0xFFDFF4FF);
+			g.text(mc.font, fl, g.guiWidth() - MARGIN - mc.font.width(fl), top - 24, flight < 100 ? 0xFFFF8080 : 0xFFDFF4FF, true);
 		}
 		Technique sel = ClientSkills.selectedTechnique(mc);
 		if (sel != null) {
