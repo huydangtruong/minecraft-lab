@@ -42,6 +42,8 @@ public final class QuestBoss {
 
 	/** D65: a chieftain drops this many times its vanilla XP (Huy: 10). */
 	public static final int XP_MULTIPLIER = 10;
+	/** D66: a chieftain's base attack damage is this many times its vanilla value (was 1.5). */
+	public static final double DAMAGE_MULTIPLIER = 2.0;
 	public static final float HEALTH = 150f;
 	public static final double SCALE = 2.0;
 	public static final int MINIONS = 4;
@@ -123,7 +125,7 @@ public final class QuestBoss {
 		}
 		AttributeInstance atk = boss.getAttribute(Attributes.ATTACK_DAMAGE);
 		if (atk != null) {
-			atk.setBaseValue(atk.getBaseValue() * 1.5);
+			atk.setBaseValue(atk.getBaseValue() * DAMAGE_MULTIPLIER);
 		}
 		boss.setPersistenceRequired();
 		boss.setCustomName(Messages.bossName(typeName));
