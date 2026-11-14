@@ -1,4 +1,6 @@
-# Chiêu thức — số liệu từng level (D43–D54)
+# Chiêu thức — số liệu từng level (D43–D56)
+
+Tên trong game (D56): Lửa = Fireball, Băng = Frozen Breath, Hồi máu = Healing Light, Xuyên tường = Shadow Walk, Hất tung = Heaven Blast, Hiến Tế = Undying Jutsu, Bay = Cloud Travel, Huyết Kiếm = Life Steal Blade.
 
 Sinh từ `technique/TechniqueRules.java`: sửa số liệu ở đó rồi tạo lại bảng này. Sát thương tính bằng máu (2 = 1 tim), "r" là bán kính tính bằng block.
 

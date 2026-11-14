@@ -4,13 +4,13 @@ import java.util.Optional;
 
 /** The techniques every player can learn (D45, D46, D52), in list order. Pure Java: numbers live in TechniqueRules. */
 public enum Technique {
-	FIRE("fire", "Flame Burst", 16, true),
-	ICE("ice", "Frost Orb", 24, true),
+	FIRE("fire", "Fireball", 16, true), // names: D56
+	ICE("ice", "Frozen Breath", 24, true),
 	HEALING("healing", "Healing Light", 60, false),
-	PHASE("phase", "Phase Walk", 90, false),
-	REPULSE("repulse", "Repulse", 20, false),
-	SACRIFICE("sacrifice", "Blood Oath", 45, false), // D47: was 30 s
-	FLIGHT("flight", "Flight", 120, false), // D52
+	PHASE("phase", "Shadow Walk", 90, false),
+	REPULSE("repulse", "Heaven Blast", 20, false),
+	SACRIFICE("sacrifice", "Undying Jutsu", 45, false), // D47: was 30 s
+	FLIGHT("flight", "Cloud Travel", 120, false), // D52
 	BLADE("blade", "Life Steal Blade", 12, false); // D52: held like a weapon; each landed hit starts the 12 s cooldown
 
 	private final String id;
