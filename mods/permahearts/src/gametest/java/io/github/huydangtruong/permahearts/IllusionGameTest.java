@@ -123,7 +123,8 @@ public class IllusionGameTest {
 			c.runAfterDelay(40, () -> {
 				try {
 					c.assertTrue(mine.stream().anyMatch(a -> a.getTarget() == q), "a clone targets the second player");
-					q.setInvulnerableTime(0); // the (now faster) clones may have hit it already
+					mine.forEach(m -> m.setNoAi(true)); // no more AI hits in between
+					q.damageCooldownTime = 0; // a mock player is never ticked, so the cooldown of an earlier clone hit would not run out
 					float before = q.getHealth();
 					boolean landed = mine.get(0).doHurtTarget(c.getLevel(), q);
 					double expected = 0.4 * p.getAttributeValue(Attributes.ATTACK_DAMAGE);
