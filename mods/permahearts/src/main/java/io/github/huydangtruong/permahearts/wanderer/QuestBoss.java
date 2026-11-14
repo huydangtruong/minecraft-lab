@@ -31,7 +31,7 @@ import net.minecraft.world.level.entity.EntityTypeTest;
 
 /**
  * The quest boss: a giant zombie, skeleton, evoker, blaze or vindicator with 150 health and four minions
- * (an evoker brings vindicators, so the fight is not a swarm of vexes). The boss UUID is saved in
+ * (an evoker brings pillagers with crossbows, D34). The boss UUID is saved in
  * WandererData.boss; the boss bar is runtime only. tick() runs once per second from the scheduler.
  */
 public final class QuestBoss {
@@ -129,7 +129,7 @@ public final class QuestBoss {
 			Wanderer.save(server, Wanderer.data(server).withBoss(previous));
 			return false;
 		}
-		EntityType<?> minionType = type == EntityTypes.EVOKER ? EntityTypes.VINDICATOR : type;
+		EntityType<?> minionType = type == EntityTypes.EVOKER ? EntityTypes.PILLAGER : type; // D34
 		for (int i = 0; i < MINIONS; i++) {
 			BlockPos m = SpawnSpots.standSpot(ow, spot, RNG.nextInt(7) - 3, RNG.nextInt(7) - 3);
 			if (minionType.create(ow, EntitySpawnReason.EVENT) instanceof Mob minion) {
