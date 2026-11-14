@@ -3,7 +3,7 @@ package io.github.huydangtruong.permahearts;
 /**
  * Heart bar layout for more than 20 hearts (D36), pure Java. The bar never grows past 2 rows (20 hearts): hearts
  * 21-40 are drawn over hearts 1-20 in a second colour starting from the first heart of the first row, 41-60 in a third
- * colour, and so on (100 hearts = 5 layers). Damage takes the top layer's last heart first. Health is counted in half
+ * colour, and so on (300 hearts = 15 layers, D37). Damage takes the top layer's last heart first. Health is counted in half
  * hearts (vanilla health points, rounded up).
  */
 public final class HeartLayers {
@@ -54,7 +54,7 @@ public final class HeartLayers {
 
 	/**
 	 * Pixels to move the armour bar down: vanilla places it above all the rows it would draw for this much health
-	 * (health + absorption, up to 10 rows at 100 hearts), the layered bar has at most 2 + 2.
+	 * (health + absorption, up to 30 rows at 300 hearts), the layered bar has at most 2 + 2.
 	 */
 	public static int armorShift(float maxHealth, int health, int absorption) {
 		float vanillaMax = Math.max(maxHealth, health);
@@ -64,7 +64,7 @@ public final class HeartLayers {
 		return vanilla - (rows - 1) * rowHeight(rows);
 	}
 
-	/** Number of colour layers used at this max health (100 hearts = 5). */
+	/** Number of colour layers used at this max health (300 hearts = 15). */
 	public static int layers(float maxHealth) {
 		return Math.max(1, (int) Math.ceil(maxHealth / LAYER_HP));
 	}

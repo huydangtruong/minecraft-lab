@@ -125,10 +125,20 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 		context.takeScreenshot("13-hearts-57-hurt");
 		hearts(context, server, 100, -1);
 		context.takeScreenshot("14-hearts-100-full");
+		hearts(context, server, 150, -1); // D37: pastels, baby pink over peach
+		context.takeScreenshot("15-hearts-150-full");
+		hearts(context, server, 300, 461); // 230.5 hearts: galaxy over cherry blossom
+		context.takeScreenshot("16-hearts-230-galaxy");
+		hearts(context, server, 300, 541); // 270.5 hearts: red fire over soul fire
+		context.takeScreenshot("17-hearts-270-fire");
+		hearts(context, server, 300, 501); // 250.5 hearts: soul fire over galaxy
+		context.takeScreenshot("17b-hearts-250-soul-fire");
+		hearts(context, server, 300, -1); // all lava
+		context.takeScreenshot("18-hearts-300-lava");
 		int rows = server.computeOnServer(s -> io.github.huydangtruong.permahearts.HeartLayers.height(
 			s.getPlayerList().getPlayers().get(0).getMaxHealth(), 0));
 		if (rows != 20) {
-			throw new AssertionError("100 hearts should use 2 rows (20 px), got " + rows);
+			throw new AssertionError("300 hearts should use 2 rows (20 px), got " + rows);
 		}
 		hearts(context, server, 10, -1);
 		server.runCommand("gamemode creative @a");
