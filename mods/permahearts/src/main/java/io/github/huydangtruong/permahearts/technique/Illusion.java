@@ -89,7 +89,7 @@ public final class Illusion extends PathfinderMob implements OwnedSummon {
 	/** Registers the type attributes and the target hooks. Called once from PermaHearts (through TechniqueCasts.init). */
 	public static void init() {
 		FabricDefaultAttributeRegistry.register(TYPE, Mob.createMobAttributes()
-			.add(Attributes.MOVEMENT_SPEED, 0.1).add(Attributes.ATTACK_DAMAGE, 1.0).add(Attributes.FOLLOW_RANGE, 40.0));
+			.add(Attributes.MOVEMENT_SPEED, 0.31).add(Attributes.ATTACK_DAMAGE, 1.0).add(Attributes.FOLLOW_RANGE, 40.0));
 		IllusionTargets.init();
 	}
 
@@ -323,6 +323,27 @@ public final class Illusion extends PathfinderMob implements OwnedSummon {
 			level.sendParticles(ParticleTypes.CRIT, target.getX(), target.getY() + target.getBbHeight() / 2, target.getZ(), 8, 0.3, 0.3, 0.3, 0.1);
 		}
 		return super.doHurtTarget(level, target);
+	}
+
+	/**
+	 * A mob's speed attribute moves it much slower than a player's (its steady speed goes with the attribute squared), so the
+	 * base 0.31 gives a walk of about 4.3 blocks/s and sprinting adds the smaller bonus that makes 5.6 (checked in IllusionGameTest).
+	 */
+	private static final Identifier SPRINT_ID = Identifier.fromNamespaceAndPath("permahearts", "illusion_sprint");
+	public static final double SPRINT_BONUS = 0.14;
+
+	@Override
+	public void setSprinting(boolean sprinting) {
+		super.setSprinting(sprinting);
+		var speed = getAttribute(Attributes.MOVEMENT_SPEED);
+		if (speed != null) {
+			speed.removeModifier(Identifier.withDefaultNamespace("sprinting"));
+			if (sprinting) {
+				speed.addOrUpdateTransientModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(SPRINT_ID, SPRINT_BONUS, net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+			} else {
+				speed.removeModifier(SPRINT_ID);
+			}
+		}
 	}
 
 	/** Sneaks like a player: the pose and the shorter hitbox. */

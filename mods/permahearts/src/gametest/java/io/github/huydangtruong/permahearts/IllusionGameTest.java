@@ -8,6 +8,8 @@ import io.github.huydangtruong.permahearts.technique.TechniqueCasts;
 import io.github.huydangtruong.permahearts.technique.TechniqueRules;
 import io.github.huydangtruong.permahearts.technique.VioletGuardian;
 import java.util.List;
+import java.util.Set;
+import net.minecraft.world.level.block.Blocks;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.MinecraftServer;
@@ -96,7 +98,7 @@ public class IllusionGameTest {
 			boolean hurtByClone = a.hurtServer(c.getLevel(), c.getLevel().damageSources().mobAttack(other), 10f);
 			c.assertTrue(!hurtByClone && a.getHealth() == hp, "a clone's hit does nothing to a sibling");
 			a.setSprinting(true);
-			c.assertTrue(Math.abs(a.getAttributeValue(Attributes.MOVEMENT_SPEED) - 0.13) < 1e-6, "sprinting is a player's +30% (0.13), was " + a.getAttributeValue(Attributes.MOVEMENT_SPEED));
+			c.assertTrue(Math.abs(a.getAttributeValue(Attributes.MOVEMENT_SPEED) - 0.31 * (1 + Illusion.SPRINT_BONUS)) < 1e-6, "sprinting adds the clone bonus, was " + a.getAttributeValue(Attributes.MOVEMENT_SPEED));
 			FlightBladeGameTest.drop(c, p);
 			c.succeed();
 		});
@@ -121,10 +123,11 @@ public class IllusionGameTest {
 			c.runAfterDelay(40, () -> {
 				try {
 					c.assertTrue(mine.stream().anyMatch(a -> a.getTarget() == q), "a clone targets the second player");
+					q.setInvulnerableTime(0); // the (now faster) clones may have hit it already
 					float before = q.getHealth();
-					mine.get(0).doHurtTarget(c.getLevel(), q);
+					boolean landed = mine.get(0).doHurtTarget(c.getLevel(), q);
 					double expected = 0.4 * p.getAttributeValue(Attributes.ATTACK_DAMAGE);
-					c.assertTrue(Math.abs((before - q.getHealth()) - expected) < 0.01, "the clone's hit lands with PvP off: " + before + " -> " + q.getHealth());
+					c.assertTrue(Math.abs((before - q.getHealth()) - expected) < 0.01, "the clone hit lands with PvP off: " + before + " -> " + q.getHealth() + " inv=" + q.getInvulnerableTime() + " dist=" + mine.get(0).distanceTo(q) + " dmgattr=" + mine.get(0).getAttributeValue(Attributes.ATTACK_DAMAGE) + " alive=" + q.isAlive() + " gm=" + q.gameMode() + " landed=" + landed + " invTo=" + q.isInvulnerableTo(c.getLevel(), c.getLevel().damageSources().mobAttack(mine.get(0))) + " hurtTime=" + q.hurtTime + " abs=" + q.getAbsorptionAmount() + " armor=" + q.getAttributeValue(Attributes.ARMOR));
 				} finally {
 					server.getGameRules().set(GameRules.PVP, pvp, server);
 					FlightBladeGameTest.drop(c, q);
@@ -239,5 +242,59 @@ public class IllusionGameTest {
 				c.succeed();
 			});
 		});
+	}
+
+	/** Runs a clone along a long strip; every tick the owner (and for sprinting a target) is put ahead of it. Measures blocks/s over ticks 20..80. */
+	private static void measureSpeed(GameTestHelper c, boolean sprint, double expected) {
+		FlightBladeGameTest.enable(c);
+		for (int x = 0; x < 22; x++) {
+			c.setBlock(x, 0, 5, Blocks.STONE);
+			c.setBlock(x, 0, 6, Blocks.STONE);
+		}
+		ServerPlayer p = FlightBladeGameTest.survivor(c);
+		arm(p, 1);
+		FlightBladeGameTest.place(c, p, 2.5, 1, 5.5, 0f, 0f);
+		TechniqueCasts.cast(p, Technique.ILLUSION, 1, 1f);
+		Illusion a = clones(c, p).get(0);
+		Vec3 s0 = c.absoluteVec(new Vec3(2.5, 1, 5.5));
+		a.snapTo(s0.x, s0.y, s0.z);
+		a.setDeltaMovement(Vec3.ZERO);
+		a.setEndTick(c.getLevel().getGameTime() + 100000);
+		// The clone stays inside the loaded test area: after every tick its step is counted and it is put back at the start.
+		Vec3 dir = c.absoluteVec(new Vec3(1, 0, 0)).subtract(c.absoluteVec(Vec3.ZERO));
+		double[] total = {0};
+		c.onEachTick(() -> {
+			long t = c.getTick();
+			if (t > 80) {
+				return;
+			}
+			double step = Math.hypot(a.getX() - s0.x, a.getZ() - s0.z);
+			if (t > 20) {
+				total[0] += step;
+			}
+			a.snapTo(s0.x, a.getY(), s0.z);
+			// 6-12 blocks from the owner: the clone walks; over 12 (under 24): it sprints, like a player running after the owner
+			double ahead = sprint ? 14 : 9;
+			p.teleportTo(c.getLevel(), s0.x + ahead * dir.x, a.getY(), s0.z + ahead * dir.z, Set.of(), 0f, 0f, false);
+			a.setTarget(null);
+			if (t == 80) {
+				double speed = total[0] / 3.0; // ticks 21..80 = 3 s
+				boolean sp = a.isSprinting();
+				FlightBladeGameTest.drop(c, p);
+				System.out.println("ILLUSION-SPEED " + (sprint ? "sprint" : "walk") + " " + speed + " blocks/s");
+				c.assertTrue(Math.abs(speed - expected) <= expected * 0.10, (sprint ? "sprint" : "walk") + " speed " + speed + " blocks/s, expected " + expected + " (+-10%), sprinting=" + sp);
+				c.succeed();
+			}
+		});
+	}
+
+	@GameTest(maxTicks = 100)
+	public void aCloneWalksAtAboutAPlayersWalkingSpeed(GameTestHelper c) {
+		measureSpeed(c, false, 4.3);
+	}
+
+	@GameTest(maxTicks = 100)
+	public void aCloneSprintsAtAboutAPlayersSprintingSpeed(GameTestHelper c) {
+		measureSpeed(c, true, 5.6);
 	}
 }
