@@ -1,9 +1,9 @@
 # P-011 — Techniques (cultivation skills)
 
-> **Tóm tắt cho Huy (VN, ≤ 3 dòng):** Chiêu thức: học/nâng bằng XP (tới Lv 20), mở tối đa 4 ô bằng ngọc lục bảo, gắn chiêu vào ô ở tab Techniques. Góc dưới phải có dãy ô ✕ + chiêu; bấm R để chuyển, giữ R hiện bảng tròn; chuột để dùng. 5 chiêu đầu: Lửa, Băng, Hồi máu, Xuyên tường, Hất tung. Làm 3 phần: A dữ liệu + bảng, B thanh chiêu + cách dùng, C các chiêu.
+> **Tóm tắt cho Huy (VN, ≤ 3 dòng):** Chiêu thức: học/nâng bằng XP (tới Lv 20), mở tối đa 4 ô bằng ngọc lục bảo, gắn chiêu vào ô ở tab Techniques. Góc dưới phải có dãy ô ✕ + chiêu; bấm R để chuyển, giữ R hiện bảng tròn; chuột để dùng. 6 chiêu đầu: Lửa, Băng, Hồi máu, Xuyên tường, Hất tung, Hiến Tế. Làm 3 phần: A dữ liệu + bảng, B thanh chiêu + cách dùng, C các chiêu.
 
 - **Status:** in-dev (part A)
-- **Mod / decision:** `permahearts` (Immortal Cultivation), D43, D44, D45 · **Branch:** `feat/P-011-techniques-a|b|c` · **Depends on:** none (P-010 Death Match is still unmerged; it will ship after 0.9.0, as 0.10.0 or later)
+- **Mod / decision:** `permahearts` (Immortal Cultivation), D43, D44, D45, D46 · **Branch:** `feat/P-011-techniques-a|b|c` · **Depends on:** none (P-010 Death Match is still unmerged; it will ship after 0.9.0, as 0.10.0 or later)
 - **Idea (Huy's words):** [techniques-idea.md](../mods/permahearts/techniques-idea.md)
 
 ## Goal
@@ -124,3 +124,45 @@ Phase Walk ending inside blocks: the player is moved up to the first free space 
 4. **Fire**: a magic fire field that burns entities but never sets blocks on fire (recommended), or real fire blocks?
 5. **Left click**: also casts (uncharged throw), or only right click casts and left click does nothing while a technique is selected?
 6. **Death Match (P-010)** and PvP: Fire and Ice hurt other players when PvP is on. OK?
+
+## Blood Oath (D46)
+
+| Level | 1 | 10 | 20 | Cooldown |
+|---|---|---|---|---|
+| Current health given up | 80% | 50% | 30% | 30 s |
+| Invulnerable | 5 s | 8 s | 10 s | |
+
+Straight lines between the marks (`TechniqueRules.piecewise`). Invulnerable = every damage is cancelled except damage tagged `bypasses_invulnerability` (void, /kill). Never kills the caster (the cost is a share of the current health).
+
+## Dev briefs (2026-11-14) — the shared core is already on `feat/P-011-techniques`
+
+`technique/Technique.java` (6 techniques: id, English name, cooldown, charged) and `technique/TechniqueRules.java` (XP costs, refund, slot thresholds, key cycle, every number per level, `stats(technique, level)` lines for the UI) are written and tested (`TechniqueRulesTest`). Use them; change numbers only there. In-game text: English `Component.literal` (D16), no lang file edits.
+
+Verified on 26.3 (javap): `PayloadTypeRegistry.serverboundPlay()` / `clientboundPlay()` (`RegistryFriendlyByteBuf`), `ServerPlayNetworking`, `ScreenMouseEvents.allowMouseClick(screen)`, `KeyMappingHelper` (package `net.fabricmc.fabric.api.client.keymapping.v1`), `Player#experienceLevel / experienceProgress / totalExperience / giveExperienceLevels / giveExperiencePoints`, `Minecraft#startUseItem / startAttack / continueAttack / handleKeybinds` (private), first-person hand rendering in `net.minecraft.client.renderer.FirstPersonHandsAndItemsRenderer` with state `client.renderer.state.level.FirstPersonHandsAndItemsRenderState`, `ThrowableItemProjectile` in `world.entity.projectile.throwableitemprojectile`, `AreaEffectCloud`, `MobEffect`. Look up anything else with javap and add it to `02-findings.md`.
+
+### Part A — dev "A" (branch `feat/P-011a-techniques-tab`)
+
+1. `technique/TechniqueData.java`: record `(Map<String,Integer> levels, Map<String,Integer> spentPoints, int emeralds, List<String> slots /* 4 entries, "" = empty */, Map<String,Long> cooldownUntil /* overworld game time */)`, `DEFAULT`, `Codec` and `StreamCodec`, pure helpers (`level(t)`, `slotsOpen()` via `TechniqueRules.slotsFor(emeralds)`, `onCooldown(t, now)`, `withLevel…`). JUnit for the helpers.
+2. Attachment `permahearts:techniques`: persistent, `copyOnDeath`, initializer DEFAULT, `syncWith(STREAM_CODEC, targetOnly())` (same pattern as `HeartsAttachment.HEARTS`).
+3. `technique/TechniqueNet.java`: one C2S payload `TechniqueAction(int kind, String technique, int slot)` with kinds UPGRADE, RESET, ASSIGN, CLEAR_SLOT, DEPOSIT. Server handler validates everything (world switch on, level/XP, cooldowns, slot open). Upgrade: needs `experienceLevel >= cost`; record the **points** removed (`TechniqueRules.points` before/after) in `spentPoints`. Reset: level 0, `giveExperiencePoints(refund)`, removes it from its slot, refused on cooldown. Assign: technique level ≥ 1, slot open, refused while the technique currently in that slot is on cooldown; a technique moves if it was in another slot. Deposit: takes emeralds from the **carried stack** of `player.containerMenu` (cursor), at most what is still needed up to 1,856, then `containerMenu.broadcastChanges()`. Also an op command `/technique set <player> <technique> <level>`, `/technique emeralds <player> <n>`, `/technique cooldowns <player> clear` for tests and playtests.
+4. Techniques tab in `client/StatsPanel.java` (move the tab body into a new `client/TechniquesTab.java`): title; row of 4 slot boxes (locked = dark with a lock, empty, or the technique icon; selected slot = gold outline; cooldown = grey overlay + seconds); emerald box to the right (click it with emeralds on the cursor to deposit; text "12/64" toward the next slot, "All slots open" when done); vertical list of the 6 techniques (icon, name, "Lv N", a ✓ button at the row end while a slot is selected and the technique can go there); click a row → detail page: name, "Lv N / 20", one or two description lines, `stats(level)` → `stats(level+1)` lines ("Range 16 → 18 blocks"; level 0 shows the level 1 numbers), buttons **Upgrade (N levels)** (grey when not enough XP), **Reset (+M XP)**, **Back**. Clicks via `ScreenMouseEvents.allowMouseClick`; keep `RecipeBookScreenMixin`'s "click on panel is not outside" working for every new area.
+5. Icons (original art, 16×16) for the 6 techniques, the lock and the ✓, drawn by a new `tools/make_technique_sprites.py` into `textures/gui/sprites/technique/`. The same icons are reused by part B.
+6. Tests: JUnit for `TechniqueData`; game tests for upgrade (spends levels, refuses without XP), reset (half refund, refused on cooldown), deposit (thresholds, partial kept, cursor stack reduced), assign rules; client test screenshots: tab with no slots, with 2 slots and a selected slot, detail page.
+
+### Part C — dev "C" (branch `feat/P-011c-techniques-skills`)
+
+Server side of the 6 techniques, triggered for now by an op command `/technique cast <technique> <level> [charge 0..1]` run as the caster (part B will call the same entry point from the key and mouse).
+
+1. `technique/TechniqueCasts.java`: `cast(ServerPlayer caster, Technique t, int level, float charge)`; no cooldown or data checks here (part B does them).
+2. Fire / Ice: thrown projectile entities (`ThrowableItemProjectile`, item look: fire charge / snowball; speed so that full charge reaches `fireRange` / `iceRange` on flat ground, charge scales it). On impact: impact damage to the entity hit; a field entity (not blocks; no block fire, no griefing) for `fireFieldSeconds` with radius `fireFieldRadius`: sets entities inside on fire and deals `fireBurnPerSecond` (normal fire colour at every level); ice area for `iceAreaSeconds` with radius `iceRadius`: applies a `permahearts:frostbite` MobEffect (attribute modifiers −`iceSlow` move speed, −`iceAttackSlow` attack speed; lasts `iceLingerSeconds` after leaving).
+3. Healing: a stationary circle at the caster's feet, radius 4, 10 s; heals **every LivingEntity** inside `healingTotal / 10` per second (players, pets, animals, enemies alike). Ring of particles on the edge, glow inside.
+4. Phase Walk: for `phaseSeconds`, blocks whose Y ≥ floor(feet Y at cast) have no collision for this player, on **both sides** (sync the floor Y and end tick to the client, e.g. a synced attachment), no suffocation damage while phasing; at the end, if inside blocks, move the player up to the first free space.
+5. Repulse: every LivingEntity within `repulseRadius` (not the caster) is pushed away horizontally by `repulsePush` plus a small upward lift, and takes `repulseDamage`.
+6. Blood Oath: take `sacrificeCost` × current health from the caster (never below 1 health), then invulnerable for `sacrificeSeconds` (cancel damage via Fabric `ServerLivingEntityEvents.ALLOW_DAMAGE` unless the source bypasses invulnerability). Red particles around the caster while it lasts.
+7. **PvP off must not protect players** (D44): technique damage must hit players even when the server's PvP is off. Check with javap how `ServerPlayer` refuses player damage when PvP is off and use a damage source / path that is not refused (keep the caster as the credited attacker when possible; if not, document the trade-off).
+8. Sounds and particles: vanilla ones only.
+9. Tests: game tests per technique (fire sets a zombie on fire and the field never places fire blocks; ice gives Frostbite with the right attribute values; healing heals a hurt cow and a hurt zombie by the right amount; repulse moves a zombie out of the radius; phase walk lets the player pass a wall at its level but stands on the floor below; blood oath costs the right health and blocks damage, then stops; damage reaches a second player with PvP off). Screenshots of each effect in the client test.
+
+### Part B — after A and C are merged (manager or a new dev)
+
+Skill bar HUD bottom-right; key R (tap cycles, hold opens a radial wheel: hover and release to pick); input mixins (right click charge, left click full charge); C2S `Cast(slot, charge)` with all checks (data from A, entry point from C), cooldown start; scrolling/1–9 back to ✕; **hand visuals (D46)**: while a technique is selected the main hand shows an un-obtainable "focus" item per technique (icons from part A as item textures) plus client particles near the hand (fire: embers rising; ice: snowflakes; healing: green sparkles; phase: purple portal wisps; repulse: white swirling dust; blood oath: dark red drops); the selection is synced so other players see the focus item too.
