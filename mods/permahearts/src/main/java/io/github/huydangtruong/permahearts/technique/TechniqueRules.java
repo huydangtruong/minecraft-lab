@@ -320,11 +320,6 @@ public final class TechniqueRules {
 		return linear(level, 30, 70);
 	}
 
-	/** Swim bonus as a multiple of the Dolphin's Grace bonus: x1 at level 1, x2 at level 20. */
-	public static double aquaSwimFactor(int level) {
-		return linear(level, 1.0, 2.0);
-	}
-
 	/** Underwater mining speed attribute value: 1.0 (Aqua Affinity) at level 1, 2.0 at level 20. Vanilla base is 0.2. */
 	public static double aquaMiningSpeed(int level) {
 		return linear(level, 1.0, 2.0);
@@ -354,10 +349,13 @@ public final class TechniqueRules {
 		return steadySpeed(WATER_ACCEL, dolphin ? DRAG_DOLPHIN : sprinting ? DRAG_SPRINT : DRAG_PLAIN);
 	}
 
-	/** The steady speed Aqua Marine aims for: plain speed plus aquaSwimFactor times the Dolphin's Grace bonus. */
+	/** Steady swim speed at level 20 (D69), blocks per tick: sprint-swimming and plain swimming. */
+	public static final double AQUA_SPRINT_MAX = 1.2;
+	public static final double AQUA_SWIM_MAX = 1.0;
+
+	/** The steady speed Aqua Marine aims for: Dolphin's Grace speed (0.5) at level 1, AQUA_SPRINT_MAX / AQUA_SWIM_MAX at 20. */
 	public static double aquaTargetSpeed(int level, boolean sprinting) {
-		double plain = swimSpeed(sprinting, false);
-		return plain + aquaSwimFactor(level) * (swimSpeed(sprinting, true) - plain);
+		return linear(level, swimSpeed(sprinting, true), sprinting ? AQUA_SPRINT_MAX : AQUA_SWIM_MAX);
 	}
 
 	/**
@@ -458,7 +456,8 @@ public final class TechniqueRules {
 				new Stat("Cooldown", t.cooldownSeconds() + " s"));
 			case AQUA -> List.of(
 				new Stat("Lasts", num(aquaSeconds(level)) + " s"),
-				new Stat("Swim speed", "\u00d7" + num(aquaSwimFactor(level)) + " dolphin"),
+				new Stat("Swim speed", num(aquaTargetSpeed(level, false) * 20) + " blocks/s"),
+				new Stat("Sprint swim", num(aquaTargetSpeed(level, true) * 20) + " blocks/s"),
 				new Stat("Underwater mining", "\u00d7" + num(aquaMiningSpeed(level)) + " aqua affinity"),
 				new Stat("Cooldown", t.cooldownSeconds() + " s"));
 			case SACRIFICE -> List.of(

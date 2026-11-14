@@ -42,6 +42,16 @@ public class AquaClientTest implements FabricClientGameTest {
 			context.waitTicks(20);
 			context.takeScreenshot("91-aqua-underwater-third-person");
 			context.runOnClient(mc -> mc.options.setCameraType(CameraType.FIRST_PERSON));
+			// P-023: the same deep-water view at night, a few blocks under, without and with the buff
+			server.runOnServer(s -> AquaMarine.end(s.getPlayerList().getPlayers().get(0)));
+			server.runCommand("fill -12 90 -12 12 99 12 stone");
+			server.runCommand("time set midnight");
+			server.runCommand("tp @a 0 108 0 -90 20");
+			context.waitTicks(60);
+			context.takeScreenshot("92-aqua-night-view-without-buff");
+			server.runOnServer(s -> TechniqueCasts.cast(s.getPlayerList().getPlayers().get(0), Technique.AQUA, 20, 1f));
+			context.waitTicks(10);
+			context.takeScreenshot("93-aqua-night-view-with-buff");
 		}
 	}
 }

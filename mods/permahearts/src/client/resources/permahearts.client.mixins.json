@@ -13,7 +13,9 @@
 		"ScreenEffectPhaseMixin",
 		"PhaseFogMixin",
 		"MouseScrollMixin",
-		"ChargeFovMixin"
+		"ChargeFovMixin",
+		"AquaWaterVisionMixin",
+		"AquaLightmapMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
