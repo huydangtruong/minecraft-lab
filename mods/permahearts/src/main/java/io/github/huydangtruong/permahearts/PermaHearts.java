@@ -77,6 +77,7 @@ public class PermaHearts implements ModInitializer {
 		io.github.huydangtruong.permahearts.technique.TechniqueNet.register();
 		io.github.huydangtruong.permahearts.technique.TechniqueSelection.init();
 		ElixirItems.init();
+		io.github.huydangtruong.permahearts.technique.FocusItems.init();
 		io.github.huydangtruong.permahearts.technique.TechniqueCasts.init(); // P-011 part C: technique effects
 		WandererMenus.init();
 		WandererScheduler.register();

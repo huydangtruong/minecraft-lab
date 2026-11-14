@@ -155,6 +155,7 @@ public final class ClientSkills {
 		}
 		lastHotbar = hotbar;
 
+		FocusParticles.tick(mc);
 		boolean inGame = mc.gui.screen() == null && available(mc);
 		tickKey(mc, inGame);
 		tickUse(mc, inGame);

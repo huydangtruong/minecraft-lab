@@ -7,7 +7,9 @@
 		"ContainerScreenAccess",
 		"RecipeBookScreenAccess",
 		"RecipeBookScreenMixin",
-		"MinecraftInputMixin"
+		"MinecraftInputMixin",
+		"FirstPersonFocusMixin",
+		"AvatarFocusMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

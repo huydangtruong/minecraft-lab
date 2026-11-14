@@ -97,6 +97,23 @@ public class SkillBarClientTest implements FabricClientGameTest {
 			check(serverSelection(server) == -1, "the server should see the cross again");
 			context.takeScreenshot("37-after-scroll");
 			server.runCommand("kill @e[type=husk]");
+
+			// focus item and hand particles for every technique, first person; the last one also in third person
+			Technique[] all = Technique.values();
+			for (int i = 0; i < all.length; i++) {
+				Technique t = all[i];
+				server.runOnServer(s -> TechniqueAttachment.set(s.getPlayerList().getPlayers().get(0),
+					TechniqueData.DEFAULT.withLevel(t, 5, 10).withEmeralds(64).withSlot(0, t)));
+				context.runOnClient(mc -> ClientSkills.select(0));
+				context.waitTicks(20);
+				check(selected(context) == 0, "slot 0 should stay selected for " + t.id() + ", was " + selected(context));
+				check(context.computeOnClient(mc -> ClientSkills.focusOf(mc.player) == t), "the focus item should be " + t.id());
+				context.takeScreenshot("4" + i + "-focus-" + t.id());
+			}
+			context.runOnClient(mc -> mc.options.setCameraType(CameraType.THIRD_PERSON_BACK));
+			context.waitTicks(15);
+			context.takeScreenshot("46-focus-third-person");
+			context.runOnClient(mc -> mc.options.setCameraType(CameraType.FIRST_PERSON));
 		}
 	}
 
