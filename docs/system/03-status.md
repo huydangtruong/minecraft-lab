@@ -18,6 +18,7 @@ Release steps: [workflow/release.md](../workflow/release.md). Release **only whe
 
 ## In flight
 
+- **P-022** ([plan](../plans/P-022-aqua-marine.md), D64): Aqua Marine technique. Sonnet dev started 2026-11-14 in a `.claude/worktrees/agent-*` worktree on `feat/P-022-dev`; the dev does not push, so the manager fast-forwards `feat/P-022-aqua-marine` to `feat/P-022-dev` locally and merges into main. Huy said not to release yet (0.12.0 waits).
 - **Windows installer bug** (reported by Huy's friend): picking a profile other than "26.3 Fabric Essential" says SUCCESS, but that profile's mods folder still has the old jar. Reading `minecraft-lab.ps1` (`Find-Profiles` / `Select-Profile`) found nothing yet. Waiting for the friend's `Mods folder:` line and that profile's Game directory.
 
 ## Open, not scheduled
