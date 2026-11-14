@@ -295,7 +295,7 @@ public final class TechniqueRules {
 				new Stat("Speed", pct(1 + flightSpeedBonus(level)) + " of creative"),
 				new Stat("Cooldown", t.cooldownSeconds() + " s"));
 			case BLADE -> List.of(
-				new Stat("Damage", "base + " + num(bladeDamage(level)) + " + elixirs"),
+				new Stat("Damage", num(bladeDamage(level))), // D57: just the number
 				new Stat("Life steal", "all damage dealt"),
 				new Stat("Cooldown", t.cooldownSeconds() + " s"));
 			case SACRIFICE -> List.of(
