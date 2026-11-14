@@ -81,7 +81,7 @@ public class FlightBladeClientTest implements FabricClientGameTest {
 				+ server.computeOnServer(sv -> sv.getPlayerList().getPlayers().get(0).getAttached(io.github.huydangtruong.permahearts.technique.Flight.END))
 				+ ", server may/flying " + server.computeOnServer(sv -> sv.getPlayerList().getPlayers().get(0).getAbilities().mayfly + "/" + sv.getPlayerList().getPlayers().get(0).getAbilities().flying)
 				+ ", client " + context.computeOnClient(mc -> mc.player.getAbilities().mayfly + "/" + mc.player.getAbilities().flying + " ground " + mc.player.onGround()));
-			check(context.computeOnClient(mc -> Math.abs(mc.player.getAbilities().getFlyingSpeed() - 0.075f) < 1e-5f), "flying speed x1.5 on the client");
+			check(context.computeOnClient(mc -> Math.abs(mc.player.getAbilities().getFlyingSpeed() - io.github.huydangtruong.permahearts.technique.TechniqueRules.flyingSpeed(10)) < 1e-5f), "flying speed of level 10 on the client");
 			server.runCommand("tp @a 0 104 0 -90 10");
 			context.waitTicks(10);
 			context.takeScreenshot("53-flight-hud-timer");

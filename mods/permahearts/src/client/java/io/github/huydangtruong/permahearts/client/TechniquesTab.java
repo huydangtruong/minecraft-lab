@@ -381,7 +381,7 @@ public final class TechniquesTab {
 				if (i >= d.slotsOpen() || d.slotOnCooldown(i, now)) {
 					return true; // locked, or its technique is cooling down: nothing to do
 				}
-				if (button == 1) {
+				if (button == com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_RIGHT) { // 26.3 numbers buttons like SDL: left 1, right 3
 					if (d.inSlot(i) != null) {
 						send(TechniqueNet.CLEAR_SLOT, "", i);
 					}
