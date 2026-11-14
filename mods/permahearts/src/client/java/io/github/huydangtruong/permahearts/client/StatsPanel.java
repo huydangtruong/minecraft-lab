@@ -26,7 +26,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * Cultivation panel (D31, D39): a rounded taiji button next to the recipe book button in the survival inventory opens a
+ * Cultivation panel (D31, D39, D40): a rounded tablet button next to the recipe book button in the survival inventory opens a
  * panel on the left with tabs like the recipe book's. Stats tab: each stat as "total (base +gear +cultivation)", the
  * Vitality bonus and the respawn point. Techniques tab: empty for now. Works like the recipe book: the inventory moves
  * right, and opening one closes the other. Data comes from the server (StatsSync), once a second.
@@ -53,7 +53,6 @@ public final class StatsPanel {
 
 	private static final Identifier BUTTON = Identifier.fromNamespaceAndPath("permahearts", "stats/button");
 	private static final Identifier BUTTON_HOVER = Identifier.fromNamespaceAndPath("permahearts", "stats/button_highlighted");
-	private static final Identifier TAIJI = Identifier.fromNamespaceAndPath("permahearts", "stats/icon");
 
 	/** Panel tabs, top to bottom. */
 	public enum Tab {
@@ -252,7 +251,7 @@ public final class StatsPanel {
 		};
 	}
 
-	/** Same size and rounded style as the recipe book button, with a taiji (tools/make_stats_sprites.py). */
+	/** Same size and rounded style as the recipe book button: a stone tablet with spirit wings (tools/make_stats_sprites.py). */
 	private static final class StatsButton extends Button {
 		StatsButton(InventoryScreen inv) {
 			super(0, 0, 20, 18, Component.literal("Cultivation"), b -> toggle(inv), DEFAULT_NARRATION);
@@ -267,7 +266,8 @@ public final class StatsPanel {
 
 	/** A tab on the panel's left edge, drawn with the vanilla recipe book tab sprites. */
 	private static final class TabButton extends Button {
-		private static final ItemStack BOOK = new ItemStack(Items.ENCHANTED_BOOK);
+		private static final ItemStack STAR = new ItemStack(Items.NETHER_STAR); // Stats tab (D40)
+		private static final ItemStack BOOK = new ItemStack(Items.ENCHANTED_BOOK); // Techniques tab
 		private final Tab tab;
 
 		TabButton(Tab t) {
@@ -283,11 +283,7 @@ public final class StatsPanel {
 			int x = getX() - (selected ? 2 : 0);
 			g.blitSprite(RenderPipelines.GUI_TEXTURED,
 				Identifier.withDefaultNamespace(selected ? "recipe_book/tab_selected" : "recipe_book/tab"), x, getY(), TAB_W, TAB_H);
-			if (tab == Tab.STATS) {
-				g.blitSprite(RenderPipelines.GUI_TEXTURED, TAIJI, x + 9, getY() + 5, 16, 16);
-			} else {
-				g.fakeItem(BOOK, x + 9, getY() + 5);
-			}
+			g.fakeItem(tab == Tab.STATS ? STAR : BOOK, x + 9, getY() + 5);
 		}
 	}
 }

@@ -81,5 +81,5 @@
 
 ## Bảng tu luyện (D39)
 
-- Nút Thái cực bo góc cạnh nút sách công thức ("Cultivation"). Bảng trái có 2 tab kiểu sách công thức: **Stats** (D31) và **Techniques** (trống, chờ mô tả chiêu thức).
+- Nút bo góc cạnh nút sách công thức ("Cultivation"): phiến đá nâu với Cánh hồn đỏ cam (D40). Tab Stats có biểu tượng Nether Star. Bảng trái có 2 tab kiểu sách công thức: **Stats** (D31) và **Techniques** (trống, chờ mô tả chiêu thức).
 - Ảnh: `docs/screens/stats-button.png`, `stats-panel.png`, `techniques-tab.png`.

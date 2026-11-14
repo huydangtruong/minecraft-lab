@@ -60,6 +60,6 @@ Một cửa sổ Minecraft sẽ hiện ~30 giây rồi tự đóng. Ảnh nằm 
 
 ## Bảng tu luyện (D39)
 
-1. Mở túi đồ (Survival): cạnh nút sách công thức có nút Thái cực bo góc; rê chuột → nền xanh như nút bên cạnh, tooltip "Cultivation".
-2. Bấm: bảng trái mở, bên trái bảng có 2 tab. Tab Thái cực = Stats; tab sách = Techniques ("No techniques yet"). Bấm qua lại đổi nội dung.
+1. Mở túi đồ (Survival): cạnh nút sách công thức có nút phiến đá Cánh hồn bo góc (D40); rê chuột → nền xanh như nút bên cạnh, tooltip "Cultivation".
+2. Bấm: bảng trái mở, bên trái bảng có 2 tab. Tab Nether Star = Stats; tab sách = Techniques ("No techniques yet"). Bấm qua lại đổi nội dung.
 3. Cầm đồ trên chuột rồi bấm vào tab: đồ không bị rơi.

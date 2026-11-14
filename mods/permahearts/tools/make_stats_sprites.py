@@ -1,12 +1,10 @@
-"""Draws the stats button and tab icon (D39): a taiji (yin-yang) symbol, the Daoist mark of cultivation.
+"""Draws the cultivation panel button (D40): a stone tablet in warm brown tones with red-orange spirit wings,
+on a rounded button in the style of the recipe book button. Original art (the Stats tab shows the Nether Star item).
 
-- stats/icon.png (16x16): the symbol, used on the Stats tab.
-- stats/button.png, stats/button_highlighted.png (20x18): a rounded button in the style of the recipe book button,
-  with the symbol on it.
+- stats/button.png, stats/button_highlighted.png (20x18)
 Run: python3 -I mods/permahearts/tools/make_stats_sprites.py
 """
 import importlib.util
-import math
 import os
 
 HERE = os.path.dirname(__file__)
@@ -17,40 +15,43 @@ write_png, rgba, CLEAR = hearts.write_png, hearts.rgba, hearts.CLEAR
 
 OUT = os.path.join(HERE, "..", "src", "main", "resources", "assets", "permahearts", "textures", "gui", "sprites", "stats")
 
-YANG = rgba("f6efdc")   # ivory
-YIN = rgba("2b1d4a")    # deep indigo
-RIM = rgba("120a24")    # outline
-GLOW = rgba("b07cff")   # violet qi on the rim's lower right
+SLAB = {"o": "211515", "k": "352323", "d": "49312b", "m": "584737", "l": "7a5d4c", "L": "947662"}
+EMBLEM = {"d": "8a1a0a", "m": "d43a10", "b": "ff6a1a", "h": "ffb04a"}
+WINGS = [  # 8x8, placed at (4, 4) on the tablet
+    "m......m",
+    "mb....bm",
+    ".mb..bm.",
+    ".mbhhbm.",
+    "..bhhb..",
+    "...bb...",
+    "...mm...",
+    "...dd...",
+]
 
 
-def taiji(size, radius):
-    """size x size image, taiji of the given radius centred in it."""
-    c = size / 2
-    img = [[CLEAR] * size for _ in range(size)]
-    for y in range(size):
-        for x in range(size):
-            px, py = x + 0.5, y + 0.5
-            d = math.hypot(px - c, py - c)
-            if d > radius:
+def tablet_icon():
+    """16x16: a stone tablet with chipped corners, light top-left edge, dark bottom-right, and the wings on it."""
+    img = [[CLEAR] * 16 for _ in range(16)]
+    for y in range(16):
+        for x in range(16):
+            if not (2 <= x <= 13 and 1 <= y <= 14) or (x in (2, 13) and y in (1, 14)):
                 continue
-            if d > radius - 1:
-                # rim: violet glow on the lower right, dark elsewhere
-                img[y][x] = GLOW if (px - c) + (py - c) > radius * 0.9 else RIM
-                continue
-            r2 = radius / 2
-            top = math.hypot(px - c, py - (c - r2))
-            bottom = math.hypot(px - c, py - (c + r2))
-            if top <= r2 * 0.36:
-                col = YIN       # dot in the yang head
-            elif bottom <= r2 * 0.36:
-                col = YANG      # dot in the yin head
-            elif top <= r2:
-                col = YANG
-            elif bottom <= r2:
-                col = YIN
+            edge = x in (2, 13) or y in (1, 14) or (x in (3, 12) and y in (1, 14)) or (y in (2, 13) and x in (2, 13))
+            if edge:
+                c = SLAB["o"]
+            elif y == 2 and x == 3:
+                c = SLAB["L"]
+            elif y == 2 or x == 3:
+                c = SLAB["l"]
+            elif y == 13 or x == 12:
+                c = SLAB["k"]
             else:
-                col = YANG if px < c else YIN
-            img[y][x] = col
+                c = SLAB["d"] if (x * 7 + y * 3) % 5 < 2 else SLAB["m"]
+            img[y][x] = rgba(c)
+    for y, row in enumerate(WINGS):
+        for x, ch in enumerate(row):
+            if ch != ".":
+                img[4 + y][4 + x] = rgba(EMBLEM[ch])
     return img
 
 
@@ -79,17 +80,16 @@ def button(highlighted):
         img[y][19] = edge
         for x in range(2, 18):
             img[y][x] = face
-    icon = taiji(14, 7)
-    for y in range(14):
-        for x in range(14):
-            if icon[y][x] != CLEAR:
-                img[2 + y][3 + x] = icon[y][x]
+    icon = tablet_icon()
+    for y in range(16):
+        for x in range(16):
+            if icon[y][x] != CLEAR and 1 <= y + 1 <= 16 and 1 <= x + 2 <= 18:
+                img[y + 1][x + 2] = icon[y][x]
     return img
 
 
 def main():
     os.makedirs(OUT, exist_ok=True)
-    write_png(os.path.join(OUT, "icon.png"), taiji(16, 7.5))
     write_png(os.path.join(OUT, "button.png"), button(False))
     write_png(os.path.join(OUT, "button_highlighted.png"), button(True))
     print("wrote stats sprites to", os.path.normpath(OUT))
