@@ -27,7 +27,11 @@ public final class TechniqueOrb extends Snowball {
 	/** Slack around a target's box when sweeping, so a fast orb does not slip past (blocks). */
 	private static final double HIT_MARGIN = 0.3;
 
+	/** Ticks after which a flying orb ends where it is. */
+	private static final int MAX_AGE = 200;
+
 	private final Technique technique;
+	private boolean landed;
 	private final int techLevel;
 
 	public TechniqueOrb(ServerLevel level, ServerPlayer caster, Technique technique, int techLevel) {
@@ -45,8 +49,8 @@ public final class TechniqueOrb extends Snowball {
 		if (!isRemoved() && level() instanceof ServerLevel sl) {
 			ParticleOptions trail = technique == Technique.FIRE ? ParticleTypes.FLAME : ParticleTypes.SNOWFLAKE;
 			sl.sendParticles(trail, getX(), getY(), getZ(), 2, 0.05, 0.05, 0.05, 0.01);
-			if (tickCount > 200) {
-				discard();
+			if (tickCount > MAX_AGE || isInWater() || getY() < sl.getMinY()) {
+				endHere(sl); // lifetime end, splashed into water or fell out of the world: still lands where it is
 			}
 		}
 	}
@@ -89,11 +93,23 @@ public final class TechniqueOrb extends Snowball {
 		return false;
 	}
 
-	@Override
-	protected void onHit(HitResult hit) {
-		if (!(level() instanceof ServerLevel sl)) {
+	/** Every end of an orb (block, entity, lifetime, water, void) goes through here: one impact at the last position. */
+	private void endHere(ServerLevel sl) {
+		if (landed) {
 			return;
 		}
+		landed = true;
+		double y = Math.max(getY(), sl.getMinY() + 1.0);
+		impact(sl, getOwner() instanceof ServerPlayer p ? p : null, new Vec3(getX(), y, getZ()));
+		discard();
+	}
+
+	@Override
+	protected void onHit(HitResult hit) {
+		if (!(level() instanceof ServerLevel sl) || landed) {
+			return;
+		}
+		landed = true;
 		ServerPlayer caster = getOwner() instanceof ServerPlayer p ? p : null;
 		Vec3 at = hit.getLocation();
 		if (hit instanceof EntityHitResult eh && eh.getEntity() instanceof LivingEntity target

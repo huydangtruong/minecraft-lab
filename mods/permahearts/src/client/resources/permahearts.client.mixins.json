@@ -10,7 +10,9 @@
 		"MinecraftInputMixin",
 		"FirstPersonFocusMixin",
 		"AvatarFocusMixin",
-		"ScreenEffectPhaseMixin"
+		"ScreenEffectPhaseMixin",
+		"MouseScrollMixin",
+		"ChargeFovMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

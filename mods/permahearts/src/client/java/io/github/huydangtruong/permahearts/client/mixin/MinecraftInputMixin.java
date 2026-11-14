@@ -4,7 +4,9 @@ import io.github.huydangtruong.permahearts.client.ClientSkills;
 import net.minecraft.client.Minecraft;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import net.minecraft.world.entity.player.Inventory;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -31,6 +33,17 @@ abstract class MinecraftInputMixin {
 	private void permahearts$noBlockBreaking(boolean down, CallbackInfo ci) {
 		if (ClientSkills.intercepting((Minecraft) (Object) this)) {
 			ci.cancel();
+		}
+	}
+
+	/** Technique mode: a number key picks a hotbar cell, not a real item slot. */
+	@Redirect(method = "handleKeybinds", at = @At(value = "INVOKE",
+		target = "Lnet/minecraft/world/entity/player/Inventory;setSelectedSlot(I)V"))
+	private void permahearts$numberKeyCell(Inventory inventory, int slot) {
+		if (ClientSkills.mode()) {
+			ClientSkills.setCell(slot);
+		} else {
+			inventory.setSelectedSlot(slot);
 		}
 	}
 }
