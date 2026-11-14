@@ -29,21 +29,25 @@ WINGS = [  # 8x8, placed at (4, 4) on the tablet
 ]
 
 
+TOP, BOTTOM = 2, 13  # tablet rows in the 16x16 icon: 12 tall, so it clears the button's bottom edge (D40, Huy)
+LEFT, RIGHT = 2, 13
+
+
 def tablet_icon():
     """16x16: a stone tablet with chipped corners, light top-left edge, dark bottom-right, and the wings on it."""
     img = [[CLEAR] * 16 for _ in range(16)]
     for y in range(16):
         for x in range(16):
-            if not (2 <= x <= 13 and 1 <= y <= 14) or (x in (2, 13) and y in (1, 14)):
+            if not (LEFT <= x <= RIGHT and TOP <= y <= BOTTOM) or (x in (LEFT, RIGHT) and y in (TOP, BOTTOM)):
                 continue
-            edge = x in (2, 13) or y in (1, 14) or (x in (3, 12) and y in (1, 14)) or (y in (2, 13) and x in (2, 13))
+            edge = x in (LEFT, RIGHT) or y in (TOP, BOTTOM)
             if edge:
                 c = SLAB["o"]
-            elif y == 2 and x == 3:
+            elif y == TOP + 1 and x == LEFT + 1:
                 c = SLAB["L"]
-            elif y == 2 or x == 3:
+            elif y == TOP + 1 or x == LEFT + 1:
                 c = SLAB["l"]
-            elif y == 13 or x == 12:
+            elif y == BOTTOM - 1 or x == RIGHT - 1:
                 c = SLAB["k"]
             else:
                 c = SLAB["d"] if (x * 7 + y * 3) % 5 < 2 else SLAB["m"]
@@ -51,7 +55,7 @@ def tablet_icon():
     for y, row in enumerate(WINGS):
         for x, ch in enumerate(row):
             if ch != ".":
-                img[4 + y][4 + x] = rgba(EMBLEM[ch])
+                img[TOP + 2 + y][4 + x] = rgba(EMBLEM[ch])
     return img
 
 
