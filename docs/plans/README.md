@@ -18,4 +18,4 @@ Quy trình: [workflow/team.md](../workflow/team.md); mẫu: [TEMPLATE.md](TEMPLA
 | [P-012](P-012-techniques-feedback.md) | Chiêu thức: sửa theo lần chơi thử đầu (bảng cuộn, đổi chiêu bằng nút +, R chèn chiêu vào thanh đồ, gồng như cung, lỗi cầu lửa) | merged | Sonnet subagents (1, 2, 3) |
 | P-013 | Xuyên tường: giới hạn tầm nhìn xuyên 8→48 block bằng sương (D51) | merged | Sonnet subagent |
 | [P-014](P-014-flight-blade.md) | Chiêu Bay và Huyết Kiếm (D52, D53) | merged | Sonnet subagent |
-| [P-019](P-019-thousand-mile-step.md) | Chiêu Thiên Lý Bộ (dịch chuyển xa như ngọc Ender, D58) | in-dev | Sonnet subagent |
+| [P-019](P-019-thousand-mile-step.md) | Chiêu Thiên Lý Bộ (dịch chuyển xa như ngọc Ender, D58, D59) | merged | Sonnet subagent |
