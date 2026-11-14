@@ -23,7 +23,7 @@ class StatMathTest {
 		// base 4, sword -2.4, Fury +10%: vanilla multiplies base after flat adds: 1.6 * 1.1 = 1.76
 		PlayerStats.Row r = StatMath.split("attack_speed", 4, List.of(new Mod(-2.4, 0, false), new Mod(0.1, 1, true)));
 		assertEquals(1.76, r.total(), 1e-9);
-		assertArrayEquals(new String[] {"1.76", "4", "-2.4", "+10%"}, StatMath.parts(r));
+		assertArrayEquals(new String[] {"1.76", "4", "-2.4", "+0.16"}, StatMath.parts(r));
 	}
 
 	@Test
