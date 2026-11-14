@@ -28,7 +28,7 @@ import net.minecraft.world.item.ItemStack;
 /**
  * Cultivation panel (D31, D39, D40): a rounded tablet button next to the recipe book button in the survival inventory opens a
  * panel on the left with tabs like the recipe book's. Stats tab: each stat as "total (base +gear +cultivation)", the
- * Vitality bonus and the respawn point. Techniques tab: empty for now. Works like the recipe book: the inventory moves
+ * Vitality bonuses (food heal, food regen) and the respawn point. Techniques tab: empty for now. Works like the recipe book: the inventory moves
  * right, and opening one closes the other. Data comes from the server (StatsSync), once a second.
  */
 public final class StatsPanel {
@@ -39,7 +39,7 @@ public final class StatsPanel {
 	private static final int TAB_OUT = 32;
 	private static final int TAB_W = 35;
 	private static final int TAB_H = 27;
-	private static final int LINE = 11;
+	private static final int LINE = 10; // D41: one more row (Food regen) must fit
 
 	private static final int TEXT = 0xFF404040;
 	private static final int TOTAL = 0xFF202020;
@@ -214,7 +214,10 @@ public final class StatsPanel {
 		g.text(font, "Food heal", tx, y, TEXT, false);
 		String heal = "+" + StatMath.num(ElixirStat.VITALITY.bonus(stats.vitality()) * 100) + "%";
 		drawLeft(g, font, vx, y, new String[] {heal}, new int[] {stats.vitality() > 0 ? BONUS : BASE});
-		y += LINE + 1;
+		y += LINE;
+		g.text(font, "Food regen", tx, y, TEXT, false); // D41: natural regeneration from a full food bar
+		drawLeft(g, font, vx, y, new String[] {heal}, new int[] {stats.vitality() > 0 ? BONUS : BASE});
+		y += LINE + 2;
 		drawLeft(g, font, vx, y, new String[] {"base ", "+gear ", "+cultivation"}, new int[] {BASE, GEAR, BONUS});
 		y += LINE + 2;
 		g.fill(tx, y, right, y + 1, 0xFF8B8B8B);
@@ -228,7 +231,7 @@ public final class StatsPanel {
 	}
 
 	private static int labelWidth(Font font) {
-		int w = font.width("Food heal");
+		int w = Math.max(font.width("Food heal"), font.width("Food regen"));
 		for (String l : LABELS.values()) {
 			w = Math.max(w, font.width(l));
 		}

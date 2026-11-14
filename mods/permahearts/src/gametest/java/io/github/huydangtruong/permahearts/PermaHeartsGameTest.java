@@ -259,6 +259,40 @@ public class PermaHeartsGameTest {
 	}
 
 	@GameTest(maxTicks = 100)
+	public void vitalityBoostsNaturalRegen(GameTestHelper context) {
+		try {
+			enable(context, true);
+			ServerPlayer p = context.makeMockServerPlayerInLevel();
+			HeartsAttachment.setCultivation(p, CultivationData.DEFAULT);
+			float plain = regenOnce(p);
+			near(context, 5f / 6f, plain, "no elixir: saturation 5 heals 5/6 health");
+			for (int i = 0; i < 4; i++) {
+				drink(p, ElixirStat.VITALITY);
+			}
+			near(context, 1.8f * 5f / 6f, regenOnce(p), "4 Vitality: regen from food +80% (+20% each)");
+			enable(context, false);
+			near(context, 5f / 6f, regenOnce(p), "switch off: vanilla regen");
+			context.succeed();
+		} finally {
+			enable(context, true);
+		}
+	}
+
+	/** Full food bar with 5 saturation at 10 health: ticks FoodData until it heals once, returns the health gained. */
+	private static float regenOnce(ServerPlayer p) {
+		p.setHealth(10f);
+		for (int i = 0; i < 20; i++) {
+			p.getFoodData().setFoodLevel(20);
+			p.getFoodData().setSaturation(5f);
+			p.getFoodData().tick(p);
+			if (p.getHealth() > 10f) {
+				return p.getHealth() - 10f;
+			}
+		}
+		return 0f;
+	}
+
+	@GameTest(maxTicks = 100)
 	public void vitalityHealsWhenEating(GameTestHelper context) {
 		try {
 			enable(context, true);
@@ -271,12 +305,12 @@ public class PermaHeartsGameTest {
 			drink(p, ElixirStat.VITALITY);
 			drink(p, ElixirStat.VITALITY);
 			p.getFoodData().setFoodLevel(0);
-			eat(p, net.minecraft.world.item.Items.COOKED_BEEF); // 8 food points x 50% = 4 health
-			near(context, 8f, p.getHealth(), "2 Vitality: steak heals 4 more");
+			eat(p, net.minecraft.world.item.Items.COOKED_BEEF); // 8 food points x 40% = 3.2 health
+			near(context, 7.2f, p.getHealth(), "2 Vitality: steak heals 3.2 more");
 			enable(context, false);
 			p.getFoodData().setFoodLevel(0);
 			eat(p, net.minecraft.world.item.Items.COOKED_BEEF);
-			near(context, 8f, p.getHealth(), "switch off: no extra healing");
+			near(context, 7.2f, p.getHealth(), "switch off: no extra healing");
 			context.succeed();
 		} finally {
 			enable(context, true);

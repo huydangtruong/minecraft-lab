@@ -12,7 +12,7 @@ public enum ElixirStat {
 	REACH("reach", 0.5, false),
 	MINING("mining", 0.10, true),
 	/** Not an attribute: each meal heals extra health = food points x bonus (D30). */
-	VITALITY("vitality", 0.25, true);
+	VITALITY("vitality", 0.20, true); // D41: was 0.25 (D30)
 
 	private final String id;
 	private final double step;
@@ -52,6 +52,14 @@ public enum ElixirStat {
 	/** Extra health (half-hearts) a meal of the given food points heals at this Vitality level. */
 	public static float foodHeal(int nutrition, int vitalityLevel) {
 		return (float) (Math.max(0, nutrition) * VITALITY.bonus(Math.max(0, vitalityLevel)));
+	}
+
+	/**
+	 * Natural regeneration from a full food bar (saturation and hunger regen) is multiplied by this (D41): +20% per
+	 * Vitality bottle, the same step as the instant heal.
+	 */
+	public static double regenMultiplier(int vitalityLevel) {
+		return 1 + VITALITY.bonus(Math.max(0, vitalityLevel));
 	}
 
 	public static Optional<ElixirStat> byId(String id) {
