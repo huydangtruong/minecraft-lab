@@ -12,13 +12,12 @@ A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [w
 |---|---|
 | Last release | `permahearts-v0.11.0` (GitHub Releases on `huydangtruong/minecraft-lab`), `mod_version=0.11.0` |
 | 0.11.0 contains | Death Match (P-010, D25), Life Steal Blade bleeding + knockback and Violet Guardian (P-020, D60), Thousand Mile Step (P-019, D58, D59) |
-| On `main`, not released | P-021 (D62, D63): Violet Guardian and Warrior Angel kills count for the owner; Warrior Angel technique (lifetime 60 s and cooldown 120 s are manager proposals) |
+| On `main`, not released | P-021 (D62, D63): Violet Guardian and Warrior Angel kills count for the owner; Warrior Angel technique (lifetime 60 s and cooldown 120 s are manager proposals); P-022 Aqua Marine (D64). Next version 0.12.0, release when Huy says |
 
 Release steps: [workflow/release.md](../workflow/release.md). Release **only when Huy says so**.
 
 ## In flight
 
-- **P-022** ([plan](../plans/P-022-aqua-marine.md), D64): Aqua Marine technique. Sonnet dev started 2026-11-14 in a `.claude/worktrees/agent-*` worktree on `feat/P-022-dev`; the dev does not push, so the manager fast-forwards `feat/P-022-aqua-marine` to `feat/P-022-dev` locally and merges into main. Huy said not to release yet (0.12.0 waits).
 - **Windows installer bug** (reported by Huy's friend): picking a profile other than "26.3 Fabric Essential" says SUCCESS, but that profile's mods folder still has the old jar. Reading `minecraft-lab.ps1` (`Find-Profiles` / `Select-Profile`) found nothing yet. Waiting for the friend's `Mods folder:` line and that profile's Game directory.
 
 ## Open, not scheduled
