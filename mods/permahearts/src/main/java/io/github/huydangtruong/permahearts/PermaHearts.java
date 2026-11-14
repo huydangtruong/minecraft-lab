@@ -73,7 +73,12 @@ public class PermaHearts implements ModInitializer {
 		HeartsAttachment.ACTIVE.identifier();
 		HeartsAttachment.CULTIVATION.identifier();
 		HeartsAttachment.WANDERER.identifier();
+		io.github.huydangtruong.permahearts.technique.TechniqueAttachment.TECHNIQUES.identifier();
+		io.github.huydangtruong.permahearts.technique.TechniqueNet.register();
+		io.github.huydangtruong.permahearts.technique.TechniqueSelection.init();
 		ElixirItems.init();
+		io.github.huydangtruong.permahearts.technique.FocusItems.init();
+		io.github.huydangtruong.permahearts.technique.TechniqueCasts.init(); // P-011 part C: technique effects
 		WandererMenus.init();
 		WandererScheduler.register();
 		io.github.huydangtruong.permahearts.stats.StatsSync.register();
@@ -87,6 +92,7 @@ public class PermaHearts implements ModInitializer {
 		CommandRegistrationCallback.EVENT.register((d, c, s) -> {
 			HeartsCommand.register(d);
 			QuestCommand.register(d);
+			io.github.huydangtruong.permahearts.technique.TechniqueCommand.register(d);
 		});
 		// Right-click on the Wanderer opens the quest screen instead of the trade screen (SUCCESS also blocks vanilla).
 		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {

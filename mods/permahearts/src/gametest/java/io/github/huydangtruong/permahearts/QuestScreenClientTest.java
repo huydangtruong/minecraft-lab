@@ -121,11 +121,119 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 		if (!tab.equals("TECHNIQUES")) {
 			throw new AssertionError("the Techniques tab was not selected: " + tab);
 		}
-		context.takeScreenshot("09b-techniques-tab");
+		techniquesTab(context, server);
 		context.clickScreenButton("Stats");
 		context.waitTicks(2);
 		context.runOnClient(mc -> mc.player.closeContainer());
 		server.runCommand("gamemode creative @a");
+	}
+
+	// ---- P-011a: Techniques tab, driven with real mouse clicks ----
+
+	private static final int HS_SLOT = 0;
+	private static final int HS_EMERALD = 4;
+	private static final int HS_ROW = 5;
+	private static final int HS_CHECK = 11;
+	private static final int HS_UPGRADE = 17;
+	private static final int HS_RESET = 18;
+	private static final int HS_BACK = 19;
+
+	@SuppressWarnings("unchecked")
+	private static java.util.List<int[]> hotspots(ClientGameTestContext context) {
+		return context.computeOnClient(mc -> {
+			try {
+				return (java.util.List<int[]>) Class.forName("io.github.huydangtruong.permahearts.client.StatsPanel")
+					.getMethod("techniqueHotspots").invoke(null);
+			} catch (ReflectiveOperationException e) {
+				throw new RuntimeException(e);
+			}
+		});
+	}
+
+	private static void clickGui(ClientGameTestContext context, int[] gui, int button) {
+		double scale = context.computeOnClient(mc -> mc.getWindow().getGuiScale());
+		context.getInput().setCursorPos(gui[0] * scale, gui[1] * scale);
+		context.waitTicks(2);
+		context.getInput().pressMouse(button);
+		context.waitTicks(4);
+	}
+
+	private static io.github.huydangtruong.permahearts.technique.TechniqueData techniqueData(TestServerContext server) {
+		return server.computeOnServer(s -> io.github.huydangtruong.permahearts.technique.TechniqueAttachment.get(s.getPlayerList().getPlayers().get(0)));
+	}
+
+	private static void check(boolean ok, String message) {
+		if (!ok) {
+			throw new AssertionError(message);
+		}
+	}
+
+	private static void techniquesTab(ClientGameTestContext context, TestServerContext server) {
+		var t = io.github.huydangtruong.permahearts.technique.Technique.class;
+		server.runOnServer(s -> {
+			ServerPlayer p = s.getPlayerList().getPlayers().get(0);
+			io.github.huydangtruong.permahearts.technique.TechniqueAttachment.set(p, io.github.huydangtruong.permahearts.technique.TechniqueData.DEFAULT);
+			p.experienceLevel = 0;
+			p.experienceProgress = 0f;
+			p.giveExperienceLevels(40);
+		});
+		context.waitTicks(5);
+		context.takeScreenshot("09b-techniques-tab"); // no slots: all four locked
+		// deposit: emeralds on the cursor, click the emerald box
+		server.runOnServer(s -> {
+			ServerPlayer p = s.getPlayerList().getPlayers().get(0);
+			p.containerMenu.setCarried(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.EMERALD, 30));
+			p.containerMenu.broadcastChanges();
+		});
+		context.waitTicks(5);
+		clickGui(context, hotspots(context).get(HS_EMERALD), 0);
+		check(techniqueData(server).emeralds() == 30, "deposit by clicking the emerald box did not work: " + techniqueData(server).emeralds());
+		context.takeScreenshot("09c-techniques-emeralds-partial");
+		server.runCommand("technique emeralds @p 320");
+		context.waitTicks(5);
+		// open fire's detail page by clicking its row, upgrade twice
+		clickGui(context, hotspots(context).get(HS_ROW), 0);
+		context.takeScreenshot("09d-technique-detail-level0");
+		clickGui(context, hotspots(context).get(HS_UPGRADE), 0);
+		clickGui(context, hotspots(context).get(HS_UPGRADE), 0);
+		check(techniqueData(server).level(t.getEnumConstants()[0]) == 2, "two Upgrade clicks should give fire level 2");
+		int levelsLeft = server.computeOnServer(s -> s.getPlayerList().getPlayers().get(0).experienceLevel);
+		check(levelsLeft == 40 - 6 - 7, "levels left should be 27, was " + levelsLeft);
+		context.takeScreenshot("09e-technique-detail-level2");
+		clickGui(context, hotspots(context).get(HS_BACK), 0);
+		// learn ice and healing with the command, then assign with real clicks: select slot 2, tick ice
+		server.runCommand("technique set @p ice 4");
+		server.runCommand("technique set @p healing 1");
+		server.runCommand("technique set @p sacrifice 20");
+		context.waitTicks(5);
+		clickGui(context, hotspots(context).get(HS_SLOT), 0); // select slot 1
+		context.takeScreenshot("09e2-slot1-selected");
+		clickGui(context, hotspots(context).get(HS_CHECK), 0); // tick fire
+		check(techniqueData(server).inSlot(0) == t.getEnumConstants()[0], "tick on fire with slot 1 selected should slot it");
+		clickGui(context, hotspots(context).get(HS_SLOT + 1), 0); // select slot 2
+		clickGui(context, hotspots(context).get(HS_CHECK + 1), 0); // tick ice
+		check(techniqueData(server).inSlot(1) == t.getEnumConstants()[1], "tick on ice with slot 2 selected should slot it");
+		server.runOnServer(s -> {
+			var p = s.getPlayerList().getPlayers().get(0);
+			var d = io.github.huydangtruong.permahearts.technique.TechniqueAttachment.get(p);
+			io.github.huydangtruong.permahearts.technique.TechniqueAttachment.set(p, d.withCooldown(t.getEnumConstants()[0], s.overworld().getGameTime() + 20 * 12));
+		});
+		context.waitTicks(5);
+		context.takeScreenshot("09f-techniques-two-slots-selected"); // fire on cooldown, slot 2 selected
+		// right click clears slot 2
+		clickGui(context, hotspots(context).get(HS_SLOT + 1), 1);
+		check(techniqueData(server).inSlot(1) == null, "right click on slot 2 should clear it");
+		// detail page of Blood Oath at level 20 (max): Upgrade greyed, Reset gives 0 (set by command)
+		clickGui(context, hotspots(context).get(HS_ROW + 5), 0);
+		context.takeScreenshot("09g-technique-detail-max");
+		clickGui(context, hotspots(context).get(HS_BACK), 0);
+		clickGui(context, hotspots(context).get(HS_ROW + 1), 0); // ice level 4: now -> next numbers
+		context.takeScreenshot("09h-technique-detail-ice");
+		clickGui(context, hotspots(context).get(HS_RESET), 0);
+		check(techniqueData(server).level(t.getEnumConstants()[1]) == 0, "Reset click should clear ice");
+		clickGui(context, hotspots(context).get(HS_BACK), 0);
+		context.takeScreenshot("09i-techniques-after-reset");
+		server.runCommand("technique cooldowns @p clear");
 	}
 
 	/** D36: more than 20 hearts stay in 2 rows, extra hearts in other colours over the first ones; armour sits above. */

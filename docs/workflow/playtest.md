@@ -61,10 +61,55 @@ Một cửa sổ Minecraft sẽ hiện ~30 giây rồi tự đóng. Ảnh nằm 
 ## Bảng tu luyện (D39)
 
 1. Mở túi đồ (Survival): cạnh nút sách công thức có nút phiến đá Cánh hồn bo góc (D40); rê chuột → nền xanh như nút bên cạnh, tooltip "Cultivation".
-2. Bấm: bảng trái mở, bên trái bảng có 2 tab. Tab Nether Star = Stats; tab sách = Techniques ("No techniques yet"). Bấm qua lại đổi nội dung.
+2. Bấm: bảng trái mở, bên trái bảng có 2 tab. Tab Nether Star = Stats; tab sách = Techniques (xem mục Chiêu thức bên dưới). Bấm qua lại đổi nội dung.
 3. Cầm đồ trên chuột rồi bấm vào tab: đồ không bị rơi.
 
 ## Vitality hồi máu tự nhiên (D41)
 
 1. Survival, uống 4 bình Vitality, bảng Stats ghi "Food heal +80%" và "Food regen +80%".
 2. Ăn no (thanh đói đầy), tự làm mất vài tim: máu hồi nhanh hơn rõ so với chưa uống (khoảng 1,8 lần).
+
+## Chiêu thức: tab Techniques (P-011 phần A)
+
+Cần bật công tắc thế giới. Lệnh trợ giúp (op): `/technique set <người> <chiêu> <cấp>`, `/technique emeralds <người> <số>`, `/technique cooldowns <người> clear`. Tên chiêu: fire, ice, healing, phase, repulse, sacrifice.
+
+1. Survival, mở túi đồ, bấm nút Cultivation, chọn tab sách (Techniques): hàng 4 ô khóa (hình ổ khóa), ô ngọc lục bảo bên phải ghi "0/64", dưới là danh sách 6 chiêu, tất cả "Lv 0" màu xám.
+2. Nhặt 30 ngọc lục bảo, bấm vào chúng trong túi để cầm lên chuột, bấm vào ô ngọc lục bảo của bảng: ô ghi "30/64", ngọc trên chuột hết. Nạp thêm tới 64: ô khóa đầu mở. Chỉ lấy đủ số cần (tối đa 1856 ngọc tổng cộng), phần dư ở lại trên chuột.
+3. `/xp add @s 40 levels`, bấm hàng "Flame Burst": trang chi tiết (tên, "Lv 0 / 20", dòng mô tả, thông số cấp 1). Bấm "Learn (6 levels)": thanh cấp XP giảm 6, chiêu lên Lv 1; thông số hiện dạng "16 → 18 blocks" (hiện tại → cấp sau). Bấm tiếp: cấp 2 tốn 7 cấp XP; nút xám khi không đủ XP.
+4. Bấm "Reset +N XP": chiêu về Lv 0, nhận lại một nửa số điểm XP đã trả. Bấm nút "Back" ở góc trên phải để về danh sách.
+5. Bấm một ô đã mở: viền vàng. Khi đó mỗi chiêu từ Lv 1 trở lên có nút ✓ ở cuối hàng: bấm ✓ để gắn chiêu vào ô. Gắn cùng chiêu vào ô khác thì nó dời đi (không nhân đôi). Chuột phải vào ô để gỡ chiêu.
+6. Chiêu đang hồi (phần A chưa có lệnh dùng chiêu, thử bằng phần C) thì ô xám có số giây, không thay/gỡ/reset được. `/technique cooldowns @s clear` xóa hồi chiêu.
+7. Bấm vào bảng khi đang cầm đồ: đồ không bị rơi ra ngoài.
+8. Tắt công tắc thế giới: nâng cấp/gắn/nạp ngọc đều bị từ chối (dòng báo trên hotbar), không mất gì.
+
+## Chiêu thức: hiệu ứng phía server (P-011 phần C)
+
+Chưa có phím hay thanh chiêu (phần B), nên thử bằng lệnh op `/technique cast <chiêu> <level 1-20> [charge 0-1]`, chạy bởi chính bạn. Chiêu: `fire`, `ice`, `healing`, `phase`, `repulse`, `sacrifice`. Cần công tắc ImmortalCultivation đang BẬT (tắt thì lệnh báo lỗi, chiêu không làm gì). Dùng `/summon husk ~5 ~ ~ {NoAI:1b}` làm bia (Husk không cháy nắng).
+
+1. **Lửa**: nhìn thẳng vào Husk cách ~6 block, `/technique cast fire 1`. Cầu lửa bay tới, nổ ra vòng lửa bán kính ~2 trong 4 giây; Husk bị 4 sát thương rồi cháy. Không có block lửa nào xuất hiện, cỏ/gỗ gần đó không cháy. `fire 6` trở lên cháy mạnh hơn (2 máu/giây), vẫn lửa thường. `fire 10 0.5` ném gần hơn (nửa tầm).
+2. **Băng**: `/technique cast ice 10`. Vùng tuyết bán kính ~4,8 trong 6 giây; Husk trong vùng có hiệu ứng **Frostbite** (biểu tượng bông tuyết, đi chậm). Ra khỏi vùng, hiệu ứng còn 3 giây. Bạn đứng trong vùng của chính mình: không bị gì.
+3. **Hồi máu**: gây vài sát thương cho bản thân và cho một con bò/Husk gần đó, đứng gần nhau, `/technique cast healing 1`. Vòng tròn sáng bán kính 4 ở chân bạn trong 10 giây; mỗi giây hồi 2 máu (tổng 10 tim) cho MỌI sinh vật trong vòng, kể cả Husk. Ra khỏi vòng thì thôi hồi.
+4. **Xuyên tường**: đứng sát một bức tường đá, `/technique cast phase 1`. Trong 10 giây đi xuyên được mọi block ngang chân trở lên (tường, đồi); sàn dưới chân vẫn đỡ bạn, không rơi. Không bị ngạt trong tường (hình có thể tối đen khi đầu nằm trong block, như vanilla). Hết giờ mà đang kẹt trong block: bạn được đẩy lên chỗ trống đầu tiên, không chết ngạt. Hạt tím quanh người.
+5. **Hất tung**: vây 2-3 Husk (bỏ `NoAI`) trong 3 block, `/technique cast repulse 5`. Chúng bị hất ra xa theo hướng từ bạn, mất vài máu; bạn không mất máu. Vòng hạt trắng loe ra.
+6. **Hiến tế**: `/technique cast sacrifice 1`: máu còn 20% (Lv 10: 50%, Lv 20: 30%), không bao giờ dưới nửa tim cuối. 5 giây (Lv 10: 8 giây) không nhận sát thương nào (để Husk đánh thử); hạt đỏ quanh người. `/kill` và rơi xuống hố hư không vẫn giết được. Hết giờ thì nhận sát thương lại.
+7. **PvP tắt vẫn trúng**: 2 người, `/gamerule pvp false`. Người A `/technique cast repulse 5` sát người B: B vẫn mất máu và bị hất, dù đánh tay thì không mất (chiêu cố ý đi vòng luật PvP, D44). Hệ quả: người chết vì chiêu thì không ai được tính công và thông báo chết không nêu tên người ra chiêu.
+8. Tắt công tắc (`/gamerule permahearts:immortal_cultivation false`): `/technique cast ...` báo lỗi, không có gì xảy ra.
+
+Kiểm bằng máy: `./gradlew :permahearts:build` (game test cho từng chiêu) và `./gradlew :permahearts:runClientGameTest` (ảnh `20-fire-field` đến `26-phase-inside-wall-third-person` trong `mods/permahearts/build/run/clientGameTest/screenshots/`).
+
+## Chiêu thức: thanh chiêu, phím R, dùng chiêu (P-011 phần B)
+
+Cần công tắc thế giới BẬT, chế độ Survival (Creative/Spectator không hiện thanh chiêu và không dùng được chiêu, giống thanh HeartXP). Chuẩn bị: `/technique set @s fire 10`, `/technique set @s ice 5`, `/technique set @s healing 3`, `/technique emeralds @s 832` (mở 3 ô), rồi gắn chiêu vào ô ở tab Techniques (chưa gắn thì thanh chỉ có ô ✕).
+
+**Lưu ý phím R**: Essential cũng dùng R cho bảng emote. Hãy đổi một trong hai: Options > Controls > Key Binds > mục "Immortal Cultivation" > "Technique (tap: next, hold: wheel)", hoặc đổi phím emote trong Essential.
+
+1. **Thanh chiêu**: góc dưới phải, cách mép 8 px như thanh HeartXP: ô ✕ rồi mỗi ô đã mở một ô (hình chiêu hoặc trống). Ô đang chọn có viền vàng; ban đầu chọn ✕. Mở chat/inventory thì thanh vẫn hiện; nhấn F1 thì ẩn.
+2. **Bấm nhanh R** (dưới 0,25 giây): chuyển ✕ → ô chiêu 1 → 2 → ... → ✕ (bỏ qua ô trống). Chiêu đang chọn hiện tên và cấp phía trên thanh. Tay chính hiện **vật tiêu điểm** (biểu tượng chiêu) thay cho món đang cầm, kèm hạt ở tay (lửa nhỏ bay lên, bông tuyết, sao xanh lá, hạt tím, khói trắng xoáy, giọt đỏ sẫm). Đồ trong túi không đổi. F5 để xem ngoài thân: tay chính cầm vật tiêu điểm, người chơi khác (chơi chung) cũng thấy.
+3. **Giữ R** (từ 0,25 giây): hiện bảng tròn giữa màn hình (game không dừng, chuột tự do): ✕ ở trên cùng, các ô chiêu xếp vòng theo chiều kim đồng hồ, mỗi ô có số giây hồi nếu đang hồi. Rê chuột về hướng một ô: ô đó sáng viền trắng, bên dưới ghi tên, cấp, hồi chiêu. **Thả R** để chọn; Esc để hủy (không đổi). Chuột ở sát tâm là không chọn gì.
+4. **Chuột trái khi đã chọn chiêu**: ném ngay với sức đầy (Lửa/Băng) hoặc dùng luôn (Hồi máu, Xuyên tường, Hất tung, Hiến Tế). Đánh/đào/đặt block bằng đồ cầm tay bị chặn khi đang chọn chiêu; muốn đánh bình thường thì bấm R về ✕ hoặc cuộn hotbar / bấm phím 1-9 (tự về ✕).
+5. **Chuột phải giữ** với Lửa/Băng: thanh nạp xanh hiện phía trên thanh chiêu, đầy sau 1 giây (chuyển vàng). **Thả** để ném: nạp nửa thì bay gần hơn (nửa tầm). Với các chiêu dùng ngay thì bấm chuột phải là dùng.
+6. **Hồi chiêu**: ngay sau khi dùng, ô chiêu bị phủ xám, thu nhỏ từ trên xuống, ghi số giây còn lại (Lửa 16 s, Băng 24 s, Hồi máu 60 s, Xuyên tường 90 s, Hất tung 20 s, Hiến Tế 45 s). Dùng khi đang hồi: dòng chữ "On cooldown: N s" hiện giữa/dưới màn hình, không ném, không tốn gì. Chiêu đang hồi vẫn chọn được.
+7. **Tự bỏ chọn**: chọn một ô rồi vào tab Techniques gỡ chiêu khỏi ô đó, hoặc chết, hoặc tắt công tắc thế giới: thanh tự về ✕ và vật tiêu điểm biến mất.
+8. **Chơi chung** (Essential): người kia chọn chiêu thì bạn thấy họ cầm vật tiêu điểm và hạt ở tay; họ đổi/bỏ chọn thì mất.
+
+Kiểm bằng máy: `./gradlew :permahearts:build` (game test cast/cooldown/chọn) và `./gradlew :permahearts:runClientGameTest` (ảnh `30-skill-bar-cross` đến `46-focus-third-person` trong `mods/permahearts/build/run/clientGameTest/screenshots/`).
