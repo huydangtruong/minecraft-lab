@@ -226,6 +226,26 @@ CROSS = [
 ]
 CROSS_PAL = {"x": "c8c8d0"}
 
+PLUS = [
+    "................",
+    "................",
+    "................",
+    ".......pp.......",
+    ".......pp.......",
+    ".......pp.......",
+    "....pppppppp....",
+    "....pppppppp....",
+    ".......pp.......",
+    ".......pp.......",
+    ".......pp.......",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+]
+PLUS_PAL = {"p": "3ad24a"}
+
 
 def main():
     os.makedirs(OUT, exist_ok=True)
@@ -239,6 +259,7 @@ def main():
         "lock": (from_ascii(LOCK, LOCK_PAL), "1a1a20"),
         "check": (from_ascii(CHECK, CHECK_PAL), "0c4a14"),
         "cross": (from_ascii(CROSS, CROSS_PAL), "30303a"),
+        "plus": (from_ascii(PLUS, PLUS_PAL), "0c4a14"),
     }
     for name, (body, edge) in icons.items():
         write_png(os.path.join(OUT, name + ".png"), outline(body, edge))

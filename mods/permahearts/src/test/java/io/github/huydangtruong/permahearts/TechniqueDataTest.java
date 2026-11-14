@@ -54,6 +54,14 @@ class TechniqueDataTest {
 	}
 
 	@Test
+	void assigningATechniqueFromAnotherSlotMovesItAndEmptiesTheOldSlot() {
+		TechniqueData d = TechniqueData.DEFAULT.withSlot(0, Technique.FIRE).withSlot(1, Technique.ICE);
+		TechniqueData moved = d.withSlot(0, Technique.ICE);
+		assertEquals(Technique.ICE, moved.inSlot(0));
+		assertNull(moved.inSlot(1));
+	}
+
+	@Test
 	void cooldowns() {
 		TechniqueData d = TechniqueData.DEFAULT.withSlot(1, Technique.HEALING).withCooldown(Technique.HEALING, 1000);
 		assertTrue(d.onCooldown(Technique.HEALING, 999));

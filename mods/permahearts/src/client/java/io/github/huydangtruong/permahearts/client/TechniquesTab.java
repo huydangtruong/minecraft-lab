@@ -27,10 +27,12 @@ import net.minecraft.world.item.Items;
 public final class TechniquesTab {
 	private static final int SLOT = 20;
 	private static final int SLOT_PITCH = 24;
-	private static final int ROW_H = 18;
-	private static final int ROW_PITCH = 19;
+	private static final int ROW_H = 22;
+	private static final int ROW_PITCH = 24;
 	private static final int LIST_TOP = 44;
-	private static final int VISIBLE_ROWS = 6;
+	/** Pixels the list moves per mouse wheel notch. */
+	private static final int SCROLL_STEP = 12;
+	private static final int PLUS = 18;
 	private static final int LINE = 10;
 
 	private static final int TEXT = 0xFF404040;
@@ -46,6 +48,7 @@ public final class TechniquesTab {
 	private static int selectedSlot = -1;
 	/** Technique whose detail page is open, null for the list. */
 	private static Technique detail;
+	/** List scroll in pixels (0 = top). */
 	private static int scroll;
 
 	private TechniquesTab() {}
@@ -107,14 +110,23 @@ public final class TechniquesTab {
 	}
 
 	private static int rowY(int y0, int i) {
-		return y0 + LIST_TOP + (i - scroll) * ROW_PITCH;
+		return y0 + LIST_TOP + i * ROW_PITCH - scroll;
+	}
+
+	/** Height of the scrolling list area: from LIST_TOP down to the panel's bottom padding. */
+	private static int listH(int h) {
+		return h - 7 - LIST_TOP;
+	}
+
+	private static int maxScroll(int h) {
+		return Math.max(0, Technique.values().length * ROW_PITCH - 2 - listH(h));
 	}
 
 	private static boolean in(double mx, double my, int x, int y, int w, int h) {
 		return mx >= x && mx < x + w && my >= y && my < y + h;
 	}
 
-	/** Detail page button rects: {x, y, w, h}. Back sits at the top right, on the title line. */
+	/** Detail page button rects: {x, y, w, h}. Back is the first thing of the header line (Back, icon, name). */
 	private static int[] upgradeRect(int tx, int right, int y0, int h) {
 		return new int[] {tx, y0 + h - 7 - 14, 104, 14};
 	}
@@ -124,7 +136,7 @@ public final class TechniquesTab {
 	}
 
 	private static int[] backRect(int tx, int right, int y0, int h) {
-		return new int[] {right - 36, y0 + 4, 36, 13};
+		return new int[] {tx, y0 + 19, 36, 16};
 	}
 
 	// ---- drawing ----
@@ -137,9 +149,9 @@ public final class TechniquesTab {
 		if (selectedSlot >= d.slotsOpen()) {
 			selectedSlot = -1;
 		}
-		drawSlots(g, font, d, now, tx, y0 + 19, mx, my);
 		if (detail == null) {
-			drawList(g, font, d, tx, right, y0, mx, my);
+			drawSlots(g, font, d, now, tx, y0 + 19, mx, my);
+			drawList(g, font, d, tx, right, y0, h, mx, my);
 		} else {
 			drawDetail(g, font, d, now, detail, tx, right, y0, h, mx, my);
 		}
@@ -173,14 +185,24 @@ public final class TechniquesTab {
 				g.outline(x, y, SLOT, SLOT, GOLD);
 			}
 			if (in(mx, my, x, y, SLOT, SLOT)) {
+				boolean cd = t != null && d.onCooldown(t, now);
 				Component tip = locked ? Component.literal("Locked: deposit emeralds")
-					: t == null ? Component.literal("Slot " + (i + 1) + ": empty")
-					: Component.literal("Slot " + (i + 1) + ": " + t.displayName() + " (right click clears)");
+					: t == null ? Component.literal("Slot " + (i + 1) + ": empty (click to put a technique in it)")
+					: cd ? Component.literal(t.displayName() + " is on cooldown: " + (d.cooldownLeft(t, now) + 19) / 20 + " s")
+					: Component.literal("Slot " + (i + 1) + ": " + t.displayName() + " (click to change, right click clears)");
 				g.setTooltipForNextFrame(font, tip, mx, my);
 			}
 		}
 		int ex = emeraldX(tx);
-		box(g, ex, y, 0xFF8B8B8B);
+		boolean editing = selectedSlot >= 0;
+		box(g, ex, y, editing && in(mx, my, ex, y, SLOT, SLOT) ? 0xFFA8A8A8 : 0xFF8B8B8B);
+		if (editing) {
+			g.blitSprite(RenderPipelines.GUI_TEXTURED, sprite("cross"), ex + 2, y + 2, 16, 16);
+			if (in(mx, my, ex, y, SLOT, SLOT)) {
+				g.setTooltipForNextFrame(font, Component.literal("Cancel"), mx, my);
+			}
+			return;
+		}
 		g.fakeItem(EMERALD, ex + 2, y + 2);
 		int missing = TechniqueRules.missingForNextSlot(d.emeralds());
 		int step = TechniqueRules.nextSlotStep(d.emeralds());
@@ -193,46 +215,52 @@ public final class TechniquesTab {
 		}
 	}
 
-	private static void drawList(GuiGraphicsExtractor g, Font font, TechniqueData d, int tx, int right, int y0, int mx, int my) {
+	private static void drawList(GuiGraphicsExtractor g, Font font, TechniqueData d, int tx, int right, int y0, int h, int mx, int my) {
 		Technique[] all = Technique.values();
 		int open = d.slotsOpen();
 		boolean assign = selectedSlot >= 0 && selectedSlot < open;
-		g.enableScissor(tx, y0 + LIST_TOP, right, y0 + LIST_TOP + VISIBLE_ROWS * ROW_PITCH - 1);
-		for (int i = scroll; i < all.length && i < scroll + VISIBLE_ROWS; i++) {
+		int viewTop = y0 + LIST_TOP;
+		int viewH = listH(h);
+		scroll = Math.max(0, Math.min(maxScroll(h), scroll));
+		g.enableScissor(tx, viewTop, right, viewTop + viewH);
+		for (int i = 0; i < all.length; i++) {
 			Technique t = all[i];
 			int y = rowY(y0, i);
-			boolean hover = in(mx, my, tx, y, right - tx, ROW_H);
+			if (y + ROW_H < viewTop || y > viewTop + viewH) {
+				continue;
+			}
+			boolean inView = my >= viewTop && my < viewTop + viewH;
+			boolean hover = in(mx, my, tx, y, right - tx, ROW_H) && inView;
 			int level = d.level(t);
 			g.fill(tx, y, right, y + ROW_H, hover ? 0xFFBDBDBD : 0xFFABABAB);
 			g.outline(tx, y, right - tx, ROW_H, 0xFF8B8B8B);
-			g.blitSprite(RenderPipelines.GUI_TEXTURED, icon(t), tx + 1, y + 1, 16, 16);
-			g.text(font, t.displayName(), tx + 22, y + 5, level > 0 ? TOTAL : BASE, false);
+			g.blitSprite(RenderPipelines.GUI_TEXTURED, icon(t), tx + 3, y + 3, 16, 16);
+			g.text(font, t.displayName(), tx + 24, y + 7, level > 0 ? TOTAL : BASE, false);
+			boolean showPlus = assign && level >= 1 && d.slotOf(t) != selectedSlot;
 			String lv = "Lv " + level;
-			int lvRight = right - (assign ? 20 : 4);
-			g.text(font, lv, lvRight - font.width(lv), y + 5, level > 0 ? BONUS : BASE, false);
-			if (assign) {
-				int[] c = checkRect(right, y);
+			int lvRight = right - (showPlus ? PLUS + 6 : 4);
+			g.text(font, lv, lvRight - font.width(lv), y + 7, level > 0 ? BONUS : BASE, false);
+			if (showPlus) {
+				int[] c = plusRect(right, y);
 				boolean can = canAssign(d, t);
-				boolean ch = in(mx, my, c[0], c[1], c[2], c[3]);
-				g.fill(c[0], c[1], c[0] + c[2], c[1] + c[3], can ? (ch ? 0xFFE0FFE0 : 0xFFC6C6C6) : 0xFF909090);
-				g.outline(c[0], c[1], c[2], c[3], can ? 0xFF555555 : 0xFF707070);
-				if (can) {
-					g.blitSprite(RenderPipelines.GUI_TEXTURED, sprite("check"), c[0] - 1, c[1] - 1, 16, 16);
-				}
+				boolean ch = can && in(mx, my, c[0], c[1], c[2], c[3]) && inView;
+				g.blitSprite(RenderPipelines.GUI_TEXTURED, Identifier.withDefaultNamespace(!can ? "widget/button_disabled" : ch ? "widget/button_highlighted" : "widget/button"),
+					c[0], c[1], c[2], c[3]);
+				g.blitSprite(RenderPipelines.GUI_TEXTURED, sprite("plus"), c[0] + 1, c[1] + 1, 16, 16);
 			}
 		}
 		g.disableScissor();
-		int hidden = all.length - VISIBLE_ROWS;
-		if (hidden > 0) {
-			int trackH = VISIBLE_ROWS * ROW_PITCH - 1;
-			int barH = Math.max(8, trackH * VISIBLE_ROWS / all.length);
-			int barY = y0 + LIST_TOP + (trackH - barH) * scroll / hidden;
+		int max = maxScroll(h);
+		if (max > 0) {
+			int content = all.length * ROW_PITCH - 2;
+			int barH = Math.max(8, viewH * viewH / content);
+			int barY = viewTop + (viewH - barH) * scroll / max;
 			g.fill(right + 1, barY, right + 3, barY + barH, 0xFF555555);
 		}
 	}
 
-	private static int[] checkRect(int right, int rowY) {
-		return new int[] {right - 16, rowY + 2, 14, 14};
+	private static int[] plusRect(int right, int rowY) {
+		return new int[] {right - PLUS - 2, rowY + 2, PLUS, PLUS};
 	}
 
 	private static boolean canAssign(TechniqueData d, Technique t) {
@@ -241,12 +269,13 @@ public final class TechniquesTab {
 
 	private static void drawDetail(GuiGraphicsExtractor g, Font font, TechniqueData d, long now, Technique t, int tx, int right, int y0, int h, int mx, int my) {
 		int level = d.level(t);
-		int y = y0 + LIST_TOP - 4;
-		g.blitSprite(RenderPipelines.GUI_TEXTURED, icon(t), tx, y, 16, 16);
-		g.text(font, Component.literal(t.displayName()).withStyle(ChatFormatting.BOLD), tx + 20, y + 4, TOTAL, false);
+		int[] bk = backRect(tx, right, y0, h);
+		int y = bk[1];
+		g.blitSprite(RenderPipelines.GUI_TEXTURED, icon(t), tx + 40, y, 16, 16);
+		g.text(font, Component.literal(t.displayName()).withStyle(ChatFormatting.BOLD), tx + 60, y, TOTAL, false);
 		String lv = "Lv " + level + " / " + TechniqueRules.MAX_LEVEL;
-		g.text(font, lv, right - font.width(lv), y + 4, level > 0 ? BONUS : BASE, false);
-		y += 18;
+		g.text(font, lv, tx + 60, y + 9, level > 0 ? BONUS : BASE, false);
+		y += 24;
 		List<FormattedCharSequence> lines = font.split(Component.literal(description(t)), right - tx);
 		if (!lines.isEmpty()) {
 			g.text(font, lines.get(0), tx, y, TEXT, false);
@@ -310,7 +339,6 @@ public final class TechniquesTab {
 		int xp = xpLevels();
 		int[] up = upgradeRect(tx, right, y0, h);
 		int[] re = resetRect(tx, right, y0, h);
-		int[] bk = backRect(tx, right, y0, h);
 		String upLabel;
 		boolean canUp;
 		if (max) {
@@ -341,11 +369,15 @@ public final class TechniquesTab {
 		int tx = x0 + 7;
 		int right = x0 + w - 7;
 		TechniqueData d = data();
+		if (detail != null) {
+			return clickDetail(d, detail, tx, right, y0, h, mx, my);
+		}
 		int slotY = y0 + 19;
+		long now = now();
 		for (int i = 0; i < TechniqueRules.MAX_SLOTS; i++) {
 			if (in(mx, my, slotX(tx, i), slotY, SLOT, SLOT)) {
-				if (i >= d.slotsOpen()) {
-					return true; // locked
+				if (i >= d.slotsOpen() || d.slotOnCooldown(i, now)) {
+					return true; // locked, or its technique is cooling down: nothing to do
 				}
 				if (button == 1) {
 					if (d.inSlot(i) != null) {
@@ -358,33 +390,39 @@ public final class TechniquesTab {
 			}
 		}
 		if (in(mx, my, emeraldX(tx), slotY, SLOT, SLOT)) {
+			if (selectedSlot >= 0) {
+				selectedSlot = -1; // the cross cancels edit mode
+				return true;
+			}
 			var p = Minecraft.getInstance().player;
 			if (p != null && p.containerMenu.getCarried().is(Items.EMERALD)) {
 				send(TechniqueNet.DEPOSIT, "", 0);
 			}
 			return true;
 		}
-		if (detail == null) {
-			return clickList(d, tx, right, y0, mx, my);
-		}
-		return clickDetail(d, detail, tx, right, y0, h, mx, my);
+		return clickList(d, tx, right, y0, h, mx, my);
 	}
 
-	private static boolean clickList(TechniqueData d, int tx, int right, int y0, double mx, double my) {
+	private static boolean clickList(TechniqueData d, int tx, int right, int y0, int h, double mx, double my) {
 		Technique[] all = Technique.values();
 		boolean assign = selectedSlot >= 0 && selectedSlot < d.slotsOpen();
-		for (int i = scroll; i < all.length && i < scroll + VISIBLE_ROWS; i++) {
+		if (!in(mx, my, tx, y0 + LIST_TOP, right - tx, listH(h))) {
+			return false;
+		}
+		for (int i = 0; i < all.length; i++) {
 			int y = rowY(y0, i);
 			if (!in(mx, my, tx, y, right - tx, ROW_H)) {
 				continue;
 			}
-			int[] c = checkRect(right, y);
-			if (assign && in(mx, my, c[0], c[1], c[2], c[3])) {
+			int[] c = plusRect(right, y);
+			if (assign && d.level(all[i]) >= 1 && d.slotOf(all[i]) != selectedSlot && in(mx, my, c[0], c[1], c[2], c[3])) {
 				if (canAssign(d, all[i])) {
 					send(TechniqueNet.ASSIGN, all[i].id(), selectedSlot);
+					selectedSlot = -1; // edit mode ends after a successful +
 				}
 			} else {
 				detail = all[i];
+				selectedSlot = -1;
 			}
 			return true;
 		}
@@ -415,13 +453,12 @@ public final class TechniquesTab {
 		return false;
 	}
 
-	/** Mouse wheel over the list. Returns true when it scrolled (or would have). */
-	public static boolean scroll(int x0, int y0, int w, double mx, double my, double amount) {
-		if (detail != null || !in(mx, my, x0 + 7, y0 + LIST_TOP, w - 14, VISIBLE_ROWS * ROW_PITCH)) {
+	/** Mouse wheel over the list. Returns true when it was over the list (scrolled or not). */
+	public static boolean scroll(int x0, int y0, int w, int h, double mx, double my, double amount) {
+		if (detail != null || !in(mx, my, x0 + 7, y0 + LIST_TOP, w - 14, listH(h))) {
 			return false;
 		}
-		int max = Math.max(0, Technique.values().length - VISIBLE_ROWS);
-		scroll = Math.max(0, Math.min(max, scroll - (int) Math.signum(amount)));
+		scroll = Math.max(0, Math.min(maxScroll(h), scroll - (int) Math.signum(amount) * SCROLL_STEP));
 		return true;
 	}
 
@@ -440,15 +477,15 @@ public final class TechniquesTab {
 			out.add(new int[] {tx + 40, rowY(y0, i) + ROW_H / 2});
 		}
 		for (int i = 0; i < Technique.values().length; i++) {
-			int[] c = checkRect(right, rowY(y0, i));
-			out.add(new int[] {c[0] + 7, c[1] + 7});
+			int[] c = plusRect(right, rowY(y0, i));
+			out.add(new int[] {c[0] + PLUS / 2, c[1] + PLUS / 2});
 		}
 		int[] up = upgradeRect(tx, right, y0, h);
 		int[] re = resetRect(tx, right, y0, h);
 		int[] bk = backRect(tx, right, y0, h);
 		out.add(new int[] {up[0] + up[2] / 2, up[1] + 7});
 		out.add(new int[] {re[0] + re[2] / 2, re[1] + 7});
-		out.add(new int[] {bk[0] + bk[2] / 2, bk[1] + 7});
+		out.add(new int[] {bk[0] + bk[2] / 2, bk[1] + bk[3] / 2});
 		return out;
 	}
 }

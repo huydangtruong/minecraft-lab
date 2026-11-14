@@ -158,6 +158,16 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 		context.waitTicks(4);
 	}
 
+	/** Mouse wheel over the technique list (negative = down). */
+	private static void scrollList(ClientGameTestContext context, double amount) {
+		double scale = context.computeOnClient(mc -> mc.getWindow().getGuiScale());
+		int[] over = hotspots(context).get(HS_SLOT); // 45 px below the first slot is inside the list
+		context.getInput().setCursorPos(over[0] * scale, (over[1] + 45) * scale);
+		context.waitTicks(2);
+		context.getInput().scroll(amount);
+		context.waitTicks(3);
+	}
+
 	private static io.github.huydangtruong.permahearts.technique.TechniqueData techniqueData(TestServerContext server) {
 		return server.computeOnServer(s -> io.github.huydangtruong.permahearts.technique.TechniqueAttachment.get(s.getPlayerList().getPlayers().get(0)));
 	}
@@ -201,32 +211,58 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 		check(levelsLeft == 40 - 6 - 7, "levels left should be 27, was " + levelsLeft);
 		context.takeScreenshot("09e-technique-detail-level2");
 		clickGui(context, hotspots(context).get(HS_BACK), 0);
-		// learn ice and healing with the command, then assign with real clicks: select slot 2, tick ice
+		// learn ice and healing with the command, then assign with real clicks
 		server.runCommand("technique set @p ice 4");
 		server.runCommand("technique set @p healing 1");
 		server.runCommand("technique set @p sacrifice 20");
 		context.waitTicks(5);
-		clickGui(context, hotspots(context).get(HS_SLOT), 0); // select slot 1
-		context.takeScreenshot("09e2-slot1-selected");
-		clickGui(context, hotspots(context).get(HS_CHECK), 0); // tick fire
-		check(techniqueData(server).inSlot(0) == t.getEnumConstants()[0], "tick on fire with slot 1 selected should slot it");
-		clickGui(context, hotspots(context).get(HS_SLOT + 1), 0); // select slot 2
-		clickGui(context, hotspots(context).get(HS_CHECK + 1), 0); // tick ice
-		check(techniqueData(server).inSlot(1) == t.getEnumConstants()[1], "tick on ice with slot 2 selected should slot it");
+		context.takeScreenshot("09d2-techniques-list-top");
+		scrollList(context, -10); // wheel down: the last rows come into view, the slot row stays
+		context.takeScreenshot("09d3-techniques-list-scrolled");
+		scrollList(context, 10);
+		var fire = t.getEnumConstants()[0];
+		var ice = t.getEnumConstants()[1];
+		clickGui(context, hotspots(context).get(HS_SLOT), 0); // left click slot 1: edit mode
+		context.takeScreenshot("09e2-slot1-edit-mode"); // gold outline, cross instead of the emerald box, + buttons
+		clickGui(context, hotspots(context).get(HS_EMERALD), 0); // the cross cancels
+		clickGui(context, hotspots(context).get(HS_CHECK), 0); // a + press outside edit mode only opens the detail page
+		check(techniqueData(server).inSlot(0) == null, "no slot should be filled outside edit mode");
+		clickGui(context, hotspots(context).get(HS_BACK), 0);
+		clickGui(context, hotspots(context).get(HS_SLOT), 0);
+		clickGui(context, hotspots(context).get(HS_CHECK), 0); // + on fire
+		check(techniqueData(server).inSlot(0) == fire, "+ on fire with slot 1 in edit mode should slot it");
+		clickGui(context, hotspots(context).get(HS_SLOT + 1), 0); // edit slot 2
+		clickGui(context, hotspots(context).get(HS_CHECK + 1), 0); // + on ice
+		check(techniqueData(server).inSlot(1) == ice, "+ on ice with slot 2 in edit mode should slot it");
+		check(techniqueData(server).inSlot(0) == fire, "slot 1 keeps fire");
+		// move: edit slot 1, + on ice -> slot 1 ice, slot 2 empty
+		clickGui(context, hotspots(context).get(HS_SLOT), 0);
+		context.takeScreenshot("09f-move-before"); // fire + ice slotted, editing slot 1
+		clickGui(context, hotspots(context).get(HS_CHECK + 1), 0);
+		check(techniqueData(server).inSlot(0) == ice, "slot 1 should hold ice after the move");
+		check(techniqueData(server).inSlot(1) == null, "slot 2 should be empty after ice moved out of it");
+		context.takeScreenshot("09f2-after-move");
+		// cooldown: ice (slot 1) on cooldown, left and right click on slot 1 do nothing
 		server.runOnServer(s -> {
 			var p = s.getPlayerList().getPlayers().get(0);
 			var d = io.github.huydangtruong.permahearts.technique.TechniqueAttachment.get(p);
-			io.github.huydangtruong.permahearts.technique.TechniqueAttachment.set(p, d.withCooldown(t.getEnumConstants()[0], s.overworld().getGameTime() + 20 * 12));
+			io.github.huydangtruong.permahearts.technique.TechniqueAttachment.set(p, d.withCooldown(ice, s.overworld().getGameTime() + 20 * 12));
 		});
 		context.waitTicks(5);
-		context.takeScreenshot("09f-techniques-two-slots-selected"); // fire on cooldown, slot 2 selected
-		// right click clears slot 2
-		clickGui(context, hotspots(context).get(HS_SLOT + 1), 1);
-		check(techniqueData(server).inSlot(1) == null, "right click on slot 2 should clear it");
+		clickGui(context, hotspots(context).get(HS_SLOT), 0);
+		clickGui(context, hotspots(context).get(HS_SLOT), 1);
+		check(techniqueData(server).inSlot(0) == ice, "slot 1 is on cooldown: clicks must do nothing");
+		context.takeScreenshot("09f3-cooldown-slot-click"); // no gold outline: the left click was refused
+		server.runCommand("technique cooldowns @p clear");
+		context.waitTicks(5);
+		clickGui(context, hotspots(context).get(HS_SLOT), 1); // right click clears
+		check(techniqueData(server).inSlot(0) == null, "right click on slot 1 should clear it");
 		// detail page of Blood Oath at level 20 (max): Upgrade greyed, Reset gives 0 (set by command)
+		scrollList(context, -10);
 		clickGui(context, hotspots(context).get(HS_ROW + 5), 0);
 		context.takeScreenshot("09g-technique-detail-max");
 		clickGui(context, hotspots(context).get(HS_BACK), 0);
+		scrollList(context, 10);
 		clickGui(context, hotspots(context).get(HS_ROW + 1), 0); // ice level 4: now -> next numbers
 		context.takeScreenshot("09h-technique-detail-ice");
 		clickGui(context, hotspots(context).get(HS_RESET), 0);

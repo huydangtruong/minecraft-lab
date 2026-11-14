@@ -118,7 +118,7 @@ public final class StatsPanel {
 				if (!open || tab != Tab.TECHNIQUES || !contains(inv, mx, my)) {
 					return true;
 				}
-				return !TechniquesTab.scroll(panelX(inv), ((ContainerScreenAccess) inv).permahearts$topPos(), W, mx, my, sy);
+				return !TechniquesTab.scroll(panelX(inv), ((ContainerScreenAccess) inv).permahearts$topPos(), W, H, mx, my, sy);
 			});
 		});
 	}
