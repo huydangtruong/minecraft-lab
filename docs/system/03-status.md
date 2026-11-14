@@ -12,7 +12,7 @@ A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [w
 |---|---|
 | Last release | `permahearts-v0.12.0` (GitHub Releases on `huydangtruong/minecraft-lab`), `mod_version=0.12.0` |
 | 0.12.0 contains | Warrior Angel (P-021, D62, D63), Aqua Marine (P-022, P-023, D64, D69), chieftain XP x10 and damage x2 (D65, D66), stronger Strength/Swiftness/Mining elixirs (D67), gold quest 64 (D68) |
-| On `main`, not released | Shorter Death Match quest line "Death Match (PvP)". Next version 0.12.1, release when Huy says |
+| On `main`, not released | Shorter Death Match quest line "Death Match (PvP)"; Strength elixir +2 damage (D70). Next version 0.12.1, release when Huy says |
 
 Release steps: [workflow/release.md](../workflow/release.md). Release **only when Huy says so**.
 

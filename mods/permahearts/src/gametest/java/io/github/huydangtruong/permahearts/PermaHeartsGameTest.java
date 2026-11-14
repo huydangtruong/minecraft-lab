@@ -248,7 +248,7 @@ public class PermaHeartsGameTest {
 		double base = p.getAttributeValue(Attributes.ATTACK_DAMAGE);
 		drink(p, ElixirStat.STRENGTH);
 		drink(p, ElixirStat.STRENGTH);
-		near(context, base + 2.0, p.getAttributeValue(Attributes.ATTACK_DAMAGE), "attack damage");
+		near(context, base + 4.0, p.getAttributeValue(Attributes.ATTACK_DAMAGE), "attack damage");
 		context.assertTrue(HeartsAttachment.getCultivation(p).level(ElixirStat.STRENGTH) == 2, "level should be 2");
 		context.succeed();
 	}
@@ -357,14 +357,14 @@ public class PermaHeartsGameTest {
 			StatApplier.apply(p);
 			double base = p.getAttributeValue(Attributes.ATTACK_DAMAGE);
 			drink(p, ElixirStat.STRENGTH);
-			near(context, base + 1.0, p.getAttributeValue(Attributes.ATTACK_DAMAGE), "on");
+			near(context, base + 2.0, p.getAttributeValue(Attributes.ATTACK_DAMAGE), "on");
 			enable(context, false);
 			near(context, base, p.getAttributeValue(Attributes.ATTACK_DAMAGE), "off");
 			context.assertTrue(HeartsAttachment.getCultivation(p).level(ElixirStat.STRENGTH) == 1, "data kept while off");
 			drink(p, ElixirStat.STRENGTH);
 			context.assertTrue(HeartsAttachment.getCultivation(p).level(ElixirStat.STRENGTH) == 1, "drinking while off must not change level");
 			enable(context, true);
-			near(context, base + 1.0, p.getAttributeValue(Attributes.ATTACK_DAMAGE), "on again");
+			near(context, base + 2.0, p.getAttributeValue(Attributes.ATTACK_DAMAGE), "on again");
 			context.succeed();
 		} finally {
 			enable(context, true);

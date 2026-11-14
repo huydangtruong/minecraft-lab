@@ -26,7 +26,7 @@
 
 | Item | Tên VN | Mỗi bình | Thuộc tính |
 |---|---|---|---|
-| `permahearts:elixir_strength` | Elixir of Strength | +1 sát thương (D67) | `ATTACK_DAMAGE` cộng |
+| `permahearts:elixir_strength` | Elixir of Strength | +2 sát thương (D70) | `ATTACK_DAMAGE` cộng |
 | `permahearts:elixir_fury` | Elixir of Fury | +10% tốc đánh | `ATTACK_SPEED` ×base |
 | `permahearts:elixir_swiftness` | Elixir of Swiftness | +10% tốc chạy (D67) | `MOVEMENT_SPEED` ×base |
 | `permahearts:elixir_iron_skin` | Elixir of Iron Skin | +1 giáp | `ARMOR` cộng |

@@ -71,3 +71,4 @@
 | D67 | Tăng 3 linh dược yếu | Mỗi bình: **Sức Mạnh +1 sát thương** (trước +0,5), **Thần Tốc +10% tốc chạy** (trước +5%), **Khai Sơn +20% tốc đào** (trước +10%). Áp cho cả bình đã uống (tính theo số bình) | 2026-11-15 |
 | D68 | Nhiệm vụ gom vàng | Nhiệm vụ thu thập **thỏi vàng** cần **64** (trước 48). Chỉ áp cho nhiệm vụ mới; nhiệm vụ đang nhận giữ số cũ | 2026-11-15 |
 | D69 | Aqua Marine nhanh hơn, nhìn rõ | Lv 1 vẫn bơi bằng cá heo (0,5 ô/tick). Lv 20: **1,2 ô/tick khi sprint**, **1,0 ô/tick khi không sprint** (trước 0,8 và 0,9), tăng đều giữa hai mức. Trong lúc chiêu chạy, ở dưới nước **nhìn rõ ngay** (như Conduit Power) và **sáng như Night Vision**; lên bờ thì như thường, không có hiệu ứng thuốc thật | 2026-11-15 |
+| D70 | Sức Mạnh +2 | Mỗi bình **Sức Mạnh** cộng **+2 sát thương** (trước +1 ở D67, ban đầu +0,5). Bình đã uống tính theo số mới | 2026-11-15 |

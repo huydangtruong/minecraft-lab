@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 class ElixirStatTest {
 	@Test
 	void bonusScalesWithLevel() {
-		assertEquals(3.0, ElixirStat.STRENGTH.bonus(3), 1e-9);
+		assertEquals(6.0, ElixirStat.STRENGTH.bonus(3), 1e-9);
 		assertEquals(0.2, ElixirStat.FURY.bonus(2), 1e-9);
 	}
 

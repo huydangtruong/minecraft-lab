@@ -5,7 +5,7 @@ import java.util.Optional;
 
 /** The permanent stats an elixir can raise. No Minecraft imports so JUnit can test it. */
 public enum ElixirStat {
-	STRENGTH("strength", 1.0, false), // D67: was 0.5
+	STRENGTH("strength", 2.0, false), // D70: was 1.0 (D67), 0.5 before
 	FURY("fury", 0.10, true),
 	SWIFTNESS("swiftness", 0.10, true), // D67: was 0.05
 	IRON_SKIN("iron_skin", 1.0, false),
