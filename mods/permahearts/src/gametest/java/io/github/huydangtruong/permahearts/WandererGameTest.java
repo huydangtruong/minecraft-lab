@@ -407,15 +407,17 @@ public class WandererGameTest {
 			}
 
 			// Strayed 40 blocks away: sent back within 24 blocks of the Crimson Master.
+			// (leash() directly: the boss tick looks the boss up by UUID, and 40 blocks away may be an unloaded chunk)
+			var boss = (net.minecraft.world.entity.monster.Ghast) ghast;
 			ghast.setPos(npc.getX() + 40, ghast.getY(), npc.getZ());
-			QuestBoss.tick(s);
+			QuestBoss.leash(s, boss);
 			var mc = ghast.getMoveControl();
 			double horizontal = Math.hypot(mc.getWantedX() - npc.getX(), mc.getWantedZ() - npc.getZ());
 			context.assertTrue(mc.hasWanted() && horizontal <= io.github.huydangtruong.permahearts.wanderer.GhastLeash.RADIUS,
 				"pulled back within 24 blocks, wanted " + horizontal);
 			// Floated 30 blocks above the player: sent back to 8..12 above.
 			ghast.setPos(p.getX(), p.getY() + 30, p.getZ());
-			QuestBoss.tick(s);
+			QuestBoss.leash(s, boss);
 			// (the reference is the player, or the ground above it when higher: tree tops, the test area's ceiling)
 			double ref = Math.max(p.getY(), context.getLevel().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING,
 				p.getBlockX(), p.getBlockZ()));

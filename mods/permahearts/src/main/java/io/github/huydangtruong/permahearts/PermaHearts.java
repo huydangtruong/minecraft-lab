@@ -182,7 +182,7 @@ public class PermaHearts implements ModInitializer {
 				sp.level().playSound(null, sp.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1f, 1f);
 				sp.sendSystemMessage(Messages.gained(r.heartsGained(), HeartRules.maxHearts(r.data())));
 			}
-			// AT_CAP only happens when already at the cap: overlay, not chat, so farming at 50 hearts doesn't spam chat.
+			// AT_CAP only happens when already at the cap: overlay, not chat, so farming at the cap doesn't spam chat.
 			case AT_CAP -> sp.sendOverlayMessage(Messages.cap());
 		}
 	}
