@@ -19,6 +19,12 @@
 - **Manager (Opus) mỏng**: viết brief ngắn, giao **một** dev Sonnet làm trọn (số liệu, code, test, chạy toàn bộ test **một lần**, merge vào nhánh tính năng); manager chỉ đọc báo cáo rồi merge vào `main`. Không chạy lại client test khi dev đã báo xanh; không tự mò javap.
 - Chỉnh số nhỏ (đổi một con số): không cần plan riêng, một dòng quyết định là đủ.
 
+## Minecraft lúc test phải tắt tiếng (Huy, 2026-11-15)
+
+Huy có thể đang chơi hoặc đã tắt màn hình đi ngủ khi agent test. Mọi Minecraft do agent mở đều **không có tiếng**:
+- Client game test: mixin `MuteTestClientMixin` trong mod test (`src/gametest`) chặn mọi âm thanh. Đừng xoá nó. Client test mới thì vẫn dùng mod test này.
+- `runClient`: `build.gradle` đặt `soundCategory_master:0.0` trong `run/options.txt` trước khi mở game.
+
 ## Tiết kiệm token (cho dev)
 
 - Đọc plan trước; không dò code ngoài plan. Tra API bằng `javap`/`gh api` như AGENTS.md, ghi cái mới vào `02-findings.md`.
