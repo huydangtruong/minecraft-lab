@@ -6,7 +6,7 @@
 - **Status:** ready
 - **Dev:** one Sonnet subagent
 
-## 1. Atk speed line on the Stats panel (D61)
+## 1. Atk speed line on the Stats panel (D61) — CANCELLED by Huy, keep the panel as it is
 
 Huy read "+0.16" from Fury next to the sword's "−2.4" and expected a minus. The number is right, since Fury is `ADD_MULTIPLIED_BASE` +10% per bottle applied after the sword's −2.4, so 1.6 × 10% = 0.16. It is still confusing.
 
