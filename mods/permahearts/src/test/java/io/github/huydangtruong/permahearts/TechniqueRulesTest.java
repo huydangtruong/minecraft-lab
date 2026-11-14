@@ -86,7 +86,7 @@ class TechniqueRulesTest {
 		assertEquals(120, Technique.FLIGHT.cooldownSeconds());
 		assertEquals(12, Technique.BLADE.cooldownSeconds());
 		assertArrayEquals(new double[] {2, 2 + 4 * 9 / 19.0, 6}, at(TechniqueRules::bladeKnockback), 1e-9);
-		assertEquals(90, Technique.GOLEM.cooldownSeconds());
+		assertEquals(180, Technique.GOLEM.cooldownSeconds());
 		assertEquals(1, TechniqueRules.golemCount(1));
 		assertEquals(1, TechniqueRules.golemCount(9));
 		assertEquals(2, TechniqueRules.golemCount(10));

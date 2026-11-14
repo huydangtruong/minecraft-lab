@@ -281,7 +281,7 @@ public final class TechniqueRules {
 	}
 
 	/** Seconds the guardians stay (D60). */
-	public static final int GOLEM_SECONDS = 60;
+	public static final int GOLEM_SECONDS = 90;
 
 	/** Unused since the blade got a 12 s cooldown (D52); kept for reference. */
 	public static final double BLADE_ATTACK_SPEED = 1.6;

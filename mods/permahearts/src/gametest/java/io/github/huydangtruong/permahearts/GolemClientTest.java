@@ -38,7 +38,8 @@ public class GolemClientTest implements FabricClientGameTest {
 					.withEmeralds(TechniqueRules.MAX_EMERALDS).withSlot(0, Technique.BLADE).withSlot(1, Technique.GOLEM)));
 			context.runOnClient(mc -> mc.options.setCameraType(CameraType.FIRST_PERSON));
 			context.waitTicks(40);
-			server.runCommand("summon husk 2.2 100 0 {NoAI:1b}");
+			server.runCommand("summon husk 2.2 100 0");
+			server.runOnServer(sv -> husk(sv).getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED).setBaseValue(0)); // NoAI mobs do not slide
 			context.waitTicks(10);
 
 			// blade: the hit bleeds and throws the husk back

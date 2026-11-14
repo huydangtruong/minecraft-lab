@@ -116,7 +116,7 @@ public class GolemGameTest {
 				c.assertTrue(Math.abs(g.getMaxHealth() - 100 * power) < 1e-3 && Math.abs(g.getHealth() - 100 * power) < 1e-3, "health " + g.getHealth() + " at level " + k[0]);
 				c.assertTrue(Math.abs(g.getAttributeValue(Attributes.ATTACK_DAMAGE) - 15 * power) < 1e-3, "damage " + g.getAttributeValue(Attributes.ATTACK_DAMAGE));
 				long left = g.endTick() - c.getLevel().getGameTime();
-				c.assertTrue(left == 1200, "lasts 60 s, was " + left + " ticks");
+				c.assertTrue(left == 1800, "lasts 90 s, was " + left + " ticks");
 			}
 		}
 		c.assertTrue(TechniqueRules.golemPower(20) == 2.0, "double at level 20");
@@ -177,7 +177,7 @@ public class GolemGameTest {
 		VioletGuardian a = mine.get(0);
 		VioletGuardian b = mine.get(1);
 		VioletGuardian d = mine.get(2);
-		a.setEndTick(c.getLevel().getGameTime() + 2); // fast-forward the 60 s
+		a.setEndTick(c.getLevel().getGameTime() + 2); // fast-forward the 90 s
 		c.runAfterDelay(8, () -> {
 			c.assertTrue(!a.isAlive(), "the first guardian vanished after its time");
 			c.assertTrue(b.isAlive() && d.isAlive(), "the others stay");
