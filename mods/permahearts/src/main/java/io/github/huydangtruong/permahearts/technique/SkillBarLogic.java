@@ -11,6 +11,11 @@ public final class SkillBarLogic {
 		return Math.max(0f, Math.min(1f, c));
 	}
 
+	/** Charge 0..1 for a technique that needs fullSeconds of holding to reach full. */
+	public static float charge(int heldTicks, float fullSeconds) {
+		return Math.max(0f, Math.min(1f, heldTicks / (20f * fullSeconds)));
+	}
+
 	/** Slot numbers (0..3) of the filled slots, in slot order. These become the first N hotbar cells in technique mode. */
 	public static int[] filledSlots(boolean[] filled) {
 		int n = 0;

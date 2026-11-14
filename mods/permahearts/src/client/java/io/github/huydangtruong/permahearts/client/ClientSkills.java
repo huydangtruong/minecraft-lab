@@ -88,7 +88,12 @@ public final class ClientSkills {
 	}
 
 	public static float chargeFraction() {
-		return SkillBarLogic.charge(chargeTicks);
+		return currentCharge();
+	}
+
+	private static float currentCharge() {
+		Technique t = selectedTechnique(Minecraft.getInstance());
+		return t == null ? SkillBarLogic.charge(chargeTicks) : SkillBarLogic.charge(chargeTicks, TechniqueRules.fullChargeSeconds(t));
 	}
 
 	// ---- changes ----
@@ -283,7 +288,7 @@ public final class ClientSkills {
 			chargeTicks++;
 		} else if (!down && charging) {
 			charging = false;
-			cast(mc, selected, SkillBarLogic.charge(chargeTicks));
+			cast(mc, selected, currentCharge());
 		}
 		useWasDown = down;
 	}

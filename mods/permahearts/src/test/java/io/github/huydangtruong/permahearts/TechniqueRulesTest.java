@@ -79,6 +79,10 @@ class TechniqueRulesTest {
 		assertEquals(0.1f, TechniqueRules.flyingSpeed(20), 1e-6f); // 200% of creative
 		assertArrayEquals(new double[] {150, 50 * (3 + 47.0 * 9 / 19), 2500}, at(TechniqueRules::teleportRange), 1e-9);
 		assertEquals(60, Technique.TELEPORT.cooldownSeconds());
+		assertEquals(3 * TechniqueRules.fullChargeSeconds(Technique.FIRE), TechniqueRules.fullChargeSeconds(Technique.TELEPORT), 1e-9);
+		assertEquals(3f, TechniqueRules.fullChargeSeconds(Technique.TELEPORT), 1e-9);
+		assertEquals("3 s", TechniqueRules.stats(Technique.TELEPORT, 1).get(2).value());
+		assertEquals(0.5f, io.github.huydangtruong.permahearts.technique.SkillBarLogic.charge(30, 3f), 1e-6);
 		assertEquals(120, Technique.FLIGHT.cooldownSeconds());
 		assertEquals(12, Technique.BLADE.cooldownSeconds());
 		assertEquals(16, Technique.FIRE.cooldownSeconds());

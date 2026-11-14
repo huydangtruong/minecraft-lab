@@ -75,7 +75,7 @@ public final class TechniqueCasts {
 			case REPULSE -> repulse(caster, lvl);
 			case SACRIFICE -> bloodOath(caster, lvl);
 			case TELEPORT -> {
-				return false; // P-019: Thousand Mile Step, not written yet
+				return ThousandMileStep.cast(caster, lvl, charge);
 			}
 			case FLIGHT -> {
 				return Flight.start(caster, lvl);
