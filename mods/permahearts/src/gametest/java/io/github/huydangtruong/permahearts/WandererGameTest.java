@@ -65,9 +65,9 @@ public class WandererGameTest {
 		e.hurtServer(level, level.damageSources().playerAttack(p), 1000f);
 	}
 
-	/** D65: a chieftain drops 3 times the XP of the same mob without the boss tag. */
+	/** D65: a chieftain drops 10 times the XP of the same mob without the boss tag. */
 	@GameTest(maxTicks = 100)
-	public void chieftainDropsTripleXp(GameTestHelper context) {
+	public void chieftainDropsTenTimesXp(GameTestHelper context) {
 		ServerLevel level = context.getLevel();
 		ServerPlayer p = context.makeMockServerPlayerInLevel();
 		Zombie plain = context.spawn(EntityTypes.ZOMBIE, new BlockPos(1, 1, 1));

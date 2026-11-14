@@ -40,8 +40,8 @@ public final class QuestBoss {
 	public static final String TAG = "permahearts_boss";
 	public static final String MINION_TAG = "permahearts_boss_minion";
 
-	/** D65: a chieftain drops this many times its vanilla XP. */
-	public static final int XP_MULTIPLIER = 3;
+	/** D65: a chieftain drops this many times its vanilla XP (Huy: 10). */
+	public static final int XP_MULTIPLIER = 10;
 	public static final float HEALTH = 150f;
 	public static final double SCALE = 2.0;
 	public static final int MINIONS = 4;

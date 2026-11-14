@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** D65: a Crimson Master chieftain (quest boss) drops 3 times its vanilla XP. */
+/** D65: a Crimson Master chieftain (quest boss) drops 10 times its vanilla XP. */
 @Mixin(LivingEntity.class)
 abstract class LivingEntityXpMixin {
 	@Inject(method = "getExperienceReward", at = @At("RETURN"), cancellable = true)
