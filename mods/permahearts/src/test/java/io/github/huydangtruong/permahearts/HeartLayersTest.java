@@ -60,9 +60,9 @@ class HeartLayersTest {
 	void threeHundredHeartsEndWithLava() {
 		assertEquals(15, HeartLayers.layers(600f));
 		for (Slot x : HeartLayers.layout(600f, 600)) {
-			assertEquals(new Slot(14, false, -1), x); // 281-300 everywhere
+			assertEquals(new Slot(14, false, -1), x); // crimson lava (281-300) everywhere
 		}
-		Slot[] s = HeartLayers.layout(600f, 501); // 250.5 hearts: 10.5 soul fire hearts (241-260) over galaxy
+		Slot[] s = HeartLayers.layout(600f, 501); // 250.5 hearts: 10.5 green fire hearts (241-260) over galaxy
 		assertEquals(new Slot(12, false, -1), s[9]);
 		assertEquals(new Slot(12, true, 11), s[10]);
 		assertEquals(new Slot(11, false, -1), s[11]);
