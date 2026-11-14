@@ -1,6 +1,7 @@
 """Draws the heart bar layer sprites (D36, D37): 9x9 PNGs for layers 1-14 (layer 0 is the vanilla red heart).
 
-Layers 1-4: bright colours (hearts 21-100), 5-9: pastels (101-200), 10-14: textures (201-300, lava on top).
+Layers 1-4: bright colours (hearts 21-100), 5-9: pastels (101-200), 10-14: textures (201-300): cherry blossom,
+galaxy, green fire, soul fire, crimson lava on top (D37, D38).
 Run: python3 -I mods/permahearts/tools/make_heart_sprites.py   (writes into src/main/resources/...)
 """
 import os
@@ -60,7 +61,18 @@ TEXTURED = {
         "....n....",
         ".........",
     ], {"n": "1a1240", "v": "4b2a8a", "m": "b04ad6", "w": "ffffff", "c": "7fd8ff"}),
-    12: ("soul fire", [  # 241-260
+    12: ("green fire", [  # 241-260 (D38: was red fire at 261-280)
+        ".........",
+        "..tk.kt..",
+        ".krkkkrk.",
+        ".rorkror.",
+        ".oyoroyo.",
+        "..oyyyo..",
+        "...oyo...",
+        "....o....",
+        ".........",
+    ], {"k": "0a1f0a", "t": "14400f", "r": "1f7a1f", "o": "3fe03f", "y": "c8ff6b"}),
+    13: ("soul fire", [  # 261-280
         ".........",
         "..tk.kt..",
         ".kakkkak.",
@@ -71,28 +83,17 @@ TEXTURED = {
         "....c....",
         ".........",
     ], {"k": "1b2a35", "t": "0d4a5a", "a": "1aa6c4", "c": "3ff2ff", "w": "e6ffff"}),
-    13: ("red fire", [  # 261-280
+    14: ("crimson lava", [  # 281-300, the top tier (D38: Huy's pick F, with a second bright dot on the right)
         ".........",
-        "..tk.kt..",
-        ".krkkkrk.",
-        ".rorkror.",
-        ".oyoroyo.",
-        "..oyyyo..",
-        "...oyo...",
-        "....o....",
+        "..mR.RO..",
+        ".mROYORm.",
+        ".ROYLOLm.",
+        ".mROYYRm.",
+        "..mROOm..",
+        "...mRm...",
+        "....m....",
         ".........",
-    ], {"k": "2a0a06", "t": "5a1408", "r": "a3120a", "o": "ff3b1a", "y": "ffb21a"}),
-    14: ("lava", [  # 281-300, the top tier
-        ".........",
-        "..ro.oy..",
-        ".royyooy.",
-        ".oyywyor.",
-        ".rooyyoo.",
-        "..dryor..",
-        "...dro...",
-        "....d....",
-        ".........",
-    ], {"d": "4a1206", "r": "c42a00", "o": "ff6a00", "y": "ffc21a", "w": "fff3b0"}),
+    ], {"m": "8a0a2a", "R": "d4143c", "O": "ff5a3a", "Y": "ffb36b", "L": "ffe0c0"}),
 }
 
 CLEAR = (0, 0, 0, 0)

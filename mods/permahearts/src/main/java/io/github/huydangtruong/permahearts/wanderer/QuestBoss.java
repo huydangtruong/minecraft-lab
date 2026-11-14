@@ -139,7 +139,7 @@ public final class QuestBoss {
 			: type;
 		for (int i = 0; i < MINIONS; i++) {
 			BlockPos m = minionType == EntityTypes.PHANTOM
-				? BlockPos.containing(boss.getX() + RNG.nextInt(13) - 6, boss.getY() + RNG.nextInt(5), boss.getZ() + RNG.nextInt(13) - 6)
+				? BlockPos.containing(boss.getX() + RNG.nextInt(7) - 3, boss.getY() + 1 + RNG.nextInt(4), boss.getZ() + RNG.nextInt(7) - 3)
 				: SpawnSpots.standSpot(ow, spot, RNG.nextInt(7) - 3, RNG.nextInt(7) - 3);
 			if (minionType.create(ow, EntitySpawnReason.EVENT) instanceof Mob minion) {
 				minion.snapTo(m.getX() + 0.5, m.getY(), m.getZ() + 0.5, RNG.nextFloat() * 360f, 0f);

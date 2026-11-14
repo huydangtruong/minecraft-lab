@@ -129,11 +129,11 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 		context.takeScreenshot("15-hearts-150-full");
 		hearts(context, server, 300, 461); // 230.5 hearts: galaxy over cherry blossom
 		context.takeScreenshot("16-hearts-230-galaxy");
-		hearts(context, server, 300, 541); // 270.5 hearts: red fire over soul fire
-		context.takeScreenshot("17-hearts-270-fire");
-		hearts(context, server, 300, 501); // 250.5 hearts: soul fire over galaxy
-		context.takeScreenshot("17b-hearts-250-soul-fire");
-		hearts(context, server, 300, -1); // all lava
+		hearts(context, server, 300, 541); // 270.5 hearts: soul fire over green fire
+		context.takeScreenshot("17-hearts-270-soul-fire");
+		hearts(context, server, 300, 501); // 250.5 hearts: green fire over galaxy
+		context.takeScreenshot("17b-hearts-250-green-fire");
+		hearts(context, server, 300, -1); // all crimson lava
 		context.takeScreenshot("18-hearts-300-lava");
 		int rows = server.computeOnServer(s -> io.github.huydangtruong.permahearts.HeartLayers.height(
 			s.getPlayerList().getPlayers().get(0).getMaxHealth(), 0));
