@@ -1,6 +1,6 @@
 """Draws the technique icons (P-011 part A): 16x16 original pixel art, one per technique, plus a lock, a tick and a cross.
 
-- technique/{fire,ice,healing,phase,repulse,sacrifice,flight,blade}.png, technique/lock.png, technique/check.png, technique/cross.png
+- technique/{fire,ice,healing,phase,repulse,sacrifice,flight,blade,teleport}.png, technique/lock.png, technique/check.png, technique/cross.png
 Each icon is drawn as a body; a dark outline is added automatically around it.
 Run: python3 -I mods/permahearts/tools/make_technique_sprites.py
 """
@@ -246,6 +246,27 @@ PLUS = [
 ]
 PLUS_PAL = {"p": "3ad24a"}
 
+TELEPORT = [  # a violet orb leaving three light streaks behind it (D58), original art
+    "................",
+    "................",
+    "................",
+    "........VVVV....",
+    "......VVvvppVV..",
+    "..sss.VvppwwpV..",
+    "......VppwhwpV..",
+    ".wsss.VpwhhwpV..",
+    "......VvppwpvV..",
+    "..sss.VVvppvVV..",
+    "........VVVV....",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+]
+TELEPORT_PAL = {"V": "5a1aa8", "v": "7a2ad6", "p": "b45cff", "w": "e8ccff", "h": "ffffff", "s": "d9b8ff"}
+
+
 def mirror(half):
     """Symmetric art: 16 rows of 8 characters (the left half) become 16 rows of 16."""
     return [row + row[::-1] for row in half]
@@ -310,6 +331,7 @@ def main():
         "sacrifice": (from_ascii(SACRIFICE, SACRIFICE_PAL), "2a2f37"),
         "flight": (from_ascii(FLIGHT, FLIGHT_PAL), "2a5a80"),
         "blade": (blade_art(), "3a0606"),
+        "teleport": (from_ascii(TELEPORT, TELEPORT_PAL), "2a0a58"),
         "lock": (from_ascii(LOCK, LOCK_PAL), "1a1a20"),
         "check": (from_ascii(CHECK, CHECK_PAL), "0c4a14"),
         "cross": (from_ascii(CROSS, CROSS_PAL), "30303a"),
@@ -319,7 +341,7 @@ def main():
     for name, (body, edge) in icons.items():
         img = outline(body, edge)
         write_png(os.path.join(OUT, name + ".png"), img)
-        if name in ("fire", "ice", "healing", "phase", "repulse", "sacrifice", "flight", "blade"):
+        if name in ("fire", "ice", "healing", "phase", "repulse", "sacrifice", "flight", "blade", "teleport"):
             write_png(os.path.join(items, "focus_" + name + ".png"), img)
     print("wrote technique sprites to", os.path.normpath(OUT))
 

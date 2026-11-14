@@ -15,6 +15,11 @@ public final class TechniqueRules {
 	/** Seconds a charged throw needs to reach full power (like a bow). */
 	public static final float FULL_CHARGE_SECONDS = 1f;
 
+	/** Seconds of holding right click to reach full charge: Thousand Mile Step takes 3 times as long as the orbs (D58). */
+	public static float fullChargeSeconds(Technique t) {
+		return t == Technique.TELEPORT ? 3 * FULL_CHARGE_SECONDS : FULL_CHARGE_SECONDS;
+	}
+
 	private TechniqueRules() {}
 
 	// ---- XP ----
@@ -314,6 +319,7 @@ public final class TechniqueRules {
 			case TELEPORT -> List.of(
 				new Stat("Range", num(teleportRange(level)) + " blocks"),
 				new Stat("Ender pearls", num(teleportPearls(level)) + "x"),
+				new Stat("Charge", num(fullChargeSeconds(t)) + " s"),
 				new Stat("Cooldown", t.cooldownSeconds() + " s"));
 			case SACRIFICE -> List.of(
 				new Stat("Costs", pct(sacrificeCost(level)) + " of current health"),

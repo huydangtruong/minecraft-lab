@@ -140,3 +140,15 @@ Kiểm bằng máy: `./gradlew :permahearts:runClientGameTest` (ảnh `27-phase-
 
 1. Ném Lửa vào một cây hoặc tường gỗ: chỗ trúng và gỗ quanh bãi lửa bắt lửa, lửa có thể lan như lửa thường.
 2. Ném vào mob trên nền đá: mob cháy, nền đá không có lửa.
+
+## Thiên Lý Bộ / Thousand Mile Step (D58, P-019)
+
+Survival, công tắc BẬT, `/technique set @s teleport 1` (hoặc học trong tab chiêu), gán vào ô, bấm R chọn ô đó (pháp khí tím trên tay).
+1. **Gồng**: giữ chuột phải, thanh lực đầy sau **3 giây** (lâu gấp 3 Fireball), màn hình zoom dần như cung, hạt tím quanh tay. Thả ra: dịch chuyển theo hướng nhìn. Chuột trái = lực tối đa ngay.
+2. **Cấp 1 hết lực** nhìn ngang ra đồng bằng: đáp xuống mặt đất cách khoảng 150 block. Chạm nhẹ (lực thấp) vẫn đi được ít nhất 20% (30 block). `/technique set @s teleport 20`: tối đa ~2500 block.
+3. Nhìn vào vách núi/tường gần: đáp ngay trước vách (hoặc trên mặt sàn nếu nhìn xuống đất), không chui vào khối.
+4. Không rơi sát thương sau khi đáp (kể cả đáp trên cao xuống đất). Có tiếng Enderman, hạt portal ở hai đầu và vệt hạt dọc đường.
+5. Nhìn ra đại dương xa: đáp trên mặt nước. Nhìn về phía hồ dung nham lớn / vực không đáy (Nether, End): thông báo "No safe place to land", không dịch chuyển, **không** vào hồi chiêu.
+6. Ở Nether chiêu không đưa lên nóc bedrock (tìm khoảng trống gần độ cao hiện tại).
+
+Kiểm bằng máy: `./gradlew :permahearts:build` (game test `ThousandMileStepGameTest`: 150 block, sàn 20%, tường, dung nham bị từ chối) và `runClientGameTest` (ảnh `60-teleport-focus-in-hand`, `61-teleport-charging`, `62-teleport-after`).
