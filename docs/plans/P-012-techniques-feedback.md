@@ -3,7 +3,7 @@
 > **Tóm tắt cho Huy (VN, ≤ 3 dòng):** Sửa theo lần chơi thử đầu: bảng Techniques (dòng cao hơn, cuộn dọc, ô chiêu dính trên cùng, trang chi tiết có Back + biểu tượng + tên + level, bấm trái ô = đổi chiêu với nút +, bấm phải = xoá ô), bấm R thì chiêu chèn vào đầu thanh đồ (bấm lại thì trả chỗ), gồng chiêu có hiệu ứng như cung + thanh lực giữa màn hình, sửa lỗi cầu lửa gồng tối đa không nổ.
 
 - **Status:** in-dev
-- **Mod / decision:** `permahearts`, D48 · **Branches:** `feat/P-012a-techniques-tab` (dev 1), `feat/P-012b-skill-hotbar` (dev 2), both from `main` · **Depends on:** P-011 (merged)
+- **Mod / decision:** `permahearts`, D48, D49 · **Branches:** `feat/P-012a-techniques-tab` (dev 1), `feat/P-012b-skill-hotbar` (dev 2), `feat/P-012c-phase-walk` (dev 3), all from `main` · **Depends on:** P-011 (merged)
 
 ## Part 1 — Techniques tab (dev 1, `client/TechniquesTab.java`, `client/StatsPanel.java`, `tools/make_technique_sprites.py`)
 
@@ -28,7 +28,15 @@
 4. **Bug — fully charged Flame Burst falls and does nothing**: reproduce (game test: full-charge fire orb on flat ground at max range must create the fire field). Likely causes: a lifetime cap discarding the orb before it lands, the custom hit sweep missing the ground at high speed, or the orb leaving loaded chunks. Fix so that **every end of an orb** (block hit, entity hit, lifetime end) triggers the impact effect at the last position. Same for Frost Orb.
 5. Tests: game tests for the orb fix (both orbs, full charge); client screenshots: mode off/on hotbar (with a sword in slot 1 and an axe in slot 2 → after R: techniques first, sword in cell N+1), right label bar with cooldowns, charging zoom + power bar.
 
-## Both
+Added for dev 2 (D49): technique cells in the hotbar have a darker, less transparent background (and/or outline) than the item cells; the selection frame on a technique cell is gold/yellow.
+
+## Part 3 — Phase Walk fixes (dev 3, `technique/PhaseState.java`, `technique/TechniqueCasts.java` phase parts, `mixin/EntityCollisionContextMixin`, `mixin/EntityInWallMixin`, a new client mixin)
+
+1. **Floor follows falls**: while phasing, if the player's feet drop below the locked floor (e.g. floor 70, walks over a hole and falls to 60), the floor becomes the new `floor(feet Y)` (only ever lowers during one cast; never rises). The player keeps phasing at the new level and stands on blocks below the new floor. Same rule on client and server (sync the new floor like the cast floor).
+2. **X-ray view while phasing**: inside blocks the screen must not be covered by the in-wall block overlay (and no suffocation fog/darkening); the view should be like spectator mode inside blocks (you see through the block you are in and into caves). Find the in-wall overlay / camera checks with javap (screen effect renderer, camera "is inside block" logic) and skip them for the local player while phasing. If that alone is not enough to see through walls, report what you see instead of building a full x-ray renderer.
+3. Tests: game test for the floor lowering (walk over a hole: player falls to the lower level and still passes walls there, does not fall through the floor below); client screenshot inside a wall while phasing (no block overlay).
+
+## All devs
 
 - Read `AGENTS.md`, `docs/workflow/team.md`; numbers only from `technique/TechniqueRules.java`; English in-game text; Vietnamese playtest steps in `docs/workflow/playtest.md`; new API facts in `docs/system/02-findings.md`.
 - Commit and push after every working step; never push `main`; no install/package scripts.
