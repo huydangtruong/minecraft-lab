@@ -180,3 +180,13 @@ Kiểm bằng máy: `./gradlew :permahearts:build` (game test `ThousandMileStepG
 5. Hạt bong bóng nhẹ quanh người; cầm linh khí thì có bong bóng và nước bắn ở tay. Chết hoặc thoát game thì chiêu tắt ngay.
 6. Kiểm bằng máy: `./gradlew :permahearts:build` (`AquaGameTest`: đo tốc độ bơi cấp 1 = cá heo, cấp 20 = 1,2 sprint / 1,0 thường, đo cả giữa nước và sát đáy) và `runClientGameTest` (ảnh `90-aqua-underwater-first-person`, `91-aqua-underwater-third-person`, `92-aqua-night-view-without-buff`, `93-aqua-night-view-with-buff`).
 
+
+## P-024: Illusion (D71)
+
+1. **Illusion** (chiêu thứ 13, `/technique set @s illusion 20`): bấm một lần. Cấp 1 có 1 bản sao, cấp 10 có 2, cấp 20 có 3. Mỗi bản sao có 20% máu và sát thương của bạn ở cấp 1, tới 40% ở cấp 20 (giáp cũng theo tỉ lệ đó).
+2. **Hình dạng**: bản sao trông như bạn: cùng skin, cùng giáp, cầm cùng vũ khí/khiên, có cả tên trên đầu. Khi bấm chiêu bạn bị dịch chuyển ngẫu nhiên vào một trong các vị trí (xáo trộn), kèm hạt khói và tiếng chuông.
+3. **Hành vi**: đi theo bạn, thỉnh thoảng nhảy, ngồi xuống, nhìn quanh; xa hơn 24 block thì dịch chuyển về cạnh bạn. Bản sao chạy nhanh hơn đi bộ một chút, có lúc lùi lại hoặc bắn cung nếu cầm cung.
+4. **Mục tiêu**: bản sao đánh quái địch quanh bạn, **kể cả creeper**. Khi tắt PvP: ai đánh bạn, hoặc người bạn đánh, trở thành mục tiêu và bản sao gây sát thương cho họ (dù PvP tắt). Bạn và bản sao khác không bị bản sao đánh; bạn đánh bản sao thì không gây sát thương.
+5. **Kill**: quái chết do bản sao giết thì tính cho bạn (HeartXP, nhiệm vụ giết). Người chơi bị bản sao giết **không** tính là kill của Death Match.
+6. Hết giờ, bạn chết/thoát game hoặc dùng lại chiêu thì bản sao biến mất kèm khói. Không rơi đồ, không cho XP.
+7. Kiểm bằng máy: `./gradlew :permahearts:build` (`IllusionGameTest`, `TechniqueRulesTest.illusionNumbers`) và `runClientGameTest` (ảnh `81-illusion-third-person`).

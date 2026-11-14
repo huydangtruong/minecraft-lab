@@ -149,6 +149,30 @@ class TechniqueRulesTest {
 	}
 
 	@Test
+	void illusionNumbers() {
+		assertEquals("Illusion", Technique.ILLUSION.displayName());
+		assertEquals(100, Technique.ILLUSION.cooldownSeconds());
+		int[][] clones = {{1, 1}, {9, 1}, {10, 2}, {19, 2}, {20, 3}};
+		for (int[] k : clones) {
+			assertEquals(k[1], TechniqueRules.illusionCount(k[0]), "clones at level " + k[0]);
+		}
+		assertEquals(0.20, TechniqueRules.illusionFactor(1), 1e-9);
+		assertEquals(0.40, TechniqueRules.illusionFactor(20), 1e-9);
+		assertEquals(20, TechniqueRules.illusionSeconds(1), 1e-9);
+		assertEquals(40, TechniqueRules.illusionSeconds(20), 1e-9);
+		// a player's hit rhythm: bare hand 4 attack speed = 5 ticks, sword 1.6 = 13 ticks (about), axe 0.8 = 25
+		assertEquals(5, TechniqueRules.illusionAttackTicks(4.0));
+		assertEquals(13, TechniqueRules.illusionAttackTicks(1.6));
+		assertEquals(25, TechniqueRules.illusionAttackTicks(0.8));
+		assertEquals(4, TechniqueRules.illusionAttackTicks(100));
+		assertEquals(40, TechniqueRules.illusionMoodTicks(0.0)); // 2 s
+		assertEquals(100, TechniqueRules.illusionMoodTicks(0.999999)); // 5 s
+		assertTrue(TechniqueRules.illusionBackOffChance(0.2) > TechniqueRules.illusionBackOffChance(0.9));
+		assertEquals("3", TechniqueRules.stats(Technique.ILLUSION, 20).get(0).value());
+		assertEquals("40 s", TechniqueRules.stats(Technique.ILLUSION, 20).get(3).value());
+	}
+
+	@Test
 	void statLines() {
 		assertEquals("16 blocks", TechniqueRules.stats(Technique.FIRE, 1).get(0).value());
 		assertEquals("10 hearts", TechniqueRules.stats(Technique.HEALING, 1).get(1).value());

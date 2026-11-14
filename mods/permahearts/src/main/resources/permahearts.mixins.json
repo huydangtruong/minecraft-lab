@@ -11,7 +11,8 @@
 		"GhastShootFireballGoalMixin",
 		"LivingEntityXpMixin",
 		"PlayerMixin",
-		"PlayerPhaseMixin"
+		"PlayerPhaseMixin",
+		"ServerPlayerHurtMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

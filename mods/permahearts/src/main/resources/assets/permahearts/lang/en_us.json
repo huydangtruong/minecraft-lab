@@ -118,6 +118,8 @@
   "item.permahearts.focus_golem": "Violet Guardian Focus",
   "item.permahearts.focus_angel": "Warrior Angel Focus",
   "item.permahearts.focus_aqua": "Aqua Marine Focus",
+  "item.permahearts.focus_illusion": "Illusion Focus",
+  "entity.permahearts.illusion": "Illusion",
   "entity.permahearts.warrior_angel": "Warrior Angel",
   "entity.permahearts.violet_guardian": "Violet Guardian",
   "key.permahearts.technique": "Technique mode (toggle)",

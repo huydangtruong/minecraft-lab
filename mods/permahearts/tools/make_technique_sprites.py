@@ -1,6 +1,6 @@
 """Draws the technique icons (P-011 part A): 16x16 original pixel art, one per technique, plus a lock, a tick and a cross.
 
-- technique/{fire,ice,healing,phase,repulse,sacrifice,flight,blade,teleport,golem,angel,aqua}.png, technique/lock.png, technique/check.png, technique/cross.png
+- technique/{fire,ice,healing,phase,repulse,sacrifice,flight,blade,teleport,golem,angel,aqua,illusion}.png, technique/lock.png, technique/check.png, technique/cross.png
 Each icon is drawn as a body; a dark outline is added automatically around it.
 Run: python3 -I mods/permahearts/tools/make_technique_sprites.py
 """
@@ -330,6 +330,39 @@ AQUA = [  # a blue-green water drop with a wave and two bubbles (D64), original 
 AQUA_PAL = {"w": "9ff4ea", "W": "2fc4c8", "h": "e8fffb", "b": "bff7ff", "B": "ffffff", "t": "38a8e0", "T": "1c78c0"}
 
 
+def illusion_art():
+    """Two overlapping player silhouettes: a faded one behind and a solid one in front (D71), original art."""
+    img = blank()
+
+    def rect(x0, y0, x1, y1, c):
+        for y in range(y0, y1 + 1):
+            for x in range(x0, x1 + 1):
+                img[y][x] = rgba(c)
+
+    # the faded one behind (left, higher)
+    rect(2, 1, 5, 4, "a6adbd")
+    rect(2, 1, 5, 1, "7a8294")
+    rect(2, 5, 5, 10, "92b4de")
+    rect(1, 5, 1, 10, "b9c1d1")
+    rect(6, 5, 6, 10, "b9c1d1")
+    rect(2, 11, 3, 13, "7d86a3")
+    rect(4, 11, 5, 13, "8a93b0")
+    # the solid one in front (right, lower)
+    rect(7, 3, 10, 6, "f0c090")
+    rect(7, 3, 10, 4, "5a3a1c")
+    img[5][7] = rgba("3a4a9a")
+    img[5][10] = rgba("3a4a9a")
+    rect(7, 7, 10, 12, "2f8fe0")
+    rect(8, 8, 9, 8, "5ab0f0")
+    rect(6, 7, 6, 8, "2f8fe0")
+    rect(11, 7, 11, 8, "2f8fe0")
+    rect(6, 9, 6, 12, "f0c090")
+    rect(11, 9, 11, 12, "f0c090")
+    rect(7, 13, 8, 14, "3a3a9a")
+    rect(9, 13, 10, 14, "4a4ab0")
+    return img
+
+
 def mirror(half):
     """Symmetric art: 16 rows of 8 characters (the left half) become 16 rows of 16."""
     return [row + row[::-1] for row in half]
@@ -398,6 +431,7 @@ def main():
         "golem": (from_ascii(GOLEM, GOLEM_PAL), "2a0a58"),
         "angel": (from_ascii(ANGEL, ANGEL_PAL), "5a3e0c"),
         "aqua": (from_ascii(AQUA, AQUA_PAL), "0c3a5a"),
+        "illusion": (illusion_art(), "1c2640"),
         "lock": (from_ascii(LOCK, LOCK_PAL), "1a1a20"),
         "check": (from_ascii(CHECK, CHECK_PAL), "0c4a14"),
         "cross": (from_ascii(CROSS, CROSS_PAL), "30303a"),
@@ -407,7 +441,7 @@ def main():
     for name, (body, edge) in icons.items():
         img = outline(body, edge)
         write_png(os.path.join(OUT, name + ".png"), img)
-        if name in ("fire", "ice", "healing", "phase", "repulse", "sacrifice", "flight", "blade", "teleport", "golem", "angel", "aqua"):
+        if name in ("fire", "ice", "healing", "phase", "repulse", "sacrifice", "flight", "blade", "teleport", "golem", "angel", "aqua", "illusion"):
             write_png(os.path.join(items, "focus_" + name + ".png"), img)
     print("wrote technique sprites to", os.path.normpath(OUT))
 
