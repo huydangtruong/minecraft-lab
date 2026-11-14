@@ -172,10 +172,11 @@ Kiểm bằng máy: `./gradlew :permahearts:build` (game test `ThousandMileStepG
 
 ## P-022: Aqua Marine (D64)
 
-1. **Aqua Marine** (chiêu thứ 12, `/technique set @s aqua 20`): bấm một lần, không gồng. Trang chi tiết có Lasts (30 s cấp 1 → 70 s cấp 20), Swim speed (×1 → ×2 cá heo), Underwater mining (×1 → ×2 Aqua Affinity), Cooldown 120 s.
+1. **Aqua Marine** (chiêu thứ 12, `/technique set @s aqua 20`): bấm một lần, không gồng. Trang chi tiết có Lasts (30 s cấp 1 → 70 s cấp 20), Swim speed và Sprint swim (10 → 20 và 24 blocks/s, D69), Underwater mining (×1 → ×2 Aqua Affinity), Cooldown 120 s.
 2. **Thở**: nhảy xuống nước sâu rồi dùng chiêu, bong bóng đầy lại và **không tụt** cho tới hết giờ; hết giờ thì bong bóng tụt lại như thường. Góc phải dưới hiện "Aqua N s" đếm ngược.
-3. **Bơi**: chạy bơi (Ctrl) dưới nước. Cấp 1 nhanh bằng Dolphin's Grace (so bằng cách uống thuốc cá heo ở creative), cấp 20 nhanh gấp đôi phần tăng của cá heo (nhanh hơn rõ).
+3. **Bơi**: chạy bơi (Ctrl) dưới nước. Cấp 1 nhanh bằng Dolphin's Grace (so bằng cách uống thuốc cá heo ở creative), cấp 20 bơi **1,2 ô/tick khi chạy bơi (Ctrl)** và **1,0 ô/tick khi không chạy** (nhanh hơn hẳn cá heo, 0,5).
+3b. **Tầm nhìn (P-023, D69)**: dưới nước lúc chiêu chạy, nhìn **rõ ngay** (không mờ dần 30 s) và **sáng** như Night Vision, kể cả ban đêm; lên bờ hoặc hết giờ thì về bình thường (trên bờ không sáng).
 4. **Đào**: đào đá dưới nước, cấp 1 như có Aqua Affinity (đội mũ), cấp 20 nhanh gấp đôi. Hết giờ thì chậm lại như thường. Chưa chạm đất (bơi lơ lửng) vẫn bị phạt như vanilla.
 5. Hạt bong bóng nhẹ quanh người; cầm linh khí thì có bong bóng và nước bắn ở tay. Chết hoặc thoát game thì chiêu tắt ngay.
-6. Kiểm bằng máy: `./gradlew :permahearts:build` (`AquaGameTest`: đo tốc độ bơi cấp 1 = cá heo, cấp 20 = 2.000 lần phần tăng của cá heo) và `runClientGameTest` (ảnh `90-aqua-underwater-first-person`, `91-aqua-underwater-third-person`).
+6. Kiểm bằng máy: `./gradlew :permahearts:build` (`AquaGameTest`: đo tốc độ bơi cấp 1 = cá heo, cấp 20 = 1,2 sprint / 1,0 thường, đo cả giữa nước và sát đáy) và `runClientGameTest` (ảnh `90-aqua-underwater-first-person`, `91-aqua-underwater-third-person`, `92-aqua-night-view-without-buff`, `93-aqua-night-view-with-buff`).
 
