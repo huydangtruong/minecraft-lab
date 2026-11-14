@@ -50,6 +50,7 @@ public final class TechniqueCasts {
 		Bleeding.init();
 		VioletGuardian.init();
 		WarriorAngel.init();
+		Illusion.init();
 		PhaseState.ATTACHMENT.identifier();
 		Flight.init();
 		AquaMarine.init();
@@ -95,6 +96,10 @@ public final class TechniqueCasts {
 			}
 			case AQUA -> {
 				return AquaMarine.start(caster, lvl);
+			}
+			case ILLUSION -> {
+				Illusion.summon(caster, lvl);
+				caster.level().playSound(null, caster.blockPosition(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.8f, 1.7f);
 			}
 			case ANGEL -> {
 				WarriorAngel.summon(caster, lvl);

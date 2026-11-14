@@ -48,7 +48,7 @@ Entity type `permahearts:illusion`. Model it on `WarriorAngel` / `VioletGuardian
 
 ## Who the clones attack (D71)
 
-Each owner has one **target list** shared by all their clones. It starts with the hostile mobs (`Enemy`) near the owner, except creepers (like iron golems). It **grows**:
+Each owner has one **target list** shared by all their clones. It starts with the hostile mobs (`Enemy`) near the owner, creepers included (Huy: clones do attack creepers). It **grows**:
 
 - **Whoever hits the owner:** any player or mob that attacks the owner, melee or projectile, is added.
 - **Whoever the owner hits:** any entity the owner attacks is added, players included.

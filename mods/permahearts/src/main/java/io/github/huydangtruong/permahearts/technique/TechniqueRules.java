@@ -313,6 +313,39 @@ public final class TechniqueRules {
 	/** Seconds the angels stay (D63). */
 	public static final int ANGEL_SECONDS = 60;
 
+	// ---- Illusion (D71) ----
+
+	/** Clones created: 1 at levels 1-9, 2 at 10-19, 3 at 20. */
+	public static int illusionCount(int level) {
+		int l = Math.max(1, Math.min(MAX_LEVEL, level));
+		return l >= 20 ? 3 : l >= 10 ? 2 : 1;
+	}
+
+	/** The share of the owner's damage, health and armour a clone has: 20% at level 1 up to 40% at 20. */
+	public static double illusionFactor(int level) {
+		return linear(level, 0.20, 0.40);
+	}
+
+	/** Seconds the clones stay: 20 at level 1 up to 40 at 20. */
+	public static double illusionSeconds(int level) {
+		return linear(level, 20, 40);
+	}
+
+	/** Ticks between two clone hits, from the owner's attack speed attribute (4 = bare hand, 1.6 = sword): a player's cooldown rhythm. */
+	public static int illusionAttackTicks(double attackSpeed) {
+		return (int) Math.max(4, Math.round(20 / Math.max(0.1, attackSpeed)));
+	}
+
+	/** Ticks until a clone's mood changes: 2 to 5 s. {@code r} is a random number in [0, 1). */
+	public static int illusionMoodTicks(double r) {
+		return 40 + (int) Math.floor(Math.max(0, Math.min(0.999999, r)) * 61);
+	}
+
+	/** Chance (0..1) that a new fighting mood is "back off": 20%, or 55% below 40% health. */
+	public static double illusionBackOffChance(double healthFraction) {
+		return healthFraction < 0.4 ? 0.55 : 0.2;
+	}
+
 	// ---- Aqua Marine (D64) ----
 
 	/** Seconds Aqua Marine lasts: 30 at level 1 up to 70 at level 20 (rounded to ticks where it is used, like flightSeconds). */
@@ -453,6 +486,12 @@ public final class TechniqueRules {
 				new Stat("Health", num(angelHealth(level))),
 				new Stat("Damage", num(angelDamage(level))),
 				new Stat("Lasts", ANGEL_SECONDS + " s"),
+				new Stat("Cooldown", t.cooldownSeconds() + " s"));
+			case ILLUSION -> List.of(
+				new Stat("Clones", String.valueOf(illusionCount(level))),
+				new Stat("Damage", pct(illusionFactor(level))),
+				new Stat("Health", pct(illusionFactor(level))),
+				new Stat("Lasts", num(illusionSeconds(level)) + " s"),
 				new Stat("Cooldown", t.cooldownSeconds() + " s"));
 			case AQUA -> List.of(
 				new Stat("Lasts", num(aquaSeconds(level)) + " s"),
