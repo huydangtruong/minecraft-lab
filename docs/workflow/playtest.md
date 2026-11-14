@@ -160,3 +160,12 @@ Kiểm bằng máy: `./gradlew :permahearts:build` (game test `ThousandMileStepG
 3. Golem đi theo bạn như chó, tự đánh quái quanh bạn và quái đánh bạn; **không** đánh người chơi, bạn đánh chúng thì không gây sát thương. Xa hơn khoảng 16 block thì dịch chuyển về cạnh bạn.
 4. Tồn tại **90 giây** rồi biến mất kèm hạt khói; bạn chết/thoát game hoặc dùng lại chiêu thì biến mất ngay (dùng lại thì thay bằng bộ mới). Hồi chiêu **180 giây**.
 5. Kiểm bằng máy: `./gradlew :permahearts:build` (`GolemGameTest`) và `runClientGameTest` (ảnh `70-blade-hit-knockback`, `71-guardians-first-person`, `72-guardians-third-person`, `73-guardians-fight`).
+
+## P-021: Warrior Angel và tính kill cho chủ (D62, D63)
+
+(Phần hiện % tốc đánh đã bỏ: bảng chỉ số giữ nguyên +0,16.)
+1. **Warrior Angel** (chiêu thứ 11, `/technique set @s angel 20`): bấm một lần, triệu hồi thiên thần dáng Vex **màu vàng trắng** quanh bạn. Số lượng: 2 (cấp 1-4), 3 (5-9), 4 (10-14), 5 (15-19), 6 (cấp 20). Trang chi tiết có Angels, Health, Damage, Lasts, Cooldown.
+2. Thiên thần bay xuyên tường, đi theo bạn (trong khoảng 6 block), tự lao vào đánh quái quanh bạn hoặc quái đánh bạn / bạn đánh. **Không** đánh người chơi và bạn; bạn đánh thì không gây sát thương. Khi lao vào có tư thế tấn công (mắt sáng).
+3. Máu: bằng Vex ở cấp 1, gấp đôi ở cấp 20; sát thương: nửa Vex ở cấp 1, gấp đôi ở cấp 20. Tồn tại **60 giây** rồi biến mất kèm hạt vàng; bạn chết/thoát game hoặc dùng lại chiêu thì biến mất (dùng lại thì thay bộ mới). Hồi chiêu **120 giây**. Không rơi đồ, không cho XP.
+4. **Tính kill**: để Violet Guardian hoặc Warrior Angel giết một con quái địch: tiến độ HeartXP / 100 quái tăng và nhiệm vụ giết của Crimson Master (nếu đang làm) cũng tăng, giống sói đã thuần.
+5. Kiểm bằng máy: `./gradlew :permahearts:build` (`AngelGameTest`) và `runClientGameTest` (ảnh `80-angels-third-person`).

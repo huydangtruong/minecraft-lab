@@ -116,6 +116,8 @@
   "item.permahearts.focus_blade": "Life Steal Blade",
   "item.permahearts.focus_teleport": "Thousand Mile Step Focus",
   "item.permahearts.focus_golem": "Violet Guardian Focus",
+  "item.permahearts.focus_angel": "Warrior Angel Focus",
+  "entity.permahearts.warrior_angel": "Warrior Angel",
   "entity.permahearts.violet_guardian": "Violet Guardian",
   "key.permahearts.technique": "Technique mode (toggle)",
   "key.category.permahearts.main": "Immortal Cultivation"

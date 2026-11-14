@@ -19,4 +19,5 @@ Quy trình: [workflow/team.md](../workflow/team.md); mẫu: [TEMPLATE.md](TEMPLA
 | P-013 | Xuyên tường: giới hạn tầm nhìn xuyên 8→48 block bằng sương (D51) | merged | Sonnet subagent |
 | [P-014](P-014-flight-blade.md) | Chiêu Bay và Huyết Kiếm (D52, D53) | merged | Sonnet subagent |
 | [P-019](P-019-thousand-mile-step.md) | Chiêu Thiên Lý Bộ (dịch chuyển xa như ngọc Ender, D58, D59) | merged | Sonnet subagent |
-| [P-020](P-020-blade-golems.md) | Huyết Kiếm chảy máu + đánh văng; chiêu Violet Guardian (golem tím) | in-dev | Sonnet subagent |
+| [P-020](P-020-blade-golems.md) | Huyết Kiếm chảy máu + đánh văng; chiêu Violet Guardian (golem tím) | merged | Sonnet subagent |
+| [P-021](P-021-warrior-angel.md) | Golem giết tính cho chủ, chiêu Warrior Angel (D62, D63) | merged | Sonnet subagent |
