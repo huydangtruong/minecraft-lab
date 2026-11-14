@@ -11,6 +11,7 @@
 		"FirstPersonFocusMixin",
 		"AvatarFocusMixin",
 		"ScreenEffectPhaseMixin",
+		"PhaseFogMixin",
 		"MouseScrollMixin",
 		"ChargeFovMixin"
 	],

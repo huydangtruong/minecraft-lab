@@ -1,5 +1,6 @@
 package io.github.huydangtruong.permahearts;
 
+import io.github.huydangtruong.permahearts.client.PhaseFog;
 import io.github.huydangtruong.permahearts.technique.PhaseState;
 import io.github.huydangtruong.permahearts.technique.Technique;
 import io.github.huydangtruong.permahearts.technique.TechniqueCasts;
@@ -116,9 +117,21 @@ public class TechniqueClientTest implements FabricClientGameTest {
 		server.runCommand("fill 9 100 -1 12 101 1 air");
 		server.runCommand("setblock 11 100 0 gold_block");
 		server.runCommand("setblock 11 101 0 glowstone");
+		// A second cave 18+ blocks ahead: fogged out at level 1 (8 blocks), visible at level 20 (48 blocks).
+		server.runCommand("fill 15 98 -6 40 106 6 stone");
+		server.runCommand("fill 20 100 -1 23 101 1 air");
+		server.runCommand("setblock 22 100 0 gold_block");
+		server.runCommand("setblock 22 101 0 glowstone");
 		server.runCommand("tp @a 3.5 100 0 -90 0");
 		context.waitTicks(20);
 		context.takeScreenshot("27-phase-xray-cave");
+		assertFogEnd(context, 8f);
+		cast(server, Technique.PHASE, 20);
+		context.waitTicks(10);
+		context.takeScreenshot("28-phase-xray-level-20");
+		assertFogEnd(context, 48f);
+		cast(server, Technique.PHASE, 1);
+		context.waitTicks(5);
 		context.runOnClient(mc -> mc.options.setCameraType(CameraType.THIRD_PERSON_BACK));
 		context.waitTicks(5);
 		context.takeScreenshot("26-phase-inside-wall-third-person");
@@ -133,5 +146,14 @@ public class TechniqueClientTest implements FabricClientGameTest {
 			throw new AssertionError("the player should be lifted above the wall when Phase Walk ends, y = " + y);
 		}
 		context.runOnClient(mc -> mc.options.setCameraType(CameraType.FIRST_PERSON));
+		assertFogEnd(context, -1f);
+	}
+
+	/** The Phase Walk fog end the client applied last frame (-1 = vanilla fog). */
+	private static void assertFogEnd(ClientGameTestContext context, float expected) {
+		float end = context.computeOnClient(mc -> PhaseFog.lastEnd);
+		if (end != expected) {
+			throw new AssertionError("Phase Walk fog end should be " + expected + " but was " + end);
+		}
 	}
 }

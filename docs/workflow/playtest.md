@@ -127,3 +127,11 @@ Chuẩn bị (Survival, công tắc BẬT): `/technique set @s flight 10`, `/tec
 7. Đánh người chơi khác bằng Huyết Kiếm khi PvP tắt: vẫn trúng (đi qua `TechniqueDamage`, D44).
 
 Kiểm bằng máy: `./gradlew :permahearts:build` (game test `FlightBladeGameTest`: bay, hết giờ, chết, Creative, sát thương, hút máu, linh dược, tầm đánh) và `./gradlew :permahearts:runClientGameTest` (ảnh `50-blade-in-hand`, `51-blade-hit`, `52-blade-cooldown`, `53-flight-hud-timer`, `54-flight-third-person`, và `46-focus-flight`, `47-focus-blade`).
+## P-013 Tầm nhìn Xuyên tường (D51)
+
+Survival, công tắc BẬT, `/technique set @s phase 1`. Đứng cạnh một vách đá lớn (có hang phía trong), dùng Xuyên tường rồi đi vào trong đá.
+1. **Cấp 1**: trong đá, màn hình tối xám như ở trong đá; hang cách 6 block vẫn thấy, thứ cách 15+ block chìm vào sương mù đen (tầm nhìn 8 block, sương bắt đầu mờ từ khoảng 5 block).
+2. `/technique set @s phase 20` rồi dùng lại: tầm nhìn xa tới 48 block (sương mờ từ khoảng 29 block), thấy hang và quặng ở xa hơn nhiều.
+3. Ra khỏi đá (đứng ngoài trời hoặc trong hang) khi còn đang xuyên tường: sương mù trở lại bình thường như vanilla. Hết thời gian Xuyên tường cũng vậy.
+
+Kiểm bằng máy: `./gradlew :permahearts:runClientGameTest` (ảnh `27-phase-xray-cave` cấp 1 và `28-phase-xray-level-20`; test kiểm khoảng cách kết thúc sương 8 và 48).
