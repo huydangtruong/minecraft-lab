@@ -4,6 +4,7 @@
 	"package": "io.github.huydangtruong.permahearts.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
+		"FoodDataMixin",
 		"FoodPropertiesMixin",
 		"GhastShootFireballGoalMixin"
 	],

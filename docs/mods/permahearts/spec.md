@@ -83,3 +83,8 @@
 
 - Nút bo góc cạnh nút sách công thức ("Cultivation"): phiến đá nâu với Cánh hồn đỏ cam (D40). Tab Stats có biểu tượng Nether Star. Bảng trái có 2 tab kiểu sách công thức: **Stats** (D31) và **Techniques** (trống, chờ mô tả chiêu thức).
 - Ảnh: `docs/screens/stats-button.png`, `stats-panel.png`, `techniques-tab.png`.
+
+## Vitality (D30, D41)
+
+- Mỗi bình: +20% máu hồi ngay khi ăn (theo điểm no của món) và +20% hồi máu tự nhiên khi no (hồi nhờ bão hoà và hồi khi ≥18 điểm đói). 4 bình = +80%. Không tốn thêm đói.
+- Bảng Stats: "Food heal" và "Food regen".

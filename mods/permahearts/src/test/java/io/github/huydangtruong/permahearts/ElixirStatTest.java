@@ -18,11 +18,14 @@ class ElixirStatTest {
 	@Test
 	void vitalityFoodHeal() {
 		assertEquals(0f, ElixirStat.foodHeal(8, 0), 1e-6);
-		assertEquals(2f, ElixirStat.foodHeal(8, 1), 1e-6); // steak, 1 bottle: +1 heart
-		assertEquals(8f, ElixirStat.foodHeal(8, 4), 1e-6);
-		assertEquals(1f, ElixirStat.foodHeal(4, 1), 1e-6); // apple
-		assertEquals("+25%", ElixirStat.VITALITY.format(ElixirStat.VITALITY.bonus(1)));
+		assertEquals(1.6f, ElixirStat.foodHeal(8, 1), 1e-6); // steak, 1 bottle: +0.8 heart (D41: 20%)
+		assertEquals(6.4f, ElixirStat.foodHeal(8, 4), 1e-6);
+		assertEquals(0.8f, ElixirStat.foodHeal(4, 1), 1e-6); // apple
+		assertEquals("+20%", ElixirStat.VITALITY.format(ElixirStat.VITALITY.bonus(1)));
 		assertEquals(ElixirStat.VITALITY, ElixirStat.byId("vitality").orElseThrow());
+		assertEquals(1.0, ElixirStat.regenMultiplier(0), 1e-9);
+		assertEquals(1.8, ElixirStat.regenMultiplier(4), 1e-9); // D41: 4 bottles = +80% regen from food
+		assertEquals(1.0, ElixirStat.regenMultiplier(-3), 1e-9);
 	}
 
 	@Test

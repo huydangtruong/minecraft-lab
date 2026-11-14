@@ -63,3 +63,8 @@ Một cửa sổ Minecraft sẽ hiện ~30 giây rồi tự đóng. Ảnh nằm 
 1. Mở túi đồ (Survival): cạnh nút sách công thức có nút phiến đá Cánh hồn bo góc (D40); rê chuột → nền xanh như nút bên cạnh, tooltip "Cultivation".
 2. Bấm: bảng trái mở, bên trái bảng có 2 tab. Tab Nether Star = Stats; tab sách = Techniques ("No techniques yet"). Bấm qua lại đổi nội dung.
 3. Cầm đồ trên chuột rồi bấm vào tab: đồ không bị rơi.
+
+## Vitality hồi máu tự nhiên (D41)
+
+1. Survival, uống 4 bình Vitality, bảng Stats ghi "Food heal +80%" và "Food regen +80%".
+2. Ăn no (thanh đói đầy), tự làm mất vài tim: máu hồi nhanh hơn rõ so với chưa uống (khoảng 1,8 lần).

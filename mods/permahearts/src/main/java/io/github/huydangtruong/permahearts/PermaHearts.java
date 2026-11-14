@@ -55,6 +55,14 @@ public class PermaHearts implements ModInitializer {
 		}
 	}
 
+	/** Natural regeneration from food is stronger with Vitality elixirs (D41, FoodDataMixin). */
+	public static float regenMultiplier(ServerPlayer p) {
+		if (!enabled(p.level().getServer())) {
+			return 1f;
+		}
+		return (float) ElixirStat.regenMultiplier(HeartsAttachment.getCultivation(p).level(ElixirStat.VITALITY));
+	}
+
 	public static boolean enabled(MinecraftServer server) {
 		return server.getGameRules().get(ENABLED);
 	}
