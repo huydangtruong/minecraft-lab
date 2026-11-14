@@ -38,7 +38,8 @@ public final class QuestGenerator {
 		new Weighted("minecraft:bastion_remnant", 1));
 
 	private static final List<Weighted> BOSS = List.of(new Weighted("minecraft:zombie", 1), new Weighted("minecraft:skeleton", 1),
-		new Weighted("minecraft:evoker", 1), new Weighted("minecraft:blaze", 1), new Weighted("minecraft:vindicator", 1));
+		new Weighted("minecraft:evoker", 1), new Weighted("minecraft:blaze", 1), new Weighted("minecraft:vindicator", 1),
+		new Weighted("minecraft:ghast", 1));
 
 	/** Blood Moon variants: the mob that comes in waves. */
 	public static final List<String> BLOOD_MOON = List.of("minecraft:zombie", "minecraft:piglin_brute", "minecraft:creeper",

@@ -152,7 +152,7 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 		context.runOnClient(mc -> mc.player.closeContainer());
 		// (runCommand has no player entity, so "@s" selects nobody: set the mode on the server player directly.)
 		server.runOnServer(s -> s.getPlayerList().getPlayers().get(0).setGameMode(net.minecraft.world.level.GameType.CREATIVE));
-		for (String type : new String[] {"zombie", "skeleton", "evoker", "blaze", "vindicator"}) {
+		for (String type : new String[] {"zombie", "skeleton", "evoker", "blaze", "vindicator", "ghast"}) {
 			server.runOnServer(s -> {
 				Wanderer.reset(s);
 				ServerPlayer p = s.getPlayerList().getPlayers().get(0);
@@ -163,6 +163,9 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 				}
 			});
 			context.waitTicks(200);
+			if (type.equals("ghast")) {
+				ghastShot(context, server);
+			}
 			String result = server.computeOnServer(s -> {
 				if (!QuestBoss.bossAlive(s)) {
 					return "boss not alive after 200 ticks";
@@ -174,6 +177,12 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 				for (Mob b : bosses(s)) {
 					if (b.isOnFire() || b.getHealth() < b.getMaxHealth()) {
 						return "boss burned or took damage in daylight (fire=" + b.isOnFire() + ", hp=" + b.getHealth() + ")";
+					}
+				}
+				// Minions wear helmets: zombies, skeletons and phantoms must not burn either.
+				for (Mob m : s.overworld().getEntities(EntityTypeTest.forClass(Mob.class), e -> e.entityTags().contains(QuestBoss.MINION_TAG))) {
+					if (m.isOnFire()) {
+						return "minion " + m.getType().getDescriptionId() + " burned in daylight";
 					}
 				}
 				bosses(s).forEach(Entity::discard);
@@ -191,6 +200,23 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 			}
 		}
 		server.runOnServer(Wanderer::reset);
+	}
+
+	/** D35: picture of the Ghast boss with its phantoms, from the ground. */
+	private static void ghastShot(ClientGameTestContext context, TestServerContext server) {
+		double[] at = server.computeOnServer(s -> {
+			Mob boss = bosses(s).get(0);
+			return new double[] {boss.getX(), boss.getY() + boss.getBbHeight() / 2, boss.getZ()};
+		});
+		context.runOnClient(mc -> {
+			double dx = at[0] - mc.player.getX();
+			double dy = at[1] - mc.player.getEyeY();
+			double dz = at[2] - mc.player.getZ();
+			mc.player.setYRot((float) (Math.toDegrees(Math.atan2(-dx, dz))));
+			mc.player.setXRot((float) (-Math.toDegrees(Math.atan2(dy, Math.hypot(dx, dz)))));
+		});
+		context.waitTicks(5);
+		context.takeScreenshot("11-ghast-boss");
 	}
 
 	/** Stone box around an air room, far above the flat world: the boss must appear inside the room, not on top of it. */

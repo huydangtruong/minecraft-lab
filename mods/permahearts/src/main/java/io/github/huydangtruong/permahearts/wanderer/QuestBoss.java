@@ -22,16 +22,18 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.monster.Ghast;
 import net.minecraft.world.entity.monster.illager.Vindicator;
 import net.minecraft.world.entity.monster.skeleton.AbstractSkeleton;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.entity.EntityTypeTest;
+import net.minecraft.world.level.levelgen.Heightmap;
 
 /**
- * The quest boss: a giant zombie, skeleton, evoker, blaze or vindicator with 150 health and four minions
- * (an evoker brings pillagers with crossbows, D34). The boss UUID is saved in
+ * The quest boss: a giant zombie, skeleton, evoker, blaze, vindicator or ghast with 150 health and four minions
+ * (an evoker brings pillagers with crossbows, D34; a ghast brings phantoms, D35). The boss UUID is saved in
  * WandererData.boss; the boss bar is runtime only. tick() runs once per second from the scheduler.
  */
 public final class QuestBoss {
@@ -113,6 +115,9 @@ public final class QuestBoss {
 		set(boss, Attributes.MAX_HEALTH, HEALTH);
 		boss.setHealth(HEALTH);
 		set(boss, Attributes.SCALE, SCALE);
+		if (boss instanceof Ghast) {
+			liftIntoSky(ow, boss); // 8 blocks wide: never in a cave, floats above the ground near the NPC (D35)
+		}
 		AttributeInstance atk = boss.getAttribute(Attributes.ATTACK_DAMAGE);
 		if (atk != null) {
 			atk.setBaseValue(atk.getBaseValue() * 1.5);
@@ -129,9 +134,13 @@ public final class QuestBoss {
 			Wanderer.save(server, Wanderer.data(server).withBoss(previous));
 			return false;
 		}
-		EntityType<?> minionType = type == EntityTypes.EVOKER ? EntityTypes.PILLAGER : type; // D34
+		EntityType<?> minionType = type == EntityTypes.EVOKER ? EntityTypes.PILLAGER // D34
+			: type == EntityTypes.GHAST ? EntityTypes.PHANTOM // D35
+			: type;
 		for (int i = 0; i < MINIONS; i++) {
-			BlockPos m = SpawnSpots.standSpot(ow, spot, RNG.nextInt(7) - 3, RNG.nextInt(7) - 3);
+			BlockPos m = minionType == EntityTypes.PHANTOM
+				? BlockPos.containing(boss.getX() + RNG.nextInt(13) - 6, boss.getY() + RNG.nextInt(5), boss.getZ() + RNG.nextInt(13) - 6)
+				: SpawnSpots.standSpot(ow, spot, RNG.nextInt(7) - 3, RNG.nextInt(7) - 3);
 			if (minionType.create(ow, EntitySpawnReason.EVENT) instanceof Mob minion) {
 				minion.snapTo(m.getX() + 0.5, m.getY(), m.getZ() + 0.5, RNG.nextFloat() * 360f, 0f);
 				minion.finalizeSpawn(ow, ow.getCurrentDifficultyAt(m), EntitySpawnReason.EVENT, null);
@@ -148,6 +157,55 @@ public final class QuestBoss {
 		clearBar();
 		server.getPlayerList().broadcastSystemMessage(Messages.bossSummoned(Messages.bossName(typeName)), false);
 		return true;
+	}
+
+	/** Moves the Ghast boss above the ground at its x/z, then higher until it touches nothing. */
+	private static void liftIntoSky(ServerLevel ow, Mob boss) {
+		double x = boss.getX();
+		double z = boss.getZ();
+		double y = Math.max(boss.getY(), ow.getHeight(Heightmap.Types.MOTION_BLOCKING, boss.getBlockX(), boss.getBlockZ()))
+			+ GhastLeash.SPAWN_ABOVE;
+		boss.setPos(x, y, z);
+		for (int i = 0; i < 16 && !ow.noCollision(boss); i++) {
+			y += 2;
+			boss.setPos(x, y, z);
+		}
+	}
+
+	/**
+	 * Once a second: a Ghast boss that floated more than 24 blocks from the Crimson Master, or more than 16 above the
+	 * nearest player (or the ground, when the player is under it), is sent back to hover 8-12 blocks over that player.
+	 */
+	private static void leash(MinecraftServer server, Ghast ghast) {
+		Entity npc = Wanderer.npc(server);
+		if (npc == null || npc.level() != ghast.level()) {
+			return;
+		}
+		ServerLevel level = (ServerLevel) ghast.level();
+		ServerPlayer near = null;
+		for (ServerPlayer p : level.players()) {
+			if (!p.isSpectator() && p.isAlive() && p.distanceToSqr(npc) <= BAR_RANGE * BAR_RANGE
+				&& (near == null || p.distanceToSqr(ghast) < near.distanceToSqr(ghast))) {
+				near = p;
+			}
+		}
+		// Vanilla ghasts only pick targets within 4 blocks of their own height; hovering above the player, the boss
+		// would never find one again after losing sight of it.
+		if (near != null && !near.isCreative() && (ghast.getTarget() == null || !ghast.getTarget().isAlive())) {
+			ghast.setTarget(near);
+		}
+		double px = near == null ? npc.getX() : near.getX();
+		double pz = near == null ? npc.getZ() : near.getZ();
+		double py = near == null ? npc.getY() : near.getY();
+		double groundHere = level.getHeight(Heightmap.Types.MOTION_BLOCKING, ghast.getBlockX(), ghast.getBlockZ());
+		if (!GhastLeash.outOfBounds(ghast.getX(), ghast.getY(), ghast.getZ(), npc.getX(), npc.getZ(), Math.max(py, groundHere))) {
+			return;
+		}
+		double groundThere = level.getHeight(Heightmap.Types.MOTION_BLOCKING, (int) Math.floor(px), (int) Math.floor(pz));
+		double[] to = GhastLeash.returnPoint(px, pz, Math.max(py, groundThere), npc.getX(), npc.getZ(),
+			GhastLeash.HOVER_MIN + RNG.nextDouble() * (GhastLeash.HOVER_MAX - GhastLeash.HOVER_MIN),
+			RNG.nextDouble() * 8 - 4, RNG.nextDouble() * 8 - 4);
+		ghast.getMoveControl().setWantedPosition(to[0], to[1], to[2], 1.0);
 	}
 
 	/** An unbreakable helmet: sunlight damages helmets of zombies and skeletons, and they burn once it breaks. */
@@ -203,6 +261,9 @@ public final class QuestBoss {
 				BossEvent.BossBarOverlay.PROGRESS);
 		}
 		bar.setProgress(Math.max(0f, Math.min(1f, living.getHealth() / living.getMaxHealth())));
+		if (living instanceof Ghast ghast) {
+			leash(server, ghast);
+		}
 		for (ServerPlayer p : server.overworld().players()) {
 			if (p.distanceToSqr(living) <= BAR_RANGE * BAR_RANGE) {
 				bar.addPlayer(p);
