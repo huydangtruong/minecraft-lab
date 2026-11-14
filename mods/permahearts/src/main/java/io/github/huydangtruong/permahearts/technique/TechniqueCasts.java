@@ -59,6 +59,9 @@ public final class TechniqueCasts {
 			case PHASE -> phaseWalk(caster, lvl);
 			case REPULSE -> repulse(caster, lvl);
 			case SACRIFICE -> bloodOath(caster, lvl);
+			case FLIGHT, BLADE -> {
+				return false; // P-014: not cast this way yet
+			}
 		}
 		return true;
 	}

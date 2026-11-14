@@ -2,14 +2,16 @@ package io.github.huydangtruong.permahearts.technique;
 
 import java.util.Optional;
 
-/** The techniques every player can learn (D45, D46), in list order. Pure Java: numbers live in TechniqueRules. */
+/** The techniques every player can learn (D45, D46, D52), in list order. Pure Java: numbers live in TechniqueRules. */
 public enum Technique {
 	FIRE("fire", "Flame Burst", 16, true),
 	ICE("ice", "Frost Orb", 24, true),
 	HEALING("healing", "Healing Light", 60, false),
 	PHASE("phase", "Phase Walk", 90, false),
 	REPULSE("repulse", "Repulse", 20, false),
-	SACRIFICE("sacrifice", "Blood Oath", 45, false); // D47: was 30 s
+	SACRIFICE("sacrifice", "Blood Oath", 45, false), // D47: was 30 s
+	FLIGHT("flight", "Flight", 120, false), // D52
+	BLADE("blade", "Life Steal Blade", 0, false); // D52: held like a weapon, no cooldown
 
 	private final String id;
 	private final String displayName;

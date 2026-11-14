@@ -77,6 +77,8 @@ public final class TechniquesTab {
 			case PHASE -> "Walk through blocks for a while.";
 			case REPULSE -> "Blast everything around away.";
 			case SACRIFICE -> "Health for invulnerability.";
+			case FLIGHT -> "Fly like in creative for a while.";
+			case BLADE -> "A blade that drinks what it cuts.";
 		};
 	}
 

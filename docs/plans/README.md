@@ -16,3 +16,5 @@ Quy trình: [workflow/team.md](../workflow/team.md); mẫu: [TEMPLATE.md](TEMPLA
 | [P-010](P-010-death-match.md) | Nhiệm vụ Death Match: nửa số người online phải bị người chơi giết, chết trong trận không mất tim/đồ (sau 0.9.0) | in-dev | Sonnet subagent |
 | [P-011](P-011-techniques.md) | Chiêu thức: nâng bằng XP, 4 ô mở bằng ngọc lục bảo, thanh chiêu + phím R + bảng tròn, 6 chiêu | merged | Sonnet subagents (A, B, C) |
 | [P-012](P-012-techniques-feedback.md) | Chiêu thức: sửa theo lần chơi thử đầu (bảng cuộn, đổi chiêu bằng nút +, R chèn chiêu vào thanh đồ, gồng như cung, lỗi cầu lửa) | merged | Sonnet subagents (1, 2, 3) |
+| P-013 | Xuyên tường: giới hạn tầm nhìn xuyên 8→48 block bằng sương (D51) | in-dev | Sonnet subagent |
+| [P-014](P-014-flight-blade.md) | Chiêu Bay và Huyết Kiếm (D52) | in-dev | Sonnet subagent |
