@@ -21,7 +21,8 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * Areas left behind by techniques: the fire field, the frost area and the healing circle. They are plain server-side
- * records ticked once per server tick (no entity, no blocks placed, no fire spreading), kept in memory only.
+ * records ticked once per server tick (no entity; the fields place no blocks themselves: the fire orb sets real fire on
+ * impact, D55), kept in memory only.
  */
 public final class TechniqueFields {
 	public enum Kind { FIRE, ICE, HEAL }
