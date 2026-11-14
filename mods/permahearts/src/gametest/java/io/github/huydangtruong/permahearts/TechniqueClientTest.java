@@ -110,6 +110,15 @@ public class TechniqueClientTest implements FabricClientGameTest {
 			throw new AssertionError("the client pushed the phasing player out of the wall, x = " + x);
 		}
 		context.takeScreenshot("25-phase-inside-wall");
+		// X-ray view: a big stone block with a cave and a gold block 7 blocks ahead; the view inside the stone must show the
+		// cave without a block overlay (like spectator mode).
+		server.runCommand("fill 2 98 -6 14 106 6 stone");
+		server.runCommand("fill 9 100 -1 12 101 1 air");
+		server.runCommand("setblock 11 100 0 gold_block");
+		server.runCommand("setblock 11 101 0 glowstone");
+		server.runCommand("tp @a 3.5 100 0 -90 0");
+		context.waitTicks(20);
+		context.takeScreenshot("27-phase-xray-cave");
 		context.runOnClient(mc -> mc.options.setCameraType(CameraType.THIRD_PERSON_BACK));
 		context.waitTicks(5);
 		context.takeScreenshot("26-phase-inside-wall-third-person");
