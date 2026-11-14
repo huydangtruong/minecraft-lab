@@ -2,7 +2,7 @@
 
 > Tóm tắt cho Huy: file này ghi việc đang làm dở và bước tiếp theo, để một phiên Claude mới đọc là làm tiếp được.
 > Manager cập nhật file này cuối mỗi đợt việc (merge, phát hành, quyết định mới).
-> Snapshot: 2026-11-14.
+> Snapshot: 2026-11-14, after release 0.11.0.
 
 A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [workflow/team.md](../workflow/team.md) → the plan of the work in flight. Do not read the whole repo.
 
@@ -10,33 +10,25 @@ A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [w
 
 | What | Where |
 |---|---|
-| Last release | `permahearts-v0.10.1` (GitHub Releases on `huydangtruong/minecraft-lab`), `mod_version=0.10.1` |
-| On `main`, not released | P-019 Thousand Mile Step (D58, D59); `/technique cast` reports a refused cast |
-| On `feat/P-020-blade-golems`, not on `main` | P-020 brief, the "Tiết kiệm credit" section in team.md, this file |
+| Last release | `permahearts-v0.11.0` (GitHub Releases on `huydangtruong/minecraft-lab`), `mod_version=0.11.0` |
+| 0.11.0 contains | Death Match (P-010, D25), Life Steal Blade bleeding + knockback and Violet Guardian (P-020, D60), Thousand Mile Step (P-019, D58, D59) |
+| On `main`, not released | nothing |
 
-Release steps: [workflow/release.md](../workflow/release.md). Release **only when Huy says so**. Next version: `0.11.0` (new technique), unless Huy picks another.
+Release steps: [workflow/release.md](../workflow/release.md). Release **only when Huy says so**.
 
-## In flight: P-020 — Life Steal Blade upgrade + Violet Guardian
+## In flight
 
-Plan: [plans/P-020-blade-golems.md](../plans/P-020-blade-golems.md) (D60).
-
-- A Sonnet dev was started on 2026-11-14 in worktree `.claude/worktrees/agent-a4190417818542910`, branch `feat/P-020-dev`. It merges into `feat/P-020-blade-golems` when the full build is green.
-- To find where it stopped:
-  ```sh
-  git log --oneline feat/P-020-blade-golems -5
-  git log --oneline feat/P-020-blade-golems..feat/P-020-dev
-  ```
-- **If `feat/P-020-blade-golems` already has the merge:** merge it into `main` (`git merge --no-ff`), run one quick `./gradlew :permahearts:build` only if there were conflicts, push `main`, mark P-020 `merged` in [plans/README.md](../plans/README.md), then ask Huy whether to release.
-- **If the dev stopped half-way** (commits on `feat/P-020-dev` but no merge): start one new Sonnet dev in that worktree with the plan and "continue from the existing commits on feat/P-020-dev; run the full build once; merge into feat/P-020-blade-golems".
-- **If `feat/P-020-dev` has no new commits:** start a new Sonnet dev with the plan from scratch.
-- Huy set golem duration **90 s** and cooldown **180 s** (sent to the dev while running; check the code uses them).
+Nothing. No agent worktrees are left under `.claude/worktrees/`.
 
 ## Open, not scheduled
 
-- **BL-004**: a command to summon the Wanderer with a chosen quest ([backlog/BACKLOG.md](../backlog/BACKLOG.md)).
-- **P-010 Death Match**: old branch `feat/P-010-death-match`, never merged, far behind `main`. Ask Huy before reviving it.
+- **BL-004**: a command to summon the Crimson Master with a chosen quest ([backlog/BACKLOG.md](../backlog/BACKLOG.md)).
+- **Not playtested by hand yet:**
+  - Death Match with 2 real players.
+  - Whether a technique kill counts in Death Match with PvP off. The code says yes, since the caster is the damage source.
+  - Violet Guardian in survival.
 - **Huy's game profile** "26.3 Fabric Essential" has an older build. Run `scripts/install.sh` only when Huy asks in that message.
-- **Housekeeping**: about 14 old agent worktrees under `.claude/worktrees/` from merged plans. Clean them up only with Huy's OK. Never touch the P-020 one while it is running.
+- **Many old merged branches** exist locally and on origin. They are harmless; delete them only if Huy asks.
 
 ## How the team works (short)
 
@@ -52,6 +44,7 @@ Full text: [workflow/team.md](../workflow/team.md).
   - Works in a worktree on `feat/P-NNN-dev` and writes the code and tests.
   - Runs the full `./gradlew :permahearts:build` once (client screenshot tests only if UI changed).
   - Merges into `feat/P-NNN-<slug>`.
+- **Merge every finished plan into `main` right away.** P-010 sat unmerged for a day and fell 118 commits behind.
 - **Git and GitHub:**
   - Commits are made as `huydangtruong` (local git config of this repo).
   - Push and release with `GH_TOKEN="$(gh auth token -u huydangtruong)"`.
