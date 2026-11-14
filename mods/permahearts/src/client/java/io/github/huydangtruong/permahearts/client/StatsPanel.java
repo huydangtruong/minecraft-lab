@@ -28,7 +28,7 @@ import net.minecraft.world.item.ItemStack;
 /**
  * Cultivation panel (D31, D39, D40): a rounded tablet button next to the recipe book button in the survival inventory opens a
  * panel on the left with tabs like the recipe book's. Stats tab: each stat as "total (base +gear +cultivation)", the
- * Vitality bonuses (food heal, food regen) and the respawn point. Techniques tab: empty for now. Works like the recipe book: the inventory moves
+ * Vitality bonuses (food heal, food regen) and the respawn point (one line). Techniques tab: empty for now. Works like the recipe book: the inventory moves
  * right, and opening one closes the other. Data comes from the server (StatsSync), once a second.
  */
 public final class StatsPanel {
@@ -218,16 +218,16 @@ public final class StatsPanel {
 		g.text(font, "Food regen", tx, y, TEXT, false); // D41: natural regeneration from a full food bar
 		drawLeft(g, font, vx, y, new String[] {heal}, new int[] {stats.vitality() > 0 ? BONUS : BASE});
 		y += LINE + 2;
-		drawLeft(g, font, vx, y, new String[] {"base ", "+gear ", "+cultivation"}, new int[] {BASE, GEAR, BONUS});
+		drawLeft(g, font, tx, y, new String[] {"base ", "+gear ", "+cultivation"}, new int[] {BASE, GEAR, BONUS});
 		y += LINE + 2;
 		g.fill(tx, y, right, y + 1, 0xFF8B8B8B);
 		y += 4;
+		// One line (Huy): the coordinates right next to "Spawn"; no bed/world or dimension note.
 		PlayerStats.Spawn s = stats.spawn();
 		g.text(font, "Spawn", tx, y, TEXT, false);
-		drawLeft(g, font, vx, y, new String[] {(s.personal() ? "bed/anchor" : "world spawn") + " · " + dimension(s.dimension())},
-			new int[] {BASE});
-		y += LINE;
-		drawLeft(g, font, vx, y, new String[] {"X " + s.x() + "   Y " + s.y() + "   Z " + s.z()}, new int[] {TOTAL});
+		String at = "X " + s.x() + "  Y " + s.y() + "  Z " + s.z();
+		int ax = vx + font.width(at) <= right ? vx : tx + font.width("Spawn") + 6; // long coordinates start earlier
+		drawLeft(g, font, ax, y, new String[] {at}, new int[] {TOTAL});
 	}
 
 	private static int labelWidth(Font font) {
@@ -243,15 +243,6 @@ public final class StatsPanel {
 			g.text(font, parts[i], x, y, colors[i], false);
 			x += font.width(parts[i]);
 		}
-	}
-
-	private static String dimension(String id) {
-		return switch (id) {
-			case "minecraft:overworld" -> "Overworld";
-			case "minecraft:the_nether" -> "Nether";
-			case "minecraft:the_end" -> "End";
-			default -> id.substring(id.indexOf(':') + 1);
-		};
 	}
 
 	/** Same size and rounded style as the recipe book button: a stone tablet with spirit wings (tools/make_stats_sprites.py). */
