@@ -97,6 +97,7 @@
   "permahearts.structure.fortress": "Nether Fortress",
   "permahearts.structure.bastion_remnant": "Bastion Remnant",
   "effect.permahearts.frostbite": "Frostbite",
+  "effect.permahearts.bleeding": "Bleeding",
   "item.permahearts.focus_fire": "Fireball Focus",
   "item.permahearts.focus_ice": "Frozen Breath Focus",
   "item.permahearts.focus_healing": "Healing Light Focus",
@@ -106,6 +107,8 @@
   "item.permahearts.focus_flight": "Cloud Travel Focus",
   "item.permahearts.focus_blade": "Life Steal Blade",
   "item.permahearts.focus_teleport": "Thousand Mile Step Focus",
+  "item.permahearts.focus_golem": "Violet Guardian Focus",
+  "entity.permahearts.violet_guardian": "Violet Guardian",
   "key.permahearts.technique": "Technique mode (toggle)",
   "key.category.permahearts.main": "Immortal Cultivation"
 }

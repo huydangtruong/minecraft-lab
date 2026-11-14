@@ -79,7 +79,8 @@ public final class TechniquesTab {
 			case SACRIFICE -> "Health for invulnerability.";
 			case TELEPORT -> "Charge, then step far away in the direction you look. Like an ender pearl, but much farther and no damage.";
 			case FLIGHT -> "Fly freely like in creative, faster at higher levels. You glide down gently when it ends.";
-			case BLADE -> "Left click a target to cut it with a blood-stained blade. You heal for the damage dealt.";
+			case BLADE -> "Left click a target to cut it with a blood-stained blade. It bleeds and flies back, and you heal for the damage dealt.";
+			case GOLEM -> "Summon loyal violet iron golems that fight for you for a minute. More and stronger at higher levels.";
 		};
 	}
 
