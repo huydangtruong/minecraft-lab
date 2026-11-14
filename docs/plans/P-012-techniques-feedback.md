@@ -2,7 +2,7 @@
 
 > **Tóm tắt cho Huy (VN, ≤ 3 dòng):** Sửa theo lần chơi thử đầu: bảng Techniques (dòng cao hơn, cuộn dọc, ô chiêu dính trên cùng, trang chi tiết có Back + biểu tượng + tên + level, bấm trái ô = đổi chiêu với nút +, bấm phải = xoá ô), bấm R thì chiêu chèn vào đầu thanh đồ (bấm lại thì trả chỗ), gồng chiêu có hiệu ứng như cung + thanh lực giữa màn hình, sửa lỗi cầu lửa gồng tối đa không nổ.
 
-- **Status:** in-dev
+- **Status:** merged
 - **Mod / decision:** `permahearts`, D48, D49 · **Branches:** `feat/P-012a-techniques-tab` (dev 1), `feat/P-012b-skill-hotbar` (dev 2), `feat/P-012c-phase-walk` (dev 3), all from `main` · **Depends on:** P-011 (merged)
 
 ## Part 1 — Techniques tab (dev 1, `client/TechniquesTab.java`, `client/StatsPanel.java`, `tools/make_technique_sprites.py`)
