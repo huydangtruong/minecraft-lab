@@ -8,6 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 
@@ -47,5 +48,22 @@ public record PhaseState(int floorY, long endTick) {
 		}
 		PhaseState s = e.getAttached(ATTACHMENT);
 		return s != null && s.active(e.level().getGameTime()) && pos.getY() >= s.floorY();
+	}
+
+	/** New floor when the feet are at feetY: only ever lowers, never rises. */
+	public static int lowerFloor(int floorY, double feetY) {
+		return Math.min(floorY, Mth.floor(feetY));
+	}
+
+	/** While phasing, lowers the locked floor when the feet drop below it (a fall into a hole). Both sides run it. */
+	public static void followFall(Player p) {
+		PhaseState s = p.getAttached(ATTACHMENT);
+		if (s == null || !s.active(p.level().getGameTime())) {
+			return;
+		}
+		int floor = lowerFloor(s.floorY(), p.getY());
+		if (floor != s.floorY()) {
+			p.setAttached(ATTACHMENT, new PhaseState(floor, s.endTick()));
+		}
 	}
 }
