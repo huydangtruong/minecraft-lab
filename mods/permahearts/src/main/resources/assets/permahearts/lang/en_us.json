@@ -95,5 +95,6 @@
   "permahearts.structure.ocean_monument": "Ocean Monument",
   "permahearts.structure.ancient_city": "Ancient City",
   "permahearts.structure.fortress": "Nether Fortress",
-  "permahearts.structure.bastion_remnant": "Bastion Remnant"
+  "permahearts.structure.bastion_remnant": "Bastion Remnant",
+  "effect.permahearts.frostbite": "Frostbite"
 }

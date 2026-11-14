@@ -74,6 +74,7 @@ public class PermaHearts implements ModInitializer {
 		HeartsAttachment.CULTIVATION.identifier();
 		HeartsAttachment.WANDERER.identifier();
 		ElixirItems.init();
+		io.github.huydangtruong.permahearts.technique.TechniqueCasts.init(); // P-011 part C: technique effects
 		WandererMenus.init();
 		WandererScheduler.register();
 		io.github.huydangtruong.permahearts.stats.StatsSync.register();
