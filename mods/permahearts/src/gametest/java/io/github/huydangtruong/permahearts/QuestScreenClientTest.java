@@ -270,6 +270,8 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 		scrollList(context, 10);
 		clickGui(context, hotspots(context).get(HS_ROW + 1), LEFT); // ice level 4: now -> next numbers
 		context.takeScreenshot("09h-technique-detail-ice");
+		scrollList(context, -10); // the detail page scrolls: bring Reset into view (D57)
+		context.takeScreenshot("09h2-technique-detail-ice-scrolled");
 		clickGui(context, hotspots(context).get(HS_RESET), LEFT);
 		check(techniqueData(server).level(t.getEnumConstants()[1]) == 0, "Reset click should clear ice");
 		clickGui(context, hotspots(context).get(HS_BACK), LEFT);

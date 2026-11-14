@@ -128,15 +128,24 @@ public final class TechniquesTab {
 		return mx >= x && mx < x + w && my >= y && my < y + h;
 	}
 
-	/** Detail page button rects: {x, y, w, h}. Back is the first thing of the header line (Back, icon, name). */
-	private static int[] upgradeRect(int tx, int right, int y0, int h) {
-		return new int[] {tx, y0 + h - 7 - 14, 104, 14};
+	/** Detail page: Upgrade and Reset rects {x, y, w, h} where they were last drawn (they scroll with the page). */
+	private static int[] lastUp = {0, 0, 0, 0};
+	private static int[] lastRe = {0, 0, 0, 0};
+	/** Detail page scroll in pixels and the height of its scrolling body. */
+	private static int detailScroll;
+	private static int detailContentH;
+	private static final int BUTTON_H = 16;
+
+	/** The detail page body scrolls between the header (Back, icon, name, level) and the panel's bottom padding. */
+	private static int detailTop(int y0) {
+		return y0 + 19 + 24;
 	}
 
-	private static int[] resetRect(int tx, int right, int y0, int h) {
-		return new int[] {tx + 104, y0 + h - 7 - 14, right - tx - 104, 14};
+	private static int detailBottom(int y0, int h) {
+		return y0 + h - 7;
 	}
 
+	/** Back is the first thing of the header line (Back, icon, name). */
 	private static int[] backRect(int tx, int right, int y0, int h) {
 		return new int[] {tx, y0 + 19, 36, 16};
 	}
@@ -272,18 +281,26 @@ public final class TechniquesTab {
 	private static void drawDetail(GuiGraphicsExtractor g, Font font, TechniqueData d, long now, Technique t, int tx, int right, int y0, int h, int mx, int my) {
 		int level = d.level(t);
 		int[] bk = backRect(tx, right, y0, h);
-		int y = bk[1];
-		g.blitSprite(RenderPipelines.GUI_TEXTURED, icon(t), tx + 40, y, 16, 16);
-		g.text(font, Component.literal(t.displayName()).withStyle(ChatFormatting.BOLD), tx + 60, y, TOTAL, false);
+		g.blitSprite(RenderPipelines.GUI_TEXTURED, icon(t), tx + 40, bk[1], 16, 16);
+		g.text(font, Component.literal(t.displayName()).withStyle(ChatFormatting.BOLD), tx + 60, bk[1], TOTAL, false);
 		String lv = "Lv " + level + " / " + TechniqueRules.MAX_LEVEL;
-		g.text(font, lv, tx + 60, y + 9, level > 0 ? BONUS : BASE, false);
-		y += 24;
-		List<FormattedCharSequence> lines = font.split(Component.literal(description(t)), right - tx);
-		if (!lines.isEmpty()) {
-			g.text(font, lines.get(0), tx, y, TEXT, false);
+		g.text(font, lv, tx + 60, bk[1] + 9, level > 0 ? BONUS : BASE, false);
+		button(g, font, bk, "Back", true, mx, my);
+
+		// scrolling body: description (italic, wrapped), stats, Upgrade, Reset
+		int top = detailTop(y0);
+		int bottom = detailBottom(y0, h);
+		int viewH = bottom - top;
+		detailScroll = Math.max(0, Math.min(Math.max(0, detailContentH - viewH), detailScroll));
+		boolean inView = my >= top && my < bottom;
+		int hx = inView ? mx : Integer.MIN_VALUE; // no hover through the clipped parts
+		g.enableScissor(tx, top, right, bottom);
+		int y = top - detailScroll;
+		for (FormattedCharSequence line : font.split(Component.literal(description(t)).withStyle(ChatFormatting.ITALIC), right - tx)) {
+			g.text(font, line, tx, y, TEXT, false);
 			y += LINE;
 		}
-		y += 2;
+		y += 6; // space between the description and the numbers
 		int shown = Math.max(1, level);
 		boolean max = level >= TechniqueRules.MAX_LEVEL;
 		boolean compare = level >= 1 && !max;
@@ -337,10 +354,8 @@ public final class TechniquesTab {
 			}
 			y += LINE;
 		}
-		// buttons
+		y += 6;
 		int xp = xpLevels();
-		int[] up = upgradeRect(tx, right, y0, h);
-		int[] re = resetRect(tx, right, y0, h);
 		String upLabel;
 		boolean canUp;
 		if (max) {
@@ -351,10 +366,23 @@ public final class TechniquesTab {
 			upLabel = (level == 0 ? "Learn (" : "Upgrade (") + cost + " levels)";
 			canUp = xp >= cost;
 		}
-		button(g, font, up, upLabel, canUp, mx, my);
+		int[] up = {tx, y, right - tx, BUTTON_H};
+		y += BUTTON_H + 2;
+		int[] re = {tx, y, right - tx, BUTTON_H};
+		y += BUTTON_H;
+		lastUp = up;
+		lastRe = re;
+		button(g, font, up, upLabel, canUp, hx, my);
 		boolean canReset = level > 0 && !d.onCooldown(t, now);
-		button(g, font, re, "Reset +" + TechniqueRules.refund(d.spent(t)) + " XP", canReset, mx, my);
-		button(g, font, bk, "Back", true, mx, my);
+		button(g, font, re, "Reset +" + TechniqueRules.refund(d.spent(t)) + " XP", canReset, hx, my);
+		g.disableScissor();
+		detailContentH = y + detailScroll - top;
+		int maxS = Math.max(0, detailContentH - viewH);
+		if (maxS > 0) {
+			int barH = Math.max(8, viewH * viewH / detailContentH);
+			int barY = top + (viewH - barH) * detailScroll / maxS;
+			g.fill(right + 1, barY, right + 3, barY + barH, 0xFF555555);
+		}
 	}
 
 	private static void button(GuiGraphicsExtractor g, Font font, int[] r, String label, boolean enabled, int mx, int my) {
@@ -424,6 +452,7 @@ public final class TechniquesTab {
 				}
 			} else {
 				detail = all[i];
+				detailScroll = 0;
 				selectedSlot = -1;
 			}
 			return true;
@@ -432,17 +461,18 @@ public final class TechniquesTab {
 	}
 
 	private static boolean clickDetail(TechniqueData d, Technique t, int tx, int right, int y0, int h, double mx, double my) {
-		int[] up = upgradeRect(tx, right, y0, h);
-		int[] re = resetRect(tx, right, y0, h);
+		int[] up = lastUp;
+		int[] re = lastRe;
 		int[] bk = backRect(tx, right, y0, h);
 		int level = d.level(t);
-		if (in(mx, my, up[0], up[1], up[2], up[3])) {
+		boolean inBody = my >= detailTop(y0) && my < detailBottom(y0, h);
+		if (inBody && in(mx, my, up[0], up[1], up[2], up[3])) {
 			if (level < TechniqueRules.MAX_LEVEL && xpLevels() >= TechniqueRules.upgradeCost(level + 1)) {
 				send(TechniqueNet.UPGRADE, t.id(), 0);
 			}
 			return true;
 		}
-		if (in(mx, my, re[0], re[1], re[2], re[3])) {
+		if (inBody && in(mx, my, re[0], re[1], re[2], re[3])) {
 			if (level > 0 && !d.onCooldown(t, now())) {
 				send(TechniqueNet.RESET, t.id(), 0);
 			}
@@ -457,7 +487,14 @@ public final class TechniquesTab {
 
 	/** Mouse wheel over the list. Returns true when it was over the list (scrolled or not). */
 	public static boolean scroll(int x0, int y0, int w, int h, double mx, double my, double amount) {
-		if (detail != null || !in(mx, my, x0 + 7, y0 + LIST_TOP, w - 14, listH(h))) {
+		if (detail != null) {
+			if (!in(mx, my, x0 + 7, detailTop(y0), w - 14, detailBottom(y0, h) - detailTop(y0))) {
+				return false;
+			}
+			detailScroll = Math.max(0, detailScroll - (int) Math.signum(amount) * SCROLL_STEP); // clamped when drawn
+			return true;
+		}
+		if (!in(mx, my, x0 + 7, y0 + LIST_TOP, w - 14, listH(h))) {
 			return false;
 		}
 		scroll = Math.max(0, Math.min(maxScroll(h), scroll - (int) Math.signum(amount) * SCROLL_STEP));
@@ -482,11 +519,11 @@ public final class TechniquesTab {
 			int[] c = plusRect(right, rowY(y0, i));
 			out.add(new int[] {c[0] + PLUS / 2, c[1] + PLUS / 2});
 		}
-		int[] up = upgradeRect(tx, right, y0, h);
-		int[] re = resetRect(tx, right, y0, h);
+		int[] up = lastUp; // where the detail page last drew them
+		int[] re = lastRe;
 		int[] bk = backRect(tx, right, y0, h);
-		out.add(new int[] {up[0] + up[2] / 2, up[1] + 7});
-		out.add(new int[] {re[0] + re[2] / 2, re[1] + 7});
+		out.add(new int[] {up[0] + up[2] / 2, up[1] + up[3] / 2});
+		out.add(new int[] {re[0] + re[2] / 2, re[1] + re[3] / 2});
 		out.add(new int[] {bk[0] + bk[2] / 2, bk[1] + bk[3] / 2});
 		return out;
 	}
