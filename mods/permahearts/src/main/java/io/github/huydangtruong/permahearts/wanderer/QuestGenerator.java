@@ -15,7 +15,7 @@ public final class QuestGenerator {
 		new Entry("minecraft:iron_ingot", 64), new Entry("minecraft:coal", 64), new Entry("minecraft:redstone", 64),
 		new Entry("minecraft:lapis_lazuli", 64), new Entry("minecraft:carrot", 64), new Entry("minecraft:potato", 64),
 		new Entry("minecraft:wheat", 64), new Entry("minecraft:oak_log", 64),
-		new Entry("minecraft:gold_ingot", 48), new Entry("minecraft:mutton", 48), new Entry("minecraft:beef", 48),
+		new Entry("minecraft:gold_ingot", 64), new Entry("minecraft:mutton", 48), new Entry("minecraft:beef", 48),
 		new Entry("minecraft:bone", 48), new Entry("minecraft:string", 48), new Entry("minecraft:leather", 48),
 		new Entry("minecraft:gunpowder", 32), new Entry("minecraft:ender_pearl", 32),
 		new Entry("minecraft:diamond", 16), new Entry("minecraft:emerald", 16));

@@ -69,3 +69,4 @@
 | D65 | Chieftain rơi nhiều XP hơn | Mọi trùm **Chieftain** (trùm nhiệm vụ của Crimson Master) khi chết rơi **gấp 10 lượng XP** gốc của loài đó (lúc đầu gấp 3, Huy nâng lên 10) | 2026-11-15 |
 | D66 | Chieftain đánh mạnh hơn | Sát thương gốc của mọi **Chieftain** = **gấp 2** bình thường (trước là gấp 1,5). Vũ khí cộng thêm như cũ | 2026-11-15 |
 | D67 | Tăng 3 linh dược yếu | Mỗi bình: **Sức Mạnh +1 sát thương** (trước +0,5), **Thần Tốc +10% tốc chạy** (trước +5%), **Khai Sơn +20% tốc đào** (trước +10%). Áp cho cả bình đã uống (tính theo số bình) | 2026-11-15 |
+| D68 | Nhiệm vụ gom vàng | Nhiệm vụ thu thập **thỏi vàng** cần **64** (trước 48). Chỉ áp cho nhiệm vụ mới; nhiệm vụ đang nhận giữ số cũ | 2026-11-15 |
