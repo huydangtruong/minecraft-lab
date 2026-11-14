@@ -29,7 +29,7 @@ Plan: [plans/P-020-blade-golems.md](../plans/P-020-blade-golems.md) (D60).
 - **If `feat/P-020-blade-golems` already has the merge:** merge it into `main` (`git merge --no-ff`), run one quick `./gradlew :permahearts:build` only if there were conflicts, push `main`, mark P-020 `merged` in [plans/README.md](../plans/README.md), then ask Huy whether to release.
 - **If the dev stopped half-way** (commits on `feat/P-020-dev` but no merge): start one new Sonnet dev in that worktree with the plan and "continue from the existing commits on feat/P-020-dev; run the full build once; merge into feat/P-020-blade-golems".
 - **If `feat/P-020-dev` has no new commits:** start a new Sonnet dev with the plan from scratch.
-- Tell Huy these were manager proposals, not his numbers, so he can change them: golem lasts **60 s**, cooldown **90 s**.
+- Huy set golem duration **90 s** and cooldown **180 s** (sent to the dev while running; check the code uses them).
 
 ## Open, not scheduled
 
