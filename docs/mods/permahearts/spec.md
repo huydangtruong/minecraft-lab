@@ -75,6 +75,6 @@
 ## Thanh tim nhiều lớp (D36)
 
 - Tới 20 tim: thanh vanilla. Trên 20 tim: luôn 2 hàng; tim 21–40 vẽ đè từ tim đầu tiên của hàng 1 bằng màu cam, 41–60 hồng, 61–80 tím, 81–100 xanh dương. Mất máu thì tim lớp trên cùng mất trước.
-- D37: 101–200 san hô, đào, hồng phấn, oải hương, bạc hà; 201–300 hoa anh đào, thiên hà, lửa linh hồn, lửa đỏ, dung nham. Sửa hình: `mods/permahearts/tools/make_heart_sprites.py` rồi chạy lại. Ảnh: `docs/screens/hearts-150-300-strip.png`.
+- D37: 101–200 san hô, đào, hồng phấn, oải hương, bạc hà; 201–300 hoa anh đào, thiên hà, lửa xanh lá, lửa linh hồn, huyết nham (D38). Sửa hình: `mods/permahearts/tools/make_heart_sprites.py` rồi chạy lại. Ảnh: `docs/screens/hearts-150-300-strip.png`.
 - Độc/wither/đóng băng: mọi tim theo màu vanilla của hiệu ứng. Tim vàng: các hàng phía trên. Giáp: ngay trên 2 hàng tim.
 - Ảnh: `docs/screens/hearts-57-full.png`, `hearts-57-hurt.png`, `hearts-100-full.png`.
