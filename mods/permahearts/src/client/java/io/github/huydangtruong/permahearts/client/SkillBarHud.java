@@ -49,6 +49,12 @@ public class SkillBarHud implements HudElement {
 					x + BOX / 2, top + BOX / 2 - 4, 0xFFFFFFFF);
 			}
 		}
+		long flight = io.github.huydangtruong.permahearts.technique.Flight.remaining(
+			mc.player.getAttached(io.github.huydangtruong.permahearts.technique.Flight.END), now);
+		if (flight > 0) { // remaining flight time, small, above the hotbar
+			Component fl = Component.literal("Flight " + SkillBarLogic.secondsLeft(flight) + " s");
+			g.centeredText(mc.font, fl, g.guiWidth() / 2, g.guiHeight() - 72, flight < 100 ? 0xFFFF8080 : 0xFFDFF4FF);
+		}
 		Technique sel = ClientSkills.selectedTechnique(mc);
 		if (sel != null) {
 			Component name = Component.literal(sel.displayName() + "  Lv " + d.level(sel));

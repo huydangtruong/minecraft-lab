@@ -103,6 +103,8 @@
   "item.permahearts.focus_phase": "Phase Walk Focus",
   "item.permahearts.focus_repulse": "Repulse Focus",
   "item.permahearts.focus_sacrifice": "Blood Oath Focus",
+  "item.permahearts.focus_flight": "Flight Focus",
+  "item.permahearts.focus_blade": "Life Steal Blade",
   "key.permahearts.technique": "Technique mode (toggle)",
   "key.category.permahearts.main": "Immortal Cultivation"
 }

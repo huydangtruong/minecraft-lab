@@ -1,7 +1,14 @@
 package io.github.huydangtruong.permahearts.technique;
 
 import io.github.huydangtruong.permahearts.PermaHearts;
+import io.github.huydangtruong.permahearts.stats.StatMath;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -40,9 +47,17 @@ public final class TechniqueCasts {
 	public static void init() {
 		Frostbite.init();
 		PhaseState.ATTACHMENT.identifier();
+		Flight.init();
+		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
+			if (entity instanceof ServerPlayer p) {
+				Flight.end(p);
+			}
+		});
 		OATH_UNTIL.identifier();
 		ServerTickEvents.END_SERVER_TICK.register(TechniqueCasts::tick);
-		ServerLifecycleEvents.SERVER_STOPPED.register(s -> TechniqueFields.clear());
+		ServerLifecycleEvents.SERVER_STOPPED.register(s -> {
+			TechniqueFields.clear();
+		});
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> !blocksDamage(entity, source));
 		CommandRegistrationCallback.EVENT.register((d, c, s) -> TechniqueCastCommand.register(d));
 	}
@@ -59,8 +74,11 @@ public final class TechniqueCasts {
 			case PHASE -> phaseWalk(caster, lvl);
 			case REPULSE -> repulse(caster, lvl);
 			case SACRIFICE -> bloodOath(caster, lvl);
-			case FLIGHT, BLADE -> {
-				return false; // P-014: not cast this way yet
+			case FLIGHT -> {
+				return Flight.start(caster, lvl);
+			}
+			case BLADE -> {
+				return false; // the blade is not cast: a left click hits (bladeHit)
 			}
 		}
 		return true;
@@ -175,12 +193,74 @@ public final class TechniqueCasts {
 		return oathActive(entity) && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY);
 	}
 
+	// ---- Life Steal Blade ----
+
+	/** Attack damage from the base value and this mod's modifiers only: the held item and other gear do not count. */
+	public static double bladeBase(ServerPlayer p) {
+		AttributeInstance inst = p.getAttribute(Attributes.ATTACK_DAMAGE);
+		if (inst == null) {
+			return 1;
+		}
+		List<StatMath.Mod> mods = new ArrayList<>();
+		for (AttributeModifier m : inst.getModifiers()) {
+			mods.add(new StatMath.Mod(m.amount(), m.operation().ordinal(), m.id().getNamespace().equals(PermaHearts.MOD_ID)));
+		}
+		return StatMath.baseWithMine(inst.getBaseValue(), mods);
+	}
+
+	/**
+	 * A left click with the blade on an entity (P-014). Checks the technique is selected, the range, the line of sight and
+	 * the cooldown (a landed hit starts it); null when it hit, else the reason (silent: the client swings anyway). The hit deals
+	 * base attack + bladeDamage and heals the attacker by the health actually removed.
+	 */
+	public static String bladeAttack(ServerPlayer p, int targetId) {
+		if (TechniqueSelection.selectedTechnique(p) != Technique.BLADE) {
+			return "The blade is not selected";
+		}
+		if (!(p.level().getEntity(targetId) instanceof LivingEntity target) || !TechniqueDamage.affectable(target, p)) {
+			return "No target";
+		}
+		if (!p.isWithinEntityInteractionRange(target, 1.0) || !p.hasLineOfSight(target)) {
+			return "Out of reach";
+		}
+		TechniqueData d = TechniqueAttachment.get(p);
+		long now = p.level().getServer().overworld().getGameTime();
+		if (d.onCooldown(Technique.BLADE, now)) {
+			return "On cooldown: " + (d.cooldownLeft(Technique.BLADE, now) + 19) / 20 + " s";
+		}
+		bladeHit(p, target, d.level(Technique.BLADE));
+		TechniqueAttachment.set(p, TechniqueAttachment.get(p).withCooldown(Technique.BLADE, now + Technique.BLADE.cooldownTicks()));
+		return null;
+	}
+
+	/** The hit itself, no checks. Returns the health the target actually lost (which the attacker gets back). */
+	public static float bladeHit(ServerPlayer p, LivingEntity target, int level) {
+		ServerLevel sl = p.level();
+		float damage = (float) (bladeBase(p) + TechniqueRules.bladeDamage(Mth.clamp(level, 1, TechniqueRules.MAX_LEVEL)));
+		float before = target.getHealth() + target.getAbsorptionAmount();
+		TechniqueDamage.hurt(sl, target, p, p, DamageTypes.PLAYER_ATTACK, damage);
+		float dealt = Math.max(0f, before - (target.getHealth() + target.getAbsorptionAmount()));
+		if (dealt > 0) {
+			p.heal(dealt);
+		}
+		p.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+		Vec3 from = target.position().add(0, target.getBbHeight() * 0.6, 0);
+		Vec3 to = p.getEyePosition().subtract(0, 0.4, 0);
+		for (int i = 0; i < 8; i++) { // red drops fly from the target toward the attacker
+			Vec3 at = from.lerp(to, i / 8.0);
+			sl.sendParticles(new DustParticleOptions(0xb01010, 1.0f), at.x, at.y, at.z, 1, 0.08, 0.08, 0.08, 0.0);
+		}
+		sl.playSound(null, target.blockPosition(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 1f, 0.8f);
+		return dealt;
+	}
+
 	// ---- ticking ----
 
 	private static void tick(MinecraftServer server) {
 		TechniqueFields.tick(server);
 		long t = server.getTickCount();
 		for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+			Flight.tick(p, t);
 			PhaseState phase = p.getAttached(PhaseState.ATTACHMENT);
 			if (phase != null && phase.endTick() >= 0) {
 				if (!phase.active(p.level().getGameTime())) {

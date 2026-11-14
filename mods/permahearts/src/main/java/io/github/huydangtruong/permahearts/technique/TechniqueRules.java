@@ -234,8 +234,19 @@ public final class TechniqueRules {
 		return 5 + 0.5 * (l - 1);
 	}
 
-	/** Life Steal Blade swings per second, like an iron sword. */
+	/** Unused since the blade got a 12 s cooldown (D52); kept for reference. */
 	public static final double BLADE_ATTACK_SPEED = 1.6;
+
+	/** Vanilla creative flying speed (Abilities default); the flight speed bonus is applied on top of it. */
+	public static final float CREATIVE_FLYING_SPEED = 0.05f;
+
+	/** Abilities flying speed while Flight is on. */
+	public static float flyingSpeed(int level) {
+		return (float) (CREATIVE_FLYING_SPEED * (1 + flightSpeedBonus(level)));
+	}
+
+	/** Slow falling after Flight ends, in ticks (5 s). */
+	public static final int FLIGHT_SLOW_FALL_TICKS = 100;
 
 	/** One line of the detail page: label and the value at a level, e.g. ("Range", "16 blocks"). */
 	public record Stat(String label, String value) {}
@@ -275,7 +286,7 @@ public final class TechniqueRules {
 			case BLADE -> List.of(
 				new Stat("Damage", "base + " + num(bladeDamage(level)) + " + elixirs"),
 				new Stat("Life steal", "all damage dealt"),
-				new Stat("Attack speed", num(BLADE_ATTACK_SPEED) + " / s"));
+				new Stat("Cooldown", t.cooldownSeconds() + " s"));
 			case SACRIFICE -> List.of(
 				new Stat("Costs", pct(sacrificeCost(level)) + " of current health"),
 				new Stat("Invulnerable", num(sacrificeSeconds(level)) + " s"),

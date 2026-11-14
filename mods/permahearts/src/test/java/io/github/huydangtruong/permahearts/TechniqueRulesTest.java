@@ -73,7 +73,7 @@ class TechniqueRulesTest {
 		assertArrayEquals(new double[] {0, 0.5, 1.0}, at(TechniqueRules::flightSpeedBonus), 1e-9);
 		assertArrayEquals(new double[] {5, 9.5, 14.5}, at(TechniqueRules::bladeDamage), 1e-9);
 		assertEquals(120, Technique.FLIGHT.cooldownSeconds());
-		assertEquals(0, Technique.BLADE.cooldownSeconds());
+		assertEquals(12, Technique.BLADE.cooldownSeconds());
 		assertEquals(16, Technique.FIRE.cooldownSeconds());
 		assertEquals(24, Technique.ICE.cooldownSeconds());
 		assertEquals(60, Technique.HEALING.cooldownSeconds());

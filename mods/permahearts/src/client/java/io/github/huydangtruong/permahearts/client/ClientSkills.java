@@ -15,7 +15,11 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.component.SwingAnimation;
+import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.resources.Identifier;
 
 /**
@@ -186,7 +190,24 @@ public final class ClientSkills {
 	/** Left click: throws at once with full charge. */
 	public static void onAttackClick(Minecraft mc) {
 		if (mc.gui.screen() == null && intercepting(mc)) {
-			cast(mc, selected, 1f);
+			if (selectedTechnique(mc) == Technique.BLADE) {
+				bladeClick(mc);
+			} else {
+				cast(mc, selected, 1f);
+			}
+		}
+	}
+
+	/** Life Steal Blade: swing, and when the crosshair is on a living entity ask the server for a hit (it checks everything). */
+	private static void bladeClick(Minecraft mc) {
+		long left = data(mc.player).cooldownLeft(Technique.BLADE, mc.level.getGameTime());
+		if (left > 0) {
+			mc.player.sendOverlayMessage(Component.literal("On cooldown: " + SkillBarLogic.secondsLeft(left) + " s"));
+			return;
+		}
+		mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
+		if (mc.hitResult instanceof EntityHitResult hit && hit.getEntity() instanceof LivingEntity target) {
+			ClientPlayNetworking.send(new TechniqueNet.SkillAction(TechniqueNet.HIT, target.getId(), 0f));
 		}
 	}
 
@@ -240,7 +261,7 @@ public final class ClientSkills {
 	private static void tickUse(Minecraft mc, boolean inGame) {
 		Technique t = inGame ? selectedTechnique(mc) : null;
 		boolean down = mc.options.keyUse.isDown();
-		if (t == null) {
+		if (t == null || t == Technique.BLADE) { // right click does nothing with the blade
 			charging = false;
 			useWasDown = down;
 			return;
