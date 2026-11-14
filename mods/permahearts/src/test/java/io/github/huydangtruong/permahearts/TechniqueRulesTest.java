@@ -65,6 +65,10 @@ class TechniqueRulesTest {
 		assertArrayEquals(new double[] {0.80, 0.50, 0.30}, at(TechniqueRules::sacrificeCost), 1e-9);
 		assertArrayEquals(new double[] {5, 8, 10}, at(TechniqueRules::sacrificeSeconds), 1e-9);
 		assertEquals(45, Technique.SACRIFICE.cooldownSeconds());
+		assertEquals(8, TechniqueRules.phaseSightRange(1));
+		assertEquals(10, TechniqueRules.phaseSightRange(2));
+		assertEquals(27, TechniqueRules.phaseSightRange(10));
+		assertEquals(48, TechniqueRules.phaseSightRange(20));
 		assertEquals(16, Technique.FIRE.cooldownSeconds());
 		assertEquals(24, Technique.ICE.cooldownSeconds());
 		assertEquals(60, Technique.HEALING.cooldownSeconds());
