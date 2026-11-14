@@ -113,3 +113,17 @@ Cần công tắc thế giới BẬT, chế độ Survival (Creative/Spectator k
 8. **Chơi chung** (Essential): người kia chọn chiêu thì bạn thấy họ cầm vật tiêu điểm và hạt ở tay; họ đổi/bỏ chọn thì mất.
 
 Kiểm bằng máy: `./gradlew :permahearts:build` (game test cast/cooldown/chọn) và `./gradlew :permahearts:runClientGameTest` (ảnh `30-skill-bar-cross` đến `46-focus-third-person` trong `mods/permahearts/build/run/clientGameTest/screenshots/`).
+
+## Chiêu Bay và Huyết Kiếm (P-014, D52)
+
+Chuẩn bị (Survival, công tắc BẬT): `/technique set @s flight 10`, `/technique set @s blade 5`, `/technique emeralds @s 832`, gắn Bay và Huyết Kiếm vào 2 ô ở tab Techniques, bấm R bật chế độ chiêu.
+
+1. **Bay**: chọn ô Bay, bấm chuột phải hoặc trái. Bạn bay lên ngay (không cần double-jump), bay như Creative: Space lên, Shift xuống, bấm đúp Space để tắt/bật bay. Lv 1 bay đúng tốc độ Creative trong 20 giây; Lv 10 nhanh hơn 50% trong 40 giây; Lv 20 nhanh gấp đôi trong 60 giây. Đang bay có hạt mây trắng dưới chân; bên phải màn hình, phía trên tên chiêu, hiện "Flight N s" đếm ngược (đỏ khi còn dưới 5 giây).
+2. **Hết giờ**: hết thời gian là mất khả năng bay, tốc độ bay về bình thường, được 5 giây rơi chậm (không chết vì rơi). Ô Bay hồi 120 giây (bắt đầu từ lúc dùng).
+3. **Bay + chết / thoát vào lại**: chết khi đang bay: hồi sinh bình thường, không còn bay. Thoát game rồi vào lại: nếu còn thời gian thì vẫn bay tiếp, nếu hết thì tự tắt. Người đang Creative/Spectator không bị chiêu này đổi gì (dùng chiêu cũng không được).
+4. **Huyết Kiếm**: chọn ô Huyết Kiếm: tay chính cầm thanh kiếm nhuốm máu, có giọt máu nhỏ ở tay. Nhắm vào Husk/bò (trong tầm đánh) rồi bấm chuột trái: sát thương = sát thương cơ bản của bạn + 5 (Lv 1; +0.5 mỗi cấp) + phần linh dược Sức mạnh. Kiếm/rìu cầm trong túi (ví dụ kiếm kim cương) KHÔNG cộng thêm. Giáp của đối thủ giảm sát thương như bình thường. Có hất lùi như đánh thường, hạt đỏ bay từ mục tiêu về phía bạn.
+5. **Hút máu**: bạn hồi đúng bằng số máu mục tiêu thực sự bị mất (giáp giảm thì hồi cũng ít đi; đánh con còn ít máu thì chỉ hồi bằng phần máu còn lại). Thử bằng cách để máu mình thấp rồi đánh.
+6. **Hồi chiêu 12 giây**: mỗi cú đánh trúng khiến ô Huyết Kiếm hồi 12 giây (hiện ở thanh chiêu bên phải như chiêu khác). Đang hồi mà bấm chuột trái: hiện "On cooldown: N s", không đánh. Vung hụt (không nhắm trúng gì) không tốn hồi chiêu. Chuột phải với kiếm: không làm gì. Đào/đập block bằng kiếm: không làm gì.
+7. Đánh người chơi khác bằng Huyết Kiếm khi PvP tắt: vẫn trúng (đi qua `TechniqueDamage`, D44).
+
+Kiểm bằng máy: `./gradlew :permahearts:build` (game test `FlightBladeGameTest`: bay, hết giờ, chết, Creative, sát thương, hút máu, linh dược, tầm đánh) và `./gradlew :permahearts:runClientGameTest` (ảnh `50-blade-in-hand`, `51-blade-hit`, `52-blade-cooldown`, `53-flight-hud-timer`, `54-flight-third-person`, và `46-focus-flight`, `47-focus-blade`).

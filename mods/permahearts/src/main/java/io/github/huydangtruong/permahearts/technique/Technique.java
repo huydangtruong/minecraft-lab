@@ -11,7 +11,7 @@ public enum Technique {
 	REPULSE("repulse", "Repulse", 20, false),
 	SACRIFICE("sacrifice", "Blood Oath", 45, false), // D47: was 30 s
 	FLIGHT("flight", "Flight", 120, false), // D52
-	BLADE("blade", "Life Steal Blade", 0, false); // D52: held like a weapon, no cooldown
+	BLADE("blade", "Life Steal Blade", 12, false); // D52: held like a weapon; each landed hit starts the 12 s cooldown
 
 	private final String id;
 	private final String displayName;

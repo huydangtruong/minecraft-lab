@@ -1,6 +1,6 @@
 """Draws the technique icons (P-011 part A): 16x16 original pixel art, one per technique, plus a lock, a tick and a cross.
 
-- technique/{fire,ice,healing,phase,repulse,sacrifice}.png, technique/lock.png, technique/check.png, technique/cross.png
+- technique/{fire,ice,healing,phase,repulse,sacrifice,flight,blade}.png, technique/lock.png, technique/check.png, technique/cross.png
 Each icon is drawn as a body; a dark outline is added automatically around it.
 Run: python3 -I mods/permahearts/tools/make_technique_sprites.py
 """
@@ -246,6 +246,58 @@ PLUS = [
 ]
 PLUS_PAL = {"p": "3ad24a"}
 
+def mirror(half):
+    """Symmetric art: 16 rows of 8 characters (the left half) become 16 rows of 16."""
+    return [row + row[::-1] for row in half]
+
+
+FLIGHT = mirror([  # two feathered wings (D52), original art
+    "........",
+    "........",
+    ".ww.....",
+    ".www....",
+    ".wwww...",
+    "..wwlw..",
+    "..wwwlw.",
+    "...wwlww",
+    "...wllww",
+    "....wllw",
+    "....wglg",
+    ".....wgg",
+    "......gg",
+    "......wg",
+    "........",
+    "........",
+])
+FLIGHT_PAL = {"w": "f4fbff", "l": "bfe0f4", "g": "7fb0d4"}
+
+
+def blade_art():
+    """A sword on the diagonal with blood on the tip and drops falling (D52)."""
+    img = blank()
+
+    def put(x, y, c):
+        img[y][x] = rgba(c)
+
+    for x in range(6, 14):
+        put(x, 15 - x, "e8eef4")  # bright edge
+        put(x, 16 - x, "9aa6b4")  # shade
+    for x, y in ((3, 8), (4, 9), (5, 10), (6, 11), (7, 12)):
+        put(x, y, "d8a020")  # cross guard
+    put(4, 11, "6a3a1a")
+    put(3, 12, "7a4a22")
+    put(2, 13, "6a3a1a")
+    put(1, 14, "d8a020")
+    for x, y in ((13, 2), (12, 3), (11, 4), (13, 3), (12, 4)):
+        put(x, y, "c01818")  # blood on the tip
+    put(11, 5, "8a0c0c")
+    put(10, 6, "8a0c0c")
+    for x, y in ((10, 7), (9, 9), (12, 5)):
+        put(x, y, "d82020")  # drops
+    put(10, 8, "a01010")
+    put(9, 10, "a01010")
+    return img
+
 
 def main():
     os.makedirs(OUT, exist_ok=True)
@@ -256,6 +308,8 @@ def main():
         "phase": (procedural(phase_color), "2a0a58"),
         "repulse": (procedural(repulse_color), "1c3a6e"),
         "sacrifice": (from_ascii(SACRIFICE, SACRIFICE_PAL), "2a2f37"),
+        "flight": (from_ascii(FLIGHT, FLIGHT_PAL), "2a5a80"),
+        "blade": (blade_art(), "3a0606"),
         "lock": (from_ascii(LOCK, LOCK_PAL), "1a1a20"),
         "check": (from_ascii(CHECK, CHECK_PAL), "0c4a14"),
         "cross": (from_ascii(CROSS, CROSS_PAL), "30303a"),
@@ -265,7 +319,7 @@ def main():
     for name, (body, edge) in icons.items():
         img = outline(body, edge)
         write_png(os.path.join(OUT, name + ".png"), img)
-        if name in ("fire", "ice", "healing", "phase", "repulse", "sacrifice"):
+        if name in ("fire", "ice", "healing", "phase", "repulse", "sacrifice", "flight", "blade"):
             write_png(os.path.join(items, "focus_" + name + ".png"), img)
     print("wrote technique sprites to", os.path.normpath(OUT))
 

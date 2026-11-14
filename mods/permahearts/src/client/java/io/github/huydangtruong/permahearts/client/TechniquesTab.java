@@ -77,8 +77,8 @@ public final class TechniquesTab {
 			case PHASE -> "Walk through blocks for a while.";
 			case REPULSE -> "Blast everything around away.";
 			case SACRIFICE -> "Health for invulnerability.";
-			case FLIGHT -> "Fly like in creative for a while.";
-			case BLADE -> "A blade that drinks what it cuts.";
+			case FLIGHT -> "Fly freely like in creative, faster at higher levels. You glide down gently when it ends.";
+			case BLADE -> "Left click a target to cut it with a blood-stained blade. You heal for the damage dealt.";
 		};
 	}
 
