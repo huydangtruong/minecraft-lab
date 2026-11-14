@@ -189,6 +189,11 @@ public final class TechniqueRules {
 		return (int) Math.round(8 + 40.0 * (l - 1) / (MAX_LEVEL - 1));
 	}
 
+	/** Distance where the in-rock fog of Phase Walk starts: 60% of the sight range. */
+	public static float phaseFogStart(int level) {
+		return phaseSightRange(level) * 0.6f;
+	}
+
 	public static double repulseRadius(int level) {
 		return scaled(4, 0.2, level);
 	}
