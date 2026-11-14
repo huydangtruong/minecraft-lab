@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -14,9 +15,17 @@ import net.minecraft.server.level.ServerPlayer;
  * synced to every player so others see the focus item in the hand (D46).
  */
 public final class TechniqueSelection {
-	public static final AttachmentType<Integer> SELECTED = AttachmentRegistry.create(
+	/** slot -1 and an empty technique id mean the cross. The id lets other clients draw the focus item without knowing our slots. */
+	public record Selection(int slot, String technique) {
+		public static final Selection NONE = new Selection(-1, "");
+	}
+
+	public static final AttachmentType<Selection> SELECTED = AttachmentRegistry.create(
 		Identifier.fromNamespaceAndPath(PermaHearts.MOD_ID, "technique_selection"),
-		b -> b.initializer(() -> -1).syncWith(ByteBufCodecs.VAR_INT, AttachmentSyncPredicate.all()));
+		b -> b.initializer(() -> Selection.NONE).syncWith(StreamCodec.composite(
+			ByteBufCodecs.VAR_INT, Selection::slot,
+			ByteBufCodecs.STRING_UTF8, Selection::technique,
+			Selection::new), AttachmentSyncPredicate.all()));
 
 	private TechniqueSelection() {}
 
@@ -27,20 +36,27 @@ public final class TechniqueSelection {
 				return;
 			}
 			for (ServerPlayer p : server.getPlayerList().getPlayers()) {
-				if (get(p) >= 0 && selectedTechnique(p) == null) {
-					set(p, -1);
+				if (get(p) >= 0) {
+					Technique t = selectedTechnique(p);
+					if (t == null) {
+						set(p, -1);
+					} else if (!t.id().equals(p.getAttachedOrCreate(SELECTED).technique())) {
+						set(p, get(p)); // another technique was put in the slot: keep the slot, update the id
+					}
 				}
 			}
 		});
 	}
 
 	public static int get(ServerPlayer p) {
-		return p.getAttachedOrCreate(SELECTED);
+		return p.getAttachedOrCreate(SELECTED).slot();
 	}
 
 	public static void set(ServerPlayer p, int index) {
-		if (get(p) != index) {
-			p.setAttached(SELECTED, index);
+		Technique t = index < 0 ? null : TechniqueAttachment.get(p).inSlot(index);
+		Selection next = t == null ? Selection.NONE : new Selection(index, t.id());
+		if (!next.equals(p.getAttachedOrCreate(SELECTED))) {
+			p.setAttached(SELECTED, next);
 		}
 	}
 

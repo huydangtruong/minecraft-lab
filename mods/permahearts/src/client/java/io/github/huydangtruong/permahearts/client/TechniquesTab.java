@@ -62,7 +62,7 @@ public final class TechniquesTab {
 		return Identifier.fromNamespaceAndPath("permahearts", "technique/" + t.id());
 	}
 
-	private static Identifier sprite(String name) {
+	static Identifier sprite(String name) {
 		return Identifier.fromNamespaceAndPath("permahearts", "technique/" + name);
 	}
 

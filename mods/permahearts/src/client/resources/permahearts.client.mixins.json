@@ -6,7 +6,8 @@
 	"client": [
 		"ContainerScreenAccess",
 		"RecipeBookScreenAccess",
-		"RecipeBookScreenMixin"
+		"RecipeBookScreenMixin",
+		"MinecraftInputMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
