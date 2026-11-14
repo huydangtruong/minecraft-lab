@@ -18,7 +18,8 @@ Release steps: [workflow/release.md](../workflow/release.md). Release **only whe
 
 ## In flight
 
-Nothing. No agent worktrees are left under `.claude/worktrees/`.
+- **P-021** ([plan](../plans/P-021-warrior-angel.md), D61–D63): Atk speed shown as %, guardian kills credit the owner, Warrior Angel technique. A Sonnet dev was started on 2026-11-14 in a `.claude/worktrees/agent-*` worktree on `feat/P-021-dev`, merging into `feat/P-021-warrior-angel`. Resume like P-020: compare `feat/P-021-warrior-angel` with `feat/P-021-dev`. Angel lifetime 60 s and cooldown 120 s are manager proposals; tell Huy he can change them.
+- **Windows installer bug** (reported by Huy's friend): picking a profile other than "26.3 Fabric Essential" says SUCCESS, but that profile's mods folder still has the old jar. Reading `minecraft-lab.ps1` (`Find-Profiles` / `Select-Profile`) found nothing yet. Waiting for the friend's `Mods folder:` line and that profile's Game directory.
 
 ## Open, not scheduled
 
