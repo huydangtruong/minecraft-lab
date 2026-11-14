@@ -74,7 +74,7 @@ class TechniqueRulesTest {
 		assertEquals(48, TechniqueRules.phaseSightRange(20));
 		assertArrayEquals(new double[] {10, 10 + 20.0 * 9 / 19, 30}, at(TechniqueRules::flightSeconds), 1e-9);
 		assertArrayEquals(new double[] {-0.20, -0.20 + 1.2 * 9 / 19, 1.0}, at(TechniqueRules::flightSpeedBonus), 1e-9);
-		assertArrayEquals(new double[] {5, 9.5, 14.5}, at(TechniqueRules::bladeDamage), 1e-9);
+		assertArrayEquals(new double[] {8, 12.5, 17.5}, at(TechniqueRules::bladeDamage), 1e-9);
 		assertEquals(0.04f, TechniqueRules.flyingSpeed(1), 1e-6f); // 80% of creative (0.05)
 		assertEquals(0.1f, TechniqueRules.flyingSpeed(20), 1e-6f); // 200% of creative
 		assertArrayEquals(new double[] {150, 50 * (3 + 47.0 * 9 / 19), 2500}, at(TechniqueRules::teleportRange), 1e-9);
@@ -85,6 +85,20 @@ class TechniqueRulesTest {
 		assertEquals(0.5f, io.github.huydangtruong.permahearts.technique.SkillBarLogic.charge(30, 3f), 1e-6);
 		assertEquals(120, Technique.FLIGHT.cooldownSeconds());
 		assertEquals(12, Technique.BLADE.cooldownSeconds());
+		assertArrayEquals(new double[] {2, 2 + 4 * 9 / 19.0, 6}, at(TechniqueRules::bladeKnockback), 1e-9);
+		assertEquals(180, Technique.GOLEM.cooldownSeconds());
+		assertEquals(1, TechniqueRules.golemCount(1));
+		assertEquals(1, TechniqueRules.golemCount(9));
+		assertEquals(2, TechniqueRules.golemCount(10));
+		assertEquals(2, TechniqueRules.golemCount(14));
+		assertEquals(3, TechniqueRules.golemCount(15));
+		assertEquals(3, TechniqueRules.golemCount(19));
+		assertEquals(4, TechniqueRules.golemCount(20));
+		assertEquals(0.5, TechniqueRules.golemPower(1), 1e-9);
+		assertEquals(2.0, TechniqueRules.golemPower(20), 1e-9);
+		assertEquals(50, TechniqueRules.golemHealth(1), 1e-9);
+		assertEquals(30, TechniqueRules.golemDamage(20), 1e-9);
+		assertEquals("4", TechniqueRules.stats(Technique.GOLEM, 20).get(0).value());
 		assertEquals(16, Technique.FIRE.cooldownSeconds());
 		assertEquals(24, Technique.ICE.cooldownSeconds());
 		assertEquals(60, Technique.HEALING.cooldownSeconds());

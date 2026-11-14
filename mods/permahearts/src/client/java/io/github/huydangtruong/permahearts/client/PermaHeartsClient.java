@@ -23,5 +23,6 @@ public class PermaHeartsClient implements ClientModInitializer {
 		ModeHotbarHud.register();
 		// Replaces the wandering trader renderer; ordinary traders keep the vanilla texture.
 		EntityRendererRegistry.register(EntityTypes.WANDERING_TRADER, WandererRenderer::new);
+		EntityRendererRegistry.register(io.github.huydangtruong.permahearts.technique.VioletGuardian.TYPE, VioletGuardianRenderer::new);
 	}
 }

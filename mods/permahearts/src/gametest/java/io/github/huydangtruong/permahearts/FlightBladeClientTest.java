@@ -59,13 +59,16 @@ public class FlightBladeClientTest implements FabricClientGameTest {
 			check(server.computeOnServer(s -> TechniqueAttachment.get(s.getPlayerList().getPlayers().get(0))
 				.onCooldown(Technique.BLADE, s.overworld().getGameTime())), "the hit starts the cooldown");
 			context.takeScreenshot("52-blade-cooldown");
+			server.runCommand("effect clear @e[type=husk]"); // bleeding would change the health
+			context.waitTicks(2);
+			float husk1b = server.computeOnServer(FlightBladeClientTest::huskHealth);
 			context.getInput().pressMouse(LEFT);
 			context.waitTicks(4);
-			check(server.computeOnServer(FlightBladeClientTest::huskHealth) == husk1, "no hit while on cooldown");
+			check(server.computeOnServer(FlightBladeClientTest::huskHealth) == husk1b, "no hit while on cooldown");
 			context.getInput().holdMouse(RIGHT);
 			context.waitTicks(5);
 			context.getInput().releaseMouse(RIGHT);
-			check(server.computeOnServer(FlightBladeClientTest::huskHealth) == husk1, "right click does nothing with the blade");
+			check(server.computeOnServer(FlightBladeClientTest::huskHealth) == husk1b, "right click does nothing with the blade");
 			server.runCommand("kill @e[type=husk]");
 
 			// flight: cell 1, right click casts at once
