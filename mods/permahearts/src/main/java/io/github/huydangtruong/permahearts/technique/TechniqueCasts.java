@@ -49,6 +49,7 @@ public final class TechniqueCasts {
 		Frostbite.init();
 		Bleeding.init();
 		VioletGuardian.init();
+		WarriorAngel.init();
 		PhaseState.ATTACHMENT.identifier();
 		Flight.init();
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
@@ -89,6 +90,10 @@ public final class TechniqueCasts {
 			case GOLEM -> {
 				VioletGuardian.summon(caster, lvl);
 				caster.level().playSound(null, caster.blockPosition(), SoundEvents.IRON_GOLEM_REPAIR, SoundSource.PLAYERS, 1f, 0.7f);
+			}
+			case ANGEL -> {
+				WarriorAngel.summon(caster, lvl);
+				caster.level().playSound(null, caster.blockPosition(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1f, 1.6f);
 			}
 		}
 		return true;

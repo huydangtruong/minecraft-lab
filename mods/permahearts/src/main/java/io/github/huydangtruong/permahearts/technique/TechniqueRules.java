@@ -283,6 +283,36 @@ public final class TechniqueRules {
 	/** Seconds the guardians stay (D60). */
 	public static final int GOLEM_SECONDS = 90;
 
+	/** Warrior Angel (D63): angels summoned, 2 at levels 1-4, 3 at 5-9, 4 at 10-14, 5 at 15-19, 6 at 20. */
+	public static int angelCount(int level) {
+		int l = Math.max(1, Math.min(MAX_LEVEL, level));
+		return l >= 20 ? 6 : l >= 15 ? 5 : l >= 10 ? 4 : l >= 5 ? 3 : 2;
+	}
+
+	/** Multiple of a vanilla vex's health (D63): 1.0 at level 1 up to 2.0 at 20. */
+	public static double angelHealthFactor(int level) {
+		return linear(level, 1.0, 2.0);
+	}
+
+	/** Multiple of a vanilla vex's attack damage (D63): 0.5 at level 1 up to 2.0 at 20. */
+	public static double angelDamageFactor(int level) {
+		return linear(level, 0.5, 2.0);
+	}
+
+	/** Vanilla vex health and attack damage (Vex.createAttributes, checked with javap: 14 and 4). */
+	public static final double VEX_BASE_HEALTH = 14, VEX_BASE_DAMAGE = 4;
+
+	public static double angelHealth(int level) {
+		return VEX_BASE_HEALTH * angelHealthFactor(level);
+	}
+
+	public static double angelDamage(int level) {
+		return VEX_BASE_DAMAGE * angelDamageFactor(level);
+	}
+
+	/** Seconds the angels stay (D63). */
+	public static final int ANGEL_SECONDS = 60;
+
 	/** Unused since the blade got a 12 s cooldown (D52); kept for reference. */
 	public static final double BLADE_ATTACK_SPEED = 1.6;
 
@@ -361,6 +391,12 @@ public final class TechniqueRules {
 				new Stat("Health", num(golemHealth(level))),
 				new Stat("Damage", num(golemDamage(level))),
 				new Stat("Duration", GOLEM_SECONDS + " s"),
+				new Stat("Cooldown", t.cooldownSeconds() + " s"));
+			case ANGEL -> List.of(
+				new Stat("Angels", String.valueOf(angelCount(level))),
+				new Stat("Health", num(angelHealth(level))),
+				new Stat("Damage", num(angelDamage(level))),
+				new Stat("Lasts", ANGEL_SECONDS + " s"),
 				new Stat("Cooldown", t.cooldownSeconds() + " s"));
 			case SACRIFICE -> List.of(
 				new Stat("Costs", pct(sacrificeCost(level)) + " of current health"),

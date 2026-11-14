@@ -13,7 +13,8 @@ public enum Technique {
 	FLIGHT("flight", "Cloud Travel", 120, false), // D52
 	BLADE("blade", "Life Steal Blade", 12, false),
 	TELEPORT("teleport", "Thousand Mile Step", 60, true), // D58: charged throw like Fireball, then the caster teleports // D52: held like a weapon; each landed hit starts the 12 s cooldown
-	GOLEM("golem", "Violet Guardian", 180, false); // D60: summons loyal violet iron golems
+	GOLEM("golem", "Violet Guardian", 180, false), // D60: summons loyal violet iron golems
+	ANGEL("angel", "Warrior Angel", 120, false); // D63: summons gold-and-white angels that fly through walls
 
 	private final String id;
 	private final String displayName;

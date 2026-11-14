@@ -1,6 +1,6 @@
 """Draws the technique icons (P-011 part A): 16x16 original pixel art, one per technique, plus a lock, a tick and a cross.
 
-- technique/{fire,ice,healing,phase,repulse,sacrifice,flight,blade,teleport,golem}.png, technique/lock.png, technique/check.png, technique/cross.png
+- technique/{fire,ice,healing,phase,repulse,sacrifice,flight,blade,teleport,golem,angel}.png, technique/lock.png, technique/check.png, technique/cross.png
 Each icon is drawn as a body; a dark outline is added automatically around it.
 Run: python3 -I mods/permahearts/tools/make_technique_sprites.py
 """
@@ -288,6 +288,27 @@ GOLEM = [  # a violet iron golem face with a long nose and two glowing eyes (D60
 GOLEM_PAL = {"V": "5a1aa8", "v": "7a2ad6", "p": "b45cff", "w": "e8ccff", "h": "ffffff", "n": "8a3ae8"}
 
 
+ANGEL = [  # a white feathered wing under a gold halo (D63), original art
+    "................",
+    ".....hgggggg....",
+    "....gG......Gg..",
+    ".....GGGGGGGG...",
+    "................",
+    "........WWWW....",
+    "......WWWWWWw...",
+    "....WWWWWWWwv...",
+    "...WWWWWWWwwv...",
+    "..WWWWWWWwwv....",
+    "..WWWWWWwwv.....",
+    ".WWWWWwwwv......",
+    ".WWWwwwv........",
+    "..WWwv..........",
+    "...Wv...........",
+    "................",
+]
+ANGEL_PAL = {"W": "ffffff", "w": "e4eaf4", "v": "b8c4d8", "g": "f2c540", "G": "c48a14", "h": "fff6b8"}
+
+
 def mirror(half):
     """Symmetric art: 16 rows of 8 characters (the left half) become 16 rows of 16."""
     return [row + row[::-1] for row in half]
@@ -354,6 +375,7 @@ def main():
         "blade": (blade_art(), "3a0606"),
         "teleport": (from_ascii(TELEPORT, TELEPORT_PAL), "2a0a58"),
         "golem": (from_ascii(GOLEM, GOLEM_PAL), "2a0a58"),
+        "angel": (from_ascii(ANGEL, ANGEL_PAL), "5a3e0c"),
         "lock": (from_ascii(LOCK, LOCK_PAL), "1a1a20"),
         "check": (from_ascii(CHECK, CHECK_PAL), "0c4a14"),
         "cross": (from_ascii(CROSS, CROSS_PAL), "30303a"),
@@ -363,7 +385,7 @@ def main():
     for name, (body, edge) in icons.items():
         img = outline(body, edge)
         write_png(os.path.join(OUT, name + ".png"), img)
-        if name in ("fire", "ice", "healing", "phase", "repulse", "sacrifice", "flight", "blade", "teleport", "golem"):
+        if name in ("fire", "ice", "healing", "phase", "repulse", "sacrifice", "flight", "blade", "teleport", "golem", "angel"):
             write_png(os.path.join(items, "focus_" + name + ".png"), img)
     print("wrote technique sprites to", os.path.normpath(OUT))
 

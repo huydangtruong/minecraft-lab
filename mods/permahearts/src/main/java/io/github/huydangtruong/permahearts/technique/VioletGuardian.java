@@ -21,18 +21,14 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
-import net.minecraft.world.entity.ai.goal.target.TargetGoal;
 import net.minecraft.world.entity.animal.golem.IronGolem;
-import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -41,7 +37,7 @@ import net.minecraft.world.phys.Vec3;
  * after its time, when its owner dies or leaves, or when the owner casts the technique again. The client draws it
  * with the vanilla iron golem model tinted violet.
  */
-public final class VioletGuardian extends IronGolem {
+public final class VioletGuardian extends IronGolem implements OwnedSummon {
 	public static final ResourceKey<EntityType<?>> KEY = ResourceKey.create(Registries.ENTITY_TYPE,
 		Identifier.fromNamespaceAndPath(PermaHearts.MOD_ID, "violet_guardian"));
 	public static final EntityType<VioletGuardian> TYPE = Registry.register(BuiltInRegistries.ENTITY_TYPE, KEY,
@@ -132,6 +128,7 @@ public final class VioletGuardian extends IronGolem {
 		setHealth(getMaxHealth());
 	}
 
+	@Override
 	public UUID owner() {
 		return owner;
 	}
@@ -153,7 +150,7 @@ public final class VioletGuardian extends IronGolem {
 		goalSelector.addGoal(1, new MeleeAttackGoal(this, 1.0, true));
 		goalSelector.addGoal(2, new FollowOwnerGoal(this));
 		goalSelector.addGoal(3, new RandomLookAroundGoal(this));
-		targetSelector.addGoal(1, new DefendOwnerGoal(this));
+		targetSelector.addGoal(1, new DefendOwnerGoal<>(this));
 	}
 
 	@Override
@@ -182,11 +179,18 @@ public final class VioletGuardian extends IronGolem {
 	/** Never attacks a player. */
 	@Override
 	public boolean canAttack(LivingEntity target) {
-		return !(target instanceof Player) && !(target instanceof VioletGuardian) && super.canAttack(target);
+		return !(target instanceof Player) && !(target instanceof OwnedSummon) && super.canAttack(target);
+	}
+
+	/** D62: a monster this guardian hurts counts as hurt by the owner, so a kill is the owner's kill. */
+	@Override
+	public boolean doHurtTarget(ServerLevel level, net.minecraft.world.entity.Entity target) {
+		OwnedSummon.giveKillCredit(this, target);
+		return super.doHurtTarget(level, target);
 	}
 
 	private Player ownerPlayer() {
-		return owner == null ? null : level().getPlayerByUUID(owner);
+		return OwnedSummon.ownerOf(this);
 	}
 
 	/** Walks back to the owner when far, teleports next to the owner when very far. */
@@ -230,58 +234,6 @@ public final class VioletGuardian extends IronGolem {
 		@Override
 		public void stop() {
 			g.getNavigation().stop();
-		}
-	}
-
-	/** Targets what hurt the owner, what the owner hit and any monster close to the owner; never players. */
-	private static final class DefendOwnerGoal extends TargetGoal {
-		private final VioletGuardian g;
-		private int wait;
-
-		DefendOwnerGoal(VioletGuardian g) {
-			super(g, false);
-			this.g = g;
-			setFlags(EnumSet.of(Flag.TARGET));
-		}
-
-		@Override
-		public boolean canUse() {
-			if (--wait > 0) {
-				return false;
-			}
-			wait = 10;
-			Player o = g.ownerPlayer();
-			if (o == null) {
-				return false;
-			}
-			LivingEntity t = pick(o);
-			if (t == null) {
-				return false;
-			}
-			targetMob = t;
-			return true;
-		}
-
-		private boolean valid(LivingEntity e, Player o) {
-			return e != null && e.isAlive() && !(e instanceof Player) && !(e instanceof VioletGuardian) && !e.isSpectator()
-				&& e.distanceToSqr(g) < 40 * 40 && e.distanceToSqr(o) < 32 * 32;
-		}
-
-		private LivingEntity pick(Player o) {
-			if (o.tickCount - o.getLastHurtByMobTimestamp() < 100 && valid(o.getLastHurtByMob(), o)) {
-				return o.getLastHurtByMob();
-			}
-			if (o.tickCount - o.getLastHurtMobTimestamp() < 100 && valid(o.getLastHurtMob(), o)) {
-				return o.getLastHurtMob();
-			}
-			AABB box = o.getBoundingBox().inflate(12, 6, 12);
-			Mob best = null;
-			for (Mob m : g.level().getEntitiesOfClass(Mob.class, box, m -> m instanceof Enemy && valid(m, o))) {
-				if (best == null || m.distanceToSqr(g) < best.distanceToSqr(g)) {
-					best = m;
-				}
-			}
-			return best;
 		}
 	}
 }

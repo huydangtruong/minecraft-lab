@@ -99,6 +99,23 @@ class TechniqueRulesTest {
 		assertEquals(50, TechniqueRules.golemHealth(1), 1e-9);
 		assertEquals(30, TechniqueRules.golemDamage(20), 1e-9);
 		assertEquals("4", TechniqueRules.stats(Technique.GOLEM, 20).get(0).value());
+		assertEquals(120, Technique.ANGEL.cooldownSeconds());
+		assertEquals("Warrior Angel", Technique.ANGEL.displayName());
+		int[][] angels = {{1, 2}, {4, 2}, {5, 3}, {9, 3}, {10, 4}, {14, 4}, {15, 5}, {19, 5}, {20, 6}};
+		for (int[] k : angels) {
+			assertEquals(k[1], TechniqueRules.angelCount(k[0]), "angels at level " + k[0]);
+		}
+		assertEquals(1.0, TechniqueRules.angelHealthFactor(1), 1e-9);
+		assertEquals(2.0, TechniqueRules.angelHealthFactor(20), 1e-9);
+		assertEquals(0.5, TechniqueRules.angelDamageFactor(1), 1e-9);
+		assertEquals(2.0, TechniqueRules.angelDamageFactor(20), 1e-9);
+		assertEquals(14, TechniqueRules.angelHealth(1), 1e-9);
+		assertEquals(28, TechniqueRules.angelHealth(20), 1e-9);
+		assertEquals(2, TechniqueRules.angelDamage(1), 1e-9);
+		assertEquals(8, TechniqueRules.angelDamage(20), 1e-9);
+		assertEquals(60, TechniqueRules.ANGEL_SECONDS);
+		assertEquals("6", TechniqueRules.stats(Technique.ANGEL, 20).get(0).value());
+		assertEquals("60 s", TechniqueRules.stats(Technique.ANGEL, 1).get(3).value());
 		assertEquals(16, Technique.FIRE.cooldownSeconds());
 		assertEquals(24, Technique.ICE.cooldownSeconds());
 		assertEquals(60, Technique.HEALING.cooldownSeconds());
