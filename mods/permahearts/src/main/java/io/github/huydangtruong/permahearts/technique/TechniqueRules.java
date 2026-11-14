@@ -183,6 +183,17 @@ public final class TechniqueRules {
 		return scaled(10, 0.5, level);
 	}
 
+	/** How far a phasing player sees through blocks (D51): 8 blocks at level 1 up to 48 at level 20, whole blocks. */
+	public static int phaseSightRange(int level) {
+		int l = Math.max(1, Math.min(MAX_LEVEL, level));
+		return (int) Math.round(8 + 40.0 * (l - 1) / (MAX_LEVEL - 1));
+	}
+
+	/** Distance where the in-rock fog of Phase Walk starts: 60% of the sight range. */
+	public static float phaseFogStart(int level) {
+		return phaseSightRange(level) * 0.6f;
+	}
+
 	public static double repulseRadius(int level) {
 		return scaled(4, 0.2, level);
 	}
@@ -212,6 +223,36 @@ public final class TechniqueRules {
 		return l <= 10 ? at1 + (at10 - at1) * (l - 1) / 9.0 : at10 + (at20 - at10) * (l - 10) / 10.0;
 	}
 
+	/** Seconds of creative-like flight (D52): 20 at level 1, 40 at 10, 60 at 20. */
+	public static double flightSeconds(int level) {
+		return piecewise(level, 20, 40, 60);
+	}
+
+	/** Flight speed on top of the creative flying speed (D52): +0% at level 1, +50% at 10, +100% at 20. */
+	public static double flightSpeedBonus(int level) {
+		return piecewise(level, 0, 0.5, 1.0);
+	}
+
+	/** Life Steal Blade damage on top of the player's base attack (D52): an iron sword's (+5) at level 1, +0.5 per level. */
+	public static double bladeDamage(int level) {
+		int l = Math.max(1, Math.min(MAX_LEVEL, level));
+		return 5 + 0.5 * (l - 1);
+	}
+
+	/** Unused since the blade got a 12 s cooldown (D52); kept for reference. */
+	public static final double BLADE_ATTACK_SPEED = 1.6;
+
+	/** Vanilla creative flying speed (Abilities default); the flight speed bonus is applied on top of it. */
+	public static final float CREATIVE_FLYING_SPEED = 0.05f;
+
+	/** Abilities flying speed while Flight is on. */
+	public static float flyingSpeed(int level) {
+		return (float) (CREATIVE_FLYING_SPEED * (1 + flightSpeedBonus(level)));
+	}
+
+	/** Slow falling after Flight ends, in ticks (5 s). */
+	public static final int FLIGHT_SLOW_FALL_TICKS = 100;
+
 	/** One line of the detail page: label and the value at a level, e.g. ("Range", "16 blocks"). */
 	public record Stat(String label, String value) {}
 
@@ -236,11 +277,20 @@ public final class TechniqueRules {
 				new Stat("Cooldown", t.cooldownSeconds() + " s"));
 			case PHASE -> List.of(
 				new Stat("Duration", num(phaseSeconds(level)) + " s"),
+				new Stat("Sight", phaseSightRange(level) + " blocks through walls"),
 				new Stat("Cooldown", t.cooldownSeconds() + " s"));
 			case REPULSE -> List.of(
 				new Stat("Radius", num(repulseRadius(level)) + " blocks"),
 				new Stat("Push", num(repulsePush(level))),
 				new Stat("Damage", num(repulseDamage(level))),
+				new Stat("Cooldown", t.cooldownSeconds() + " s"));
+			case FLIGHT -> List.of(
+				new Stat("Flight", num(flightSeconds(level)) + " s"),
+				new Stat("Speed", "+" + pct(flightSpeedBonus(level)) + " (creative = +0%)"),
+				new Stat("Cooldown", t.cooldownSeconds() + " s"));
+			case BLADE -> List.of(
+				new Stat("Damage", "base + " + num(bladeDamage(level)) + " + elixirs"),
+				new Stat("Life steal", "all damage dealt"),
 				new Stat("Cooldown", t.cooldownSeconds() + " s"));
 			case SACRIFICE -> List.of(
 				new Stat("Costs", pct(sacrificeCost(level)) + " of current health"),

@@ -35,6 +35,11 @@ public final class StatMath {
 		return e;
 	}
 
+	/** The value of an attribute from its base and only this mod's modifiers (no gear): what the Life Steal Blade uses. */
+	public static double baseWithMine(double base, List<Mod> mods) {
+		return value(base, mods.stream().filter(Mod::mine).toList(), true);
+	}
+
 	public static PlayerStats.Row split(String id, double base, List<Mod> mods) {
 		double total = value(base, mods, true);
 		double withoutMine = value(base, mods, false);

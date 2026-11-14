@@ -335,6 +335,8 @@ public class WandererGameTest {
 			Wanderer.accept(s);
 			ServerPlayer p = testPlayer(context);
 			context.assertTrue(Wanderer.startEvent(s, 0, p), "start should work");
+			// Tests run in parallel: Blood Moon mobs left by other tests count toward the 30-mob cap. Clear them first.
+			tagged(s, BloodMoon.TAG).forEach(net.minecraft.world.entity.Entity::discard);
 			BloodMoon.wave(s, List.of(p));
 			List<? extends Mob> spawned = tagged(s, BloodMoon.TAG);
 			long horses = spawned.stream().filter(m -> m instanceof net.minecraft.world.entity.animal.equine.ZombieHorse).count();

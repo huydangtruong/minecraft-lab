@@ -42,8 +42,10 @@ public final class TechniqueNet {
 	/** CAST / SELECT of the skill bar (P-011b). */
 	public static final int CAST = 0;
 	public static final int SELECT = 1;
+	/** Blade hit (P-014): slot = entity id of the target, charge unused. */
+	public static final int HIT = 2;
 
-	/** kind CAST: slot 0..3 and charge 0..1. kind SELECT: slot -1 (the cross) or 0..3, charge unused. */
+	/** kind CAST: slot 0..3 and charge 0..1. kind SELECT: slot -1 (the cross) or 0..3. kind HIT: slot = target entity id. */
 	public record SkillAction(int kind, int slot, float charge) implements CustomPacketPayload {
 		public static final Type<SkillAction> TYPE = new Type<>(Identifier.fromNamespaceAndPath(PermaHearts.MOD_ID, "skill_action"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, SkillAction> CODEC = StreamCodec.composite(
@@ -71,6 +73,8 @@ public final class TechniqueNet {
 				}
 			} else if (payload.kind() == SELECT) {
 				select(ctx.player(), payload.slot());
+			} else if (payload.kind() == HIT) {
+				TechniqueCasts.bladeAttack(ctx.player(), payload.slot()); // refusals are silent
 			}
 		});
 		ServerPlayNetworking.registerGlobalReceiver(TechniqueAction.TYPE, (payload, ctx) -> {

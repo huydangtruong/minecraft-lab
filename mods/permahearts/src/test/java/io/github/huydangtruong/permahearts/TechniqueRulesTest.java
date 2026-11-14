@@ -65,6 +65,18 @@ class TechniqueRulesTest {
 		assertArrayEquals(new double[] {0.80, 0.50, 0.30}, at(TechniqueRules::sacrificeCost), 1e-9);
 		assertArrayEquals(new double[] {5, 8, 10}, at(TechniqueRules::sacrificeSeconds), 1e-9);
 		assertEquals(45, Technique.SACRIFICE.cooldownSeconds());
+		assertEquals(8, TechniqueRules.phaseSightRange(1));
+		assertEquals(10, TechniqueRules.phaseSightRange(2));
+		assertEquals(27, TechniqueRules.phaseSightRange(10));
+		assertEquals(48, TechniqueRules.phaseSightRange(20));
+		assertArrayEquals(new double[] {20, 40, 60}, at(TechniqueRules::flightSeconds), 1e-9);
+		assertArrayEquals(new double[] {0, 0.5, 1.0}, at(TechniqueRules::flightSpeedBonus), 1e-9);
+		assertArrayEquals(new double[] {5, 9.5, 14.5}, at(TechniqueRules::bladeDamage), 1e-9);
+		assertEquals(0.05f, TechniqueRules.flyingSpeed(1), 1e-9f);
+		assertEquals(0.075f, TechniqueRules.flyingSpeed(10), 1e-6f);
+		assertEquals(0.1f, TechniqueRules.flyingSpeed(20), 1e-6f);
+		assertEquals(120, Technique.FLIGHT.cooldownSeconds());
+		assertEquals(12, Technique.BLADE.cooldownSeconds());
 		assertEquals(16, Technique.FIRE.cooldownSeconds());
 		assertEquals(24, Technique.ICE.cooldownSeconds());
 		assertEquals(60, Technique.HEALING.cooldownSeconds());

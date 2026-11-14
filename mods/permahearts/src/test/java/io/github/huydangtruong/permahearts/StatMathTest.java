@@ -47,4 +47,11 @@ class StatMathTest {
 		assertEquals("+0", StatMath.signed(0));
 		assertEquals("-2.4", StatMath.signed(-2.4));
 	}
+
+	@Test
+	void bladeBaseIgnoresGearButKeepsCultivation() {
+		// base 1, diamond sword +6 (gear), Strength elixirs +1.5: the blade sees 2.5
+		assertEquals(2.5, StatMath.baseWithMine(1, List.of(new Mod(6, 0, false), new Mod(1.5, 0, true))), 1e-9);
+		assertEquals(1, StatMath.baseWithMine(1, List.of(new Mod(6, 0, false))), 1e-9);
+	}
 }

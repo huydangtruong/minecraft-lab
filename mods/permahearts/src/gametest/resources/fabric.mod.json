@@ -5,8 +5,8 @@
 	"name": "PermaHearts tests",
 	"environment": "*",
 	"entrypoints": {
-		"fabric-client-gametest": ["io.github.huydangtruong.permahearts.QuestScreenClientTest", "io.github.huydangtruong.permahearts.TechniqueClientTest", "io.github.huydangtruong.permahearts.SkillBarClientTest"],
-		"fabric-gametest": ["io.github.huydangtruong.permahearts.PermaHeartsGameTest", "io.github.huydangtruong.permahearts.WandererGameTest", "io.github.huydangtruong.permahearts.TechniqueGameTest", "io.github.huydangtruong.permahearts.TechniqueEffectsGameTest"]
+		"fabric-client-gametest": ["io.github.huydangtruong.permahearts.QuestScreenClientTest", "io.github.huydangtruong.permahearts.TechniqueClientTest", "io.github.huydangtruong.permahearts.SkillBarClientTest", "io.github.huydangtruong.permahearts.FlightBladeClientTest"],
+		"fabric-gametest": ["io.github.huydangtruong.permahearts.PermaHeartsGameTest", "io.github.huydangtruong.permahearts.WandererGameTest", "io.github.huydangtruong.permahearts.TechniqueGameTest", "io.github.huydangtruong.permahearts.TechniqueEffectsGameTest", "io.github.huydangtruong.permahearts.FlightBladeGameTest"]
 	},
 	"depends": {
 		"permahearts": "*"
