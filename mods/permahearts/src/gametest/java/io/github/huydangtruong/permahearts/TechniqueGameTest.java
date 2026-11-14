@@ -6,6 +6,7 @@ import io.github.huydangtruong.permahearts.technique.TechniqueAttachment;
 import io.github.huydangtruong.permahearts.technique.TechniqueData;
 import io.github.huydangtruong.permahearts.technique.TechniqueNet;
 import io.github.huydangtruong.permahearts.technique.TechniqueRules;
+import io.github.huydangtruong.permahearts.technique.TechniqueSelection;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
@@ -201,6 +202,64 @@ public class TechniqueGameTest {
 		TechniqueAttachment.STREAM_CODEC.encode(buf, d);
 		TechniqueData back = TechniqueAttachment.STREAM_CODEC.decode(buf);
 		context.assertTrue(d.equals(back), "decoded data differs: " + back);
+		context.succeed();
+	}
+
+	// ---- P-011b: cast, cooldown, selection ----
+
+	private static ServerPlayer caster(GameTestHelper context, Technique t, int level, int slot) {
+		ServerPlayer p = player(context);
+		TechniqueAttachment.set(p, TechniqueData.DEFAULT.withLevel(t, level, 10).withEmeralds(TechniqueRules.MAX_EMERALDS).withSlot(slot, t));
+		return p;
+	}
+
+	@GameTest(maxTicks = 100)
+	public void castStartsCooldownAndIsRefusedWhileItRuns(GameTestHelper context) {
+		ServerPlayer p = caster(context, Technique.REPULSE, 7, 1);
+		context.assertTrue(TechniqueNet.cast(p, 1, 1f) == null, "first cast should work");
+		TechniqueData d = TechniqueAttachment.get(p);
+		context.assertTrue(d.onCooldown(Technique.REPULSE, now(p)), "cooldown should run");
+		context.assertTrue(d.cooldownLeft(Technique.REPULSE, now(p)) == Technique.REPULSE.cooldownTicks(), "cooldown should be " + Technique.REPULSE.cooldownTicks() + " ticks, was " + d.cooldownLeft(Technique.REPULSE, now(p)));
+		String err = TechniqueNet.cast(p, 1, 1f);
+		context.assertTrue(err != null && err.startsWith("On cooldown"), "second cast must be refused with the cooldown, was " + err);
+		context.succeed();
+	}
+
+	@GameTest(maxTicks = 100)
+	public void castRefusedForEmptyLockedAndSwitchOff(GameTestHelper context) {
+		ServerPlayer p = caster(context, Technique.HEALING, 3, 0);
+		context.assertTrue(TechniqueNet.cast(p, 2, 1f) != null, "empty slot must be refused");
+		context.assertTrue(TechniqueNet.cast(p, 7, 1f) != null && TechniqueNet.cast(p, -1, 1f) != null, "bad slot must be refused");
+		TechniqueAttachment.set(p, TechniqueAttachment.get(p).withEmeralds(0));
+		context.assertTrue(TechniqueNet.cast(p, 0, 1f) != null, "locked slot must be refused");
+		TechniqueAttachment.set(p, TechniqueAttachment.get(p).withEmeralds(TechniqueRules.MAX_EMERALDS));
+		enable(context, false);
+		context.assertTrue(TechniqueNet.cast(p, 0, 1f) != null, "switch off must refuse");
+		context.assertTrue(!TechniqueAttachment.get(p).onCooldown(Technique.HEALING, now(p)), "refused casts start no cooldown");
+		enable(context, true);
+		context.succeed();
+	}
+
+	@GameTest(maxTicks = 100)
+	public void castUsesThePlayersLevel(GameTestHelper context) {
+		// Healing heals scaled(20, 4, level) in all: the circle exists after the cast, level 1 data must not be used.
+		ServerPlayer p = caster(context, Technique.SACRIFICE, 20, 3);
+		TechniqueData d = TechniqueAttachment.get(p);
+		context.assertTrue(d.level(Technique.SACRIFICE) == 20 && d.inSlot(3) == Technique.SACRIFICE, "setup");
+		context.assertTrue(TechniqueNet.cast(p, 3, 1f) == null, "cast at level 20");
+		context.assertTrue(TechniqueAttachment.get(p).level(Technique.SACRIFICE) == 20, "level unchanged by a cast");
+		context.succeed();
+	}
+
+	@GameTest(maxTicks = 100)
+	public void selectKeepsOnlyFilledSlots(GameTestHelper context) {
+		ServerPlayer p = caster(context, Technique.PHASE, 2, 2);
+		context.assertTrue(TechniqueNet.select(p, 2) == 2 && TechniqueSelection.get(p) == 2, "filled slot can be selected");
+		context.assertTrue(TechniqueNet.select(p, 0) == -1 && TechniqueSelection.get(p) == -1, "empty slot becomes the cross");
+		TechniqueNet.select(p, 2);
+		TechniqueAttachment.set(p, TechniqueAttachment.get(p).withSlot(2, null));
+		context.assertTrue(TechniqueSelection.selectedTechnique(p) == null, "a slot that became empty selects nothing");
+		context.assertTrue(TechniqueNet.select(p, 99) == -1, "out of range becomes the cross");
 		context.succeed();
 	}
 }

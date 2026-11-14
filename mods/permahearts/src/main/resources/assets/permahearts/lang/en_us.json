@@ -96,5 +96,13 @@
   "permahearts.structure.ancient_city": "Ancient City",
   "permahearts.structure.fortress": "Nether Fortress",
   "permahearts.structure.bastion_remnant": "Bastion Remnant",
-  "effect.permahearts.frostbite": "Frostbite"
+  "effect.permahearts.frostbite": "Frostbite",
+  "item.permahearts.focus_fire": "Flame Burst Focus",
+  "item.permahearts.focus_ice": "Frost Orb Focus",
+  "item.permahearts.focus_healing": "Healing Light Focus",
+  "item.permahearts.focus_phase": "Phase Walk Focus",
+  "item.permahearts.focus_repulse": "Repulse Focus",
+  "item.permahearts.focus_sacrifice": "Blood Oath Focus",
+  "key.permahearts.technique": "Technique (tap: next, hold: wheel)",
+  "key.category.permahearts.main": "Immortal Cultivation"
 }

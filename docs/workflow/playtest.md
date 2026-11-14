@@ -96,3 +96,20 @@ Chưa có phím hay thanh chiêu (phần B), nên thử bằng lệnh op `/techn
 8. Tắt công tắc (`/gamerule permahearts:immortal_cultivation false`): `/technique cast ...` báo lỗi, không có gì xảy ra.
 
 Kiểm bằng máy: `./gradlew :permahearts:build` (game test cho từng chiêu) và `./gradlew :permahearts:runClientGameTest` (ảnh `20-fire-field` đến `26-phase-inside-wall-third-person` trong `mods/permahearts/build/run/clientGameTest/screenshots/`).
+
+## Chiêu thức: thanh chiêu, phím R, dùng chiêu (P-011 phần B)
+
+Cần công tắc thế giới BẬT, chế độ Survival (Creative/Spectator không hiện thanh chiêu và không dùng được chiêu, giống thanh HeartXP). Chuẩn bị: `/technique set @s fire 10`, `/technique set @s ice 5`, `/technique set @s healing 3`, `/technique emeralds @s 832` (mở 3 ô), rồi gắn chiêu vào ô ở tab Techniques (chưa gắn thì thanh chỉ có ô ✕).
+
+**Lưu ý phím R**: Essential cũng dùng R cho bảng emote. Hãy đổi một trong hai: Options > Controls > Key Binds > mục "Immortal Cultivation" > "Technique (tap: next, hold: wheel)", hoặc đổi phím emote trong Essential.
+
+1. **Thanh chiêu**: góc dưới phải, cách mép 8 px như thanh HeartXP: ô ✕ rồi mỗi ô đã mở một ô (hình chiêu hoặc trống). Ô đang chọn có viền vàng; ban đầu chọn ✕. Mở chat/inventory thì thanh vẫn hiện; nhấn F1 thì ẩn.
+2. **Bấm nhanh R** (dưới 0,25 giây): chuyển ✕ → ô chiêu 1 → 2 → ... → ✕ (bỏ qua ô trống). Chiêu đang chọn hiện tên và cấp phía trên thanh. Tay chính hiện **vật tiêu điểm** (biểu tượng chiêu) thay cho món đang cầm, kèm hạt ở tay (lửa nhỏ bay lên, bông tuyết, sao xanh lá, hạt tím, khói trắng xoáy, giọt đỏ sẫm). Đồ trong túi không đổi. F5 để xem ngoài thân: tay chính cầm vật tiêu điểm, người chơi khác (chơi chung) cũng thấy.
+3. **Giữ R** (từ 0,25 giây): hiện bảng tròn giữa màn hình (game không dừng, chuột tự do): ✕ ở trên cùng, các ô chiêu xếp vòng theo chiều kim đồng hồ, mỗi ô có số giây hồi nếu đang hồi. Rê chuột về hướng một ô: ô đó sáng viền trắng, bên dưới ghi tên, cấp, hồi chiêu. **Thả R** để chọn; Esc để hủy (không đổi). Chuột ở sát tâm là không chọn gì.
+4. **Chuột trái khi đã chọn chiêu**: ném ngay với sức đầy (Lửa/Băng) hoặc dùng luôn (Hồi máu, Xuyên tường, Hất tung, Hiến Tế). Đánh/đào/đặt block bằng đồ cầm tay bị chặn khi đang chọn chiêu; muốn đánh bình thường thì bấm R về ✕ hoặc cuộn hotbar / bấm phím 1-9 (tự về ✕).
+5. **Chuột phải giữ** với Lửa/Băng: thanh nạp xanh hiện phía trên thanh chiêu, đầy sau 1 giây (chuyển vàng). **Thả** để ném: nạp nửa thì bay gần hơn (nửa tầm). Với các chiêu dùng ngay thì bấm chuột phải là dùng.
+6. **Hồi chiêu**: ngay sau khi dùng, ô chiêu bị phủ xám, thu nhỏ từ trên xuống, ghi số giây còn lại (Lửa 16 s, Băng 24 s, Hồi máu 60 s, Xuyên tường 90 s, Hất tung 20 s, Hiến Tế 45 s). Dùng khi đang hồi: dòng chữ "On cooldown: N s" hiện giữa/dưới màn hình, không ném, không tốn gì. Chiêu đang hồi vẫn chọn được.
+7. **Tự bỏ chọn**: chọn một ô rồi vào tab Techniques gỡ chiêu khỏi ô đó, hoặc chết, hoặc tắt công tắc thế giới: thanh tự về ✕ và vật tiêu điểm biến mất.
+8. **Chơi chung** (Essential): người kia chọn chiêu thì bạn thấy họ cầm vật tiêu điểm và hạt ở tay; họ đổi/bỏ chọn thì mất.
+
+Kiểm bằng máy: `./gradlew :permahearts:build` (game test cast/cooldown/chọn) và `./gradlew :permahearts:runClientGameTest` (ảnh `30-skill-bar-cross` đến `46-focus-third-person` trong `mods/permahearts/build/run/clientGameTest/screenshots/`).

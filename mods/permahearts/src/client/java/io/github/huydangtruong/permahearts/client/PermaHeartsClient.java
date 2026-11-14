@@ -14,6 +14,9 @@ public class PermaHeartsClient implements ClientModInitializer {
 	public void onInitializeClient() {
 		HudElementRegistry.attachElementAfter(VanillaHudElements.CHAT,
 			Identifier.fromNamespaceAndPath("permahearts", "heart_xp"), new HeartXpHud());
+		HudElementRegistry.attachElementAfter(VanillaHudElements.CHAT,
+			Identifier.fromNamespaceAndPath("permahearts", "skill_bar"), new SkillBarHud());
+		ClientSkills.register();
 		MenuScreens.register(WandererMenus.TYPE, WandererScreen::new);
 		StatsPanel.register();
 		LayeredHeartsHud.register();

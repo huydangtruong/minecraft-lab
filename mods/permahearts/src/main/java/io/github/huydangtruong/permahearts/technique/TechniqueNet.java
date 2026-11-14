@@ -39,16 +39,96 @@ public final class TechniqueNet {
 		}
 	}
 
+	/** CAST / SELECT of the skill bar (P-011b). */
+	public static final int CAST = 0;
+	public static final int SELECT = 1;
+
+	/** kind CAST: slot 0..3 and charge 0..1. kind SELECT: slot -1 (the cross) or 0..3, charge unused. */
+	public record SkillAction(int kind, int slot, float charge) implements CustomPacketPayload {
+		public static final Type<SkillAction> TYPE = new Type<>(Identifier.fromNamespaceAndPath(PermaHearts.MOD_ID, "skill_action"));
+		public static final StreamCodec<RegistryFriendlyByteBuf, SkillAction> CODEC = StreamCodec.composite(
+			ByteBufCodecs.VAR_INT, SkillAction::kind,
+			ByteBufCodecs.VAR_INT, SkillAction::slot,
+			ByteBufCodecs.FLOAT, SkillAction::charge,
+			SkillAction::new);
+
+		@Override
+		public Type<? extends CustomPacketPayload> type() {
+			return TYPE;
+		}
+	}
+
 	private TechniqueNet() {}
 
 	public static void register() {
 		PayloadTypeRegistry.serverboundPlay().register(TechniqueAction.TYPE, TechniqueAction.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(SkillAction.TYPE, SkillAction.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(SkillAction.TYPE, (payload, ctx) -> {
+			if (payload.kind() == CAST) {
+				String error = cast(ctx.player(), payload.slot(), payload.charge());
+				if (error != null) {
+					ctx.player().sendOverlayMessage(Component.literal(error));
+				}
+			} else if (payload.kind() == SELECT) {
+				select(ctx.player(), payload.slot());
+			}
+		});
 		ServerPlayNetworking.registerGlobalReceiver(TechniqueAction.TYPE, (payload, ctx) -> {
 			String error = apply(ctx.player(), payload.kind(), payload.technique(), payload.slot());
 			if (error != null) {
 				ctx.player().sendOverlayMessage(Component.literal(error));
 			}
 		});
+	}
+
+	/**
+	 * Casts the technique in a slot (P-011b). Returns null when it was cast, else the reason (English, shown on the overlay).
+	 * Checks: switch on, alive, not spectator, slot open and filled, level at least 1, not on cooldown. Starts the cooldown.
+	 */
+	public static String cast(ServerPlayer p, int slot, float charge) {
+		if (!PermaHearts.enabled(p.level().getServer())) {
+			return "Immortal Cultivation is off in this world";
+		}
+		if (!p.isAlive() || p.isSpectator()) {
+			return "You cannot cast now";
+		}
+		TechniqueData d = TechniqueAttachment.get(p);
+		if (slot < 0 || slot >= d.slotsOpen()) {
+			return "That slot is locked";
+		}
+		Technique t = d.inSlot(slot);
+		if (t == null) {
+			return "That slot is empty";
+		}
+		int level = d.level(t);
+		if (level < 1) {
+			return "Learn " + t.displayName() + " first";
+		}
+		long now = p.level().getServer().overworld().getGameTime();
+		if (d.onCooldown(t, now)) {
+			return "On cooldown: " + (d.cooldownLeft(t, now) + 19) / 20 + " s";
+		}
+		float c = Float.isNaN(charge) ? 1f : Math.max(0f, Math.min(1f, charge));
+		if (!TechniqueCasts.cast(p, t, level, c)) {
+			return "You cannot cast now";
+		}
+		TechniqueAttachment.set(p, TechniqueAttachment.get(p).withCooldown(t, now + t.cooldownTicks()));
+		return null;
+	}
+
+	/** Selects the cross (-1) or a filled slot. Anything else becomes the cross. Returns the index kept. */
+	public static int select(ServerPlayer p, int index) {
+		int kept = -1;
+		if (index >= 0 && index < TechniqueRules.MAX_SLOTS) {
+			TechniqueData d = TechniqueAttachment.get(p);
+			Technique t = d.inSlot(index);
+			if (index < d.slotsOpen() && t != null && d.level(t) >= 1
+				&& PermaHearts.enabled(p.level().getServer()) && p.isAlive() && !p.isSpectator()) {
+				kept = index;
+			}
+		}
+		TechniqueSelection.set(p, kept);
+		return kept;
 	}
 
 	/** Runs a request. Returns null when it worked, else the reason it was refused (English, shown to the player). */
