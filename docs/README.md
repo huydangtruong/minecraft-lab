@@ -4,6 +4,7 @@ Trang định tuyến. Repo này chứa các mod Fabric của Huy cho Minecraft 
 
 | Muốn biết | Đọc |
 |---|---|
+| **Đang làm dở gì, bước tiếp theo** (đọc đầu tiên) | [system/03-status.md](system/03-status.md) |
 | Phiên bản, đường dẫn, Java, cách tra tên class/hàm, Essential hoạt động thế nào | [system/00-environment.md](system/00-environment.md) |
 | Các quyết định của Huy | [system/01-decisions.md](system/01-decisions.md) |
 | API đã kiểm trên 26.3 (chữ ký), bẫy đã gặp, kết quả build | [system/02-findings.md](system/02-findings.md) |

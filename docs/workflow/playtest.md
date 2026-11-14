@@ -152,3 +152,11 @@ Survival, công tắc BẬT, `/technique set @s teleport 1` (hoặc học trong 
 6. Ở Nether chiêu không đưa lên nóc bedrock (tìm khoảng trống gần độ cao hiện tại).
 
 Kiểm bằng máy: `./gradlew :permahearts:build` (game test `ThousandMileStepGameTest`: 150 block, sàn 20%, tường, dung nham bị từ chối) và `runClientGameTest` (ảnh `60-teleport-focus-in-hand`, `61-teleport-charging`, `62-teleport-after`).
+
+## P-020: Huyết Kiếm nâng cấp và Violet Guardian
+
+1. **Huyết Kiếm**: sát thương cấp 1 là +8 (trước +5), cấp 20 là +17.5. Chém trúng: mục tiêu **chảy máu** 4 giây (mất 1 máu mỗi giây, hạt đỏ, có biểu tượng giọt máu) và bị **đánh văng**: cấp 1 khoảng 2 block, cấp 20 khoảng 6 block (quái xác sống cũng chảy máu).
+2. **Violet Guardian** (chiêu thứ 10, `/technique set @s golem 20`): bấm một lần, triệu hồi Iron Golem **màu tím** cạnh bạn. Số lượng: 1 (cấp 1-9), 2 (10-14), 3 (15-19), 4 (cấp 20). Máu và sát thương bằng 0.5x golem thường ở cấp 1, 2x ở cấp 20.
+3. Golem đi theo bạn như chó, tự đánh quái quanh bạn và quái đánh bạn; **không** đánh người chơi, bạn đánh chúng thì không gây sát thương. Xa hơn khoảng 16 block thì dịch chuyển về cạnh bạn.
+4. Tồn tại **90 giây** rồi biến mất kèm hạt khói; bạn chết/thoát game hoặc dùng lại chiêu thì biến mất ngay (dùng lại thì thay bằng bộ mới). Hồi chiêu **180 giây**.
+5. Kiểm bằng máy: `./gradlew :permahearts:build` (`GolemGameTest`) và `runClientGameTest` (ảnh `70-blade-hit-knockback`, `71-guardians-first-person`, `72-guardians-third-person`, `73-guardians-fight`).

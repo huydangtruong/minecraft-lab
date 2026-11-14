@@ -34,12 +34,12 @@ import net.minecraft.world.phys.Vec3;
 
 /** P-014: Flight and Life Steal Blade on a real survival player (the helper's mock player is always Creative). */
 public class FlightBladeGameTest {
-	private static void enable(GameTestHelper c) {
+	static void enable(GameTestHelper c) {
 		MinecraftServer s = c.getLevel().getServer();
 		s.getGameRules().set(PermaHearts.ENABLED, true, s);
 	}
 
-	private static void floor(GameTestHelper c) {
+	static void floor(GameTestHelper c) {
 		for (int x = 0; x < 12; x++) {
 			for (int z = 0; z < 12; z++) {
 				c.setBlock(x, 0, z, Blocks.STONE);
@@ -47,12 +47,12 @@ public class FlightBladeGameTest {
 		}
 	}
 
-	private static void place(GameTestHelper c, ServerPlayer p, double x, double y, double z, float yaw, float pitch) {
+	static void place(GameTestHelper c, ServerPlayer p, double x, double y, double z, float yaw, float pitch) {
 		Vec3 v = c.absoluteVec(new Vec3(x, y, z));
 		p.teleportTo(c.getLevel(), v.x, v.y, v.z, Set.of(), yaw, pitch, false);
 	}
 
-	private static ServerPlayer survivor(GameTestHelper c) {
+	static ServerPlayer survivor(GameTestHelper c) {
 		ServerLevel level = c.getLevel();
 		MinecraftServer server = level.getServer();
 		GameProfile profile = new GameProfile(UUID.randomUUID(), "fb" + Integer.toHexString((int) (Math.random() * 0xFFFFFF)));
@@ -74,7 +74,7 @@ public class FlightBladeGameTest {
 		return p;
 	}
 
-	private static void drop(GameTestHelper c, ServerPlayer p) {
+	static void drop(GameTestHelper c, ServerPlayer p) {
 		c.getLevel().getServer().getPlayerList().remove(p);
 	}
 
@@ -162,7 +162,7 @@ public class FlightBladeGameTest {
 		String error = TechniqueCasts.bladeAttack(p, h.getId());
 		c.assertTrue(error == null, "hit refused: " + error);
 		float dealt = hh - h.getHealth();
-		c.assertTrue(dealt <= 6f && dealt > 5.8f, "base 1 + 5 = 6 damage minus the Husk armour, was " + dealt);
+		c.assertTrue(dealt <= 9f && dealt > 8.8f, "base 1 + 8 = 9 damage minus the Husk armour, was " + dealt);
 		c.assertTrue(Math.abs(p.getHealth() - (5f + dealt)) < 1e-3, "healed by the damage dealt, was " + p.getHealth());
 		c.assertTrue(TechniqueAttachment.get(p).onCooldown(Technique.BLADE, c.getLevel().getServer().overworld().getGameTime()), "landed hit starts the cooldown");
 		String again = TechniqueCasts.bladeAttack(p, h.getId());
@@ -182,12 +182,12 @@ public class FlightBladeGameTest {
 		p.getAttribute(Attributes.ATTACK_DAMAGE).addPermanentModifier(new AttributeModifier(
 			Identifier.fromNamespaceAndPath(PermaHearts.MOD_ID, "test_strength"), 2.0, AttributeModifier.Operation.ADD_VALUE));
 		float hh = h.getHealth();
-		p.setHealth(10f);
+		p.setHealth(4f);
 		c.assertTrue(TechniqueCasts.bladeAttack(p, h.getId()) == null, "hit works");
 		float dealt = hh - h.getHealth();
 		double want = 1 + 2 + TechniqueRules.bladeDamage(2);
 		c.assertTrue(dealt <= want && dealt > want - 0.3, "base + elixir + blade = " + want + ", was " + dealt);
-		c.assertTrue(Math.abs(p.getHealth() - (10 + dealt)) < 1e-3, "heal equals damage dealt");
+		c.assertTrue(Math.abs(p.getHealth() - (4 + dealt)) < 1e-3, "heal equals damage dealt");
 		drop(c, p);
 		c.succeed();
 	}

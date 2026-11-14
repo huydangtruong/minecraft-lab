@@ -63,6 +63,7 @@ final class FocusParticles {
 					level.addParticle(ParticleTypes.END_ROD, x, y, z, (rnd.nextDouble() - 0.5) * 0.03, -0.03, (rnd.nextDouble() - 0.5) * 0.03);
 				}
 			}
+			case GOLEM -> level.addParticle(new net.minecraft.core.particles.DustParticleOptions(0xb45cff, 0.9f), x, y, z, 0, 0.01, 0);
 			case BLADE -> {
 				level.addParticle(DROP, x, y - 0.1, z, 0, -0.05, 0);
 				if (rnd.nextInt(2) == 0) {

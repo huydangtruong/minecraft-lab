@@ -27,6 +27,7 @@ import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.phys.AABB;
@@ -46,6 +47,8 @@ public final class TechniqueCasts {
 	/** Registers the effect, attachments, events, ticking and the cast command. Called once from PermaHearts. */
 	public static void init() {
 		Frostbite.init();
+		Bleeding.init();
+		VioletGuardian.init();
 		PhaseState.ATTACHMENT.identifier();
 		Flight.init();
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
@@ -82,6 +85,10 @@ public final class TechniqueCasts {
 			}
 			case BLADE -> {
 				return false; // the blade is not cast: a left click hits (bladeHit)
+			}
+			case GOLEM -> {
+				VioletGuardian.summon(caster, lvl);
+				caster.level().playSound(null, caster.blockPosition(), SoundEvents.IRON_GOLEM_REPAIR, SoundSource.PLAYERS, 1f, 0.7f);
 			}
 		}
 		return true;
@@ -236,6 +243,21 @@ public final class TechniqueCasts {
 		return null;
 	}
 
+	/** Ground friction: a body on flat ground keeps 0.91 * 0.6 of its speed each tick, so it slides speed / (1 - 0.546). */
+	static final double SLIDE_FACTOR = 1 - 0.91 * 0.6;
+
+	/** Throws the target horizontally away from the attacker so it slides about {@code blocks} on flat ground (D60). */
+	static void knockBack(ServerPlayer from, LivingEntity target, double blocks) {
+		Vec3 dir = new Vec3(target.getX() - from.getX(), 0, target.getZ() - from.getZ());
+		if (dir.lengthSqr() < 1e-6) {
+			dir = from.getLookAngle().multiply(1, 0, 1);
+		}
+		dir = dir.normalize();
+		double speed = blocks * SLIDE_FACTOR;
+		target.setDeltaMovement(dir.x * speed, Math.min(0, target.getDeltaMovement().y), dir.z * speed);
+		target.needsSync = true; // sends the new velocity to clients (the old hurtMarked)
+	}
+
 	/** The hit itself, no checks. Returns the health the target actually lost (which the attacker gets back). */
 	public static float bladeHit(ServerPlayer p, LivingEntity target, int level) {
 		ServerLevel sl = p.level();
@@ -246,6 +268,10 @@ public final class TechniqueCasts {
 		if (dealt > 0) {
 			p.heal(dealt);
 		}
+		if (target.isAlive()) {
+			target.addEffect(new MobEffectInstance(Bleeding.EFFECT, TechniqueRules.BLEED_SECONDS * 20, 0, false, true, true));
+		}
+		knockBack(p, target, TechniqueRules.bladeKnockback(Mth.clamp(level, 1, TechniqueRules.MAX_LEVEL)));
 		p.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 		Vec3 from = target.position().add(0, target.getBbHeight() * 0.6, 0);
 		Vec3 to = p.getEyePosition().subtract(0, 0.4, 0);
