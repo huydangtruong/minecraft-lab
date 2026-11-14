@@ -45,7 +45,10 @@ public final class TechniqueCastCommand {
 			src.sendFailure(Component.literal("ImmortalCultivation is off in this world, techniques do nothing"));
 			return 0;
 		}
-		TechniqueCasts.cast(p, t.get(), level, charge);
+		if (!TechniqueCasts.cast(p, t.get(), level, charge)) {
+			src.sendFailure(Component.literal(t.get().displayName() + " could not be cast here"));
+			return 0;
+		}
 		src.sendSuccess(() -> Component.literal("Cast " + t.get().displayName() + " level " + level), false);
 		return 1;
 	}

@@ -15,6 +15,11 @@ public final class TechniqueRules {
 	/** Seconds a charged throw needs to reach full power (like a bow). */
 	public static final float FULL_CHARGE_SECONDS = 1f;
 
+	/** Seconds of holding right click to reach full charge: Thousand Mile Step takes 3 times as long as the orbs (D58). */
+	public static float fullChargeSeconds(Technique t) {
+		return t == Technique.TELEPORT ? 3 * FULL_CHARGE_SECONDS : FULL_CHARGE_SECONDS;
+	}
+
 	private TechniqueRules() {}
 
 	// ---- XP ----
@@ -259,6 +264,19 @@ public final class TechniqueRules {
 	/** Slow falling after Flight ends, in ticks (5 s). */
 	public static final int FLIGHT_SLOW_FALL_TICKS = 100;
 
+	/** About how far a vanilla ender pearl flies on flat ground at full strength (simulated: 1.5 speed, 0.03 gravity). */
+	public static final double PEARL_RANGE = 50;
+
+	/** Thousand Mile Step range as a multiple of an ender pearl's (D58): 3x at level 1 up to 50x at level 20. */
+	public static double teleportPearls(int level) {
+		return linear(level, 3, 50);
+	}
+
+	/** Thousand Mile Step distance in blocks at full charge: 150 at level 1, 2500 at level 20. */
+	public static double teleportRange(int level) {
+		return PEARL_RANGE * teleportPearls(level);
+	}
+
 	/** One line of the detail page: label and the value at a level, e.g. ("Range", "16 blocks"). */
 	public record Stat(String label, String value) {}
 
@@ -297,6 +315,11 @@ public final class TechniqueRules {
 			case BLADE -> List.of(
 				new Stat("Damage", num(bladeDamage(level))), // D57: just the number
 				new Stat("Life steal", "all damage dealt"),
+				new Stat("Cooldown", t.cooldownSeconds() + " s"));
+			case TELEPORT -> List.of(
+				new Stat("Range", num(teleportRange(level)) + " blocks"),
+				new Stat("Ender pearls", num(teleportPearls(level)) + "x"),
+				new Stat("Charge", num(fullChargeSeconds(t)) + " s"),
 				new Stat("Cooldown", t.cooldownSeconds() + " s"));
 			case SACRIFICE -> List.of(
 				new Stat("Costs", pct(sacrificeCost(level)) + " of current health"),

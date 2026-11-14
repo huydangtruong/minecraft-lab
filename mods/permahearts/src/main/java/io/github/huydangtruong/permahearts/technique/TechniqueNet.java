@@ -114,7 +114,7 @@ public final class TechniqueNet {
 		}
 		float c = Float.isNaN(charge) ? 1f : Math.max(0f, Math.min(1f, charge));
 		if (!TechniqueCasts.cast(p, t, level, c)) {
-			return "You cannot cast now";
+			return t == Technique.TELEPORT ? "No safe place to land" : "You cannot cast now";
 		}
 		TechniqueAttachment.set(p, TechniqueAttachment.get(p).withCooldown(t, now + t.cooldownTicks()));
 		return null;

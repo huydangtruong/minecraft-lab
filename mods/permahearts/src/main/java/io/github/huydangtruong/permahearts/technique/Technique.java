@@ -11,7 +11,8 @@ public enum Technique {
 	REPULSE("repulse", "Heaven Blast", 20, false),
 	SACRIFICE("sacrifice", "Undying Jutsu", 45, false), // D47: was 30 s
 	FLIGHT("flight", "Cloud Travel", 120, false), // D52
-	BLADE("blade", "Life Steal Blade", 12, false); // D52: held like a weapon; each landed hit starts the 12 s cooldown
+	BLADE("blade", "Life Steal Blade", 12, false),
+	TELEPORT("teleport", "Thousand Mile Step", 60, true); // D58: charged throw like Fireball, then the caster teleports // D52: held like a weapon; each landed hit starts the 12 s cooldown
 
 	private final String id;
 	private final String displayName;
