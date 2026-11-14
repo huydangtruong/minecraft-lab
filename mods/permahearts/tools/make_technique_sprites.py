@@ -47,8 +47,7 @@ def outline(img, color):
     return out
 
 
-FIRE = [
-    "................",
+FIRE = [  # one empty row at the bottom so the outline closes (Huy)
     "......r.........",
     ".....rr.........",
     ".....rrr........",
@@ -64,6 +63,7 @@ FIRE = [
     "...rryywwyrr....",
     "....rrryyrr.....",
     ".....rrrrr......",
+    "................",
 ]
 FIRE_PAL = {"r": "d4380f", "y": "ff8a1a", "w": "ffd84a", "h": "fff3b0"}
 
@@ -146,25 +146,25 @@ def repulse_color(dx, dy):
     return None
 
 
-SACRIFICE = [
+SACRIFICE = [  # silver cross (D50), original art
     "................",
-    ".......rr.......",
-    ".......rr.......",
-    "......rrrr......",
-    "......rrrr......",
-    ".....rrrrrr.....",
-    "....rrrrrrrr....",
-    "....rrhrrrrr....",
-    "...rrrhrrrrrr...",
-    "...rrrhrrrrrr...",
-    "...rrrrrrrrdr...",
-    "...rrrrrrrddr...",
-    "....rrrrrdddr...",
-    "....rrrrdddr....",
-    ".....rrrrrr.....",
-    "......rrrr......",
+    "......hhhs......",
+    "......hmms......",
+    "......hmms......",
+    "..hhhhhhhhhhhs..",
+    "..hmmmmwmmmmms..",
+    "..hmmmmmmmmmms..",
+    "..sssshmmsssss..",
+    "......hmms......",
+    "......hmms......",
+    "......hmms......",
+    "......hmms......",
+    "......hmms......",
+    "......hmms......",
+    "......ssss......",
+    "................",
 ]
-SACRIFICE_PAL = {"r": "d41a1a", "h": "ff9a9a", "d": "8a0a0a"}
+SACRIFICE_PAL = {"h": "f4f7fa", "m": "c3cad3", "s": "7e8896", "w": "ffffff"}
 
 LOCK = [
     "................",
@@ -255,14 +255,18 @@ def main():
         "healing": (from_ascii(HEALING, HEALING_PAL), "0f4a1a"),
         "phase": (procedural(phase_color), "2a0a58"),
         "repulse": (procedural(repulse_color), "1c3a6e"),
-        "sacrifice": (from_ascii(SACRIFICE, SACRIFICE_PAL), "4a0606"),
+        "sacrifice": (from_ascii(SACRIFICE, SACRIFICE_PAL), "2a2f37"),
         "lock": (from_ascii(LOCK, LOCK_PAL), "1a1a20"),
         "check": (from_ascii(CHECK, CHECK_PAL), "0c4a14"),
         "cross": (from_ascii(CROSS, CROSS_PAL), "30303a"),
         "plus": (from_ascii(PLUS, PLUS_PAL), "0c4a14"),
     }
+    items = os.path.join(OUT, "..", "..", "..", "item")  # focus item textures = the technique icons (P-011 B)
     for name, (body, edge) in icons.items():
-        write_png(os.path.join(OUT, name + ".png"), outline(body, edge))
+        img = outline(body, edge)
+        write_png(os.path.join(OUT, name + ".png"), img)
+        if name in ("fire", "ice", "healing", "phase", "repulse", "sacrifice"):
+            write_png(os.path.join(items, "focus_" + name + ".png"), img)
     print("wrote technique sprites to", os.path.normpath(OUT))
 
 
