@@ -2,7 +2,7 @@
 
 > **Tóm tắt cho Huy (VN, ≤ 3 dòng):** Thêm 2 chiêu: **Bay** (bay như Creative, 20→60 giây, nhanh hơn tới +100%, hồi 120 giây) và **Huyết Kiếm** (cầm kiếm nhuốm máu, chuột trái đánh trúng thì gây sát thương = cơ bản + chiêu + linh dược và hút máu đúng lượng đó; không hồi chiêu). Sau đó phát hành.
 
-- **Status:** in-dev
+- **Status:** merged
 - **Mod / decision:** `permahearts`, D52 · **Branch:** `feat/P-014-flight-blade` · **Depends on:** P-011, P-012 (merged); P-013 (Phase Walk sight fog) runs in parallel on another branch
 
 ## Already done (manager)
