@@ -68,12 +68,12 @@ public final class TechniquesTab {
 
 	private static String description(Technique t) {
 		return switch (t) {
-			case FIRE -> "Throw a fire orb (hold to charge). It leaves a burning field.";
-			case ICE -> "Throw a frost orb (hold to charge). Chills everything in its area.";
-			case HEALING -> "A circle at your feet heals every living thing inside.";
-			case PHASE -> "Walk through blocks at your feet level and above.";
-			case REPULSE -> "Blast away everything around you and hurt it a little.";
-			case SACRIFICE -> "Give up health to be invulnerable for a while.";
+			case FIRE -> "Charge and throw a fire orb.";
+			case ICE -> "Charge and throw a frost orb.";
+			case HEALING -> "A circle that heals everything.";
+			case PHASE -> "Walk through blocks for a while.";
+			case REPULSE -> "Blast everything around away.";
+			case SACRIFICE -> "Health for invulnerability.";
 		};
 	}
 
@@ -114,17 +114,17 @@ public final class TechniquesTab {
 		return mx >= x && mx < x + w && my >= y && my < y + h;
 	}
 
-	/** Detail page button rects: {x, y, w, h}. */
+	/** Detail page button rects: {x, y, w, h}. Back sits at the top right, on the title line. */
 	private static int[] upgradeRect(int tx, int right, int y0, int h) {
-		return new int[] {tx, y0 + h - 7 - 30, right - tx, 14};
+		return new int[] {tx, y0 + h - 7 - 14, 104, 14};
 	}
 
 	private static int[] resetRect(int tx, int right, int y0, int h) {
-		return new int[] {tx, y0 + h - 7 - 14, (right - tx) - 44, 14};
+		return new int[] {tx + 104, y0 + h - 7 - 14, right - tx - 104, 14};
 	}
 
 	private static int[] backRect(int tx, int right, int y0, int h) {
-		return new int[] {right - 40, y0 + h - 7 - 14, 40, 14};
+		return new int[] {right - 36, y0 + 4, 36, 13};
 	}
 
 	// ---- drawing ----
@@ -241,18 +241,18 @@ public final class TechniquesTab {
 
 	private static void drawDetail(GuiGraphicsExtractor g, Font font, TechniqueData d, long now, Technique t, int tx, int right, int y0, int h, int mx, int my) {
 		int level = d.level(t);
-		int y = y0 + LIST_TOP - 3;
+		int y = y0 + LIST_TOP - 4;
 		g.blitSprite(RenderPipelines.GUI_TEXTURED, icon(t), tx, y, 16, 16);
 		g.text(font, Component.literal(t.displayName()).withStyle(ChatFormatting.BOLD), tx + 20, y + 4, TOTAL, false);
 		String lv = "Lv " + level + " / " + TechniqueRules.MAX_LEVEL;
 		g.text(font, lv, right - font.width(lv), y + 4, level > 0 ? BONUS : BASE, false);
-		y += 20;
+		y += 18;
 		List<FormattedCharSequence> lines = font.split(Component.literal(description(t)), right - tx);
-		for (int i = 0; i < Math.min(2, lines.size()); i++) {
-			g.text(font, lines.get(i), tx, y, TEXT, false);
+		if (!lines.isEmpty()) {
+			g.text(font, lines.get(0), tx, y, TEXT, false);
 			y += LINE;
 		}
-		y += 3;
+		y += 2;
 		int shown = Math.max(1, level);
 		boolean max = level >= TechniqueRules.MAX_LEVEL;
 		boolean compare = level >= 1 && !max;
@@ -268,19 +268,41 @@ public final class TechniquesTab {
 			String cur = now1.get(i).value();
 			String nxt = next.get(i).value();
 			g.text(font, now1.get(i).label(), tx, y, TEXT, false);
+			int avail = right - vx;
 			if (!compare || cur.equals(nxt)) {
-				g.text(font, cur, vx, y, level > 0 ? TOTAL : BASE, false);
-			} else if (font.width(cur + " > " + nxt) <= right - vx) {
-				int x = vx;
-				g.text(font, cur, x, y, BASE, false);
-				x += font.width(cur) + 3;
-				g.text(font, "→", x, y, BASE, false);
-				x += font.width("→") + 3;
-				g.text(font, nxt, x, y, BONUS, false);
+				int color = level > 0 ? TOTAL : BASE;
+				List<FormattedCharSequence> parts = font.split(Component.literal(cur), avail);
+				for (int k = 0; k < Math.min(2, parts.size()); k++) {
+					g.text(font, parts.get(k), vx, y, color, false);
+					if (k == 0 && parts.size() > 1) {
+						y += LINE;
+					}
+				}
 			} else {
-				g.text(font, cur, vx, y, BASE, false);
-				y += LINE;
-				g.text(font, "→ " + nxt, vx, y, BONUS, false);
+				// "16 blocks" -> "18 blocks" reads better as "16 > 18 blocks": the words they share go once, at the end
+				String[] a = cur.split(" ");
+				String[] b = nxt.split(" ");
+				int common = 0;
+				while (common < a.length - 1 && common < b.length - 1 && a[a.length - 1 - common].equals(b[b.length - 1 - common])
+					&& !Character.isDigit(a[a.length - 1 - common].charAt(0))) {
+					common++;
+				}
+				String curShort = String.join(" ", java.util.Arrays.copyOfRange(a, 0, a.length - common));
+				String nxtShort = String.join(" ", java.util.Arrays.copyOfRange(b, 0, b.length - common));
+				String tail = common == 0 ? "" : " " + String.join(" ", java.util.Arrays.copyOfRange(a, a.length - common, a.length));
+				int arrow = font.width("\u2192") + 6;
+				if (font.width(curShort) + arrow + font.width(nxtShort + tail) <= avail) {
+					int x = vx;
+					g.text(font, curShort, x, y, BASE, false);
+					x += font.width(curShort) + 3;
+					g.text(font, "\u2192", x, y, BASE, false);
+					x += font.width("\u2192") + 3;
+					g.text(font, nxtShort + tail, x, y, BONUS, false);
+				} else {
+					g.text(font, cur, vx, y, BASE, false);
+					y += LINE;
+					g.text(font, "\u2192 " + nxt, vx, y, BONUS, false);
+				}
 			}
 			y += LINE;
 		}
@@ -301,7 +323,7 @@ public final class TechniquesTab {
 		}
 		button(g, font, up, upLabel, canUp, mx, my);
 		boolean canReset = level > 0 && !d.onCooldown(t, now);
-		button(g, font, re, "Reset (+" + TechniqueRules.refund(d.spent(t)) + " XP)", canReset, mx, my);
+		button(g, font, re, "Reset +" + TechniqueRules.refund(d.spent(t)) + " XP", canReset, mx, my);
 		button(g, font, bk, "Back", true, mx, my);
 	}
 
@@ -309,7 +331,7 @@ public final class TechniquesTab {
 		boolean hover = enabled && in(mx, my, r[0], r[1], r[2], r[3]);
 		String sprite = !enabled ? "widget/button_disabled" : hover ? "widget/button_highlighted" : "widget/button";
 		g.blitSprite(RenderPipelines.GUI_TEXTURED, Identifier.withDefaultNamespace(sprite), r[0], r[1], r[2], r[3]);
-		g.text(font, label, r[0] + (r[2] - font.width(label)) / 2, r[1] + 3, enabled ? 0xFFFFFFFF : 0xFFA0A0A0, true);
+		g.text(font, label, r[0] + (r[2] - font.width(label)) / 2, r[1] + (r[3] - 8) / 2, enabled ? 0xFFFFFFFF : 0xFFA0A0A0, true);
 	}
 
 	// ---- input ----
