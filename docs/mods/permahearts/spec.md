@@ -47,7 +47,7 @@
   - **Giết**: "Giết 16 Zombie" + số đếm; ai giết cũng tính. 16 zombie / skeleton / nhện / creeper / enderman / drowned · 8 phù thủy.
   - **Trăng máu** (0.6.0): ngẫu nhiên 1 trong 6 loại (D29): đêm **Zombie**, **Piglin Brute** (không biến thành zombie piglin), **Creeper**, **Skeleton**, **Spider** hoặc **Zombie Horseman** (zombie cầm giáo sắt cưỡi ngựa zombie, như bản gốc; một kỵ sĩ tính là 1 con trong giới hạn 30; dòng này không đi cùng dòng giết zombie hay trùm zombie). Nút Bắt đầu → trời thành đêm, mỗi 10 giây **3 con** loại đó quanh mỗi người chơi **trong vùng 96×96 quanh Crimson Master** (tối đa 30 con sống, D33), không ngủ được; trong lúc Trăng máu: người trong vùng không ra được, người ngoài vùng (vd. hồi sinh ở xa) không vào được; tới gần mép (8 block) thấy bụi đỏ đánh dấu mép; Creative/Spectator được miễn; người bấm sống tới sáng là xong, chết thì dòng quay về chưa làm.
   - **Thám hiểm** (0.6.0): "Đặt chân tới một Làng/Đền sa mạc/…".
-  - **Hạ thủ lĩnh** (0.6.0): nút Triệu hồi → trùm to gấp đôi, 150 máu, 4 đệ tử, cạnh NPC. Trùm: Zombie, Skeleton, Evoker (đệ tử là Vindicator), Blaze, Vindicator Chieftain.
+  - **Hạ thủ lĩnh** (0.6.0): nút Triệu hồi → trùm to gấp đôi, 150 máu, 4 đệ tử, cạnh NPC. Trùm: Zombie, Skeleton, Evoker (đệ tử là Pillager cầm nỏ, D34), Blaze, Vindicator Chieftain.
 - Dòng xong → ô thưởng có 1 linh dược ngẫu nhiên; ai lấy trước được. Xong hết + lấy hết thưởng → NPC chào và đi, đếm lại 4 ngày (D32).
 - Lệnh: `/quest` (NPC ở đâu, còn bao lâu, tiến độ), `/quest giveup` (ai cũng dùng được, như nút Give up: Master rời đi, lần sau 4 ngày; D28). Admin: `/quest summon` (gọi NPC ngay cạnh mình với nhiệm vụ mới), `/quest skip` (NPC xuất hiện ngay ở ~500 block), `/quest complete <dòng>`, `/quest reset`.
 

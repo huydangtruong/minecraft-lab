@@ -358,7 +358,7 @@ public class WandererGameTest {
 	}
 
 	@GameTest(maxTicks = 100)
-	public void evokerBossBringsVindicators(GameTestHelper context) {
+	public void evokerBossBringsPillagers(GameTestHelper context) {
 		MinecraftServer s = context.getLevel().getServer();
 		try {
 			enable(context, true);
@@ -373,7 +373,8 @@ public class WandererGameTest {
 			List<? extends Mob> minions = tagged(s, QuestBoss.MINION_TAG);
 			context.assertTrue(minions.size() == 4, "four minions, found " + minions.size());
 			for (Mob m : minions) {
-				context.assertTrue(m instanceof net.minecraft.world.entity.monster.illager.Vindicator, "evoker minions are vindicators");
+				context.assertTrue(m instanceof net.minecraft.world.entity.monster.illager.Pillager && m.getMainHandItem().is(net.minecraft.world.item.Items.CROSSBOW),
+					"evoker minions are pillagers with crossbows");
 			}
 			context.succeed();
 		} finally {
