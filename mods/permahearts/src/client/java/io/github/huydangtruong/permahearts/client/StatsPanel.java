@@ -8,6 +8,8 @@ import io.github.huydangtruong.permahearts.stats.StatMath;
 import io.github.huydangtruong.permahearts.stats.StatsSync;
 import java.util.Map;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
 import net.fabricmc.fabric.api.client.screen.v1.Screens;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -28,7 +30,7 @@ import net.minecraft.world.item.ItemStack;
 /**
  * Cultivation panel (D31, D39, D40): a rounded tablet button next to the recipe book button in the survival inventory opens a
  * panel on the left with tabs like the recipe book's. Stats tab: each stat as "total (base +gear +cultivation)", the
- * Vitality bonuses (food heal, food regen) and the respawn point (one line). Techniques tab: empty for now. Works like the recipe book: the inventory moves
+ * Vitality bonuses (food heal, food regen) and the respawn point (one line). Techniques tab: see TechniquesTab (slots, emerald box, list, detail page). Works like the recipe book: the inventory moves
  * right, and opening one closes the other. Data comes from the server (StatsSync), once a second.
  */
 public final class StatsPanel {
@@ -101,8 +103,22 @@ public final class StatsPanel {
 					t.setPosition(panelX(inv) - TAB_OUT + 2, top + 3 + t.tab.ordinal() * TAB_H);
 				}
 				if (open) {
-					draw(inv, g);
+					draw(inv, g, mx, my);
 				}
+			});
+			ScreenMouseEvents.allowMouseClick(inv).register((scr, ev) -> {
+				if (!open || tab != Tab.TECHNIQUES || !contains(inv, ev.x(), ev.y())) {
+					return true;
+				}
+				int x0 = panelX(inv);
+				int y0 = ((ContainerScreenAccess) inv).permahearts$topPos();
+				return !TechniquesTab.click(x0, y0, W, H, ev.x(), ev.y(), ev.button());
+			});
+			ScreenMouseEvents.allowMouseScroll(inv).register((scr, mx, my, sx, sy) -> {
+				if (!open || tab != Tab.TECHNIQUES || !contains(inv, mx, my)) {
+					return true;
+				}
+				return !TechniquesTab.scroll(panelX(inv), ((ContainerScreenAccess) inv).permahearts$topPos(), W, mx, my, sy);
 			});
 		});
 	}
@@ -114,6 +130,15 @@ public final class StatsPanel {
 	/** Selected tab (tests). */
 	public static Tab tab() {
 		return tab;
+	}
+
+	/** GUI centres of the Techniques tab's clickable things (tests): see TechniquesTab.hotspots. Empty when the panel is closed. */
+	public static java.util.List<int[]> techniqueHotspots() {
+		var screen = Minecraft.getInstance().gui.screen();
+		if (!open || !(screen instanceof InventoryScreen inv)) {
+			return java.util.List.of();
+		}
+		return TechniquesTab.hotspots(panelX(inv), ((ContainerScreenAccess) inv).permahearts$topPos(), W, H);
 	}
 
 	/** GUI position of the button (tests). */
@@ -175,7 +200,7 @@ public final class StatsPanel {
 
 	// ---- drawing ----
 
-	private static void draw(InventoryScreen inv, GuiGraphicsExtractor g) {
+	private static void draw(InventoryScreen inv, GuiGraphicsExtractor g, int mx, int my) {
 		Font font = Minecraft.getInstance().font;
 		int x0 = panelX(inv);
 		int y0 = ((ContainerScreenAccess) inv).permahearts$topPos();
@@ -192,7 +217,7 @@ public final class StatsPanel {
 		int right = x1 - 7;
 		g.text(font, Component.literal(tab.label).withStyle(ChatFormatting.BOLD), tx, y0 + 7, TEXT, false);
 		if (tab == Tab.TECHNIQUES) {
-			g.text(font, "No techniques yet", tx, y0 + 22, BASE, false); // D39: Huy describes them later
+			TechniquesTab.draw(g, font, x0, y0, W, H, mx, my);
 			return;
 		}
 		var player = Minecraft.getInstance().player;
