@@ -91,7 +91,7 @@ public final class TechniqueCasts {
 	private static void phaseWalk(ServerPlayer caster, int level) {
 		ServerLevel sl = caster.level();
 		long end = sl.getGameTime() + Math.round(TechniqueRules.phaseSeconds(level) * 20);
-		caster.setAttached(PhaseState.ATTACHMENT, new PhaseState(caster.blockPosition().getY(), end));
+		caster.setAttached(PhaseState.ATTACHMENT, new PhaseState(caster.blockPosition().getY(), end, level));
 		sl.sendParticles(ParticleTypes.PORTAL, caster.getX(), caster.getY() + 1, caster.getZ(), 50, 0.4, 0.8, 0.4, 0.6);
 		sl.playSound(null, caster.blockPosition(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.8f, 1.5f);
 	}

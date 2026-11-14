@@ -14,14 +14,15 @@ import net.minecraft.world.entity.player.Player;
 
 /**
  * Phase Walk state of a player: blocks whose Y is at or above floorY have no collision for the player until endTick
- * (level game time). Synced to the owner so the client predicts the same movement as the server. Not saved.
+ * (level game time); level is the cast level (sight range). Synced to the owner so the client predicts the same movement as the server. Not saved.
  */
-public record PhaseState(int floorY, long endTick) {
-	public static final PhaseState NONE = new PhaseState(0, -1);
+public record PhaseState(int floorY, long endTick, int level) {
+	public static final PhaseState NONE = new PhaseState(0, -1, 1);
 
 	public static final StreamCodec<io.netty.buffer.ByteBuf, PhaseState> STREAM_CODEC = StreamCodec.composite(
 		ByteBufCodecs.VAR_INT, PhaseState::floorY,
 		ByteBufCodecs.VAR_LONG, PhaseState::endTick,
+		ByteBufCodecs.VAR_INT, PhaseState::level,
 		PhaseState::new);
 
 	public static final AttachmentType<PhaseState> ATTACHMENT = AttachmentRegistry.create(
@@ -39,6 +40,15 @@ public record PhaseState(int floorY, long endTick) {
 		}
 		PhaseState s = e.getAttached(ATTACHMENT);
 		return s != null && s.active(e.level().getGameTime());
+	}
+
+	/** Cast level of the entity's active Phase Walk, or 0 when it is not phasing. */
+	public static int phaseLevel(Entity e) {
+		if (!(e instanceof Player)) {
+			return 0;
+		}
+		PhaseState s = e.getAttached(ATTACHMENT);
+		return s != null && s.active(e.level().getGameTime()) ? s.level() : 0;
 	}
 
 	/** True when the block at pos has no collision for this entity right now. */
@@ -63,7 +73,7 @@ public record PhaseState(int floorY, long endTick) {
 		}
 		int floor = lowerFloor(s.floorY(), p.getY());
 		if (floor != s.floorY()) {
-			p.setAttached(ATTACHMENT, new PhaseState(floor, s.endTick()));
+			p.setAttached(ATTACHMENT, new PhaseState(floor, s.endTick(), s.level()));
 		}
 	}
 }
