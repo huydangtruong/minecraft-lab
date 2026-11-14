@@ -9,7 +9,7 @@ public enum Technique {
 	HEALING("healing", "Healing Light", 60, false),
 	PHASE("phase", "Phase Walk", 90, false),
 	REPULSE("repulse", "Repulse", 20, false),
-	SACRIFICE("sacrifice", "Blood Oath", 30, false);
+	SACRIFICE("sacrifice", "Blood Oath", 45, false); // D47: was 30 s
 
 	private final String id;
 	private final String displayName;

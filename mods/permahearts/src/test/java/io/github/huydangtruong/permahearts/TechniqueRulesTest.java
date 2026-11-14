@@ -58,13 +58,13 @@ class TechniqueRulesTest {
 		assertArrayEquals(new double[] {4, 13, 18}, at(TechniqueRules::fireImpactDamage));
 		assertEquals(1, TechniqueRules.fireBurnPerSecond(5));
 		assertEquals(2, TechniqueRules.fireBurnPerSecond(6));
-		assertArrayEquals(new double[] {0.20, 0.56, 0.76}, at(TechniqueRules::iceSlow), 1e-9);
+		assertArrayEquals(new double[] {0.20, 0.56, 0.86}, at(TechniqueRules::iceSlow), 1e-9);
 		assertArrayEquals(new double[] {20, 56, 76}, at(TechniqueRules::healingTotal));
 		assertArrayEquals(new double[] {10, 14.5, 17}, at(TechniqueRules::phaseSeconds), 1e-9);
 		assertArrayEquals(new double[] {2, 6.5, 9}, at(TechniqueRules::repulseDamage), 1e-9);
 		assertArrayEquals(new double[] {0.80, 0.50, 0.30}, at(TechniqueRules::sacrificeCost), 1e-9);
 		assertArrayEquals(new double[] {5, 8, 10}, at(TechniqueRules::sacrificeSeconds), 1e-9);
-		assertEquals(30, Technique.SACRIFICE.cooldownSeconds());
+		assertEquals(45, Technique.SACRIFICE.cooldownSeconds());
 		assertEquals(16, Technique.FIRE.cooldownSeconds());
 		assertEquals(24, Technique.ICE.cooldownSeconds());
 		assertEquals(60, Technique.HEALING.cooldownSeconds());

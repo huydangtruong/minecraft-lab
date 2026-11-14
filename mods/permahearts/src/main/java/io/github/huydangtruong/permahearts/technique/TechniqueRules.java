@@ -151,9 +151,9 @@ public final class TechniqueRules {
 		return 6;
 	}
 
-	/** Move speed taken away inside the ice area (0.20 = -20%). */
+	/** Move speed taken away inside the ice area (0.20 = -20%): 20% at level 1, 56% at 10, 86% at 20 (D47). */
 	public static double iceSlow(int level) {
-		return scaled(0.20, 0.04, level);
+		return piecewise(level, 0.20, 0.56, 0.86);
 	}
 
 	/** Attack speed taken away inside the ice area. */
