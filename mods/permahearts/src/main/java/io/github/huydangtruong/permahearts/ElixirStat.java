@@ -5,12 +5,12 @@ import java.util.Optional;
 
 /** The permanent stats an elixir can raise. No Minecraft imports so JUnit can test it. */
 public enum ElixirStat {
-	STRENGTH("strength", 0.5, false),
+	STRENGTH("strength", 1.0, false), // D67: was 0.5
 	FURY("fury", 0.10, true),
-	SWIFTNESS("swiftness", 0.05, true),
+	SWIFTNESS("swiftness", 0.10, true), // D67: was 0.05
 	IRON_SKIN("iron_skin", 1.0, false),
 	REACH("reach", 0.5, false),
-	MINING("mining", 0.10, true),
+	MINING("mining", 0.20, true), // D67: was 0.10
 	/** Not an attribute: each meal heals extra health = food points x bonus (D30). */
 	VITALITY("vitality", 0.20, true); // D41: was 0.25 (D30)
 
