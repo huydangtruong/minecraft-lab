@@ -1,0 +1,9 @@
+{
+	"required": true,
+	"package": "io.github.huydangtruong.permahearts.test.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"client": ["MuteTestClientMixin"],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}
