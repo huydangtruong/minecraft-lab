@@ -76,18 +76,18 @@ class HeartRulesTest {
 
 	@Test
 	void reachingCapDropsExtraXp() {
-		var r = HeartRules.onHostileKill(at(99, 0), 1200);
+		var r = HeartRules.onHostileKill(at(299, 0), 1200);
 		assertEquals(KillOutcome.GAINED, r.outcome());
-		assertEquals(100, HeartRules.maxHearts(r.data()));
+		assertEquals(300, HeartRules.maxHearts(r.data()));
 		assertEquals(0, r.data().heartXp());
 		assertEquals(1, r.heartsGained());
 	}
 
 	@Test
 	void killAtCap() {
-		var r = HeartRules.onHostileKill(at(100, 0), 20);
+		var r = HeartRules.onHostileKill(at(300, 0), 20);
 		assertEquals(KillOutcome.AT_CAP, r.outcome());
-		assertEquals(100, HeartRules.maxHearts(r.data()));
+		assertEquals(300, HeartRules.maxHearts(r.data()));
 		assertEquals(0, r.data().heartXp());
 		assertEquals(0, r.heartsGained());
 	}
@@ -100,15 +100,15 @@ class HeartRulesTest {
 	@Test
 	void clamping() {
 		assertEquals(1, HeartRules.maxHearts(HeartRules.withHearts(HeartsData.DEFAULT, 0)));
-		assertEquals(100, HeartRules.maxHearts(HeartRules.withHearts(HeartsData.DEFAULT, 150)));
+		assertEquals(300, HeartRules.maxHearts(HeartRules.withHearts(HeartsData.DEFAULT, 450)));
 		assertEquals(499, HeartRules.withXp(HeartsData.DEFAULT, 600).heartXp());
 		assertEquals(0, HeartRules.withXp(HeartsData.DEFAULT, -5).heartXp());
-		assertEquals(0, HeartRules.withHearts(at(10, 100), 150).heartXp());
+		assertEquals(0, HeartRules.withHearts(at(10, 100), 450).heartXp());
 	}
 
 	@Test
 	void xpFractionForHud() {
 		assertEquals(0.5f, HeartRules.xpFraction(at(10, 250)));
-		assertEquals(1f, HeartRules.xpFraction(at(100, 0)));
+		assertEquals(1f, HeartRules.xpFraction(at(300, 0)));
 	}
 }

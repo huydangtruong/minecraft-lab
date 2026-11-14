@@ -19,11 +19,13 @@ import net.minecraft.world.entity.player.Player;
  * vanilla; absorption hearts go in rows above. The armour bar is moved down to sit right above them.
  */
 public final class LayeredHeartsHud {
-	private static final Identifier[] LAYER_FULL = new Identifier[5];
-	private static final Identifier[] LAYER_HALF = new Identifier[5];
+	/** Layer 0 = vanilla red; 1-4 bright, 5-9 pastel, 10-14 textured (tools/make_heart_sprites.py, D37). */
+	private static final int LAYERS = 15;
+	private static final Identifier[] LAYER_FULL = new Identifier[LAYERS];
+	private static final Identifier[] LAYER_HALF = new Identifier[LAYERS];
 
 	static {
-		for (int i = 1; i < 5; i++) {
+		for (int i = 1; i < LAYERS; i++) {
 			LAYER_FULL[i] = Identifier.fromNamespaceAndPath("permahearts", "hud/heart/layer_" + i + "_full");
 			LAYER_HALF[i] = Identifier.fromNamespaceAndPath("permahearts", "hud/heart/layer_" + i + "_half");
 		}

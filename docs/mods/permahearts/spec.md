@@ -3,7 +3,7 @@
 - Mỗi người chơi bắt đầu **10 tim** (20 máu).
 - **Chết**: −1 tim tối đa vĩnh viễn, sàn **1 tim** (D1). Chết ở 1 tim: không mất thêm, báo "đã ở mức thấp nhất". Hồi sinh với máu đầy theo mức mới. HeartXP và thống kê giữ nguyên.
 - **HeartXP** (D8): giết mob hostile (`Enemy`: zombie, skeleton, creeper, slime, ghast, phantom, piglin, enderman, Wither, Warden, Ender Dragon…) được HeartXP = **máu tối đa của mob đó**, làm tròn, tối thiểu 1. Ví dụ: Zombie/Skeleton/Creeper +20, Spider +16, Enderman +40, Ravager +100, Ender Dragon +200, Wither +300, Warden +500. Người được tính là người nhận kill credit của vanilla (đánh, bắn, sói, đẩy rơi trong 5 giây). Mob không hostile không tính.
-- **Đủ 500 HeartXP** = +1 tim tối đa, phần dư chuyển sang thanh mới (một lần giết hơn 500 có thể cho nhiều tim). Trần **100 tim** (D36; trước là 50, D7): khi đạt trần, HeartXP về 0 và không tích nữa, báo "đã tối đa". Cộng tim: +2 máu hiện tại mỗi tim, âm thanh level-up, tin trong chat.
+- **Đủ 500 HeartXP** = +1 tim tối đa, phần dư chuyển sang thanh mới (một lần giết hơn 500 có thể cho nhiều tim). Trần **300 tim** (D37; trước là 100, D36; 50, D7): khi đạt trần, HeartXP về 0 và không tích nữa, báo "đã tối đa". Cộng tim: +2 máu hiện tại mỗi tim, âm thanh level-up, tin trong chat.
 - Mỗi lần giết: overlay "+20 HeartXP".
 - **Thanh HeartXP** (D9): góc dưới bên trái (cách mép trái và mép dưới 8px), chữ "HeartXP 320/500" (ở trần: "HeartXP MAX") trên một thanh đỏ. Ẩn khi Creative/Spectator và khi tắt HUD (F1). Chỉ thấy khi client cũng cài mod.
 - Dữ liệu lưu theo người chơi trong save của world (Essential: save của máy host), đồng bộ xuống client của chính người đó.
@@ -75,5 +75,6 @@
 ## Thanh tim nhiều lớp (D36)
 
 - Tới 20 tim: thanh vanilla. Trên 20 tim: luôn 2 hàng; tim 21–40 vẽ đè từ tim đầu tiên của hàng 1 bằng màu cam, 41–60 hồng, 61–80 tím, 81–100 xanh dương. Mất máu thì tim lớp trên cùng mất trước.
+- D37: 101–200 san hô, đào, hồng phấn, oải hương, bạc hà; 201–300 hoa anh đào, thiên hà, lửa linh hồn, lửa đỏ, dung nham. Sửa hình: `mods/permahearts/tools/make_heart_sprites.py` rồi chạy lại. Ảnh: `docs/screens/hearts-150-300-strip.png`.
 - Độc/wither/đóng băng: mọi tim theo màu vanilla của hiệu ứng. Tim vàng: các hàng phía trên. Giáp: ngay trên 2 hàng tim.
 - Ảnh: `docs/screens/hearts-57-full.png`, `hearts-57-hurt.png`, `hearts-100-full.png`.

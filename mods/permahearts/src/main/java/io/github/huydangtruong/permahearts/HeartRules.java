@@ -4,7 +4,7 @@ package io.github.huydangtruong.permahearts;
 public final class HeartRules {
 	public static final int BASE = 10;
 	public static final int MIN = 1;
-	public static final int MAX = 100; // D36
+	public static final int MAX = 300; // D37 (was 100, D36)
 	public static final int XP_PER_HEART = 500;
 
 	public enum DeathOutcome { LOST, AT_FLOOR }
