@@ -1,11 +1,7 @@
 package io.github.huydangtruong.permahearts.technique;
 
-/** Pure maths of the skill bar: tap/hold of the skill key, charge, radial wheel, cooldown overlay. No Minecraft imports. */
+/** Pure maths of the skill bar: technique-mode hotbar mapping, charge, cooldown overlay. No Minecraft imports. */
 public final class SkillBarLogic {
-	/** A key press shorter than this is a tap (next technique); longer opens the wheel. 0.25 s. */
-	public static final int TAP_TICKS = 5;
-	/** Mouse distance (GUI pixels) from the wheel centre under which nothing is hovered. */
-	public static final double WHEEL_DEAD_ZONE = 14;
 
 	private SkillBarLogic() {}
 
@@ -15,44 +11,37 @@ public final class SkillBarLogic {
 		return Math.max(0f, Math.min(1f, c));
 	}
 
-	/** Selections the wheel shows, in order: -1 (the cross) then each filled slot. */
-	public static int[] wheelEntries(boolean[] filled) {
-		int n = 1;
+	/** Slot numbers (0..3) of the filled slots, in slot order. These become the first N hotbar cells in technique mode. */
+	public static int[] filledSlots(boolean[] filled) {
+		int n = 0;
 		for (boolean f : filled) {
 			if (f) {
 				n++;
 			}
 		}
-		int[] entries = new int[n];
-		entries[0] = -1;
-		int k = 1;
+		int[] out = new int[n];
+		int k = 0;
 		for (int i = 0; i < filled.length; i++) {
 			if (filled[i]) {
-				entries[k++] = i;
+				out[k++] = i;
 			}
 		}
-		return entries;
+		return out;
 	}
 
-	/**
-	 * Wheel entry under the mouse, offset (dx, dy) from the centre in screen pixels (y grows downwards), or -1 inside the
-	 * dead zone. Entry 0 sits at the top, the others follow clockwise.
-	 */
-	public static int wheelIndex(double dx, double dy, int count) {
-		if (count <= 0 || Math.hypot(dx, dy) < WHEEL_DEAD_ZONE) {
-			return -1;
-		}
-		double angle = Math.atan2(dx, -dy); // 0 = up, clockwise positive
-		if (angle < 0) {
-			angle += 2 * Math.PI;
-		}
-		double step = 2 * Math.PI / count;
-		return (int) ((angle + step / 2) / step) % count;
+	/** Technique mode: slot of the technique shown in a hotbar cell, or -1 when the cell shows an item. */
+	public static int techniqueAtCell(int cell, int[] slots) {
+		return cell >= 0 && cell < slots.length ? slots[cell] : -1;
 	}
 
-	/** Angle (radians, 0 = up, clockwise) of entry i of count. */
-	public static double wheelAngle(int i, int count) {
-		return 2 * Math.PI * i / count;
+	/** Technique mode: real item slot shown in a hotbar cell (cell - N), or -1 when the cell shows a technique. */
+	public static int itemSlotAtCell(int cell, int techniqueCount) {
+		return cell >= techniqueCount ? cell - techniqueCount : -1;
+	}
+
+	/** Cell after scrolling (delta +1 = down/right) in a hotbar of 9 cells, wrapping. */
+	public static int scrollCell(int cell, int delta) {
+		return Math.floorMod(cell + (int) Math.signum(delta), 9);
 	}
 
 	/** Share of the technique's cooldown still to run (1 right after the cast, 0 when ready). */

@@ -103,6 +103,6 @@
   "item.permahearts.focus_phase": "Phase Walk Focus",
   "item.permahearts.focus_repulse": "Repulse Focus",
   "item.permahearts.focus_sacrifice": "Blood Oath Focus",
-  "key.permahearts.technique": "Technique (tap: next, hold: wheel)",
+  "key.permahearts.technique": "Technique mode (toggle)",
   "key.category.permahearts.main": "Immortal Cultivation"
 }

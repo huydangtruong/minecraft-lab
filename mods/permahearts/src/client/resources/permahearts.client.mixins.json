@@ -9,7 +9,9 @@
 		"RecipeBookScreenMixin",
 		"MinecraftInputMixin",
 		"FirstPersonFocusMixin",
-		"AvatarFocusMixin"
+		"AvatarFocusMixin",
+		"MouseScrollMixin",
+		"ChargeFovMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
