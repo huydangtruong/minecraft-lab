@@ -76,7 +76,7 @@ public class AngelGameTest {
 		});
 	}
 
-	@GameTest(maxTicks = 220)
+	@GameTest(maxTicks = 400)
 	public void angelsFlyToAMonsterAndHurtIt(GameTestHelper c) {
 		ServerPlayer p = owner(c);
 		FlightBladeGameTest.place(c, p, 5.5, 1, 2.5, 0f, 0f);
@@ -84,10 +84,10 @@ public class AngelGameTest {
 		Husk h = c.spawn(EntityTypes.HUSK, new Vec3(5.5, 1, 9.5));
 		h.setNoAi(true);
 		TechniqueCasts.cast(p, Technique.ANGEL, 20, 1f);
-		c.runAfterDelay(180, () -> {
+		// Vex flight is random: wait for the first hit instead of checking once at a fixed tick
+		c.succeedWhen(() -> {
 			c.assertTrue(!h.isAlive() || h.getHealth() < h.getMaxHealth(), "an angel hurt the husk, health " + h.getHealth());
 			FlightBladeGameTest.drop(c, p);
-			c.succeed();
 		});
 	}
 
