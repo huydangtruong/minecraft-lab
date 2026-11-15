@@ -21,17 +21,48 @@ class RewardBoxTest {
 		return o.itemId().startsWith("permahearts:elixir_");
 	}
 
-	@Test
-	void tierByLineType() {
-		assertEquals(RewardTier.SILVER, RewardTier.forLine(QuestType.COLLECT));
-		assertEquals(RewardTier.SILVER, RewardTier.forLine(QuestType.KILL));
-		assertEquals(RewardTier.GOLD, RewardTier.forLine(QuestType.EXPLORE));
-		assertEquals(RewardTier.GOLD, RewardTier.forLine(QuestType.BLOOD_MOON));
-		assertEquals(RewardTier.DIAMOND, RewardTier.forLine(QuestType.BOSS));
-		assertEquals(RewardTier.DIAMOND, RewardTier.forLine(QuestType.DEATH_MATCH));
-		for (QuestType t : QuestType.values()) {
-			assertTrue(RewardTier.forLine(t) != null);
+	private static final int ROLLS = 200_000;
+
+	private static int[] countTiers(QuestType type, long seed) {
+		Random rng = new Random(seed);
+		int[] n = new int[RewardTier.values().length];
+		for (int i = 0; i < ROLLS; i++) {
+			n[RewardTier.roll(type, rng).ordinal()]++;
 		}
+		return n;
+	}
+
+	private static void assertOdds(int[] counts, int silver, int gold, int diamond, int emerald, String what) {
+		int[] want = {silver, gold, diamond, emerald};
+		for (RewardTier t : RewardTier.values()) {
+			double got = 100.0 * counts[t.ordinal()] / ROLLS;
+			assertTrue(Math.abs(got - want[t.ordinal()]) < 1.0, what + " " + t + ": " + got + "% vs " + want[t.ordinal()] + "%");
+		}
+	}
+
+	@Test
+	void tierOddsD90() {
+		for (QuestType t : QuestType.values()) {
+			boolean hard = t == QuestType.BOSS || t == QuestType.BLOOD_MOON;
+			assertOdds(countTiers(t, 11), hard ? 20 : 40, 30, hard ? 30 : 20, hard ? 20 : 10, t.toString());
+			int total = 0;
+			for (RewardTier tier : RewardTier.values()) {
+				total += RewardTier.oddsPercent(t, tier);
+			}
+			assertEquals(100, total, t + " odds add up to 100");
+		}
+	}
+
+	@Test
+	void tierRollIsDeterministicPerSeed() {
+		assertEquals(RewardTier.roll(QuestType.BOSS, new Random(3)), RewardTier.roll(QuestType.BOSS, new Random(3)));
+	}
+
+	@Test
+	void emeraldBox() {
+		assertEquals(6, RewardTier.EMERALD.options());
+		assertEquals(2, RewardTier.EMERALD.picks());
+		assertEquals("emerald_reward_box", RewardTier.EMERALD.itemName());
 	}
 
 	@Test
@@ -40,7 +71,7 @@ class RewardBoxTest {
 		assertEquals(4, RewardTier.GOLD.options());
 		assertEquals(5, RewardTier.DIAMOND.options());
 		for (RewardTier t : RewardTier.values()) {
-			assertEquals(1, t.picks());
+			assertEquals(t == RewardTier.EMERALD ? 2 : 1, t.picks());
 		}
 	}
 
@@ -97,7 +128,7 @@ class RewardBoxTest {
 	}
 
 	@Test
-	void specialsOnlyInGoldAndDiamond() {
+	void specialsOnlyInGoldDiamondAndEmerald() {
 		Random rng = new Random(4);
 		for (RewardTier t : RewardTier.values()) {
 			Set<RewardOption> specialsSeen = new HashSet<>();
@@ -106,13 +137,16 @@ class RewardBoxTest {
 					if (isElixir(o)) {
 						continue;
 					}
-					if (RewardRoll.GOLD_SPECIALS.contains(o) || RewardRoll.DIAMOND_SPECIALS.contains(o)) {
+					if (RewardRoll.GOLD_SPECIALS.contains(o) || RewardRoll.DIAMOND_SPECIALS.contains(o)
+						|| RewardRoll.EMERALD_SPECIALS.contains(o)) {
 						specialsSeen.add(o);
 					}
 				}
 			}
 			if (t == RewardTier.SILVER) {
 				assertTrue(specialsSeen.isEmpty(), "silver has no specials: " + specialsSeen);
+			} else if (t == RewardTier.EMERALD) {
+				assertEquals(Set.copyOf(RewardRoll.EMERALD_SPECIALS), specialsSeen, "emerald specials all appear, and only them");
 			} else {
 				assertEquals(Set.copyOf(RewardRoll.specials(t)), specialsSeen, t + " specials all appear");
 			}
@@ -127,7 +161,7 @@ class RewardBoxTest {
 			for (RewardTier t : RewardTier.values()) {
 				for (RewardOption o : RewardRoll.roll(t, rng)) {
 					if (o.itemId().equals("minecraft:netherite_ingot")) {
-						assertFalse(t == RewardTier.SILVER || t == RewardTier.GOLD, "netherite only in diamond boxes");
+						assertFalse(t != RewardTier.DIAMOND, "netherite only in diamond boxes");
 						assertEquals(1, o.count());
 						diamondNether = true;
 					}
@@ -174,7 +208,7 @@ class RewardBoxTest {
 				Set<String> items = new HashSet<>();
 				for (RewardOption o : box) {
 					if (!isElixir(o)) {
-						assertTrue(items.add(o.itemId()), "duplicate " + o + " in " + box);
+						assertTrue(items.add(o.key()), "duplicate " + o + " in " + box);
 					}
 				}
 			}
@@ -227,5 +261,72 @@ class RewardBoxTest {
 		assertFalse(RewardSelection.valid(-1, 1, 3));
 		assertFalse(RewardSelection.valid(1 << 20, 1, 5));
 		assertFalse(RewardSelection.valid(Integer.MIN_VALUE, 1, 5));
+	}
+
+	@Test
+	void emeraldSpecialsAreTheFiveOfD89() {
+		assertEquals(List.of("minecraft:totem_of_undying", "permahearts:enlightenment_bottle", "minecraft:enchanted_book",
+			"minecraft:enchanted_book", "minecraft:enchanted_book"),
+			RewardRoll.EMERALD_SPECIALS.stream().map(RewardOption::itemId).toList());
+		assertEquals(Set.of("minecraft:mending@1", "minecraft:sharpness@5", "minecraft:protection@5"),
+			RewardRoll.EMERALD_SPECIALS.stream().filter(RewardOption::hasEnchant)
+				.map(o -> o.enchant() + "@" + o.enchantLevel()).collect(java.util.stream.Collectors.toSet()));
+		for (RewardOption o : RewardRoll.EMERALD_SPECIALS) {
+			assertEquals(1, o.count());
+		}
+	}
+
+	@Test
+	void emeraldRollSixCardsBooksMayShareAnItemIdButNotAnEnchantment() {
+		Random rng = new Random(12);
+		boolean twoBooks = false;
+		int specialCards = 0;
+		int itemCards = 0;
+		for (int i = 0; i < 20000; i++) {
+			List<RewardOption> box = RewardRoll.roll(RewardTier.EMERALD, rng);
+			assertEquals(6, box.size());
+			Set<String> keys = new HashSet<>();
+			int books = 0;
+			for (RewardOption o : box) {
+				if (isElixir(o)) {
+					continue;
+				}
+				assertTrue(keys.add(o.key()), "duplicate " + o + " in " + box);
+				itemCards++;
+				if (RewardRoll.EMERALD_SPECIALS.contains(o)) {
+					specialCards++;
+				}
+				if (o.itemId().equals("minecraft:enchanted_book")) {
+					assertTrue(o.hasEnchant(), "a book card carries its enchantment");
+					books++;
+				}
+			}
+			twoBooks |= books >= 2;
+		}
+		assertTrue(twoBooks, "two different books can be in one box");
+		double share = (double) specialCards / itemCards;
+		assertTrue(share > 0.2 && share < 0.3, "about 25% of the item cards are specials (a bit less after duplicates), was " + share);
+	}
+
+	@Test
+	void optionCodecRoundTripWithAndWithoutEnchant() {
+		for (RewardOption o : List.of(new RewardOption("minecraft:diamond", 16), RewardOption.book("minecraft:sharpness", 5))) {
+			var json = RewardOption.CODEC.encodeStart(com.mojang.serialization.JsonOps.INSTANCE, o).getOrThrow();
+			assertEquals(o, RewardOption.CODEC.parse(com.mojang.serialization.JsonOps.INSTANCE, json).getOrThrow());
+		}
+		// A plain card does not even write the enchantment fields.
+		var plain = RewardOption.CODEC.encodeStart(com.mojang.serialization.JsonOps.INSTANCE, new RewardOption("minecraft:diamond", 16))
+			.getOrThrow().getAsJsonObject();
+		assertFalse(plain.has("enchant") && !plain.get("enchant").getAsString().isEmpty());
+	}
+
+	@Test
+	void oldSavedCardWithoutEnchantStillLoads() {
+		var old = new com.google.gson.JsonObject();
+		old.addProperty("item", "minecraft:gold_ingot");
+		old.addProperty("count", 64);
+		RewardOption o = RewardOption.CODEC.parse(com.mojang.serialization.JsonOps.INSTANCE, old).getOrThrow();
+		assertEquals(new RewardOption("minecraft:gold_ingot", 64), o);
+		assertFalse(o.hasEnchant());
 	}
 }

@@ -168,7 +168,7 @@ public class WandererGameTest {
 			context.assertTrue(Wanderer.claim(s, 0, p1).isEmpty(), "claim before done must give nothing");
 			Wanderer.complete(s, 0);
 			ItemStack got = Wanderer.claim(s, 0, p1);
-			context.assertTrue(got.is(io.github.huydangtruong.permahearts.reward.RewardBoxes.item(io.github.huydangtruong.permahearts.reward.RewardTier.SILVER)), "first claim gives the silver box (D76)");
+			context.assertTrue(io.github.huydangtruong.permahearts.reward.RewardBoxes.tierOf(got).isPresent(), "first claim gives a reward box (D76, tier rolled D90)");
 			context.assertTrue(Wanderer.claim(s, 0, p2).isEmpty(), "second claim must give nothing");
 			context.succeed();
 		} finally {
@@ -195,7 +195,7 @@ public class WandererGameTest {
 			context.assertTrue(npc.isRemoved(), "NPC should be gone");
 			context.assertTrue(d.phase() == Phase.WAITING, "phase should be WAITING, was " + d.phase());
 			long days = d.nextDay() - Wanderer.currentDay(s);
-			context.assertTrue(days == 4, "next visit in 4 days, was " + days);
+			context.assertTrue(days == 5, "next visit in 5 days, was " + days);
 			context.succeed();
 		} finally {
 			Wanderer.reset(s);
@@ -627,7 +627,7 @@ public class WandererGameTest {
 			context.assertTrue(d.quest().isEmpty() && d.boss().isEmpty() && d.bloodMoon().isEmpty(), "no quest, boss state or event");
 			context.assertTrue(tagged(s, QuestBoss.TAG).isEmpty() && tagged(s, QuestBoss.MINION_TAG).isEmpty(), "boss and minions gone");
 			long days = d.nextDay() - Wanderer.currentDay(s);
-			context.assertTrue(days == 4, "next visit in 4 days, was " + days);
+			context.assertTrue(days == 5, "next visit in 5 days, was " + days);
 			context.assertTrue(!Wanderer.giveUp(s, p), "give up while WAITING does nothing");
 			context.succeed();
 		} finally {
@@ -650,7 +650,7 @@ public class WandererGameTest {
 			context.assertTrue(r == 1 && d.phase() == Phase.WAITING, "giveup should end the visit, phase " + d.phase());
 			context.assertTrue(npc.isRemoved(), "NPC should be gone");
 			long days = d.nextDay() - Wanderer.currentDay(s);
-			context.assertTrue(days == 4, "next visit in 4 days, was " + days);
+			context.assertTrue(days == 5, "next visit in 5 days, was " + days);
 			int again = s.getCommands().getDispatcher().execute("quest giveup", src);
 			context.assertTrue(again == 0, "nothing to give up while WAITING");
 			context.succeed();
@@ -689,7 +689,7 @@ public class WandererGameTest {
 			context.assertTrue(d.phase() == Phase.WAITING, "phase should be WAITING, was " + d.phase());
 			context.assertTrue(npc.isRemoved(), "NPC should be gone");
 			long days = d.nextDay() - Wanderer.currentDay(s);
-			context.assertTrue(days == 4, "next visit in 4 days, was " + days);
+			context.assertTrue(days == 5, "next visit in 5 days, was " + days);
 			context.succeed();
 		} finally {
 			Wanderer.reset(s);

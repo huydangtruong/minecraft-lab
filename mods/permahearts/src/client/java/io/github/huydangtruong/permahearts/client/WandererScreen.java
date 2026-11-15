@@ -1,7 +1,6 @@
 package io.github.huydangtruong.permahearts.client;
 
 import io.github.huydangtruong.permahearts.reward.RewardBoxes;
-import io.github.huydangtruong.permahearts.reward.RewardTier;
 import io.github.huydangtruong.permahearts.Messages;
 import io.github.huydangtruong.permahearts.wanderer.DeathMatchRules;
 import io.github.huydangtruong.permahearts.wanderer.QuestSnapshot;
@@ -281,7 +280,7 @@ public class WandererScreen extends AbstractContainerScreen<WandererMenu> {
 		} else if (menu.isDone(i)) {
 			text = Messages.lineDone(Wanderer.rewardName(line.type()));
 			color = TEXT_DONE;
-			icon = RewardBoxes.stack(RewardTier.forLine(line.type()));
+			icon = new ItemStack(RewardBoxes.MYSTERY); // D90: the tier is rolled at claim
 		} else {
 			text = Wanderer.lineText(line.type(), line.target(), menu.requiredOf(i), menu.progressOf(i), menu.eventRunning(i));
 			icon = switch (line.type()) {

@@ -48,10 +48,24 @@ public final class RewardBoxes {
 				case SILVER -> Rarity.COMMON;
 				case GOLD -> Rarity.UNCOMMON;
 				case DIAMOND -> Rarity.RARE;
+				case EMERALD -> Rarity.EPIC;
 			};
 			ITEMS.put(tier, Registry.register(BuiltInRegistries.ITEM, key,
 				new RewardBoxItem(new Item.Properties().setId(key).stacksTo(1).rarity(rarity), tier)));
 		}
+	}
+
+	/** Shown instead of the box on a done quest line: the tier is rolled only when the line is claimed (D90). Not obtainable. */
+	public static final Item MYSTERY = register("mystery_box", props -> new MysteryBoxItem(props), new Item.Properties().stacksTo(1));
+
+	/** Bottle of Enlightenment (D89): drink for +16 levels. Only from the emerald box. */
+	public static final Item BOTTLE = register("enlightenment_bottle", props -> new EnlightenmentBottleItem(props), new Item.Properties().stacksTo(16).rarity(Rarity.RARE)
+		.component(net.minecraft.core.component.DataComponents.CONSUMABLE, net.minecraft.world.item.component.Consumables.DEFAULT_DRINK)
+		.component(net.minecraft.core.component.DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true));
+
+	private static Item register(String name, java.util.function.Function<Item.Properties, Item> factory, Item.Properties props) {
+		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(PermaHearts.MOD_ID, name));
+		return Registry.register(BuiltInRegistries.ITEM, key, factory.apply(props.setId(key)));
 	}
 
 	/** What the client needs to build the screen. */
@@ -77,11 +91,28 @@ public final class RewardBoxes {
 			for (RewardTier t : RewardTier.values()) {
 				out.accept(item(t));
 			}
+			out.accept(BOTTLE);
 		});
 	}
 
 	public static Item item(RewardTier tier) {
 		return ITEMS.get(tier);
+	}
+
+	/** The item stack a card gives: the item and count, plus the stored enchantment for a book card. */
+	public static ItemStack cardStack(RewardOption o, net.minecraft.core.HolderLookup.Provider registries) {
+		ItemStack stack = new ItemStack(BuiltInRegistries.ITEM.getValue(Identifier.parse(o.itemId())), o.count());
+		if (o.hasEnchant()) {
+			ResourceKey<net.minecraft.world.item.enchantment.Enchantment> key =
+				ResourceKey.create(Registries.ENCHANTMENT, Identifier.parse(o.enchant()));
+			registries.lookupOrThrow(Registries.ENCHANTMENT).get(key).ifPresent(holder -> {
+				var enchants = new net.minecraft.world.item.enchantment.ItemEnchantments.Mutable(
+					net.minecraft.world.item.enchantment.ItemEnchantments.EMPTY);
+				enchants.set(holder, o.enchantLevel());
+				stack.set(net.minecraft.core.component.DataComponents.STORED_ENCHANTMENTS, enchants.toImmutable());
+			});
+		}
+		return stack;
 	}
 
 	/** A fresh, unrolled box. */
@@ -138,7 +169,8 @@ public final class RewardBoxes {
 	}
 
 	/**
-	 * Gives the selected cards of the box in that hand and consumes the box. The selection is checked against the
+	 * Gives the selected cards of the box in that hand and consumes the box (all picks at once on Claim; closing the
+	 * screen before Claim takes nothing and keeps the box). The selection is checked against the
 	 * stored roll; nothing the client sent but the mask is used. Returns false (box kept) if the hand holds no rolled
 	 * box or the mask is not exactly picks cards inside the roll.
 	 */
@@ -157,7 +189,7 @@ public final class RewardBoxes {
 				if (item.isEmpty() || o.count() <= 0) {
 					return false;
 				}
-				given.add(new ItemStack(item.get(), o.count()));
+				given.add(cardStack(o, player.level().registryAccess()));
 			}
 		}
 		box.shrink(1);
