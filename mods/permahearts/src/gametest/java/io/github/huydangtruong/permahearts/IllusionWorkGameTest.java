@@ -99,6 +99,57 @@ public class IllusionWorkGameTest {
 		});
 	}
 
+	/** A field for the D84 tests: 3 empty farmland blocks, dirt and grass next to them and next to water, one ripe wheat. */
+	private static void field(GameTestHelper c) {
+		c.setBlock(6, 0, 2, Blocks.FARMLAND);
+		c.setBlock(7, 0, 2, Blocks.FARMLAND);
+		c.setBlock(6, 0, 3, Blocks.FARMLAND);
+		c.setBlock(5, 0, 3, Blocks.WATER);
+		c.setBlock(5, 0, 2, Blocks.DIRT);
+		c.setBlock(7, 0, 3, Blocks.GRASS_BLOCK);
+		c.setBlock(4, 0, 2, Blocks.DIRT);
+		ripeWheat(c, 7, 4);
+	}
+
+	private static boolean field(GameTestHelper c, boolean planted) {
+		boolean untilled = c.getBlockState(new BlockPos(5, 0, 2)).is(Blocks.DIRT) && c.getBlockState(new BlockPos(7, 0, 3)).is(Blocks.GRASS_BLOCK)
+			&& c.getBlockState(new BlockPos(4, 0, 2)).is(Blocks.DIRT);
+		return untilled && (!planted || c.getBlockState(new BlockPos(6, 1, 2)).is(Blocks.WHEAT) && c.getBlockState(new BlockPos(7, 1, 2)).is(Blocks.WHEAT)
+			&& c.getBlockState(new BlockPos(6, 1, 3)).is(Blocks.WHEAT));
+	}
+
+	/** D84: the farmer never makes farmland. It plants the empty farmland it has, harvests, and takes the rest to the chest. */
+	@GameTest(maxTicks = 1200)
+	public void farmNeverTillsPlantsEmptyFarmlandAndDeliversTheRestToTheChest(GameTestHelper c) {
+		ServerPlayer p = owner(c, new ItemStack(Items.IRON_HOE));
+		Container chest = chest(c, 2, 1, 5);
+		field(c);
+		Illusion a = castOne(c, p);
+		a.carry().add(new ItemStack(Items.WHEAT_SEEDS, 10));
+		c.succeedWhen(() -> {
+			c.assertTrue(field(c, true), "empty farmland planted, dirt and grass untouched" + dbg(a));
+			c.assertTrue(count(chest, s -> s.is(Items.WHEAT)) >= 1, "the ripe wheat is in the chest" + dbg(a));
+			c.assertTrue(count(chest, s -> s.is(Items.WHEAT_SEEDS)) >= 5 && a.carry().isEmpty(), "leftover seeds delivered, was " + count(chest, s -> s.is(Items.WHEAT_SEEDS)) + dbg(a));
+			FlightBladeGameTest.drop(c, p);
+		});
+	}
+
+	@GameTest(maxTicks = 1200)
+	public void farmWithoutAChestDropsTheLeftoversAndNeverTills(GameTestHelper c) {
+		ServerPlayer p = owner(c, new ItemStack(Items.IRON_HOE));
+		field(c);
+		Illusion a = castOne(c, p);
+		a.carry().add(new ItemStack(Items.WHEAT_SEEDS, 10));
+		c.succeedWhen(() -> {
+			c.assertTrue(field(c, true), "empty farmland planted, dirt and grass untouched" + dbg(a));
+			c.assertTrue(a.carry().isEmpty(), "nothing is kept" + dbg(a));
+			int seeds = logItems(c, p, Items.WHEAT_SEEDS);
+			c.assertTrue(seeds >= 5, "leftover seeds dropped on the ground, found " + seeds);
+			c.assertTrue(logItems(c, p, Items.WHEAT) >= 1, "the wheat dropped too");
+			FlightBladeGameTest.drop(c, p);
+		});
+	}
+
 	@GameTest(maxTicks = 1200)
 	public void chopBreaksANaturalTreeAndLeavesABuiltWall(GameTestHelper c) {
 		ServerPlayer p = owner(c, new ItemStack(Items.IRON_AXE));
