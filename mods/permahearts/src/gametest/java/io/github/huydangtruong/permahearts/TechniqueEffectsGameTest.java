@@ -203,6 +203,69 @@ public class TechniqueEffectsGameTest {
 		});
 	}
 
+	/** D94: a Husk walking out of a level 1 field keeps burning about 3 s, taking about 2 damage per second. */
+	@GameTest(maxTicks = 200)
+	public void fireAfterburnKeepsBurningOutsideTheField(GameTestHelper c) {
+		enable(c, true);
+		floor(c);
+		Husk h = husk(c, 6.5, 6.5, true);
+		h.getAttribute(Attributes.MAX_HEALTH).setBaseValue(100);
+		h.setHealth(100);
+		TechniqueFields.add(TechniqueFields.Kind.FIRE, c.getLevel(), c.absoluteVec(new Vec3(6.5, 1, 6.5)), 3, 4, 1, UUID.randomUUID());
+		float[] hp = new float[3];
+		c.runAfterDelay(20, () -> {
+			c.assertTrue(h.isOnFire(), "the husk should burn inside the field");
+			Vec3 out = c.absoluteVec(new Vec3(10.5, 1, 6.5)); // 4 blocks from the centre, field radius is 3
+			h.teleportTo(out.x, out.y, out.z);
+		});
+		c.runAfterDelay(25, () -> hp[0] = h.getHealth());
+		c.runAfterDelay(55, () -> {
+			hp[1] = h.getHealth();
+			float lost = hp[0] - hp[1];
+			c.assertTrue(h.isOnFire(), "the husk should still burn outside the field");
+			c.assertTrue(lost >= 1.5f && lost <= 4.5f, "about 2 damage per second for 1.5 s expected, lost " + lost);
+		});
+		c.runAfterDelay(120, () -> hp[2] = h.getHealth());
+		c.runAfterDelay(160, () -> {
+			c.assertTrue(!h.isOnFire(), "the afterburn (3 s) should be over");
+			c.assertTrue(h.getHealth() == hp[2], "no burn damage once the fire is out");
+			c.assertTrue(TechniqueFields.burningCount() == 0, "the burn record should be cleaned up");
+			c.succeed();
+		});
+	}
+
+	/** D94: an entity that jumps into water stops taking the burn damage. */
+	@GameTest(maxTicks = 120)
+	public void fireBurnStopsInWater(GameTestHelper c) {
+		enable(c, true);
+		floor(c);
+		Husk h = husk(c, 6.5, 6.5, true);
+		h.getAttribute(Attributes.MAX_HEALTH).setBaseValue(100);
+		h.setHealth(100);
+		TechniqueFields.add(TechniqueFields.Kind.FIRE, c.getLevel(), c.absoluteVec(new Vec3(6.5, 1, 6.5)), 3, 4, 1, UUID.randomUUID());
+		float[] hp = new float[1];
+		c.runAfterDelay(20, () -> {
+			c.assertTrue(h.isOnFire(), "the husk should burn inside the field");
+			for (int x = 9; x <= 11; x++) {
+				for (int z = 5; z <= 7; z++) {
+					c.setBlock(x, 1, z, Blocks.WATER);
+					c.setBlock(x, 2, z, Blocks.WATER);
+				}
+			}
+			Vec3 out = c.absoluteVec(new Vec3(10.5, 1, 6.5));
+			h.teleportTo(out.x, out.y, out.z);
+		});
+		c.runAfterDelay(40, () -> {
+			c.assertTrue(!h.isOnFire(), "water should put the husk out");
+			hp[0] = h.getHealth();
+		});
+		c.runAfterDelay(100, () -> {
+			c.assertTrue(h.getHealth() == hp[0], "no burn damage after water, health " + hp[0] + " -> " + h.getHealth());
+			c.assertTrue(TechniqueFields.burningCount() == 0, "the burn record should be cleaned up");
+			c.succeed();
+		});
+	}
+
 	@GameTest(maxTicks = 100)
 	public void iceOrbGivesFrostbiteWithTheRightValues(GameTestHelper c) {
 		enable(c, true);

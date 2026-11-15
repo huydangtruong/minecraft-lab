@@ -60,7 +60,8 @@ class TechniqueRulesTest {
 		assertArrayEquals(new double[] {24, 42, 52}, at(TechniqueRules::fireRange)); // D72
 		assertArrayEquals(new double[] {24, 42, 52}, at(TechniqueRules::iceRange));
 		assertArrayEquals(new double[] {3, 4.8, 5.8}, at(TechniqueRules::fireFieldRadius), 1e-9);
-		assertArrayEquals(new double[] {1, 2.8, 3.8}, at(TechniqueRules::fireBurnPerSecond), 1e-9);
+		assertArrayEquals(new double[] {2, 2 + 3.0 * 9 / 19, 5}, at(TechniqueRules::fireBurnPerSecond), 1e-9); // D94
+		assertArrayEquals(new double[] {3, 4.8, 6.8}, at(TechniqueRules::fireAfterburnSeconds), 1e-9);
 		assertArrayEquals(new double[] {1.5, 3.75, 5.0}, at(TechniqueRules::repulsePush), 1e-9);
 		assertArrayEquals(new double[] {4, 13, 18}, at(TechniqueRules::fireImpactDamage));
 		assertArrayEquals(new double[] {0.40, 0.40 + 0.56 * 9 / 19, 0.96}, at(TechniqueRules::iceSlow), 1e-9);
