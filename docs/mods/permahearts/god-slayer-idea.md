@@ -1,6 +1,6 @@
 # God Slayer (Kẻ Tiêu Diệt Thần Thánh): ý tưởng
 
-> Bản nháp ý tưởng, **chưa phải spec**. Chờ Huy trả lời các câu hỏi cuối file rồi mới viết spec và plan.
+> Bản nháp ý tưởng, **chưa phải spec**. Còn chờ Huy chọn thứ tự mở skill (mục "Huy trả lời lần 3") rồi mới viết spec và plan.
 
 ## Lời Huy (2026-11-15, đã bỏ tạp âm)
 
@@ -100,6 +100,36 @@
   - phần thưởng khi hạ;
   - bay có xuyên tường không;
   - có luật game bật/tắt không.
+
+## Huy trả lời (2026-11-15, lần 3), thay các ý ở trên khi khác nhau (D96)
+
+- **Mạnh dần:** mỗi lần bị hạ, nó **mạnh lên 20%**. Manager chọn: máu và sát thương cộng thêm 20% của mức khởi điểm (500 → 600 → 700 máu; kiếm 30 → 36 → 42), không nhân dồn.
+- **Phần thưởng khi hạ:** **+100 level** cho người hạ và **5 rương ngẫu nhiên**. Mỗi rương bốc ngẫu nhiên trong 4 loại **bạc, vàng, kim cương, ngọc lục bảo** (D76, D89), **mỗi loại 25%**.
+- **Bay:** **không xuyên tường** như Vex. Thay vào đó nó **dịch chuyển thẳng tới người chơi** khi người đó ở quá xa, hoặc trốn ở chỗ nó khó tự đi tới được.
+- **Bật/tắt bằng lệnh:** `/boss summon` gọi God Slayer ra, `/boss giveup` cho nó rời đi. Không cần luật game riêng.
+- **Thứ tự mở skill:** chờ Huy chọn từ danh sách dưới đây.
+
+### Danh sách skill hiện có
+
+| # | Skill | Loại | Gì |
+|---|---|---|---|
+| 1 | Song kiếm | Đánh gần | Chuỗi 3 nhát nhanh, nhát cuối hất văng, xuyên một phần giáp. Mỗi nhát 30 |
+| 2 | Lao chém | Đánh gần | Cách 6–15 block thì lao tới như tia chớp rồi chém |
+| 3 | Hỏa cầu Oni | Bắn xa | Đứng lại bắn quả cầu lửa đỏ đen, nổ **phá block** (lớn hơn Ghast) |
+| 4 | Phi đao linh hồn | Bắn xa | Đứng lại bắn loạt 5–7 lưỡi dao tím như mũi tên. Không phải nổ, Blast Protection không giảm |
+| 5 | Tia dưới nước | Dưới nước | Dùng AI Elder Guardian: ngắm 1–2 giây có tia báo trước, rồi bắn mạnh. Bơi gấp 3 cá heo |
+| 6 | Bay đuổi | Di chuyển | Người chơi bay hoặc xây cột thì nó bay theo (không xuyên tường) |
+| 7 | Dịch chuyển | Di chuyển | Người chơi quá xa hoặc trốn chỗ khó tới thì dịch chuyển thẳng tới. Giết xong một người thì dịch chuyển tới người chưa bị giết, kể cả ở Nether/End |
+| 8 | Tự nổ | Mở khóa | Phá một vùng quanh nó, gây sát thương người đứng gần và người đang đánh nó |
+| 9 | Đấu trường | Mở khóa | Vòng tròn quanh nó, người chơi không ra được, khoảng 10 giây |
+| 10 | Gọi đệ | Mở khóa | Gọi 4 quái bất kỳ (Vindicator, Piglin Brute, Evoker, …) |
+| 11 | Che tầm nhìn | Mở khóa | Làm người chơi mù hoặc chỉ thấy 1–2 block, như Warden |
+
+Luôn có (không phải skill, là luật chống lừa): miễn sát thương môi trường và quái khác, mỗi đòn nhận tối đa 40, kẹt thì phá block quanh nó, không vào thuyền/xe mỏ/dây dắt, bị đánh từ chỗ an toàn hoặc né mãi thì hồi máu.
+
+Gợi ý của manager:
+- **Có sẵn từ đầu:** 1 Song kiếm, 2 Lao chém, 5 Tia dưới nước, 6 Bay đuổi, 7 Dịch chuyển. Phần di chuyển phải có từ đầu, nếu không người chơi trốn được.
+- **Mở dần, mỗi lần bị hạ mở 1:** 4 Phi đao → 3 Hỏa cầu → 10 Gọi đệ → 11 Che tầm nhìn → 9 Đấu trường → 8 Tự nổ.
 
 ## Câu hỏi cho Huy (lần 1)
 
