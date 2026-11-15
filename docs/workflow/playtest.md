@@ -193,7 +193,7 @@ Kiểm bằng máy: `./gradlew :permahearts:build` (game test `ThousandMileStepG
 
 ## P-025: Illusion làm việc (D73)
 
-Cầm đồ trong tay chính rồi bấm Illusion: bản sao khoá việc theo món đó (đổi đồ sau không đổi việc). Việc nằm trong vòng tròn quanh chỗ bấm (bán kính 8 block ở cấp 1, 16 ở cấp 20). Mỗi bản sao mang tối đa 9 ô đồ, đem về rương/thùng gần chỗ bấm khi đầy, khi hết việc, hoặc 3 giây trước khi hết giờ. Không có rương thì thả đồ xuống chân bạn. Việc không cho XP và không hao đồ nghề. Cầm tay không hoặc kiếm thì vẫn chỉ đánh nhau.
+Để đồ nghề ở **ô hotbar đầu tiên** (D85, không phải đồ đang cầm) rồi bấm Illusion: bản sao khoá việc theo món đó. Ô đầu trống thì các bản sao chỉ đánh nhau. Đồ của bạn không bị lấy (trừ phần thức ăn chia cho việc breed) (đổi đồ sau không đổi việc). Việc nằm trong vòng tròn quanh chỗ bấm (bán kính 8 block ở cấp 1, 16 ở cấp 20). Mỗi bản sao mang tối đa 9 ô đồ, đem về rương/thùng gần chỗ bấm khi đầy, khi hết việc, hoặc 3 giây trước khi hết giờ. Không có rương thì thả đồ xuống chân bạn. Việc không cho XP và không hao đồ nghề. Cầm tay không hoặc kiếm thì vẫn chỉ đánh nhau.
 
 1. **Cuốc (farm)**: đặt vài ô lúa chín gần nước, rương bên cạnh, bấm. Bản sao gặt, trồng lại ngay, trồng hạt lên ô đất cày sẵn còn trống. Nó KHÔNG BAO GIỜ cuốc đất mới (D84). Hết việc thì mang hết hạt và nông sản đến rương; không có rương thì thả xuống đất (vài giây sau khi hết việc, không đợi hết giờ).
 2. **Cần câu (fish)**: đứng gần ao nước từ 2x2 ô trở lên, bấm. Bản sao ra bờ, vung cần, chờ 5-30 giây (Lure rút ngắn, Luck of the Sea tăng đồ hiếm), cá vào rương.
