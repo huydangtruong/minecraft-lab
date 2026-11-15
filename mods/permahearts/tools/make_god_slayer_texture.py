@@ -10,6 +10,7 @@ copied or recoloured. Run: python3 -I mods/permahearts/tools/make_god_slayer_tex
 """
 import importlib.util
 import os
+import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 spec = importlib.util.spec_from_file_location("hearts", os.path.join(HERE, "make_heart_sprites.py"))
@@ -30,12 +31,16 @@ PAL = {
     "w": "d6d1c4",  # hair shade
     "B": "4a1612",  # dark red / eye socket
     "I": "f0e6c8",  # ivory horn tip
+    "O": "f0cf6e",  # horn amber
+    "o": "b98a34",  # horn shade
+    "F": "fffaf0",  # fang
     "i": "cdbf96",  # ivory shade
     "E": "ffe14a",  # glowing eye
     "S": "b9bcc8",  # blade steel
     "s": "8a8e9c",  # blade shade
     "H": "e8ecf4",  # blade edge light
     "P": "6b3b20",  # grip wrap
+    "N": "5a6a8a",  # dim glowing blade edge (eyes layer only)
 }
 
 
@@ -63,103 +68,223 @@ def box_uv(u, v, w, h, d):
     }
 
 
+TEX = 128   # sheet width
+TEXH = 256  # sheet height
+
+# name: (w, h, d, kind). The same sizes are used by GodSlayerModel.java; the packed texture offsets are printed with --uv.
+BOXES = {
+    "head": (16, 14, 15, "head"),
+    "brow": (16, 3, 3, "skin"),
+    "fang": (3, 6, 2, "fang"),
+    "hair_top": (17, 4, 17, "hair"),
+    "hair_side": (3, 20, 13, "hair"),
+    "hair_up": (20, 17, 5, "hair"),
+    "hair_lock": (5, 18, 4, "hair"),
+    "spike": (3, 8, 3, "hair"),
+    "horn1": (7, 8, 7, "horn_base"),
+    "horn2": (6, 9, 6, "horn"),
+    "horn3": (5, 9, 5, "horn"),
+    "horn4": (3, 8, 3, "horn"),
+    "collar": (20, 5, 18, "armor"),
+    "chest": (28, 18, 15, "chest"),
+    "hair_back": (24, 28, 5, "hair"),
+    "waist": (18, 10, 11, "armor"),
+    "belt": (20, 4, 13, "rope"),
+    "knot": (5, 6, 3, "gold"),
+    "tasset_front": (20, 10, 2, "armor"),
+    "tasset_side": (2, 10, 11, "armor"),
+    "pauldron_top": (16, 4, 16, "armor"),
+    "pauldron_low": (14, 3, 14, "armor"),
+    "arm": (9, 14, 9, "sleeve"),
+    "forearm": (8, 14, 8, "forearm"),
+    "fist": (7, 6, 7, "skin"),
+    "handle": (3, 12, 3, "grip"),
+    "guard": (8, 2, 5, "gold"),
+    "blade": (4, 22, 2, "steel"),
+    "blade_tip": (3, 5, 2, "steel"),
+    "thigh": (11, 12, 11, "hakama"),
+    "shin": (9, 11, 9, "hakama"),
+    "foot": (9, 3, 12, "skin"),
+}
+
+
+def pack():
+    """Shelf-pack the boxes into the 128x256 sheet (largest first); returns {name: (u, v)}."""
+    order = sorted(BOXES, key=lambda n: -(BOXES[n][1] + BOXES[n][2]))
+    uv, x, y, row = {}, 0, 0, 0
+    for n in order:
+        w, h, d, _ = BOXES[n]
+        bw, bh = 2 * (w + d), h + d
+        if x + bw > TEX:
+            x, y, row = 0, y + row, 0
+        assert y + bh <= TEXH, "texture sheet is full"
+        uv[n] = (x, y)
+        x += bw
+        row = max(row, bh)
+    return uv
+
+
+UV = pack()
+
+
+def noise(x, y, k=0):
+    return ((x * 73856093) ^ (y * 19349663) ^ (k * 83492791)) % 11
+
+
+def face_char(kind, face, x, y, w, h):
+    """The colour letter of one texel of a box face (x, y inside a w*h rectangle)."""
+    n = noise(x, y, len(face))
+    if kind == "skin":
+        if face == "bottom" or y == h - 1 and face not in ("top",):
+            return "r"
+        return "r" if n == 0 else ("L" if n == 1 and face == "top" else "R")
+    if kind == "hair":
+        if (x + y // 5) % 5 == 0 and n < 6:
+            return "w"
+        return "w" if n == 0 else "W"
+    if kind == "horn_base":
+        return "B" if y % 4 < 2 else "O"
+    if kind == "horn":
+        if y % 4 == 3:
+            return "o"
+        return "o" if (face in ("right", "back") and x % 2 == 0) else "O"
+    if kind == "fang":
+        return "F"
+    if kind == "armor":
+        if face == "top" or face == "bottom":
+            return "K"
+        if y % 4 == 3:
+            return "G" if x % 2 == 0 else "B"
+        return "k" if x % 4 == 0 else "K"
+    if kind == "rope":
+        return "G" if (x + y) % 3 else "P"
+    if kind == "gold":
+        return "G" if n > 1 else "P"
+    if kind == "sleeve":
+        if face == "bottom":
+            return "G"
+        return "B" if y % 5 == 4 else ("k" if x % 4 == 0 else "K")
+    if kind == "forearm":
+        if face in ("top", "bottom"):
+            return "R"
+        if y >= h - 8:
+            return "G" if y == h - 8 else ("K" if x % 4 else "k")  # black bracer
+        return "R" if n > 0 else "r"
+    if kind == "grip":
+        return "P" if (x + y) % 3 else "K"
+    if kind == "steel":
+        if face == "front":
+            if x == 0:
+                return "H"
+            return "S" if x < w - 1 else "s"
+        if face == "back":
+            return "s" if x == 0 else "S"
+        return "H"
+    if kind == "hakama":
+        if face == "top":
+            return "K"
+        return "k" if x % 4 == 0 else ("B" if y == h - 1 else "K")
+    if kind == "chest":
+        return "K"
+    return "K"
+
+
+def paint_box(img, name):
+    w, h, d, kind = BOXES[name]
+    u, v = UV[name]
+    for face, (x0, y0, fw, fh) in box_uv(u, v, w, h, d).items():
+        for dy in range(fh):
+            for dx in range(fw):
+                put(img, x0 + dx, y0 + dy, face_char(kind, face, dx, dy, fw, fh))
+
+
+HEAD_FRONT = [
+    "RRRRRRRRRRRRRRRR",
+    "RRRRRRRRRRRRRRRR",
+    "RKKRRRRRRRRRRKKR",
+    "RRKKKRRRRRRKKKRR",
+    "RRBBKKRRRRKKBBRR",
+    "RRBBBKRRRRKBBBRR",
+    "RRRBBRRrrRRBBRRR",
+    "RRRRRRrBBrRRRRRR",
+    "RRRRRRrBBrRRRRRR",
+    "RRRKKKKKKKKKKRRR",
+    "RRRKWKKKKKKWKRRR",
+    "RRRKKWKBBKWKKRRR",
+    "RRRRKKKKKKKKRRRR",
+    "RrRRRRRRRRRRRRrR",
+]
+
+
+def paint_head(img):
+    paint_box(img, "head")
+    u, v = UV["head"]
+    f = box_uv(u, v, 16, 14, 15)["front"]
+    paint(img, f[0], f[1], HEAD_FRONT)
+    # ears on the sides
+    for face in ("right", "left"):
+        x, y, _, _ = box_uv(u, v, 16, 14, 15)[face]
+        paint(img, x + 5, y + 4, ["rr", "rr", "rr"])
+
+
+def paint_chest(img):
+    paint_box(img, "chest")
+    u, v = UV["chest"]
+    f = box_uv(u, v, 28, 18, 15)
+    # open black kimono: bare red chest in a V, gold-laced plate across the belly, gold crest on the back
+    rows = []
+    for y in range(18):
+        row = ""
+        for x in range(28):
+            half = abs(x - 13.5)
+            ch = "K" if x % 7 else "k"
+            if y < 9 and half < 6 - y * 0.6:
+                ch = "R" if (x + y) % 5 else "r"
+            elif y >= 9 and y % 4 == 1:
+                ch = "G"
+            elif y >= 9 and x % 5 == 0:
+                ch = "B"
+            row += ch
+        rows.append(row)
+    paint(img, f["front"][0], f["front"][1], rows)
+    back = []
+    for y in range(18):
+        row = ""
+        for x in range(28):
+            ch = "K" if x % 7 else "k"
+            if 4 <= y <= 12 and abs(x - 13.5) + abs(y - 8) < 5.5 and (abs(x - 13.5) + abs(y - 8)) % 3 > 0:
+                ch = "G"
+            row += ch
+        back.append(row)
+    paint(img, f["back"][0], f["back"][1], back)
+
+
 def build_skin():
-    img = [[CLEAR] * 64 for _ in range(64)]
-
-    # ---- head 8x8x8 at (0,0) ----
-    f = box_uv(0, 0, 8, 8, 8)
-    solid(img, *f["top"], "R")
-    solid(img, *f["bottom"], "r")
-    solid(img, *f["back"], "R")
-    for side in ("right", "left"):
-        solid(img, *f[side], "R")
-        x, y, _, _ = f[side]
-        paint(img, x + 3, y + 3, ["rr", "rr"])  # ear
-    paint(img, f["front"][0], f["front"][1], [
-        "RRRRRRRR",
-        "RKRRRRKR",
-        "RRKRRKRR",
-        "RBBRRBBR",
-        "RRBRRBRR",
-        "RRRrrRRR",
-        "RKWKKWKR",
-        "RRrrrrRR",
-    ])
-
-    # ---- hat = the white hair, 8x8x8 at (32,0), fully outside the face ----
-    h = box_uv(32, 0, 8, 8, 8)
-    solid(img, *h["top"], "W")
-    paint(img, h["top"][0], h["top"][1], ["WWwWWWwW", "WWWWWwWW", "wWWWWWWW", "WWWwWWWW", "WWWWWWwW", "WwWWWWWW", "WWWWwWWW", "WWWWWWWW"])
-    paint(img, h["front"][0], h["front"][1], ["WWWWWWWW", "WWwWWwWW", "W.W..W.W", "........", "........", "........", "........", "........"])
-    paint(img, h["right"][0], h["right"][1], ["WWWWWWWW", "WWWWWWWW", "WwWWWww.", "WWwWw...", "WWWWw...", "WwWWw...", "WWWw....", "WwWW...."])
-    paint(img, h["left"][0], h["left"][1], ["WWWWWWWW", "WWWWWWWW", ".wwWWwWW", "...wWwWW", "...wWWWW", "...wWWwW", "....wWWW", "....WWwW"])
-    paint(img, h["back"][0], h["back"][1], ["WWWWwWWW", "WWwWWWWW", "WWWWWwWW", "wWWWWWWW", "WWWwWWWW", "WWWWWWwW", "WwWWWWWW", "WWWWwWWW"])
-
-    # ---- body 8x12x4 at (16,16): black kimono, open chest, belt, gold crest on the back ----
-    b = box_uv(16, 16, 8, 12, 4)
-    solid(img, *b["top"], "K")
-    solid(img, *b["bottom"], "K")
-    paint(img, b["front"][0], b["front"][1], [
-        "KKRRRRKK",
-        "KKrRRrKK",
-        "KKKRRKKK",
-        "KKKrrKKK",
-        "KKKKKKKK",
-        "BBBBBBBB",
-        "BBBGGBBB",
-        "KkKKKKkK",
-        "KkKKKKkK",
-        "KkKKKKkK",
-        "KkKKKKkK",
-        "KkKKKKkK",
-    ])
-    for side in ("right", "left"):
-        paint(img, b[side][0], b[side][1], ["KKKK"] * 5 + ["BBBB"] * 2 + ["KkKK"] * 5)
-    paint(img, b["back"][0], b["back"][1], [
-        "KKKKKKKK", "KKKKKKKK", "KKKGGKKK", "KKGKKGKK", "KKKGGKKK", "BBBBBBBB",
-        "BBBBBBBB", "KkKKKKkK", "KkKKKKkK", "KkKKKKkK", "KkKKKKkK", "KkKKKKkK",
-    ])
-
-    # ---- arms 4x12x4: right at (40,16), left at (32,48): black sleeve, red forearm, black bracer ----
-    for u, v in ((40, 16), (32, 48)):
-        a = box_uv(u, v, 4, 12, 4)
-        solid(img, *a["top"], "K")
-        solid(img, *a["bottom"], "R")
-        arm = ["KKKK"] * 5 + ["GGGG"] + ["RRRR"] + ["KKKK"] * 3 + ["RRRR", "rRRr"]
-        for face in ("right", "front", "left", "back"):
-            paint(img, a[face][0], a[face][1], arm)
-
-    # ---- legs 4x12x4: right at (0,16), left at (16,48): black hakama, bare red feet ----
-    for u, v in ((0, 16), (16, 48)):
-        lg = box_uv(u, v, 4, 12, 4)
-        solid(img, *lg["top"], "K")
-        solid(img, *lg["bottom"], "r")
-        pant = ["KkKK"] * 9 + ["RRRR", "RRRR", "rRRr"]
-        for face in ("right", "front", "left", "back"):
-            paint(img, lg[face][0], lg[face][1], pant)
-
-    # ---- horn base 2x2x2 at (0,32), horn tip 1x3x1 at (8,32) ----
-    hb = box_uv(0, 32, 2, 2, 2)
-    for face, (x, y, w, hh) in hb.items():
-        solid(img, x, y, w, hh, "B" if face in ("top", "bottom", "back") else "r")
-    ht = box_uv(8, 32, 1, 3, 1)
-    for face, (x, y, w, hh) in ht.items():
-        solid(img, x, y, w, hh, "i" if face in ("right", "back") else "I")
-
-    # ---- shoulder plate 6x2x6 at (16,32): black lamellae with a gold lace ----
-    p = box_uv(16, 32, 6, 2, 6)
-    paint(img, p["top"][0], p["top"][1], ["GKKKKG", "KkkkkK", "KKKKKK", "KkkkkK", "KKKKKK", "GKKKKG"])
-    solid(img, *p["bottom"], "K")
-    for face in ("right", "front", "left", "back"):
-        paint(img, p[face][0], p[face][1], ["KKKKKK", "GKGKGK"])
+    img = [[CLEAR] * TEX for _ in range(TEXH)]
+    for name in BOXES:
+        if name == "head":
+            paint_head(img)
+        elif name == "chest":
+            paint_chest(img)
+        else:
+            paint_box(img, name)
     return img
 
 
 def build_eyes():
-    img = [[CLEAR] * 64 for _ in range(64)]
-    # head front face is at (8,8); the eyes sit at columns 1-2 and 5-6 of rows 3-4, slanting down to the nose
-    for x, y in ((9, 11), (10, 11), (10, 12), (13, 11), (14, 11), (13, 12)):
-        put(img, x, y, "E")
+    img = [[CLEAR] * TEX for _ in range(TEXH)]
+    u, v = UV["head"]
+    fx, fy, _, _ = box_uv(u, v, 16, 14, 15)["front"]
+    # the two slanted eyes of HEAD_FRONT (the dark K rows 2-5 are the brows; the eyes sit in the B sockets)
+    for dx, dy in ((2, 4), (3, 4), (3, 5), (4, 5), (13, 4), (12, 4), (12, 5), (11, 5)):
+        put(img, fx + dx, fy + dy, "E")
+    # a faint glowing edge on both sides of each blade (front face first column, drawn dim)
+    bu, bv = UV["blade"]
+    bf = box_uv(bu, bv, 4, 26, 2)
+    for face in ("front", "back"):
+        x, y, w, h = bf[face]
+        for dy in range(h):
+            put(img, x, y + dy, "N")
     return img
 
 
@@ -183,6 +308,10 @@ def build_katana():
 
 
 def main():
+    if "--uv" in sys.argv:
+        for n, (u, v) in sorted(UV.items()):
+            print("%s %d %d" % (n, u, v))
+        return
     ent = os.path.join(ASSETS, "entity")
     item = os.path.join(ASSETS, "item")
     os.makedirs(ent, exist_ok=True)
