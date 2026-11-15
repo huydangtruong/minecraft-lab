@@ -1,6 +1,6 @@
 # God Slayer (Kẻ Tiêu Diệt Thần Thánh): ý tưởng
 
-> Bản nháp ý tưởng, **chưa phải spec**. Còn chờ Huy chọn thứ tự mở skill (mục "Huy trả lời lần 3") rồi mới viết spec và plan.
+> Bản nháp ý tưởng. Đã chốt (D96, D97); làm theo plan P-032 rồi P-033.
 
 ## Lời Huy (2026-11-15, đã bỏ tạp âm)
 
@@ -107,29 +107,29 @@
 - **Phần thưởng khi hạ:** **+100 level** cho người hạ và **5 rương ngẫu nhiên**. Mỗi rương bốc ngẫu nhiên trong 4 loại **bạc, vàng, kim cương, ngọc lục bảo** (D76, D89), **mỗi loại 25%**.
 - **Bay:** **không xuyên tường** như Vex. Thay vào đó nó **dịch chuyển thẳng tới người chơi** khi người đó ở quá xa, hoặc trốn ở chỗ nó khó tự đi tới được.
 - **Bật/tắt bằng lệnh:** `/boss summon` gọi God Slayer ra, `/boss giveup` cho nó rời đi. Không cần luật game riêng.
-- **Thứ tự mở skill:** chờ Huy chọn từ danh sách dưới đây.
+- **Thứ tự mở skill:** 10 level, mỗi level mở 1 chiêu, xem D97. Hỏa cầu bắn liền 3 viên cách nhau 0,25 giây.
 
-### Danh sách skill hiện có
+### Khả năng nội tại (luôn có, không phải chiêu, không tính vào level)
 
-| # | Skill | Loại | Gì |
-|---|---|---|---|
-| 1 | Song kiếm | Đánh gần | Chuỗi 3 nhát nhanh, nhát cuối hất văng, xuyên một phần giáp. Mỗi nhát 30 |
-| 2 | Lao chém | Đánh gần | Cách 6–15 block thì lao tới như tia chớp rồi chém |
-| 3 | Hỏa cầu Oni | Bắn xa | Đứng lại bắn quả cầu lửa đỏ đen, nổ **phá block** (lớn hơn Ghast) |
-| 4 | Phi đao linh hồn | Bắn xa | Đứng lại bắn loạt 5–7 lưỡi dao tím như mũi tên. Không phải nổ, Blast Protection không giảm |
-| 5 | Tia dưới nước | Dưới nước | Dùng AI Elder Guardian: ngắm 1–2 giây có tia báo trước, rồi bắn mạnh. Bơi gấp 3 cá heo |
-| 6 | Bay đuổi | Di chuyển | Người chơi bay hoặc xây cột thì nó bay theo (không xuyên tường) |
-| 7 | Dịch chuyển | Di chuyển | Người chơi quá xa hoặc trốn chỗ khó tới thì dịch chuyển thẳng tới. Giết xong một người thì dịch chuyển tới người chưa bị giết, kể cả ở Nether/End |
-| 8 | Tự nổ | Mở khóa | Phá một vùng quanh nó, gây sát thương người đứng gần và người đang đánh nó |
-| 9 | Đấu trường | Mở khóa | Vòng tròn quanh nó, người chơi không ra được, khoảng 10 giây |
-| 10 | Gọi đệ | Mở khóa | Gọi 4 quái bất kỳ (Vindicator, Piglin Brute, Evoker, …) |
-| 11 | Che tầm nhìn | Mở khóa | Làm người chơi mù hoặc chỉ thấy 1–2 block, như Warden |
+- **Di chuyển mọi môi trường:** chạy rất nhanh trên cạn; người chơi bay hoặc xây cột thì nó **bay theo** (không xuyên tường); xuống nước thì tự **bơi nhanh gấp 3 cá heo**.
+- **Phá block** khi bị kẹt hoặc bị chặn đường, như Wither.
+- **Tự dịch chuyển tới người chơi** khi người đó ở quá xa, trốn chỗ nó khó tự tới, hoặc qua chiều không gian khác (Nether, End). Giết xong một người thì dịch chuyển tới người chưa bị giết.
+- **Chống lừa:** miễn sát thương môi trường và quái khác, mỗi đòn nhận tối đa 40, không vào thuyền/xe mỏ/dây dắt, không bị piston đẩy, bị đánh từ chỗ an toàn hoặc người chơi né mãi thì hồi máu.
 
-Luôn có (không phải skill, là luật chống lừa): miễn sát thương môi trường và quái khác, mỗi đòn nhận tối đa 40, kẹt thì phá block quanh nó, không vào thuyền/xe mỏ/dây dắt, bị đánh từ chỗ an toàn hoặc né mãi thì hồi máu.
+### Chiêu theo level (D97: mỗi level 1 chiêu mới, mạnh thêm 20%)
 
-Gợi ý của manager:
-- **Có sẵn từ đầu:** 1 Song kiếm, 2 Lao chém, 5 Tia dưới nước, 6 Bay đuổi, 7 Dịch chuyển. Phần di chuyển phải có từ đầu, nếu không người chơi trốn được.
-- **Mở dần, mỗi lần bị hạ mở 1:** 4 Phi đao → 3 Hỏa cầu → 10 Gọi đệ → 11 Che tầm nhìn → 9 Đấu trường → 8 Tự nổ.
+| Lv | Chiêu mới | Gì |
+|---|---|---|
+| 1 | Chém thường | Một nhát kiếm, 30 sát thương |
+| 2 | Song kiếm | Chuỗi 3 nhát nhanh, nhát cuối hất văng, xuyên một phần giáp |
+| 3 | Lao chém | Cách 6–15 block thì lao tới như tia chớp rồi chém |
+| 4 | Phi đao linh hồn | Đứng lại bắn loạt 5–7 lưỡi dao tím như mũi tên. Không phải nổ, Blast Protection không giảm |
+| 5 | Tia dưới nước | Dùng AI Elder Guardian: ngắm 1–2 giây có tia báo trước, rồi bắn mạnh |
+| 6 | Hỏa cầu Oni | Đứng lại bắn **liền 3 viên, cách nhau 0,25 giây**, nổ **phá block** (lớn hơn Ghast) |
+| 7 | Gọi đệ | Gọi 4 quái bất kỳ (Vindicator, Piglin Brute, Evoker, …) |
+| 8 | Che tầm nhìn | Làm người chơi mù hoặc chỉ thấy 1–2 block, như Warden |
+| 9 | Đấu trường | Vòng tròn quanh nó, người chơi không ra được, khoảng 10 giây |
+| 10 | Tự nổ | Phá một vùng quanh nó, gây sát thương người đứng gần và người đang đánh nó |
 
 ## Câu hỏi cho Huy (lần 1)
 
