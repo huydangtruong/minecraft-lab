@@ -5,7 +5,7 @@
 > Đã chọn ô trước thì bấm vào tên chiêu cũng đặt được, không cần dấu cộng.
 
 - **Status:** ready
-- **Mod / decision:** `permahearts`, D82, D83 · **Branch:** `feat/P-028-chop-picking` · **Depends on:** none
+- **Mod / decision:** `permahearts`, D82, D83, D84, D85 · **Branch:** `feat/P-028-chop-picking` · **Depends on:** none
 
 ## Goal
 
@@ -22,6 +22,10 @@ Files: `technique/illusion/ChopTask.java`, `technique/illusion/WorkGoal.java`, `
   - A top log 6+ blocks up is out of reach. The clone then tries to walk into the tree, has no path, and stalls up to 15 s (`goTo` skips only after 300 ticks).
   - Fix: measure from the eye position, allow reaching logs straight above from the trunk base, and skip a log at once when the path fails instead of waiting 15 s.
   - Also check `workTicks` and the `acted(destroySpeed*5)` pause add up to something sane.
+- **Leaves (Huy, after playtest):**
+  - The clone does not break leaves, and leaves block its view of and path to the logs.
+  - When natural leaves (`PERSISTENT == false`) sit on the ray from its eyes to a wanted log, or block its path or standing spot, it breaks those leaves. Each break gets a short pause, and the drops are picked up.
+  - Only the leaves in the way, never the whole canopy, never player-placed leaves.
 - **Target speed:** a level-1 clone fells a whole 6-log oak in **≤ 12 s** of game time; the 7-log tree is fully felled too (no log left floating).
 - **Drop bug:**
   - When the clone has no chest, everything it carries must end up on the ground when it delivers or its time runs out. Keep D73: dropped at the owner's feet when the owner is in the work area, else where the clone stands; never deleted.
@@ -31,6 +35,18 @@ Files: `technique/illusion/ChopTask.java`, `technique/illusion/WorkGoal.java`, `
     - items dropped at the owner's feet being swallowed or hidden.
   - The game test asserts that after the clone is gone, log `ItemEntity`s exist (or the owner's inventory gained them, if picked up) and the count equals the logs broken.
 - Keep the rest of D73 unchanged (chest delivery, pickup, replanting).
+
+## Part 1b: Farming without tilling (D84)
+
+- `FarmTask` never turns dirt or grass into farmland (no hoe tilling). It harvests, replants, and plants seeds on existing empty farmland.
+- When all farmland is planted and nothing is ripe, it delivers its seeds and crops to the chest, or drops them with no chest (D73 rules).
+- Game test: no new farmland appears, all empty farmland gets planted, and the leftovers end up in the chest or on the ground.
+
+## Part 1c: Job from the first hotbar slot (D85)
+
+- `Illusion` picks the job from the owner's inventory slot 0, not from the main hand. An empty slot 0 gives FIGHT.
+- A working clone holds a copy of slot 0 as its tool. FIGHT keeps today's gear copying.
+- Game test: sword in hand and axe in slot 0 gives CHOP; empty slot 0 gives FIGHT.
 
 ## Part 2: Techniques tab (D83)
 
