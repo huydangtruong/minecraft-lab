@@ -108,6 +108,11 @@ public final class TechniqueNet {
 		if (level < 1) {
 			return "Learn " + t.displayName() + " first";
 		}
+		if (t == Technique.WARP) {
+			// D75: right click only places a portal (no cooldown, the refusal is a red overlay sent by Warp); the cooldown starts after a warp
+			io.github.huydangtruong.permahearts.technique.warp.Warp.place(p, level);
+			return null;
+		}
 		long now = p.level().getServer().overworld().getGameTime();
 		if (d.onCooldown(t, now)) {
 			return "On cooldown: " + (d.cooldownLeft(t, now) + 19) / 20 + " s";

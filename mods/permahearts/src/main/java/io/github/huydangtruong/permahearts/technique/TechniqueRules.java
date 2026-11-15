@@ -437,6 +437,29 @@ public final class TechniqueRules {
 		return PEARL_RANGE * teleportPearls(level);
 	}
 
+	// ---- Cosmic Warping (D75) ----
+
+	/** Portals one player may own: 2 at level 1 up to 20 at level 20, a straight line rounded down. */
+	public static int warpMaxPortals(int level) {
+		int l = Math.max(1, Math.min(MAX_LEVEL, level));
+		return 2 + (l - 1) * 18 / 19;
+	}
+
+	/** Seconds of cooldown after a warp: 160 at level 1, 5 less per level (65 at level 20). */
+	public static int warpCooldownSeconds(int level) {
+		int l = Math.max(1, Math.min(MAX_LEVEL, level));
+		return 160 - 5 * (l - 1);
+	}
+
+	/** Cooldown of a technique at a level in seconds: the enum value, except Cosmic Warping which falls with the level. */
+	public static int cooldownSeconds(Technique t, int level) {
+		return t == Technique.WARP ? warpCooldownSeconds(level) : t.cooldownSeconds();
+	}
+
+	public static int cooldownTicks(Technique t, int level) {
+		return cooldownSeconds(t, level) * 20;
+	}
+
 	/** One line of the detail page: label and the value at a level, e.g. ("Range", "16 blocks"). */
 	public record Stat(String label, String value) {}
 
@@ -508,6 +531,9 @@ public final class TechniqueRules {
 				new Stat("Sprint swim", num(aquaTargetSpeed(level, true) * 20) + " blocks/s"),
 				new Stat("Underwater mining", "\u00d7" + num(aquaMiningSpeed(level)) + " aqua affinity"),
 				new Stat("Cooldown", t.cooldownSeconds() + " s"));
+			case WARP -> List.of(
+				new Stat("Portals", String.valueOf(warpMaxPortals(level))),
+				new Stat("Cooldown", warpCooldownSeconds(level) + " s"));
 			case SACRIFICE -> List.of(
 				new Stat("Costs", pct(sacrificeCost(level)) + " of current health"),
 				new Stat("Invulnerable", num(sacrificeSeconds(level)) + " s"),

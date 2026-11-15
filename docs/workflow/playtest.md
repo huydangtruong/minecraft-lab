@@ -141,7 +141,7 @@ Kiểm bằng máy: `./gradlew :permahearts:runClientGameTest` (ảnh `27-phase-
 1. Ném Lửa vào một cây hoặc tường gỗ: chỗ trúng và gỗ quanh bãi lửa bắt lửa, lửa có thể lan như lửa thường.
 2. Ném vào mob trên nền đá: mob cháy, nền đá không có lửa.
 
-## Thiên Lý Bộ / Thousand Mile Step (D58, P-019)
+## Quantum Leap, trước là Thiên Lý Bộ / Thousand Mile Step (D58, D74, P-019)
 
 Survival, công tắc BẬT, `/technique set @s teleport 1` (hoặc học trong tab chiêu), gán vào ô, bấm R chọn ô đó (pháp khí tím trên tay).
 1. **Gồng**: giữ chuột phải, thanh lực đầy sau **3 giây** (lâu gấp 3 Fireball), màn hình zoom dần như cung, hạt tím quanh tay. Thả ra: dịch chuyển theo hướng nhìn. Chuột trái = lực tối đa ngay.
@@ -204,3 +204,19 @@ Cầm đồ trong tay chính rồi bấm Illusion: bản sao khoá việc theo m
 7. **Đánh nhau**: quái đánh bạn thì bản sao đánh trả rồi quay lại làm việc. Quái thù địch (zombie, skeleton...) giờ chọn ngẫu nhiên giữa bạn và các bản sao (sửa lỗi "quái không để ý bản sao").
 8. Bản sao biến mất (hết giờ, chết) thì thả đồ đang mang.
 9. Kiểm bằng máy: `./gradlew :permahearts:build` (`IllusionWorkGameTest`, `TechniqueRulesTest`).
+
+## P-026: Quantum Leap (đổi tên) và Cosmic Warping (D74, D75)
+
+**Quantum Leap** (chiêu cũ Thousand Mile Step, id vẫn là `teleport`): tên mới "Quantum Leap" trong tab chiêu, trang chi tiết và tên pháp khí; icon, hạt, vệt bay và màu tab đổi sang **xanh ngọc (turquoise)**. Cách chơi y như cũ (gồng 3 giây, đi tới ~150 block cấp 1).
+
+**Cosmic Warping** (chiêu thứ 13, `/technique set @s warp 20` hoặc học trong tab chiêu, gán vào ô, bấm R chọn ô đó):
+1. **Chuột phải** nhìn xuống mặt trên của một khối trong tầm ~6 block (có 2 khối trống phía trên): mọc một **cổng** (hình bầu dục ~1 rộng × 1,5 cao, viền tím, bên trong xoáy chậm màu riêng của bạn, có hạt). Đặt cổng **không** tốn hồi chiêu. Cấp 1 tối đa **2 cổng**, cấp 20 tối đa **20**; đặt thêm: dòng chữ **đỏ** "Portal limit reached (N). Remove one in the warp menu.".
+2. Cổng **không phá được**: không bằng tay hay công cụ (kể cả creative), không bằng TNT/Creeper, piston, nước/dung nham, quái. Mất chiêu / reset chiêu vẫn không mất cổng. Người khác thấy cổng của bạn nhưng không dùng được.
+3. **Chuột trái** (ở bất cứ đâu, kể cả khác chiều không gian): mở **menu warp**: mục **Portals** (cũ nhất lên trước, mỗi dòng 2 hàng: tên, rồi "x, y, z" + chiều không gian nếu không phải Overworld, có nút **X** bên phải) rồi mục **Players** (người chơi khác đang online). Tiêu đề hiện "Portals N / max" và thời gian hồi còn lại. Lăn chuột để cuộn.
+4. Bấm một dòng: dịch chuyển tới cổng (hoặc tới người đó), có tiếng Enderman + hạt portal ở hai đầu, menu đóng. **Hồi chiêu chỉ bắt đầu sau khi dịch chuyển**: 160 giây cấp 1, giảm dần còn 65 giây cấp 20. Đang hồi chiêu vẫn mở được menu, nhưng bấm dòng thì bị từ chối (chữ đỏ báo giây còn lại). Thanh chiêu hiện đếm ngược đúng.
+5. Bấm **X**: cổng biến mất ngay và khỏi danh sách (chỉ chủ cổng xoá được). Cổng ở khu vực chưa tải: danh sách mất ngay, thân cổng biến mất khi tải lại khu đó.
+6. **Tên cổng tự đặt**: công trình gần nhất trong ~64 block (Village, Ruined Portal...), không có thì tên biome (ví dụ "Cherry Grove"); trùng thì thêm " 2", " 3".
+7. Màu bên trong cổng lấy từ UUID người đặt (hai người chơi khác nhau thường khác màu, không bao giờ tím).
+8. Thoát game vào lại: cổng và danh sách vẫn còn.
+
+Kiểm bằng máy: `./gradlew :permahearts:build` (JUnit `WarpRulesTest`, game test `WarpGameTest`: đặt 2 cổng + từ chối cổng thứ 3, không phá được, xoá, dịch chuyển + hồi chiêu, tới người chơi khác, tên) và `runClientGameTest` (`WarpClientTest`: ảnh `90-warp-menu`, `91-warp-portal`).

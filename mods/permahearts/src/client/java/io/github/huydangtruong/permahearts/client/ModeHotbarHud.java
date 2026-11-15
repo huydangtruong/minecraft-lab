@@ -54,7 +54,7 @@ public final class ModeHotbarHud {
 				g.blitSprite(RenderPipelines.GUI_TEXTURED, TechniquesTab.icon(t), x + 2, y0 + 3, 16, 16);
 				long cd = d.cooldownLeft(t, now);
 				if (cd > 0) {
-					int h = Math.round(18 * SkillBarLogic.cooldownFraction(cd, t.cooldownTicks()));
+					int h = Math.round(18 * SkillBarLogic.cooldownFraction(cd, io.github.huydangtruong.permahearts.technique.TechniqueRules.cooldownTicks(t, Math.max(1, d.level(t)))));
 					g.fill(x + 1, y0 + 2, x + 19, y0 + 2 + h, 0xB0808080);
 					g.centeredText(mc.font, Component.literal(Integer.toString(SkillBarLogic.secondsLeft(cd))),
 						x + 10, y0 + 7, 0xFFFFFFFF);

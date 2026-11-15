@@ -12,11 +12,12 @@ public enum Technique {
 	SACRIFICE("sacrifice", "Undying Jutsu", 45, false), // D47: was 30 s
 	FLIGHT("flight", "Cloud Travel", 120, false), // D52
 	BLADE("blade", "Life Steal Blade", 12, false),
-	TELEPORT("teleport", "Thousand Mile Step", 60, true), // D58: charged throw like Fireball, then the caster teleports // D52: held like a weapon; each landed hit starts the 12 s cooldown
+	TELEPORT("teleport", "Quantum Leap", 60, true), // D58, D74 (was Thousand Mile Step): charged throw like Fireball, then the caster teleports // D52: held like a weapon; each landed hit starts the 12 s cooldown
 	GOLEM("golem", "Violet Guardian", 180, false), // D60: summons loyal violet iron golems
 	ANGEL("angel", "Warrior Angel", 120, false), // D63: summons gold-and-white angels that fly through walls
 	AQUA("aqua", "Aqua Marine", 120, false), // D64: breathe, swim fast and dig fast underwater for a while
-	ILLUSION("illusion", "Illusion", 110, false); // D71: clones of the caster that fight for them; D73: they also work (110 s, was 100)
+	ILLUSION("illusion", "Illusion", 110, false), // D71: clones of the caster that fight for them; D73: they also work (110 s, was 100)
+	WARP("warp", "Cosmic Warping", 160, false); // D75: portal network; the real cooldown falls with the level (TechniqueRules.cooldownSeconds)
 
 	private final String id;
 	private final String displayName;

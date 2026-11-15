@@ -54,8 +54,10 @@ final class FocusParticles {
 			}
 			case SACRIFICE -> level.addParticle(BLOOD, x, y, z, 0, 0.01, 0);
 			case TELEPORT -> {
-				level.addParticle(ParticleTypes.PORTAL, x, y, z, (rnd.nextDouble() - 0.5) * 0.4, rnd.nextDouble() * 0.2, (rnd.nextDouble() - 0.5) * 0.4);
-				level.addParticle(ParticleTypes.PORTAL, x, y + 0.1, z, (rnd.nextDouble() - 0.5) * 0.4, rnd.nextDouble() * 0.2, (rnd.nextDouble() - 0.5) * 0.4);
+				level.addParticle(new DustParticleOptions(0x30D5C8, 0.8f), x, y, z, 0, 0.01, 0); // D74: turquoise
+				if (rnd.nextInt(3) == 0) {
+					level.addParticle(ParticleTypes.END_ROD, x, y, z, (rnd.nextDouble() - 0.5) * 0.03, 0.02, (rnd.nextDouble() - 0.5) * 0.03);
+				}
 			}
 			case FLIGHT -> {
 				level.addParticle(ParticleTypes.CLOUD, x, y, z, (rnd.nextDouble() - 0.5) * 0.02, -0.015, (rnd.nextDouble() - 0.5) * 0.02);
@@ -74,6 +76,12 @@ final class FocusParticles {
 				level.addParticle(ParticleTypes.SMOKE, x, y, z, (rnd.nextDouble() - 0.5) * 0.02, 0.01, (rnd.nextDouble() - 0.5) * 0.02);
 				if (rnd.nextInt(3) == 0) {
 					level.addParticle(ParticleTypes.END_ROD, x, y, z, (rnd.nextDouble() - 0.5) * 0.02, 0.02, (rnd.nextDouble() - 0.5) * 0.02);
+				}
+			}
+			case WARP -> {
+				level.addParticle(new DustParticleOptions(0xB45CFF, 0.8f), x, y, z, 0, 0.01, 0);
+				if (rnd.nextInt(3) == 0) {
+					level.addParticle(ParticleTypes.PORTAL, x, y, z, (rnd.nextDouble() - 0.5) * 0.2, 0.1, (rnd.nextDouble() - 0.5) * 0.2);
 				}
 			}
 			case AQUA -> {
