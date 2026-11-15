@@ -4,12 +4,14 @@
 	"package": "io.github.huydangtruong.permahearts.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
+		"AnimalBreedXpMixin",
 		"EntityCollisionContextMixin",
 		"EntityInWallMixin",
 		"FoodDataMixin",
 		"FoodPropertiesMixin",
 		"GhastShootFireballGoalMixin",
 		"LivingEntityXpMixin",
+		"NearestAttackableDecoyMixin",
 		"PlayerMixin",
 		"PlayerPhaseMixin",
 		"ServerPlayerHurtMixin"

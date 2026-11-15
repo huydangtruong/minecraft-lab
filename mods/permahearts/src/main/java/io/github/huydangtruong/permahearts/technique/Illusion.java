@@ -1,6 +1,9 @@
 package io.github.huydangtruong.permahearts.technique;
 
 import io.github.huydangtruong.permahearts.PermaHearts;
+import io.github.huydangtruong.permahearts.technique.illusion.IllusionCarry;
+import io.github.huydangtruong.permahearts.technique.illusion.IllusionJob;
+import io.github.huydangtruong.permahearts.technique.illusion.WorkGoal;
 import io.github.huydangtruong.permahearts.wanderer.SpawnSpots;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -80,6 +83,11 @@ public final class Illusion extends PathfinderMob implements OwnedSummon {
 	private long endTick;
 	private double factor = 0.2;
 	private double fallbackDamage = 1.0;
+	private IllusionJob job = IllusionJob.FIGHT;
+	private BlockPos workCenter = BlockPos.ZERO;
+	private double workRadius;
+	private int workTicks = 20;
+	private final IllusionCarry carry = new IllusionCarry();
 
 	public Illusion(EntityType<? extends PathfinderMob> type, Level level) {
 		super(type, level);
@@ -109,6 +117,11 @@ public final class Illusion extends PathfinderMob implements OwnedSummon {
 		double factor = TechniqueRules.illusionFactor(level);
 		long end = sl.getGameTime() + Math.round(TechniqueRules.illusionSeconds(level) * 20);
 		IllusionTargets.open(owner.getUUID());
+		// D73: the job is locked at the cast from the item in the owner's main hand.
+		ItemStack held = owner.getMainHandItem();
+		IllusionJob job = IllusionJob.fromItemId(BuiltInRegistries.ITEM.getKey(held.getItem()).toString());
+		BlockPos center = owner.blockPosition();
+		int foodShare = job == IllusionJob.BREED ? held.getCount() / (count + 1) : 0;
 		// count + 1 spots on a ring 2-3 blocks away, evenly spread from a random start; the owner takes one at random.
 		BlockPos origin = owner.blockPosition();
 		List<Vec3> spots = new ArrayList<>();
@@ -132,11 +145,23 @@ public final class Illusion extends PathfinderMob implements OwnedSummon {
 			c.endTick = end;
 			c.factor = factor;
 			c.applyStats(owner);
+			c.job = job;
+			c.workCenter = center;
+			c.workRadius = TechniqueRules.illusionWorkRadius(level);
+			c.workTicks = TechniqueRules.illusionWorkTicks(level);
 			c.setCustomName(Component.literal(owner.getGameProfile().name()));
 			c.setCustomNameVisible(true);
 			c.setPersistenceRequired();
 			for (EquipmentSlot slot : EquipmentSlot.values()) {
 				c.setDropChance(slot, 0f);
+			}
+			if (job.works()) { // the main hand is locked to the cast item (looks only: no attribute modifiers)
+				ItemStack lock = held.copyWithCount(1);
+				lock.set(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
+				c.setItemSlot(EquipmentSlot.MAINHAND, lock);
+			}
+			if (foodShare > 0) { // breeding food is never free: the owner's stack is split with the clones
+				c.carry.add(held.split(foodShare));
 			}
 			c.copyGear(owner);
 			sl.addFreshEntity(c);
@@ -192,6 +217,9 @@ public final class Illusion extends PathfinderMob implements OwnedSummon {
 	void copyGear(Player o) {
 		setSilent(true);
 		for (EquipmentSlot slot : GEAR) {
+			if (slot == EquipmentSlot.MAINHAND && job.works()) {
+				continue;
+			}
 			ItemStack want = o.getItemBySlot(slot).copy();
 			if (!want.isEmpty()) {
 				want.set(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
@@ -237,6 +265,60 @@ public final class Illusion extends PathfinderMob implements OwnedSummon {
 		endTick = tick;
 	}
 
+	/** The job locked at the cast. */
+	public IllusionJob job() {
+		return job;
+	}
+
+	/** The cast point, centre of the work area. */
+	public BlockPos workCenter() {
+		return workCenter;
+	}
+
+	public double workRadius() {
+		return workRadius;
+	}
+
+	/** Ticks between two work actions. */
+	public int workTicks() {
+		return workTicks;
+	}
+
+	/** The work area as a box (the circle's bounding box, a bit taller). */
+	public AABB workBox() {
+		return new AABB(workCenter).inflate(workRadius, 6, workRadius);
+	}
+
+	public IllusionCarry carry() {
+		return carry;
+	}
+
+	/** The item locked in the main hand (the tool of the job). */
+	public ItemStack lockedItem() {
+		return getMainHandItem();
+	}
+
+	public Player ownerPlayer() {
+		return OwnedSummon.ownerOf(this);
+	}
+
+	/** Drops what the clone carries: at the owner's feet when the owner is in the work area, else where the clone stands. Never deletes items. */
+	public void dropCarry() {
+		if (carry.isEmpty() || !(level() instanceof ServerLevel sl)) {
+			return;
+		}
+		Player o = ownerPlayer();
+		Vec3 at = o != null && o.level() == sl && o.blockPosition().distSqr(workCenter) <= workRadius * workRadius ? o.position() : position();
+		for (ItemStack s : carry.drain()) {
+			net.minecraft.world.entity.item.ItemEntity e = new net.minecraft.world.entity.item.ItemEntity(sl, at.x, at.y + 0.3, at.z, s);
+			e.setDefaultPickUpDelay();
+			if (o != null) {
+				e.setThrower(o);
+			}
+			sl.addFreshEntity(e);
+		}
+	}
+
 	/** The share of the owner's stats this clone has. */
 	public double factor() {
 		return factor;
@@ -248,6 +330,7 @@ public final class Illusion extends PathfinderMob implements OwnedSummon {
 	protected void registerGoals() {
 		goalSelector.addGoal(0, new FloatGoal(this));
 		goalSelector.addGoal(1, new FightGoal(this));
+		goalSelector.addGoal(2, new WorkGoal(this));
 		goalSelector.addGoal(3, new IdleGoal(this));
 		targetSelector.addGoal(1, new IllusionTargetGoal(this));
 	}
@@ -269,6 +352,7 @@ public final class Illusion extends PathfinderMob implements OwnedSummon {
 	/** Closes the owner's target list when the last clone is gone. */
 	@Override
 	public void remove(Entity.RemovalReason reason) {
+		dropCarry();
 		super.remove(reason);
 		UUID id = owner;
 		if (id != null && level() instanceof ServerLevel sl && IllusionTargets.active(id) && clonesOf(sl, id).isEmpty()) {
@@ -433,8 +517,11 @@ public final class Illusion extends PathfinderMob implements OwnedSummon {
 			if (best != null) {
 				return best;
 			}
+			boolean works = c.job.works(); // a working clone only fights hostile mobs that come within 6 blocks of it or the owner
+			double near = TechniqueRules.ILLUSION_WORK_FIGHT_RANGE;
 			AABB box = o.getBoundingBox().inflate(12, 6, 12);
-			for (Mob m : sl.getEntitiesOfClass(Mob.class, box, m -> m instanceof Enemy && IllusionTargets.eligible(o, m) && c.canAttack(m))) {
+			for (Mob m : sl.getEntitiesOfClass(Mob.class, box, m -> m instanceof Enemy && IllusionTargets.eligible(o, m) && c.canAttack(m)
+				&& (!works || m.distanceTo(c) <= near || m.distanceTo(o) <= near))) {
 				if (best == null || m.distanceToSqr(c) < best.distanceToSqr(c)) {
 					best = m;
 				}
@@ -603,7 +690,7 @@ public final class Illusion extends PathfinderMob implements OwnedSummon {
 
 		@Override
 		public boolean canUse() {
-			return a.getTarget() == null && OwnedSummon.ownerOf(a) != null;
+			return a.getTarget() == null && !a.job.works() && OwnedSummon.ownerOf(a) != null;
 		}
 
 		@Override

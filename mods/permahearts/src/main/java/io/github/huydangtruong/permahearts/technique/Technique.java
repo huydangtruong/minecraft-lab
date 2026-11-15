@@ -16,7 +16,7 @@ public enum Technique {
 	GOLEM("golem", "Violet Guardian", 180, false), // D60: summons loyal violet iron golems
 	ANGEL("angel", "Warrior Angel", 120, false), // D63: summons gold-and-white angels that fly through walls
 	AQUA("aqua", "Aqua Marine", 120, false), // D64: breathe, swim fast and dig fast underwater for a while
-	ILLUSION("illusion", "Illusion", 100, false); // D71: clones of the caster that fight for them
+	ILLUSION("illusion", "Illusion", 110, false); // D71: clones of the caster that fight for them; D73: they also work (110 s, was 100)
 
 	private final String id;
 	private final String displayName;

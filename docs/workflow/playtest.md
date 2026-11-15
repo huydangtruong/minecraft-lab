@@ -190,3 +190,17 @@ Kiểm bằng máy: `./gradlew :permahearts:build` (game test `ThousandMileStepG
 5. **Kill**: quái chết do bản sao giết thì tính cho bạn (HeartXP, nhiệm vụ giết). Người chơi bị bản sao giết **không** tính là kill của Death Match.
 6. Hết giờ, bạn chết/thoát game hoặc dùng lại chiêu thì bản sao biến mất kèm khói. Không rơi đồ, không cho XP.
 7. Kiểm bằng máy: `./gradlew :permahearts:build` (`IllusionGameTest`, `TechniqueRulesTest.illusionNumbers`) và `runClientGameTest` (ảnh `81-illusion-third-person`).
+
+## P-025: Illusion làm việc (D73)
+
+Cầm đồ trong tay chính rồi bấm Illusion: bản sao khoá việc theo món đó (đổi đồ sau không đổi việc). Việc nằm trong vòng tròn quanh chỗ bấm (bán kính 8 block ở cấp 1, 16 ở cấp 20). Mỗi bản sao mang tối đa 9 ô đồ, đem về rương/thùng gần chỗ bấm khi đầy, khi hết việc, hoặc 3 giây trước khi hết giờ. Không có rương thì thả đồ xuống chân bạn. Việc không cho XP và không hao đồ nghề. Cầm tay không hoặc kiếm thì vẫn chỉ đánh nhau.
+
+1. **Cuốc (farm)**: đặt vài ô lúa chín gần nước, rương bên cạnh, bấm. Bản sao gặt, trồng lại ngay, cuốc đất cạnh ruộng nếu mang hạt. Rương nhận nông sản.
+2. **Cần câu (fish)**: đứng gần ao nước từ 2x2 ô trở lên, bấm. Bản sao ra bờ, vung cần, chờ 5-30 giây (Lure rút ngắn, Luck of the Sea tăng đồ hiếm), cá vào rương.
+3. **Rìu (chop)**: gần cây tự nhiên. Chặt từ gốc lên, trồng lại cây con ở gốc; công trình gỗ của bạn (khúc gỗ chạm lá bạn đặt) thì không đụng.
+4. **Kéo (shear)**: gần cừu còn lông. Bản sao cắt, len vào rương.
+5. **Xô (milk)**: để xô rỗng trong rương, có bò gần đó. Xô rỗng thành xô sữa trong rương. Không có xô trong rương thì không làm gì (không tạo xô).
+6. **Lúa mì / cà rốt / hạt (breed)**: cầm đồ ăn, chia đều giữa bạn và các bản sao. Bản sao đút bò/cừu/lợn trưởng thành, hai con cùng loài một lúc. Thức ăn trong rương dùng trước. Con non ra đời không cho XP.
+7. **Đánh nhau**: quái đánh bạn thì bản sao đánh trả rồi quay lại làm việc. Quái thù địch (zombie, skeleton...) giờ chọn ngẫu nhiên giữa bạn và các bản sao (sửa lỗi "quái không để ý bản sao").
+8. Bản sao biến mất (hết giờ, chết) thì thả đồ đang mang.
+9. Kiểm bằng máy: `./gradlew :permahearts:build` (`IllusionWorkGameTest`, `TechniqueRulesTest`).

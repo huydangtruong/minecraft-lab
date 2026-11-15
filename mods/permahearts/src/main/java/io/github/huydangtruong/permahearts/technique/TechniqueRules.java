@@ -315,10 +315,29 @@ public final class TechniqueRules {
 		return linear(level, 0.20, 0.40);
 	}
 
-	/** Seconds the clones stay: 20 at level 1 up to 40 at 20. */
+	/** Seconds the clones stay (D73): 30 at level 1 up to 50 at 20. */
 	public static double illusionSeconds(int level) {
-		return linear(level, 20, 40);
+		return linear(level, 30, 50);
 	}
+
+	/** Work area radius in blocks around the cast point (D73): 8 at level 1 up to 16 at 20. */
+	public static double illusionWorkRadius(int level) {
+		return linear(level, 8, 16);
+	}
+
+	/** Ticks between two work actions (D73): 20 at level 1 down to 8 at 20. A block still takes its break time on top. */
+	public static int illusionWorkTicks(int level) {
+		return (int) Math.round(linear(level, 20, 8));
+	}
+
+	/** Stacks a working clone carries. */
+	public static final int ILLUSION_CARRY_STACKS = 9;
+
+	/** The chest search reaches this many blocks beyond the work area. */
+	public static final int ILLUSION_CHEST_EXTRA = 8;
+
+	/** Blocks within which a working clone fights hostile mobs near itself or its owner. */
+	public static final double ILLUSION_WORK_FIGHT_RANGE = 6;
 
 	/** Ticks between two clone hits, from the owner's attack speed attribute (4 = bare hand, 1.6 = sword): a player's cooldown rhythm. */
 	public static int illusionAttackTicks(double attackSpeed) {
@@ -481,6 +500,7 @@ public final class TechniqueRules {
 				new Stat("Damage", pct(illusionFactor(level))),
 				new Stat("Health", pct(illusionFactor(level))),
 				new Stat("Lasts", num(illusionSeconds(level)) + " s"),
+				new Stat("Work area", num(illusionWorkRadius(level)) + " blocks"),
 				new Stat("Cooldown", t.cooldownSeconds() + " s"));
 			case AQUA -> List.of(
 				new Stat("Lasts", num(aquaSeconds(level)) + " s"),

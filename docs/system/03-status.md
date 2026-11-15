@@ -19,6 +19,8 @@ Release steps: [workflow/release.md](../workflow/release.md). Release **only whe
 
 ## In flight
 
+- **P-025 Illusion work modes (D73)**: branch `feat/P-025-dev`, merged into `feat/P-025-illusion-work` (not pushed). FARM, FISH, CHOP, SHEAR, MILK, BREED plus the fix for hostile mobs ignoring clones. `./gradlew :permahearts:build` green. Needs Huy's hand playtest ([workflow/playtest.md](../workflow/playtest.md), section P-025).
+
 - **Windows installer bug** (reported by Huy's friend): picking a profile other than "26.3 Fabric Essential" says SUCCESS, but that profile's mods folder still has the old jar. Reading `minecraft-lab.ps1` (`Find-Profiles` / `Select-Profile`) found nothing yet. Waiting for the friend's `Mods folder:` line and that profile's Game directory.
 
 ## Open, not scheduled

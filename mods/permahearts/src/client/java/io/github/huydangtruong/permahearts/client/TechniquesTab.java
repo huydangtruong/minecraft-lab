@@ -82,7 +82,7 @@ public final class TechniquesTab {
 			case BLADE -> "Left click a target to cut it with a blood-stained blade. It bleeds and flies back, and you heal for the damage dealt.";
 			case GOLEM -> "Summon loyal violet iron golems that fight for you for 90 seconds. More and stronger at higher levels.";
 			case AQUA -> "Breathe, swim fast and dig freely underwater.";
-			case ILLUSION -> "Creates illusions of yourself that fight for you. Who attacks you, or whom you attack, becomes their target.";
+			case ILLUSION -> "Creates illusions of yourself that fight for you. Who attacks you, or whom you attack, becomes their target. Hold a tool when you cast and they work instead: hoe farms, rod fishes, axe chops, shears shear, bucket milks, wheat/carrots/seeds breed. Drops go to a chest near the cast point.";
 			case ANGEL -> "Summons warrior angels that fly through walls and fight for you.";
 		};
 	}

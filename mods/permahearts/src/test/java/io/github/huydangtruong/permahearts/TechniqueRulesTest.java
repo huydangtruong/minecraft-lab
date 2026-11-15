@@ -2,9 +2,11 @@ package io.github.huydangtruong.permahearts;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.github.huydangtruong.permahearts.technique.Technique;
+import io.github.huydangtruong.permahearts.technique.illusion.IllusionJob;
 import io.github.huydangtruong.permahearts.technique.TechniqueRules;
 import org.junit.jupiter.api.Test;
 
@@ -151,15 +153,21 @@ class TechniqueRulesTest {
 	@Test
 	void illusionNumbers() {
 		assertEquals("Illusion", Technique.ILLUSION.displayName());
-		assertEquals(100, Technique.ILLUSION.cooldownSeconds());
+		assertEquals(110, Technique.ILLUSION.cooldownSeconds());
 		int[][] clones = {{1, 1}, {9, 1}, {10, 2}, {19, 2}, {20, 3}};
 		for (int[] k : clones) {
 			assertEquals(k[1], TechniqueRules.illusionCount(k[0]), "clones at level " + k[0]);
 		}
 		assertEquals(0.20, TechniqueRules.illusionFactor(1), 1e-9);
 		assertEquals(0.40, TechniqueRules.illusionFactor(20), 1e-9);
-		assertEquals(20, TechniqueRules.illusionSeconds(1), 1e-9);
-		assertEquals(40, TechniqueRules.illusionSeconds(20), 1e-9);
+		assertEquals(30, TechniqueRules.illusionSeconds(1), 1e-9);
+		assertEquals(50, TechniqueRules.illusionSeconds(20), 1e-9);
+		assertEquals(8, TechniqueRules.illusionWorkRadius(1), 1e-9);
+		assertEquals(16, TechniqueRules.illusionWorkRadius(20), 1e-9);
+		assertEquals(20, TechniqueRules.illusionWorkTicks(1));
+		assertEquals(8, TechniqueRules.illusionWorkTicks(20));
+		assertTrue(TechniqueRules.illusionWorkTicks(10) < 20 && TechniqueRules.illusionWorkTicks(10) > 8);
+		assertEquals(9, TechniqueRules.ILLUSION_CARRY_STACKS);
 		// a player's hit rhythm: bare hand 4 attack speed = 5 ticks, sword 1.6 = 13 ticks (about), axe 0.8 = 25
 		assertEquals(5, TechniqueRules.illusionAttackTicks(4.0));
 		assertEquals(13, TechniqueRules.illusionAttackTicks(1.6));
@@ -169,7 +177,29 @@ class TechniqueRulesTest {
 		assertEquals(100, TechniqueRules.illusionMoodTicks(0.999999)); // 5 s
 		assertTrue(TechniqueRules.illusionBackOffChance(0.2) > TechniqueRules.illusionBackOffChance(0.9));
 		assertEquals("3", TechniqueRules.stats(Technique.ILLUSION, 20).get(0).value());
-		assertEquals("40 s", TechniqueRules.stats(Technique.ILLUSION, 20).get(3).value());
+		assertEquals("50 s", TechniqueRules.stats(Technique.ILLUSION, 20).get(3).value());
+		assertEquals("Work area", TechniqueRules.stats(Technique.ILLUSION, 20).get(4).label());
+		assertEquals("16 blocks", TechniqueRules.stats(Technique.ILLUSION, 20).get(4).value());
+	}
+
+	@Test
+	void illusionJobFromItemId() {
+		String[][] rows = {
+			{"minecraft:wooden_hoe", "FARM"}, {"minecraft:netherite_hoe", "FARM"}, {"minecraft:diamond_hoe", "FARM"},
+			{"minecraft:fishing_rod", "FISH"},
+			{"minecraft:iron_axe", "CHOP"}, {"minecraft:stone_axe", "CHOP"},
+			{"minecraft:shears", "SHEAR"},
+			{"minecraft:bucket", "MILK"},
+			{"minecraft:wheat", "BREED"}, {"minecraft:carrot", "BREED"}, {"minecraft:potato", "BREED"},
+			{"minecraft:diamond_sword", "FIGHT"}, {"minecraft:diamond_pickaxe", "FIGHT"}, {"minecraft:iron_shovel", "FIGHT"},
+			{"minecraft:wheat_seeds", "FIGHT"}, {"minecraft:water_bucket", "FIGHT"}, {"minecraft:air", "FIGHT"},
+			{"minecraft:bow", "FIGHT"}, {"other:shiny_axe", "FIGHT"}, {"", "FIGHT"}};
+		for (String[] r : rows) {
+			assertEquals(IllusionJob.valueOf(r[1]), IllusionJob.fromItemId(r[0]), r[0]);
+		}
+		assertEquals(IllusionJob.FIGHT, IllusionJob.fromItemId(null));
+		assertFalse(IllusionJob.FIGHT.works());
+		assertTrue(IllusionJob.BREED.works());
 	}
 
 	@Test
