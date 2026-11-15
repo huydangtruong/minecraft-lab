@@ -4,7 +4,7 @@
 > Rương mới ngọc lục bảo (xanh lá, 6 thẻ, chọn 2) với Totem, bình +16 level, sách Mending / Sharpness V / Protection V.
 > Rương bốc ngẫu nhiên lúc nhận, không hiện trước: thường bạc 40 / vàng 30 / kim cương 20 / ngọc lục bảo 10; hạ thủ lĩnh và trăng máu 20 / 30 / 30 / 20.
 
-- **Status:** in progress
+- **Status:** merged
 - **Mod / decision:** `permahearts`, D87, D88, D89, D90 · **Branch:** `feat/P-030-crimson-tuning` · **Depends on:** none
 
 ## Part 1: schedule and quests (D87, D88)
