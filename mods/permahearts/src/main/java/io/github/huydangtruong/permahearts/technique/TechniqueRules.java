@@ -227,6 +227,11 @@ public final class TechniqueRules {
 		return scaled(1.5, 0.25, level); // D72: was 1.0 + 0.15
 	}
 
+	/** D99: seconds a non-player stays stunned after Heaven Blast: 1.0 at level 1, +0.1 per level (2.9 at level 20). */
+	public static double repulseStunSeconds(int level) {
+		return 1.0 + 0.1 * (Math.max(1, Math.min(MAX_LEVEL, level)) - 1);
+	}
+
 	public static double repulseDamage(int level) {
 		return scaled(5, 0.5, level); // D72: was 2 at level 1
 	}
@@ -540,6 +545,7 @@ public final class TechniqueRules {
 				new Stat("Radius", num(repulseRadius(level)) + " blocks"),
 				new Stat("Push", num(repulsePush(level))),
 				new Stat("Damage", num(repulseDamage(level))),
+				new Stat("Stun", String.format(java.util.Locale.ROOT, "%.1f s", repulseStunSeconds(level))),
 				new Stat("Cooldown", t.cooldownSeconds() + " s"));
 			case FLIGHT -> List.of(
 				new Stat("Flight", num(flightSeconds(level)) + " s"),

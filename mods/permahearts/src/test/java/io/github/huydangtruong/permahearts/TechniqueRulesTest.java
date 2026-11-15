@@ -56,6 +56,13 @@ class TechniqueRulesTest {
 	}
 
 	@Test
+	void heavenBlastStatsShowTheStun() {
+		assertEquals("Stun", TechniqueRules.stats(Technique.REPULSE, 1).get(3).label());
+		assertEquals("1.0 s", TechniqueRules.stats(Technique.REPULSE, 1).get(3).value());
+		assertEquals("2.9 s", TechniqueRules.stats(Technique.REPULSE, 20).get(3).value());
+	}
+
+	@Test
 	void numbersAtLevels1_10_20() {
 		assertArrayEquals(new double[] {24, 42, 52}, at(TechniqueRules::fireRange)); // D72
 		assertArrayEquals(new double[] {24, 42, 52}, at(TechniqueRules::iceRange));
@@ -71,6 +78,7 @@ class TechniqueRulesTest {
 		assertArrayEquals(new double[] {24, 24 + 72.0 * 9 / 19, 96}, at(TechniqueRules::healingTotal)); // D80: 12 -> 48 hearts
 		assertArrayEquals(new double[] {10, 14.5, 17}, at(TechniqueRules::phaseSeconds), 1e-9);
 		assertArrayEquals(new double[] {5, 9.5, 12}, at(TechniqueRules::repulseDamage), 1e-9);
+		assertArrayEquals(new double[] {1.0, 1.9, 2.9}, at(TechniqueRules::repulseStunSeconds), 1e-9); // D99
 		assertArrayEquals(new double[] {0.80, 0.50, 0.30}, at(TechniqueRules::sacrificeCost), 1e-9);
 		assertArrayEquals(new double[] {8, 12.5, 17.5}, at(TechniqueRules::sacrificeSeconds), 1e-9);
 		assertEquals(45, Technique.SACRIFICE.cooldownSeconds());

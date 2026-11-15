@@ -11,6 +11,7 @@
 		"FoodPropertiesMixin",
 		"GhastShootFireballGoalMixin",
 		"LivingEntityXpMixin",
+		"MobStunMixin",
 		"NearestAttackableDecoyMixin",
 		"PlayerMixin",
 		"PlayerPhaseMixin",

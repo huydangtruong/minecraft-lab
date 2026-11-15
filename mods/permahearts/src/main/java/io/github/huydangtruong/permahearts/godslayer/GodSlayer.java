@@ -3,6 +3,7 @@ package io.github.huydangtruong.permahearts.godslayer;
 import io.github.huydangtruong.permahearts.PermaHearts;
 import io.github.huydangtruong.permahearts.godslayer.GodSlayerRules.Mode;
 import io.github.huydangtruong.permahearts.technique.Frostbite;
+import io.github.huydangtruong.permahearts.technique.Stun;
 import io.github.huydangtruong.permahearts.technique.OwnedSummon;
 import java.util.List;
 import java.util.UUID;
@@ -162,6 +163,10 @@ public final class GodSlayer extends PathfinderMob {
 			int percent = GodSlayerRules.frostPercent(effect.getAmplifier() + 1);
 			effect = new MobEffectInstance(Frostbite.EFFECT, effect.getDuration(), percent - 1, effect.isAmbient(),
 				effect.isVisible(), effect.showIcon());
+		}
+		if (effect.getEffect().equals(Stun.EFFECT)) {
+			effect = new MobEffectInstance(Stun.EFFECT, GodSlayerRules.stunTicks(effect.getDuration()), effect.getAmplifier(),
+				effect.isAmbient(), effect.isVisible(), effect.showIcon());
 		}
 		return super.addEffect(effect, source);
 	}

@@ -29,6 +29,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -47,6 +48,7 @@ public final class TechniqueCasts {
 	/** Registers the effect, attachments, events, ticking and the cast command. Called once from PermaHearts. */
 	public static void init() {
 		Frostbite.init();
+		Stun.init();
 		Bleeding.init();
 		VioletGuardian.init();
 		WarriorAngel.init();
@@ -192,6 +194,10 @@ public final class TechniqueCasts {
 				: 1 - Mth.clamp(e.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE), 0, 1);
 			e.setDeltaMovement(dx / len * push * resist, 0.3 * resist + 0.05, dz / len * push * resist);
 			e.needsSync = true; // sends the new velocity to players
+			// D99: every non-player that was pushed is stunned (the God Slayer for a tenth of the time, see its addEffect)
+			if (e instanceof Mob) {
+				e.addEffect(new MobEffectInstance(Stun.EFFECT, (int) Math.round(TechniqueRules.repulseStunSeconds(level) * 20), 0, false, false, false));
+			}
 		}
 		int points = 28;
 		for (int ring = 1; ring <= 2; ring++) {
