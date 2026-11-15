@@ -117,5 +117,7 @@ public final class WandererScheduler {
 			}
 		}
 		Wanderer.spawnNpc(level, feet, Wanderer.newQuest(level.getServer()), 0f);
+		// P-032: every 4th visit from day 100 may bring the God Slayer.
+		io.github.huydangtruong.permahearts.godslayer.GodSlayerHunt.onCrimsonMasterVisit(level.getServer());
 	}
 }

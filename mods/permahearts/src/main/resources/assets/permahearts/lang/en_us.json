@@ -143,6 +143,8 @@
   "item.permahearts.focus_thunder": "Thunder Strike Focus",
   "item.permahearts.focus_warp": "Cosmic Warping Focus",
   "entity.permahearts.warp_portal": "Warp Portal",
+  "entity.permahearts.god_slayer": "God Slayer",
+  "item.permahearts.katana": "Katana",
   "key.permahearts.technique": "Technique mode (toggle)",
   "key.category.permahearts.main": "\u00a7eImmortal Cultivation"
 }

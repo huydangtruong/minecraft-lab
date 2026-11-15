@@ -346,4 +346,78 @@ public final class Messages {
 		String path = id.substring(id.indexOf(':') + 1);
 		return Component.translatableWithFallback("permahearts.structure." + path, path);
 	}
+
+	// ---- God Slayer (P-032) ----
+
+	public static Component godSlayerName(int level) {
+		return Component.translatableWithFallback("permahearts.god_slayer.bar", "God Slayer \u2014 Lv %s", level);
+	}
+
+	public static Component godSlayerTitle() {
+		return Component.translatableWithFallback("permahearts.god_slayer.title", "God Slayer");
+	}
+
+	public static Component godSlayerSubtitle(String name, int seconds) {
+		return Component.translatableWithFallback("permahearts.god_slayer.subtitle", "is coming for %s in %ss", name, seconds);
+	}
+
+	public static Component godSlayerWarningChat(String name) {
+		return Component.translatableWithFallback("permahearts.god_slayer.warning_chat",
+			"God Slayer is coming for %s. It arrives in 60 seconds.", name);
+	}
+
+	public static Component godSlayerCountdown(int seconds) {
+		return Component.translatableWithFallback("permahearts.god_slayer.countdown", "God Slayer arrives in %s...", seconds);
+	}
+
+	public static Component godSlayerWeaklings() {
+		return Component.translatableWithFallback("permahearts.god_slayer.weaklings",
+			"God Slayer: Weaklings. Come back when your hearts can bear my blade.");
+	}
+
+	public static Component godSlayerNext(String name) {
+		return Component.translatableWithFallback("permahearts.god_slayer.next", "God Slayer turns to %s.", name);
+	}
+
+	public static Component godSlayerFallen(int level) {
+		return Component.translatableWithFallback("permahearts.god_slayer.fallen",
+			"God Slayer has fallen. It will return stronger. (Lv %s)", level);
+	}
+
+	public static Component godSlayerWon() {
+		return Component.translatableWithFallback("permahearts.god_slayer.won", "God Slayer: Pathetic. I will be back.");
+	}
+
+	public static Component godSlayerGaveUp() {
+		return Component.translatableWithFallback("permahearts.god_slayer.gave_up", "God Slayer left.");
+	}
+
+	public static Component godSlayerReward(int levels, int boxes) {
+		return Component.translatableWithFallback("permahearts.god_slayer.reward",
+			"You slew the God Slayer: +%s levels and %s reward boxes!", levels, boxes);
+	}
+
+	public static Component godSlayerBusy() {
+		return Component.translatableWithFallback("permahearts.god_slayer.busy", "God Slayer is already coming or hunting");
+	}
+
+	public static Component godSlayerNoPlayer() {
+		return Component.translatableWithFallback("permahearts.god_slayer.no_player", "No player to hunt");
+	}
+
+	public static Component godSlayerSummoned(String name) {
+		return Component.translatableWithFallback("permahearts.god_slayer.summoned", "God Slayer will hunt %s", name);
+	}
+
+	public static Component godSlayerNoHunt() {
+		return Component.translatableWithFallback("permahearts.god_slayer.no_hunt", "No God Slayer hunt is running");
+	}
+
+	public static Component godSlayerLevelSet(int level) {
+		return Component.translatableWithFallback("permahearts.god_slayer.level_set", "God Slayer level is now %s", level);
+	}
+
+	public static Component godSlayerLevelIs(int level) {
+		return Component.translatableWithFallback("permahearts.god_slayer.level_is", "God Slayer level is %s", level);
+	}
 }
