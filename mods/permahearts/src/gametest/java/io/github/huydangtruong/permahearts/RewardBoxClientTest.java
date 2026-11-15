@@ -47,7 +47,6 @@ public class RewardBoxClientTest implements FabricClientGameTest {
 	}
 
 	private static void boxScreen(ClientGameTestContext context, TestServerContext server, RewardTier tier, String name) {
-		context.runOnClient(mc -> mc.player.closeContainer());
 		server.runOnServer(s -> {
 			ServerPlayer p = s.getPlayerList().getPlayers().get(0);
 			p.getInventory().clearContent();
@@ -75,7 +74,13 @@ public class RewardBoxClientTest implements FabricClientGameTest {
 				new net.minecraft.client.input.MouseButtonInfo(0, 0)), false);
 		});
 		context.waitTicks(10);
-		int mask = server.computeOnServer(s -> ((RewardBoxMenu) s.getPlayerList().getPlayers().get(0).containerMenu).selected());
+		int mask = server.computeOnServer(s -> {
+			ServerPlayer sp = s.getPlayerList().getPlayers().get(0);
+			if (!(sp.containerMenu instanceof RewardBoxMenu m)) {
+				throw new AssertionError("menu closed: " + sp.containerMenu + " hand " + sp.getMainHandItem() + " data " + sp.getMainHandItem().get(RewardBoxes.DATA));
+			}
+			return m.selected();
+		});
 		if (mask != 0b10) {
 			throw new AssertionError("a click on card 1 should select only it, mask was " + mask);
 		}

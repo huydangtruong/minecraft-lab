@@ -110,13 +110,16 @@ public class RewardBoxScreen extends AbstractContainerScreen<RewardBoxMenu> {
 			g.fakeItem(stack, 0, 0);
 			g.pose().popMatrix();
 			g.centeredText(font, Component.literal("x" + o.count()), x + CARD_W / 2, y + 38, 0xFFFFFFFF);
-			int ty = y + 49;
-			List<FormattedCharSequence> lines = font.split(stack.getHoverName(), CARD_W - 4);
+			// Names are drawn at 80% so a long word ("Enchanted") fits the card without breaking mid-word.
+			List<FormattedCharSequence> lines = font.split(stack.getHoverName(), (int) ((CARD_W - 2) / 0.8f));
+			g.pose().pushMatrix();
+			g.pose().translate(x + CARD_W / 2f, y + 49);
+			g.pose().scale(0.8f, 0.8f);
 			for (int k = 0; k < Math.min(3, lines.size()); k++) {
 				FormattedCharSequence line = lines.get(k);
-				g.text(font, line, x + (CARD_W - font.width(line)) / 2, ty, TEXT, false);
-				ty += 9;
+				g.text(font, line, -font.width(line) / 2, k * 10, TEXT, false);
 			}
+			g.pose().popMatrix();
 		}
 	}
 
