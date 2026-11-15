@@ -203,19 +203,24 @@ public class TechniqueEffectsGameTest {
 		});
 	}
 
+	/*
+	 * D94 note: keep both fire-afterburn tests inside x/z 0..7. The game-test arena only loads and ticks the chunks of its own
+	 * 8x8 structure; a mob teleported beyond it (depending on where the arena falls on the chunk grid) stops ticking, so
+	 * its fire counter and health freeze and the test saw "lost 0".
+	 */
 	/** D94: a Husk walking out of a level 1 field keeps burning about 3 s, taking about 2 damage per second. */
 	@GameTest(maxTicks = 200)
 	public void fireAfterburnKeepsBurningOutsideTheField(GameTestHelper c) {
 		enable(c, true);
 		floor(c);
-		Husk h = husk(c, 6.5, 6.5, true);
+		Husk h = husk(c, 1.5, 3.5, true);
 		h.getAttribute(Attributes.MAX_HEALTH).setBaseValue(100);
 		h.setHealth(100);
-		TechniqueFields.add(TechniqueFields.Kind.FIRE, c.getLevel(), c.absoluteVec(new Vec3(6.5, 1, 6.5)), 3, 4, 1, UUID.randomUUID());
+		TechniqueFields.add(TechniqueFields.Kind.FIRE, c.getLevel(), c.absoluteVec(new Vec3(1.5, 1, 3.5)), 3, 4, 1, UUID.randomUUID());
 		float[] hp = new float[3];
 		c.runAfterDelay(20, () -> {
 			c.assertTrue(h.isOnFire(), "the husk should burn inside the field");
-			Vec3 out = c.absoluteVec(new Vec3(10.5, 1, 6.5)); // 4 blocks from the centre, field radius is 3
+			Vec3 out = c.absoluteVec(new Vec3(6.5, 1, 3.5)); // 5 blocks from the centre, field radius is 3
 			h.teleportTo(out.x, out.y, out.z);
 		});
 		c.runAfterDelay(25, () -> hp[0] = h.getHealth());
@@ -239,20 +244,20 @@ public class TechniqueEffectsGameTest {
 	public void fireBurnStopsInWater(GameTestHelper c) {
 		enable(c, true);
 		floor(c);
-		Husk h = husk(c, 6.5, 6.5, true);
+		Husk h = husk(c, 1.5, 3.5, true);
 		h.getAttribute(Attributes.MAX_HEALTH).setBaseValue(100);
 		h.setHealth(100);
-		TechniqueFields.add(TechniqueFields.Kind.FIRE, c.getLevel(), c.absoluteVec(new Vec3(6.5, 1, 6.5)), 3, 4, 1, UUID.randomUUID());
+		TechniqueFields.add(TechniqueFields.Kind.FIRE, c.getLevel(), c.absoluteVec(new Vec3(1.5, 1, 3.5)), 3, 4, 1, UUID.randomUUID());
 		float[] hp = new float[1];
 		c.runAfterDelay(20, () -> {
 			c.assertTrue(h.isOnFire(), "the husk should burn inside the field");
-			for (int x = 9; x <= 11; x++) {
-				for (int z = 5; z <= 7; z++) {
+			for (int x = 5; x <= 7; x++) {
+				for (int z = 2; z <= 4; z++) {
 					c.setBlock(x, 1, z, Blocks.WATER);
 					c.setBlock(x, 2, z, Blocks.WATER);
 				}
 			}
-			Vec3 out = c.absoluteVec(new Vec3(10.5, 1, 6.5));
+			Vec3 out = c.absoluteVec(new Vec3(6.5, 1, 3.5));
 			h.teleportTo(out.x, out.y, out.z);
 		});
 		c.runAfterDelay(40, () -> {
