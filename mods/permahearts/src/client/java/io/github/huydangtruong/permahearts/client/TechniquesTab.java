@@ -32,7 +32,6 @@ public final class TechniquesTab {
 	private static final int LIST_TOP = 44;
 	/** Pixels the list moves per mouse wheel notch. */
 	private static final int SCROLL_STEP = 12;
-	private static final int PLUS = 18;
 	private static final int LINE = 10;
 
 	private static final int TEXT = 0xFF404040;
@@ -291,15 +290,6 @@ public final class TechniquesTab {
 					g.setTooltipForNextFrame(font, Component.literal("Learn it first: click i"), mx, my);
 				}
 			}
-			boolean showPlus = assign && level >= 1 && d.slotOf(t) != selectedSlot;
-			if (showPlus) {
-				int[] c = plusRect(right, y);
-				boolean can = canAssign(d, t);
-				boolean ch = can && in(mx, my, c[0], c[1], c[2], c[3]) && inView;
-				g.blitSprite(RenderPipelines.GUI_TEXTURED, Identifier.withDefaultNamespace(!can ? "widget/button_disabled" : ch ? "widget/button_highlighted" : "widget/button"),
-					c[0], c[1], c[2], c[3]);
-				g.blitSprite(RenderPipelines.GUI_TEXTURED, sprite("plus"), c[0] + 1, c[1] + 1, 16, 16);
-			}
 		}
 		g.disableScissor();
 		int max = maxScroll(h);
@@ -311,10 +301,6 @@ public final class TechniquesTab {
 		}
 	}
 
-	private static int[] plusRect(int right, int rowY) {
-		return new int[] {right - PLUS - 2, rowY + 2, PLUS, PLUS};
-	}
-
 	private static boolean canAssign(TechniqueData d, Technique t) {
 		return selectedSlot >= 0 && d.level(t) >= 1 && d.slotOf(t) != selectedSlot && !d.slotOnCooldown(selectedSlot, now());
 	}
@@ -324,9 +310,9 @@ public final class TechniquesTab {
 		return d.level(t) >= 1 && slot < d.slotsOpen() && d.slotOf(t) != slot && !d.slotOnCooldown(slot, now);
 	}
 
-	/** The "i" (details) button of a row, where the level text used to be, left of the + button. */
+	/** The "i" (details) button of a row, where the level text used to be; at the right edge of the row (D91). */
 	private static int[] infoRect(int right, int rowY) {
-		return new int[] {right - PLUS - 2 - 2 - INFO, rowY + 3, INFO, INFO};
+		return new int[] {right - 2 - INFO, rowY + 3, INFO, INFO};
 	}
 
 	/** The level bar under a technique name: {x, y}. */
@@ -526,7 +512,6 @@ public final class TechniquesTab {
 				continue;
 			}
 			Technique t = all[i];
-			int[] c = plusRect(right, y);
 			int[] info = infoRect(right, y);
 			int[] bar = barRect(tx, y);
 			if (in(mx, my, info[0], info[1], INFO, INFO)) { // "i": the only way to the detail page
@@ -534,14 +519,9 @@ public final class TechniquesTab {
 				detailScroll = 0;
 				selectedSlot = -1;
 				selectedTechnique = null;
-			} else if (assign && d.level(t) >= 1 && d.slotOf(t) != selectedSlot && in(mx, my, c[0], c[1], c[2], c[3])) {
-				if (canAssign(d, t)) {
-					send(TechniqueNet.ASSIGN, t.id(), selectedSlot);
-					selectedSlot = -1; // edit mode ends after a successful +
-				}
 			} else if (in(mx, my, bar[0], bar[1] - 1, BAR_W, BAR_H + 2) || d.level(t) < 1) {
 				// the bar only has a tooltip; an unlearned row does nothing
-			} else if (assign) { // slot first: the row name puts the technique into the chosen slot, like the +
+			} else if (assign) { // slot first: the row name puts the technique into the chosen slot
 				if (canAssign(d, t)) {
 					send(TechniqueNet.ASSIGN, t.id(), selectedSlot);
 					selectedSlot = -1;
@@ -610,9 +590,59 @@ public final class TechniquesTab {
 		for (int i = 0; i < Technique.values().length; i++) {
 			out.add(new int[] {tx + 40, rowY(y0, i) + 7}); // on the name, above the level bar
 		}
+		int[] up = lastUp;
+		int[] re = lastRe;
+		int[] bk = backRect(tx, right, y0, h);
+		int level = d.level(t);
+		boolean inBody = my >= detailTop(y0) && my < detailBottom(y0, h);
+		if (inBody && in(mx, my, up[0], up[1], up[2], up[3])) {
+			if (level < TechniqueRules.MAX_LEVEL && xpLevels() >= TechniqueRules.upgradeCost(level + 1)) {
+				send(TechniqueNet.UPGRADE, t.id(), 0);
+			}
+			return true;
+		}
+		if (inBody && in(mx, my, re[0], re[1], re[2], re[3])) {
+			if (level > 0 && !d.onCooldown(t, now())) {
+				send(TechniqueNet.RESET, t.id(), 0);
+			}
+			return true;
+		}
+		if (in(mx, my, bk[0], bk[1], bk[2], bk[3])) {
+			detail = null;
+			return true;
+		}
+		return false;
+	}
+
+	/** Mouse wheel over the list. Returns true when it was over the list (scrolled or not). */
+	public static boolean scroll(int x0, int y0, int w, int h, double mx, double my, double amount) {
+		if (detail != null) {
+			if (!in(mx, my, x0 + 7, detailTop(y0), w - 14, detailBottom(y0, h) - detailTop(y0))) {
+				return false;
+			}
+			detailScroll = Math.max(0, detailScroll - (int) Math.signum(amount) * SCROLL_STEP); // clamped when drawn
+			return true;
+		}
+		if (!in(mx, my, x0 + 7, y0 + LIST_TOP, w - 14, listH(h))) {
+			return false;
+		}
+		scroll = Math.max(0, Math.min(maxScroll(h), scroll - (int) Math.signum(amount) * SCROLL_STEP));
+		return true;
+	}
+
+	// ---- tests ----
+
+	/** Centres of the clickable things in GUI coordinates, for the client test: slots 0..3, emerald box, list rows. */
+	public static List<int[]> hotspots(int x0, int y0, int w, int h) {
+		int tx = x0 + 7;
+		int right = x0 + w - 7;
+		List<int[]> out = new ArrayList<>();
+		for (int i = 0; i < TechniqueRules.MAX_SLOTS; i++) {
+			out.add(new int[] {slotX(tx, i) + SLOT / 2, y0 + 19 + SLOT / 2});
+		}
+		out.add(new int[] {emeraldX(tx) + SLOT / 2, y0 + 19 + SLOT / 2});
 		for (int i = 0; i < Technique.values().length; i++) {
-			int[] c = plusRect(right, rowY(y0, i));
-			out.add(new int[] {c[0] + PLUS / 2, c[1] + PLUS / 2});
+			out.add(new int[] {tx + 40, rowY(y0, i) + 7}); // on the name, above the level bar
 		}
 		int[] up = lastUp; // where the detail page last drew them
 		int[] re = lastRe;
