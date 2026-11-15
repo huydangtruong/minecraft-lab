@@ -43,7 +43,7 @@ public class SkillBarHud implements HudElement {
 			g.blitSprite(RenderPipelines.GUI_TEXTURED, TechniquesTab.icon(tech), x + 3, top + 3, 16, 16);
 			long cd = d.cooldownLeft(tech, now);
 			if (cd > 0) {
-				int h = Math.round((BOX - 2) * SkillBarLogic.cooldownFraction(cd, tech.cooldownTicks()));
+				int h = Math.round((BOX - 2) * SkillBarLogic.cooldownFraction(cd, io.github.huydangtruong.permahearts.technique.TechniqueRules.cooldownTicks(tech, Math.max(1, d.level(tech)))));
 				g.fill(x + 1, top + 1, x + BOX - 1, top + 1 + h, 0xB0808080);
 				g.centeredText(mc.font, Component.literal(Integer.toString(SkillBarLogic.secondsLeft(cd))),
 					x + BOX / 2, top + BOX / 2 - 4, 0xFFFFFFFF);

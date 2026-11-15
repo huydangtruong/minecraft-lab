@@ -54,6 +54,7 @@ public final class TechniqueCasts {
 		PhaseState.ATTACHMENT.identifier();
 		Flight.init();
 		AquaMarine.init();
+		io.github.huydangtruong.permahearts.technique.warp.Warp.init();
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity instanceof ServerPlayer p) {
 				Flight.end(p);
@@ -96,6 +97,9 @@ public final class TechniqueCasts {
 			}
 			case AQUA -> {
 				return AquaMarine.start(caster, lvl);
+			}
+			case WARP -> {
+				return io.github.huydangtruong.permahearts.technique.warp.Warp.place(caster, lvl);
 			}
 			case ILLUSION -> {
 				Illusion.summon(caster, lvl);

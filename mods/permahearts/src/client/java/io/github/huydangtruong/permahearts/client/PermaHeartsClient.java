@@ -26,5 +26,16 @@ public class PermaHeartsClient implements ClientModInitializer {
 		EntityRendererRegistry.register(io.github.huydangtruong.permahearts.technique.VioletGuardian.TYPE, VioletGuardianRenderer::new);
 		EntityRendererRegistry.register(io.github.huydangtruong.permahearts.technique.WarriorAngel.TYPE, WarriorAngelRenderer::new);
 		EntityRendererRegistry.register(io.github.huydangtruong.permahearts.technique.Illusion.TYPE, IllusionRenderer::new);
+		// Cosmic Warping (P-026, D75)
+		EntityRendererRegistry.register(io.github.huydangtruong.permahearts.technique.warp.WarpPortal.TYPE, WarpPortalRenderer::new);
+		net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.registerGlobalReceiver(
+			io.github.huydangtruong.permahearts.technique.warp.Warp.Menu.TYPE, (payload, ctx) -> {
+				var mc = ctx.client();
+				if (mc.gui.screen() instanceof WarpScreen open) {
+					open.update(payload);
+				} else {
+					mc.gui.setScreen(new WarpScreen(payload));
+				}
+			});
 	}
 }

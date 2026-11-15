@@ -176,7 +176,7 @@ public final class ClientSkills {
 		if (t == null) {
 			return false;
 		}
-		long left = d.cooldownLeft(t, mc.level.getGameTime());
+		long left = t == Technique.WARP ? 0 : d.cooldownLeft(t, mc.level.getGameTime()); // D75: placing a portal has no cooldown
 		if (left > 0) {
 			mc.player.sendOverlayMessage(Component.literal("On cooldown: " + SkillBarLogic.secondsLeft(left) + " s"));
 			return false;
@@ -197,6 +197,8 @@ public final class ClientSkills {
 		if (mc.gui.screen() == null && intercepting(mc)) {
 			if (selectedTechnique(mc) == Technique.BLADE) {
 				bladeClick(mc);
+			} else if (selectedTechnique(mc) == Technique.WARP) {
+				ClientPlayNetworking.send(new io.github.huydangtruong.permahearts.technique.warp.Warp.Request(io.github.huydangtruong.permahearts.technique.warp.Warp.OPEN, "")); // D75: left click opens the warp menu
 			} else {
 				cast(mc, selected, 1f);
 			}
