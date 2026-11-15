@@ -261,3 +261,16 @@ Mở Cultivation, tab Techniques.
 2. Gõ `/testmode full` lần nữa: không ghi đè bản đã lưu.
 3. Nhặt thêm vài món, rồi `/testmode reset`: tim, linh dược, túi đồ và giáp về đúng như trước khi gõ full; đồ nhặt thêm mất. Tin "Test mode off.". Gõ reset lần nữa: "Test mode is not on.".
 4. Người không phải OP gõ `/testmode` không được.
+
+## God Slayer (P-032, D96, D97)
+
+1. Là OP, gõ `/boss summon` (hoặc `/boss summon <người>`): chữ lớn "God Slayer" giữa màn hình, tin chat tên người bị săn, tiếng trống, 10 giây cuối có đếm ngược. Gõ lại lúc đó: báo đang bận.
+2. Sau 60 giây boss hiện ra cách người bị săn 15 đến 20 ô, có khói đen. Cao khoảng 3 ô, da đỏ, tóc trắng, hai sừng, hai katana. Thanh máu đỏ chia 10 phần, tên "God Slayer — Lv 1", màn hình tối đi. Ra xa hơn 96 ô thì thanh biến mất.
+3. Nó chạy rất nhanh và chém khi tới gần 3,5 ô: ở Lv 1 trừ 30 máu mỗi giây một nhát (độ khó Normal). Bạn đứng trên cao hoặc bay: nó bay lên bắt. Xuống nước: nó bơi nhanh hơn cá heo rất nhiều. Đứng sau tường: nó đập tường (khi `mobGriefing` bật), tắt thì nó dịch chuyển tới cạnh bạn. Cách xa hơn 48 ô cũng dịch chuyển.
+4. Đánh nó bằng kiếm hoặc chiêu thức: mỗi nhát mất tối đa 40 máu. Lửa, nổ, quái khác, dung nham, rơi không làm nó mất máu. Frostbite và Repulse chỉ còn 10%. Không dắt, không cưỡi, không đẩy được.
+5. Đi vào Nether lúc nó đang săn: nó theo sang. Người bị săn chết: nó quay sang người khác (tin chat), hết người thì nó thắng.
+6. Hạ được nó: +100 level kinh nghiệm, 5 hộp thưởng, tin chat; lần sau nó mạnh hơn (Lv 2: 600 máu). Hết 10 phút mà còn sống: nó trêu rồi biến mất trong khói, cấp không đổi. `/boss giveup`: boss biến mất.
+7. `/boss level 3` đặt cấp (1 đến 10), `/boss level` xem cấp. Người không phải OP gõ `/boss` không được.
+8. Tự xuất hiện: từ ngày 100, mỗi lần Crimson Master đến lần thứ 4, 8, 12. Có người từ 30 tim thì săn người đó, không ai đủ thì tin chat "Weaklings. Come back when your hearts can bear my blade.".
+9. Tắt game giữa lúc săn: mở lại không còn boss, không còn đồng hồ.
+10. Kiểm bằng máy: `GodSlayerRulesTest`, `GodSlayerGameTest`, `GodSlayerClientTest` (ảnh `90-god-slayer-front`).

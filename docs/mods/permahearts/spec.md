@@ -109,3 +109,19 @@
 - **Bottle of Enlightenment** (`permahearts:enlightenment_bottle`): xếp chồng 16, độ hiếm RARE, có ánh sáng. Uống (chuột phải, 32 tick như bình thuốc) được **+16 level kinh nghiệm**, tiêu 1 bình (không tiêu trong Creative). Không chế được, chỉ ra từ hộp ngọc lục bảo (có trong tab Creative "Food & Drinks" để thử).
 - Thẻ ra lúc mở lần đầu và lưu trong component `permahearts:reward_box` (thẻ sách lưu thêm `enchant` và `level`, save cũ không có hai trường này vẫn đọc được); đóng rồi mở lại vẫn các thẻ cũ. Chọn thẻ, bấm Claim: máy chủ kiểm lại, đưa đồ (đầy túi thì rơi dưới chân), trừ 1 hộp, phát tiếng lên cấp. Close giữ hộp.
 - Nhiệm vụ lưu cũ có phần thưởng linh dược vẫn cho hộp (bốc ngẫu nhiên lúc nhận).
+
+## God Slayer (P-032, D96, D97)
+
+Boss Oni "God Slayer" săn người chơi. Đợt này làm lõi: chạy, chém Lv 1, săn theo lượt, thưởng. Chiêu mạnh hơn theo cấp thêm ở P-033.
+
+- **Cơ thể**: cao khoảng 3 ô, da đỏ, tóc trắng, hai sừng, giáp vai đen, hai katana. Thanh máu đỏ chia 10 phần "God Slayer — Lv N", làm tối màn hình, hiện trong 96 ô cùng chiều không gian.
+- **Cấp**: 1 đến 10, lưu theo world. Máu 500 ở Lv 1, thêm 100 mỗi cấp. Chém 30 sát thương ở Lv 1, mạnh dần theo cấp; cấp cao thì to hơn một chút.
+- **Di chuyển**: đất (tốc độ 0,4, tầm nhìn 128, bước lên 1,5 ô), trên không (bay, không xuyên tường), trong nước (gấp 3 lần cá heo). Tự chọn theo chỗ người bị săn đứng. Đập khối cản đường như Wither theo `mobGriefing`; tắt thì dịch chuyển (khi kẹt, cách xa hơn 48 ô, hoặc khác chiều không gian thì theo sang).
+- **Chống ăn gian**: chỉ người chơi, đạn của người chơi hoặc quái triệu hồi của người chơi gây sát thương, mỗi nhát tối đa 40. Miễn lửa, không dắt, không cưỡi, không bị đẩy lùi, piston không đẩy được. Frostbite và Repulse còn 10%. Tự hồi 2% máu mỗi giây khi không ai đánh được nó. Không biến mất, không rơi đồ.
+- **Cuộc săn**: nghỉ, cảnh báo 60 giây (chữ lớn, tin chat, tiếng trống, đếm ngược 10 giây cuối), săn tối đa 10 phút. Người bị săn chết thì boss chuyển sang người khác.
+  - Hạ được boss: +100 level kinh nghiệm, 5 hộp thưởng, cấp boss +1 (tối đa 10).
+  - Hết giờ hoặc hết người: boss trêu rồi biến mất trong khói, cấp giữ nguyên.
+  - Boss không được lưu: tắt game giữa lúc săn thì mở lại là hết săn.
+- **Kích hoạt**: mỗi lần Crimson Master đến thì đếm một lượt. Từ ngày 100, lượt thứ 4, 8, 12: có người từ 30 tim thì săn một người trong số đó, không có thì tin chat "Weaklings...".
+- **Lệnh (OP)**: `/boss summon [người]`, `/boss giveup`, `/boss level [1..10]`.
+- Dữ liệu: `GodSlayerSavedData` (cấp, số lượt, pha, hạn giờ, UUID boss, người bị săn, danh sách đã chết).

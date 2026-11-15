@@ -25,6 +25,8 @@ Release steps: [workflow/release.md](../workflow/release.md). Release **only whe
 
 ## In flight
 
+- **P-032 God Slayer core**: dev work done on `feat/P-032-dev`, merged into `feat/P-032-god-slayer` (both pushed). Entity, Lv 1 Slash, hunt flow, `/boss`, Crimson Master trigger, JUnit, game tests, client screenshot `90-god-slayer-front`. Not merged into `main` yet and not playtested by hand (see playtest.md "God Slayer"). Next: P-033 (skills for Lv 2 to 10 through `GodSlayerSkills`).
+
 - **Windows installer bug** (reported by Huy's friend): picking a profile other than "26.3 Fabric Essential" says SUCCESS, but that profile's mods folder still has the old jar. Reading `minecraft-lab.ps1` (`Find-Profiles` / `Select-Profile`) found nothing yet. Waiting for the friend's `Mods folder:` line and that profile's Game directory.
 
 ## Open, not scheduled
