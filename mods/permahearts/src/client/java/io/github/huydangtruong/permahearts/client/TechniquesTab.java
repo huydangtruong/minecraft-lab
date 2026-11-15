@@ -333,10 +333,11 @@ public final class TechniquesTab {
 		int level = d.level(t);
 		int[] bk = backRect(tx, right, y0, h);
 		g.blitSprite(RenderPipelines.GUI_TEXTURED, icon(t), tx + 40, bk[1], 16, 16);
-		g.text(font, Component.literal(t.displayName()).withStyle(ChatFormatting.BOLD), tx + 60, bk[1], TOTAL, false);
-		String lv = "Lv " + level + " / " + TechniqueRules.MAX_LEVEL;
-		int lx = tx + 60;
-		int ly = bk[1] + 9;
+		Component name = Component.literal(t.displayName()).withStyle(ChatFormatting.BOLD);
+		g.text(font, name, tx + 60, bk[1], TOTAL, false);
+		String lv = "Lv " + level;
+		int lx = tx + 60 + font.width(name) + 8;
+		int ly = bk[1];
 		for (int ox = -1; ox <= 1; ox++) { // a dark outline, like vanilla's level number, so the green reads on the light panel
 			for (int oy = -1; oy <= 1; oy++) {
 				if (ox != 0 || oy != 0) {
