@@ -2,7 +2,7 @@
 
 > Tóm tắt cho Huy: file này ghi việc đang làm dở và bước tiếp theo, để một phiên Claude mới đọc là làm tiếp được.
 > Manager cập nhật file này cuối mỗi đợt việc (merge, phát hành, quyết định mới).
-> Snapshot: 2026-11-15, after D94, D95 merged.
+> Snapshot: 2026-11-15, after release 0.18.0.
 
 A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [workflow/team.md](../workflow/team.md) → the plan of the work in flight. Do not read the whole repo.
 
@@ -10,7 +10,7 @@ A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [w
 
 | What | Where |
 |---|---|
-| Last release | `permahearts-v0.17.0` (GitHub Releases on `huydangtruong/minecraft-lab`), `mod_version=0.17.0` |
+| Last release | `permahearts-v0.18.0` (GitHub Releases on `huydangtruong/minecraft-lab`), `mod_version=0.18.0` |
 | 0.12.0 contains | Warrior Angel (P-021, D62, D63), Aqua Marine (P-022, P-023, D64, D69), chieftain XP x10 and damage x2 (D65, D66), stronger Strength/Swiftness/Mining elixirs (D67), gold quest 64 (D68) |
 | 0.13.0 contains | Illusion technique (P-024, D71); D72 numbers (Warrior Angel, Cloud Travel, Undying Jutsu, Heaven Blast, Fireball, Frozen Breath); chieftain health 200 and the leader-bonus fix; Strength +2 (D70); "Death Match (PvP)" line |
 | 0.14.0 contains | Illusion work modes and hostile mobs targeting the clones (P-025, D73); Quantum Leap rename (turquoise) and Cosmic Warping portals (P-026, D74, D75); quest reward boxes (P-027, D76); technique slots cost 64, 128, 256, 512 emeralds (D77); clones plant bare farmland and pick up wool near the sheep. Not playtested by hand |
@@ -18,7 +18,8 @@ A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [w
 | 0.15.1 contains | Cosmic Warping cooldown 90 s (Lv 1) to 40 s (Lv 20) (D81) |
 | 0.16.0 contains | Thunder Strike, 15th technique (P-029, D86); Illusion chopping fix with leaf breaking (D82), farming without tilling (D84), job from hotbar slot 1 (D85); new technique picking, level bars and "i" button (P-028, D83). Not playtested by hand |
 | 0.17.0 contains | Crimson Master every 5 days, new quest weights and mobs (D87, D88); emerald reward box, pick 2, Bottle of Enlightenment (D89); box tier random at claim and hidden (D90) (P-030). Not playtested by hand |
-| On `main`, not released | No "+" buttons, "i" at the right (D91); /testmode full and reset (D92); detail page without level bar, short Thunder Strike text, fixed Thunder icon (D93) (P-031). Fireball afterburn, burn 2 to 5 (D94); level next to the name, Thunder Strike cooldown 26 s (D95). Not playtested by hand |
+| 0.18.0 contains | No "+" buttons, "i" at the right (D91); /testmode full and reset (D92); detail page without level bar, short Thunder Strike text, fixed Thunder icon (D93) (P-031). Fireball afterburn, burn 2 to 5 (D94); level next to the name, Thunder Strike cooldown 26 s (D95). Not playtested by hand |
+| On `main`, not released | Nothing |
 
 Release steps: [workflow/release.md](../workflow/release.md). Release **only when Huy says so**.
 
