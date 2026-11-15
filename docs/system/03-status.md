@@ -28,7 +28,7 @@ Release steps: [workflow/release.md](../workflow/release.md). Release **only whe
 ## In flight
 
 - **Next: P-033** God Slayer skills Lv 2 to 10 through `GodSlayerSkills` (D97). No plan yet.
-- **God Slayer look still weak** (manager + Huy, after P-034): the face is too small and hidden by horns/shoulders, the hair is a short white block (should be a long mane down the back), the client test's "side" view is nearly frontal. Fix with or before P-033.
+- **Waiting, from Huy's playtest of 0.20.0** (see [BACKLOG](../backlog/BACKLOG.md)): BL-011 God Slayer teleports too early (do first), BL-012 God Slayer look fixes (fangs, armpit plates, wings and 45° lean when flying, straight katana with a slanted tip, face, hair), BL-010 orange Crimson Master notice and red 60 s countdown, BL-009 Swiftness +5%.
 
 - **Windows installer bug** (reported by Huy's friend): picking a profile other than "26.3 Fabric Essential" says SUCCESS, but that profile's mods folder still has the old jar. Reading `minecraft-lab.ps1` (`Find-Profiles` / `Select-Profile`) found nothing yet. Waiting for the friend's `Mods folder:` line and that profile's Game directory.
 
