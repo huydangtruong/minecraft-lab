@@ -4,7 +4,7 @@
 > Danh sách chiêu: nút "i" mở chi tiết, thanh level xanh lá dưới tên chiêu; bấm chiêu thì chiêu sáng viền vàng cùng các ô có thể đặt, bấm ô để đặt, ô emerald thành nút Cancel nền đỏ nhạt.
 > Đã chọn ô trước thì bấm vào tên chiêu cũng đặt được, không cần dấu cộng.
 
-- **Status:** ready
+- **Status:** merged
 - **Mod / decision:** `permahearts`, D82, D83, D84, D85 · **Branch:** `feat/P-028-chop-picking` · **Depends on:** none
 
 ## Goal

@@ -19,15 +19,15 @@ The 15th technique, `Technique.THUNDER("thunder", "Thunder Strike", 24, false)`.
 
 - `thunderDamage(level) = 14 + 2 * (level - 1)` → 14 at Lv 1, 52 at Lv 20 (damage points, 2 = one heart).
 - `thunderPower(level) = 3.0 * (1 + 0.05 * (level - 1))` → creeper power 3 at Lv 1, 5.85 at Lv 20 (+5% of the Lv 1 size per level, linear).
-- `THUNDER_RANGE = 64` blocks, `THUNDER_WARN_TICKS = 20` (1 s).
+- `THUNDER_RANGE = 128` blocks, `THUNDER_WARN_TICKS = 20` (1 s).
 - Cooldown 24 s at every level.
 - Stat lines: Damage, Blast size (as % of a creeper, e.g. "100%" → "195%"), Range, Cooldown.
 
 ## Controls
 
 - In technique mode, with Thunder Strike in the selected slot (or the focus item in hand), **a left or right click** casts it. It is not charged. Reuse the left-click path WARP already has in `ClientSkills`.
-- Aim: the client sends the cast. The server ray-casts from the caster's eyes along the look direction up to 64 blocks, against blocks and entities (not the caster or the caster's own summons). The hit point is the target.
-- If nothing is hit within range, the cast is refused with the overlay "No target in range" and no cooldown is used.
+- Aim: the client sends the cast. The server ray-casts from the caster's eyes along the look direction up to 128 blocks, against blocks and entities (not the caster or the caster's own summons). The hit point is the target.
+- If nothing is hit within 128 blocks, the strike lands on the first solid ground straight below the farthest point of the ray, or on that point itself over the void.
 - The cooldown starts at the cast, not at the strike.
 
 ## The strike
@@ -38,7 +38,7 @@ The 15th technique, `Technique.THUNDER("thunder", "Thunder Strike", 24, false)`.
    - Seen by every player nearby. It stays on that point; it does not follow a moving mob.
    - A quiet crackle sound at the start.
 2. **Strike after 20 ticks**, scheduled on the server (survives the caster dying or logging out in between; skip if the chunk unloaded):
-   - A **visual-only** lightning bolt (`LightningBolt` with visual-only set; check the 26.3 name with javap). It makes no fire, charges no creeper, and does not turn pigs or villagers.
+   - A lightning bolt that sets no fire. It **transforms mobs inside the blast like real lightning does** (pig → zombified piglin, villager → witch, creeper → charged, and so on), before the damage is dealt.
    - Thunder sound.
    - An **explosion** at the point with power `thunderPower(level)`. It breaks blocks and drops them like a creeper explosion (respect the `mobGriefing` game rule the way a creeper does). No fire.
    - **Damage** comes from the technique, not from the explosion's own damage (set the explosion to deal no entity damage):
@@ -63,7 +63,8 @@ The 15th technique, `Technique.THUNDER("thunder", "Thunder Strike", 24, false)`.
   - a cast at a zombie 10 blocks away: nothing happens for 19 ticks, then the zombie takes damage and blocks near the point are gone;
   - the caster standing at the edge of the blast is not hurt;
   - with `mobGriefing` false, no block breaks;
-  - nothing in range → refused, no cooldown;
+  - aiming at the open sky strikes the ground below the 128-block point;
+  - a pig in the blast becomes a zombified piglin;
   - a level-20 strike breaks a larger crater than a level-1 one.
 - **Client test:** cast with a real left click (`pressMouse` with `MOUSE_BUTTON_LEFT`). Take screenshot `99-thunder-warning` during the warning and `100-thunder-strike` after it, and look at them.
 
