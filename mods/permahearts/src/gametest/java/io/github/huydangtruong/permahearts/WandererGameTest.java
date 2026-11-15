@@ -168,7 +168,7 @@ public class WandererGameTest {
 			context.assertTrue(Wanderer.claim(s, 0, p1).isEmpty(), "claim before done must give nothing");
 			Wanderer.complete(s, 0);
 			ItemStack got = Wanderer.claim(s, 0, p1);
-			context.assertTrue(got.is(ElixirItems.get(ElixirStat.STRENGTH)), "first claim gives the strength elixir");
+			context.assertTrue(got.is(io.github.huydangtruong.permahearts.reward.RewardBoxes.item(io.github.huydangtruong.permahearts.reward.RewardTier.SILVER)), "first claim gives the silver box (D76)");
 			context.assertTrue(Wanderer.claim(s, 0, p2).isEmpty(), "second claim must give nothing");
 			context.succeed();
 		} finally {

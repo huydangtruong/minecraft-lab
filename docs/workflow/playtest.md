@@ -220,3 +220,14 @@ Cầm đồ trong tay chính rồi bấm Illusion: bản sao khoá việc theo m
 8. Thoát game vào lại: cổng và danh sách vẫn còn.
 
 Kiểm bằng máy: `./gradlew :permahearts:build` (JUnit `WarpRulesTest`, game test `WarpGameTest`: đặt 2 cổng + từ chối cổng thứ 3, không phá được, xoá, dịch chuyển + hồi chiêu, tới người chơi khác, tên) và `runClientGameTest` (`WarpClientTest`: ảnh `90-warp-menu`, `91-warp-portal`).
+
+## P-027: Hộp thưởng (D76)
+
+Mỗi dòng nhiệm vụ trả một **hộp thưởng** thay cho linh dược. Cấp theo loại dòng: thu thập và giết = hộp **bạc** (3 thẻ), khám phá và Blood Moon = hộp **vàng** (4 thẻ), boss và Death Match = hộp **kim cương** (5 thẻ). Mỗi hộp chọn 1 thẻ.
+
+1. Lấy hộp bằng lệnh: `/give @s permahearts:gold_reward_box` (cũng có `silver_reward_box`, `diamond_reward_box`, và trong tab Creative "Food & Drinks").
+2. Bấm chuột phải khi cầm hộp: mở màn hình các thẻ. Mỗi thẻ là một bình linh dược hoặc một món đồ (sắt, vàng, kim cương, ngọc lục bảo, redstone, lapis, ngọc ender, thuốc súng). Thẻ đồ có 20% là thẻ đặc biệt (hộp vàng và kim cương): 4 táo vàng phép hoặc 32 ngọc lục bảo; hộp kim cương còn có 1 thỏi netherite. Hộp bạc không có thẻ đặc biệt.
+3. Bấm một thẻ: thẻ có viền vàng. Nút **Claim** chỉ sáng khi chọn đủ số thẻ (1). Di chuột vào thẻ để xem tên món.
+4. Bấm **Claim**: nhận món, hộp biến mất, có tiếng lên cấp. Bấm **Close** (hoặc Esc): hộp còn nguyên, và mở lại vẫn ra đúng các thẻ cũ (thẻ được ra lúc mở lần đầu).
+5. Hoàn thành một dòng nhiệm vụ rồi nói chuyện với Wanderer: nhận hộp đúng bậc. Màn hình nhiệm vụ cũng hiện hộp ở phần thưởng. Nhiệm vụ lưu từ bản cũ (phần thưởng là linh dược) cũng cho hộp.
+6. Kiểm bằng máy: `./gradlew :permahearts:build` (`RewardBoxTest`, `RewardBoxGameTest`) và `runClientGameTest` (ảnh `90-reward-box-*`, `92-quest-box-rewards`, `93-reward-box-diamond-*`).

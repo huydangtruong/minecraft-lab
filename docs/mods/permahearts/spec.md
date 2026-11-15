@@ -98,3 +98,10 @@
 - Trận không giữ Crimson Master ở lại (khác Trăng máu / trùm). Người thoát game không làm trận dừng.
 - Kỹ thuật: cờ `permahearts:dm_protected` trên người chơi được đặt lúc ALLOW_DEATH; mixin `PlayerMixin` bỏ qua `Player#dropEquipment` và `Player#getBaseExperienceReward`; đồ và XP chép sang người mới ở COPY_FROM; tim giữ nguyên ở AFTER_RESPAWN.
 
+
+## Hộp thưởng nhiệm vụ (D76, P-027)
+
+- Mỗi dòng nhiệm vụ trả một hộp thưởng (thay linh dược): `permahearts:silver_reward_box` (thu thập, giết; 3 thẻ), `gold_reward_box` (khám phá, Blood Moon; 4 thẻ), `diamond_reward_box` (boss, Death Match; 5 thẻ). Chọn 1 thẻ (`picks`).
+- Mỗi thẻ: 50% một bình linh dược ngẫu nhiên (x1), 50% một món đồ. Món đồ: sắt 64, vàng 64, kim cương 16, ngọc lục bảo 16, redstone 64, lapis 64, ngọc ender 32, thuốc súng 32 (số lượng lấy từ bảng thu thập của QuestGenerator), không trùng nhau. Thẻ đồ có 20% là thẻ đặc biệt: vàng = 4 táo vàng phép hoặc 32 ngọc lục bảo; kim cương = thêm 1 thỏi netherite; bạc không có.
+- Thẻ ra lúc mở lần đầu và lưu trong component `permahearts:reward_box`; đóng rồi mở lại vẫn các thẻ cũ. Chọn thẻ, bấm Claim: máy chủ kiểm lại, đưa đồ (đầy túi thì rơi dưới chân), trừ 1 hộp, phát tiếng lên cấp. Close giữ hộp.
+- Nhiệm vụ lưu cũ có phần thưởng linh dược vẫn cho hộp theo loại dòng. Màn hình nhiệm vụ hiện biểu tượng hộp.

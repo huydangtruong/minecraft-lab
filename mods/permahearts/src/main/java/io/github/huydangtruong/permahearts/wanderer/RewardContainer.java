@@ -7,7 +7,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * One per quest, shared by every open menu. Slot i shows the elixir for line i while that line is done and not
+ * One per quest, shared by every open menu. Slot i shows the reward box (D76) for line i while that line is done and not
  * claimed. Taking it out (any path vanilla uses) claims the line, so the other player's slot goes empty on their next sync.
  */
 final class RewardContainer implements Container {
@@ -49,9 +49,8 @@ final class RewardContainer implements Container {
 
 	@Override
 	public ItemStack getItem(int i) {
-		return line(i).flatMap(l -> io.github.huydangtruong.permahearts.ElixirStat.byId(l.reward()))
-			.map(s -> new ItemStack(io.github.huydangtruong.permahearts.ElixirItems.get(s)))
-			.orElse(ItemStack.EMPTY);
+		return line(i).map(l -> io.github.huydangtruong.permahearts.reward.RewardBoxes.stack(
+			io.github.huydangtruong.permahearts.reward.RewardTier.forLine(l.type()))).orElse(ItemStack.EMPTY);
 	}
 
 	private ItemStack take(int i) {

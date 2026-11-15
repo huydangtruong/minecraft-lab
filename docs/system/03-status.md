@@ -19,7 +19,7 @@ Release steps: [workflow/release.md](../workflow/release.md). Release **only whe
 
 ## In flight
 
-- **P-026 Quantum Leap + Cosmic Warping** (D74, D75) and **P-027 reward boxes** (D76): two Sonnet devs in parallel worktrees under `.claude/worktrees/`, branches `feat/P-026-dev` → `feat/P-026-cosmic-warping` and `feat/P-027-dev` → `feat/P-027-reward-boxes`. If the session dies: check those worktrees for commits, else start new devs from the plans.
+- **P-026 Quantum Leap + Cosmic Warping** (D74, D75) and **P-027 reward boxes** (D76; dev done on `feat/P-027-dev`, build green, waiting for merge and Huy's playtest): two Sonnet devs in parallel worktrees under `.claude/worktrees/`, branches `feat/P-026-dev` → `feat/P-026-cosmic-warping` and `feat/P-027-dev` → `feat/P-027-reward-boxes`. If the session dies: check those worktrees for commits, else start new devs from the plans.
 
 - **Windows installer bug** (reported by Huy's friend): picking a profile other than "26.3 Fabric Essential" says SUCCESS, but that profile's mods folder still has the old jar. Reading `minecraft-lab.ps1` (`Find-Profiles` / `Select-Profile`) found nothing yet. Waiting for the friend's `Mods folder:` line and that profile's Game directory.
 

@@ -20,6 +20,16 @@ public final class QuestGenerator {
 		new Entry("minecraft:gunpowder", 32), new Entry("minecraft:ender_pearl", 32),
 		new Entry("minecraft:diamond", 16), new Entry("minecraft:emerald", 16));
 
+	/** Amount of an item in the collect quests (0 if it is not one); reward boxes use the same amounts (D76). */
+	public static int collectAmount(String id) {
+		for (Entry e : COLLECT) {
+			if (e.id().equals(id)) {
+				return e.count();
+			}
+		}
+		return 0;
+	}
+
 	private static final List<Entry> KILL = List.of(
 		new Entry("minecraft:zombie", 16), new Entry("minecraft:skeleton", 16), new Entry("minecraft:spider", 16),
 		new Entry("minecraft:creeper", 16), new Entry("minecraft:enderman", 16), new Entry("minecraft:drowned", 16),

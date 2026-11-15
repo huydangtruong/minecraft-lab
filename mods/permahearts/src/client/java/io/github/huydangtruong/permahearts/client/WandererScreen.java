@@ -1,7 +1,7 @@
 package io.github.huydangtruong.permahearts.client;
 
-import io.github.huydangtruong.permahearts.ElixirItems;
-import io.github.huydangtruong.permahearts.ElixirStat;
+import io.github.huydangtruong.permahearts.reward.RewardBoxes;
+import io.github.huydangtruong.permahearts.reward.RewardTier;
 import io.github.huydangtruong.permahearts.Messages;
 import io.github.huydangtruong.permahearts.wanderer.DeathMatchRules;
 import io.github.huydangtruong.permahearts.wanderer.QuestSnapshot;
@@ -195,7 +195,7 @@ public class WandererScreen extends AbstractContainerScreen<WandererMenu> {
 	}
 
 	/** Vanilla-style raised panel: black outline with cut corners, white top-left bevel, grey bottom-right bevel. */
-	private static void panel(GuiGraphicsExtractor g, int x, int y, int w, int h) {
+	static void panel(GuiGraphicsExtractor g, int x, int y, int w, int h) {
 		g.fill(x + 2, y, x + w - 2, y + 1, OUTLINE);
 		g.fill(x + 2, y + h - 1, x + w - 2, y + h, OUTLINE);
 		g.fill(x, y + 2, x + 1, y + h - 2, OUTLINE);
@@ -212,7 +212,7 @@ public class WandererScreen extends AbstractContainerScreen<WandererMenu> {
 	}
 
 	/** Sunken box like a vanilla slot: dark top-left edge, white bottom-right edge. */
-	private static void inset(GuiGraphicsExtractor g, int x, int y, int w, int h, int fill) {
+	static void inset(GuiGraphicsExtractor g, int x, int y, int w, int h, int fill) {
 		g.fill(x, y, x + w, y + h, SLOT_DARK);
 		g.fill(x + 1, y + 1, x + w, y + h, LIGHT);
 		g.fill(x + 1, y + 1, x + w - 1, y + h - 1, fill);
@@ -279,9 +279,9 @@ public class WandererScreen extends AbstractContainerScreen<WandererMenu> {
 			color = TEXT_DIM;
 			icon = ItemStack.EMPTY;
 		} else if (menu.isDone(i)) {
-			text = Messages.lineDone(Wanderer.rewardName(line.reward()));
+			text = Messages.lineDone(Wanderer.rewardName(line.type()));
 			color = TEXT_DONE;
-			icon = ElixirStat.byId(line.reward()).map(s -> new ItemStack(ElixirItems.get(s))).orElse(ItemStack.EMPTY);
+			icon = RewardBoxes.stack(RewardTier.forLine(line.type()));
 		} else {
 			text = Wanderer.lineText(line.type(), line.target(), menu.requiredOf(i), menu.progressOf(i), menu.eventRunning(i));
 			icon = switch (line.type()) {
