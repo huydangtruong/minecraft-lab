@@ -3,7 +3,7 @@
 > **Tóm tắt cho Huy (VN, ≤ 3 dòng):** chọn ô chiêu thì không còn nút "+" ở các dòng chiêu; nút "i" dời sát phải.
 > Lệnh /testmode full: đủ bộ netherite phù phép, 50 tim, mỗi linh dược 10 lần. /testmode reset: trả về như cũ.
 
-- **Status:** in progress
+- **Status:** merged
 - **Mod / decision:** `permahearts`, D91, D92 · **Branch:** `feat/P-031-ui-testmode` · **Depends on:** none
 
 ## Part 1: Techniques tab (D91)
