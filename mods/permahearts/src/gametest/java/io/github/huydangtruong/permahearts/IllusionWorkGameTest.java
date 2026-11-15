@@ -99,6 +99,57 @@ public class IllusionWorkGameTest {
 		});
 	}
 
+	/** A field for the D84 tests: 3 empty farmland blocks, dirt and grass next to them and next to water, one ripe wheat. */
+	private static void field(GameTestHelper c) {
+		c.setBlock(6, 0, 2, Blocks.FARMLAND);
+		c.setBlock(7, 0, 2, Blocks.FARMLAND);
+		c.setBlock(6, 0, 3, Blocks.FARMLAND);
+		c.setBlock(5, 0, 3, Blocks.WATER);
+		c.setBlock(5, 0, 2, Blocks.DIRT);
+		c.setBlock(7, 0, 3, Blocks.GRASS_BLOCK);
+		c.setBlock(4, 0, 2, Blocks.DIRT);
+		ripeWheat(c, 7, 4);
+	}
+
+	private static boolean field(GameTestHelper c, boolean planted) {
+		boolean untilled = c.getBlockState(new BlockPos(5, 0, 2)).is(Blocks.DIRT) && c.getBlockState(new BlockPos(7, 0, 3)).is(Blocks.GRASS_BLOCK)
+			&& c.getBlockState(new BlockPos(4, 0, 2)).is(Blocks.DIRT);
+		return untilled && (!planted || c.getBlockState(new BlockPos(6, 1, 2)).is(Blocks.WHEAT) && c.getBlockState(new BlockPos(7, 1, 2)).is(Blocks.WHEAT)
+			&& c.getBlockState(new BlockPos(6, 1, 3)).is(Blocks.WHEAT));
+	}
+
+	/** D84: the farmer never makes farmland. It plants the empty farmland it has, harvests, and takes the rest to the chest. */
+	@GameTest(maxTicks = 1200)
+	public void farmNeverTillsPlantsEmptyFarmlandAndDeliversTheRestToTheChest(GameTestHelper c) {
+		ServerPlayer p = owner(c, new ItemStack(Items.IRON_HOE));
+		Container chest = chest(c, 2, 1, 5);
+		field(c);
+		Illusion a = castOne(c, p);
+		a.carry().add(new ItemStack(Items.WHEAT_SEEDS, 10));
+		c.succeedWhen(() -> {
+			c.assertTrue(field(c, true), "empty farmland planted, dirt and grass untouched" + dbg(a));
+			c.assertTrue(count(chest, s -> s.is(Items.WHEAT)) >= 1, "the ripe wheat is in the chest" + dbg(a));
+			c.assertTrue(count(chest, s -> s.is(Items.WHEAT_SEEDS)) >= 5 && a.carry().isEmpty(), "leftover seeds delivered, was " + count(chest, s -> s.is(Items.WHEAT_SEEDS)) + dbg(a));
+			FlightBladeGameTest.drop(c, p);
+		});
+	}
+
+	@GameTest(maxTicks = 1200)
+	public void farmWithoutAChestDropsTheLeftoversAndNeverTills(GameTestHelper c) {
+		ServerPlayer p = owner(c, new ItemStack(Items.IRON_HOE));
+		field(c);
+		Illusion a = castOne(c, p);
+		a.carry().add(new ItemStack(Items.WHEAT_SEEDS, 10));
+		c.succeedWhen(() -> {
+			c.assertTrue(field(c, true), "empty farmland planted, dirt and grass untouched" + dbg(a));
+			c.assertTrue(a.carry().isEmpty(), "nothing is kept" + dbg(a));
+			int seeds = logItems(c, p, Items.WHEAT_SEEDS);
+			c.assertTrue(seeds >= 5, "leftover seeds dropped on the ground, found " + seeds);
+			c.assertTrue(logItems(c, p, Items.WHEAT) >= 1, "the wheat dropped too");
+			FlightBladeGameTest.drop(c, p);
+		});
+	}
+
 	@GameTest(maxTicks = 1200)
 	public void chopBreaksANaturalTreeAndLeavesABuiltWall(GameTestHelper c) {
 		ServerPlayer p = owner(c, new ItemStack(Items.IRON_AXE));
@@ -121,6 +172,95 @@ public class IllusionWorkGameTest {
 		c.succeedWhen(() -> {
 			c.assertTrue(count(chest, s -> s.is(Items.OAK_LOG)) >= 4, "the four trunk logs are in the chest, was " + count(chest, s -> s.is(Items.OAK_LOG)));
 			c.assertTrue(c.getBlockState(new BlockPos(3, 1, 7)).is(Blocks.OAK_LOG) && c.getBlockState(new BlockPos(3, 2, 7)).is(Blocks.OAK_LOG), "the built wall stays");
+			FlightBladeGameTest.drop(c, p);
+		});
+	}
+
+	private static void tree(GameTestHelper c, int x, int z, int logs, net.minecraft.world.level.block.Block log) {
+		c.setBlock(x, 0, z, Blocks.DIRT);
+		for (int y = 1; y <= logs; y++) {
+			c.setBlock(x, y, z, log);
+		}
+		var leaf = Blocks.OAK_LEAVES.defaultBlockState().setValue(LeavesBlock.PERSISTENT, false).setValue(LeavesBlock.DISTANCE, 1);
+		c.setBlock(x, logs + 1, z, leaf);
+		for (int y = Math.max(2, logs - 2); y <= logs; y++) { // natural leaves all round the upper logs: they block the way to them
+			for (int dx = -1; dx <= 1; dx++) {
+				for (int dz = -1; dz <= 1; dz++) {
+					if (dx != 0 || dz != 0) {
+						c.setBlock(x + dx, y, z + dz, leaf);
+					}
+				}
+			}
+		}
+	}
+
+	private static int logsLeft(GameTestHelper c, int x, int z, int logs, net.minecraft.world.level.block.Block log) {
+		int n = 0;
+		for (int y = 1; y <= logs; y++) {
+			if (c.getBlockState(new BlockPos(x, y, z)).is(log)) {
+				n++;
+			}
+		}
+		return n;
+	}
+
+	private static int logItems(GameTestHelper c, ServerPlayer p, net.minecraft.world.item.Item item) {
+		int n = c.getLevel().getEntitiesOfClass(ItemEntity.class, arena(c), e -> e.getItem().is(item)).stream().mapToInt(e -> e.getItem().getCount()).sum();
+		for (int i = 0; i < p.getInventory().getContainerSize(); i++) {
+			if (p.getInventory().getItem(i).is(item)) {
+				n += p.getInventory().getItem(i).getCount();
+			}
+		}
+		return n;
+	}
+
+	/** P-028 (D82): a level-1 clone fells a 6-log oak in 12 s, and with no chest every log ends up on the ground or with the owner. */
+	@GameTest(maxTicks = 900)
+	public void chopFellsASixLogOakWithin12SecondsAndDropsTheLogsWithoutAChest(GameTestHelper c) {
+		ServerPlayer p = owner(c, new ItemStack(Items.IRON_AXE));
+		tree(c, 6, 2, 6, Blocks.OAK_LOG);
+		Illusion a = castOne(c, p);
+		long start = c.getLevel().getGameTime();
+		long[] felled = {-1};
+		c.succeedWhen(() -> {
+			if (felled[0] < 0 && logsLeft(c, 6, 2, 6, Blocks.OAK_LOG) == 0) {
+				felled[0] = c.getLevel().getGameTime() - start;
+				System.out.println("CHOPTIME oak6 ticks=" + felled[0]);
+			}
+			c.assertTrue(felled[0] >= 0, "the oak is felled" + dbg(a) + " left=" + logsLeft(c, 6, 2, 6, Blocks.OAK_LOG));
+			c.assertTrue(felled[0] <= 240, "felled within 12 s, took " + felled[0] + " ticks");
+			c.assertTrue(!a.isAlive(), "wait until the clone is gone" + dbg(a));
+			int n = logItems(c, p, Items.OAK_LOG);
+			c.assertTrue(n == 6, "all 6 logs dropped or picked up by the owner, found " + n);
+			FlightBladeGameTest.drop(c, p);
+		});
+	}
+
+	/** P-028 (D82): a tall tree is felled completely, no log left floating. */
+	@GameTest(maxTicks = 900)
+	public void chopFellsATallBirchCompletely(GameTestHelper c) {
+		ServerPlayer p = owner(c, new ItemStack(Items.IRON_AXE));
+		tree(c, 6, 2, 7, Blocks.BIRCH_LOG);
+		var kept = Blocks.OAK_LEAVES.defaultBlockState().setValue(LeavesBlock.PERSISTENT, true);
+		c.setBlock(3, 1, 4, kept); // a player-placed leaf block in the work area must stay
+		Illusion a = castOne(c, p);
+		long start = c.getLevel().getGameTime();
+		c.succeedWhen(() -> {
+			int left = logsLeft(c, 6, 2, 7, Blocks.BIRCH_LOG);
+			if (left == 0) {
+				System.out.println("CHOPTIME birch7 ticks=" + (c.getLevel().getGameTime() - start));
+			}
+			c.assertTrue(left == 0, "the birch is felled, " + left + " logs left" + dbg(a));
+			c.assertTrue(c.getBlockState(new BlockPos(3, 1, 4)).is(Blocks.OAK_LEAVES), "player-placed leaves are never broken");
+			int leaves = 0;
+			for (int y = 5; y <= 7; y++) {
+				for (int dx = -1; dx <= 1; dx++) {
+					for (int dz = -1; dz <= 1; dz++) {
+						leaves += c.getBlockState(new BlockPos(6 + dx, y, 2 + dz)).is(Blocks.OAK_LEAVES) ? 1 : 0;
+					}
+				}
+			}
+			c.assertTrue(leaves >= 12, "only the leaves in the way are broken, not the canopy: " + leaves + " of 24 left");
 			FlightBladeGameTest.drop(c, p);
 		});
 	}
@@ -213,6 +353,23 @@ public class IllusionWorkGameTest {
 			FishTask.testWaitTicks = -1;
 			FlightBladeGameTest.drop(c, p);
 		});
+	}
+
+	/** D85: the job comes from the first hotbar slot, not from the main hand; an empty first slot means FIGHT. */
+	@GameTest(maxTicks = 60)
+	public void theJobComesFromTheFirstHotbarSlotNotTheMainHand(GameTestHelper c) {
+		ServerPlayer p = owner(c, new ItemStack(Items.AIR));
+		p.getInventory().setItem(0, new ItemStack(Items.IRON_AXE));
+		p.getInventory().setItem(3, new ItemStack(Items.DIAMOND_SWORD));
+		p.getInventory().setSelectedSlot(3);
+		Illusion a = castOne(c, p);
+		c.assertTrue(a.job() == IllusionJob.CHOP && a.getMainHandItem().is(Items.IRON_AXE), "slot 0 axe gives CHOP, was " + a.job());
+		c.assertTrue(p.getInventory().getItem(0).is(Items.IRON_AXE) && p.getInventory().getItem(0).getCount() == 1, "the owner's item is untouched");
+		p.getInventory().setItem(0, ItemStack.EMPTY);
+		Illusion b = castOne(c, p);
+		c.assertTrue(b.job() == IllusionJob.FIGHT, "an empty slot 0 gives FIGHT even with a sword in hand, was " + b.job());
+		FlightBladeGameTest.drop(c, p);
+		c.succeed();
 	}
 
 	@GameTest(maxTicks = 120)

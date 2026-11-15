@@ -3,10 +3,7 @@ package io.github.huydangtruong.permahearts.technique.illusion;
 import io.github.huydangtruong.permahearts.technique.Illusion;
 import java.util.List;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -19,19 +16,20 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * FARM: harvests ripe crops, replants at once, then tills dirt or grass next to farmland (near water) for the seeds it carries.
- * The crops are broken like a player would (normal drops); the work counts as the clone's, so no XP and no tool wear.
+ * FARM: harvests ripe crops, replants at once, then plants the seeds it carries on farmland that already exists and is empty.
+ * It never makes new farmland (D84): no planting of dirt or grass. When all farmland is planted and nothing is ripe it has no work,
+ * so the WorkGoal delivers what it carries (chest, or dropped on the ground). The crops are broken like a player would (normal drops); the work counts as the clone's, so no XP and no tool wear.
  */
 final class FarmTask implements WorkTask {
 	private static final double REACH = 4.0;
 	private BlockPos target;
-	private boolean tilling;
+	private boolean planting;
 	private boolean had;
 
 	@Override
 	public boolean tick(WorkGoal g, ServerLevel sl) {
 		Illusion a = g.illusion();
-		if (target != null && (g.isSkipped(target) || !(tilling ? canTill(sl, target, a) : ripe(sl.getBlockState(target))))) {
+		if (target != null && (g.isSkipped(target) || !(planting ? canPlant(sl, target) : ripe(sl.getBlockState(target))))) {
 			target = null;
 		}
 		if (target == null) {
@@ -49,8 +47,8 @@ final class FarmTask implements WorkTask {
 			return true;
 		}
 		a.getLookControl().setLookAt(at.x, at.y, at.z);
-		if (tilling) {
-			till(g, sl, a, target);
+		if (planting) {
+			plant(g, sl, a, target);
 		} else {
 			harvest(g, sl, a, target);
 		}
@@ -62,20 +60,20 @@ final class FarmTask implements WorkTask {
 		BlockPos best = null;
 		double bd = Double.MAX_VALUE;
 		boolean seeds = hasSeeds(a);
-		BlockPos bestTill = null;
+		BlockPos bestPlant = null;
 		double bt = Double.MAX_VALUE;
 		for (BlockPos p : WorkTask.cells(g, sl, 3, 3)) {
 			double d = p.distSqr(a.blockPosition());
 			if (d < bd && ripe(sl.getBlockState(p)) && !g.isSkipped(p)) {
 				bd = d;
 				best = p.immutable();
-			} else if (seeds && d < bt && canTill(sl, p, a) && !g.isSkipped(p)) {
+			} else if (seeds && d < bt && canPlant(sl, p) && !g.isSkipped(p)) {
 				bt = d;
-				bestTill = p.immutable();
+				bestPlant = p.immutable();
 			}
 		}
-		tilling = best == null;
-		target = best != null ? best : bestTill;
+		planting = best == null;
+		target = best != null ? best : bestPlant;
 	}
 
 	/** A fully grown crop of the five plants the clone knows. */
@@ -157,43 +155,15 @@ final class FarmTask implements WorkTask {
 		g.pickupFor(20);
 	}
 
-	/** Empty farmland (a harvest that dropped no seed leaves one) or dirt/grass next to farmland near water. */
-	private static boolean canTill(ServerLevel sl, BlockPos p, Illusion a) {
-		BlockState st = sl.getBlockState(p);
-		if (st.getBlock() == Blocks.FARMLAND && sl.getBlockState(p.above()).isAir()) {
-			return true;
-		}
-		if ((st.getBlock() != Blocks.DIRT && st.getBlock() != Blocks.GRASS_BLOCK) || !sl.getBlockState(p.above()).isAir()) {
-			return false;
-		}
-		boolean next = false;
-		for (Direction d : Direction.Plane.HORIZONTAL) {
-			if (sl.getBlockState(p.relative(d)).getBlock() == Blocks.FARMLAND) {
-				next = true;
-				break;
-			}
-		}
-		return next && nearWater(sl, p);
+	/** Existing farmland with nothing on it (a harvest that dropped no seed leaves one). Dirt and grass are never turned into farmland. */
+	private static boolean canPlant(ServerLevel sl, BlockPos p) {
+		return sl.getBlockState(p).getBlock() == Blocks.FARMLAND && sl.getBlockState(p.above()).isAir();
 	}
 
-	/** Within 4 blocks of water, like vanilla hydration (same level or one up). */
-	private static boolean nearWater(ServerLevel sl, BlockPos p) {
-		for (BlockPos q : BlockPos.betweenClosed(p.offset(-4, 0, -4), p.offset(4, 1, 4))) {
-			if (sl.getFluidState(q).is(net.minecraft.tags.FluidTags.WATER)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private void till(WorkGoal g, ServerLevel sl, Illusion a, BlockPos pos) {
+	private void plant(WorkGoal g, ServerLevel sl, Illusion a, BlockPos pos) {
 		ItemStack seed = a.carry().take(s -> cropOf(s) != null, 1);
 		if (seed.isEmpty()) {
 			return;
-		}
-		if (sl.getBlockState(pos).getBlock() != Blocks.FARMLAND) {
-			sl.setBlock(pos, Blocks.FARMLAND.defaultBlockState(), 3);
-			sl.playSound(null, pos, SoundEvents.HOE_TILL.value(), SoundSource.BLOCKS, 1f, 1f);
 		}
 		sl.setBlock(pos.above(), cropOf(seed).defaultBlockState(), 3);
 		a.swingForAttack(InteractionHand.MAIN_HAND);

@@ -95,6 +95,16 @@ public final class WorkGoal extends Goal {
 		cooldown = a.workTicks() + Math.max(0, extra);
 	}
 
+	/** A short pause (for example after breaking a leaf in the way). */
+	public void pause(int ticks) {
+		cooldown = Math.max(cooldown, ticks);
+	}
+
+	public void unskip(Object key) {
+		skipped.remove(key);
+		goKey = null;
+	}
+
 	/** Lets the clone pick up item drops within 3 blocks for this many more ticks. */
 	public void pickupFor(int ticks) {
 		pickupUntil = Math.max(pickupUntil, a.level().getGameTime() + ticks);

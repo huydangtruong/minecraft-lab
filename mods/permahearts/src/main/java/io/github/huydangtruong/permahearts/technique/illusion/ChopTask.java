@@ -15,6 +15,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
@@ -28,13 +30,19 @@ import net.minecraft.world.phys.Vec3;
  */
 final class ChopTask implements WorkTask {
 	private static final int MAX_LOGS = 64;
-	private static final double REACH = 6.0;
+	/** Reach from the clone's eyes to the centre of a log. */
+	private static final double REACH = 5.5;
+	/** Ticks the clone may walk towards one log before it gives up on it (5 s). */
+	private static final int WALK_LIMIT = 100;
 
 	private List<BlockPos> tree = new ArrayList<>();
 	private final Set<BlockPos> notNatural = new HashSet<>();
 	/** Where a trunk stood and the sapling item that belongs there. */
 	private final List<Stump> stumps = new ArrayList<>();
 	private boolean had;
+	/** The lowest log of the tree being felled: the clone walks to its foot to reach the logs above. */
+	private BlockPos foot;
+	private int walking;
 
 	private record Stump(BlockPos pos, Item sapling) {}
 
@@ -55,17 +63,41 @@ final class ChopTask implements WorkTask {
 		}
 		BlockPos log = tree.get(0);
 		Vec3 at = Vec3.atCenterOf(log);
-		if (!g.goTo(log, at, REACH) || !g.ready()) {
+		if (a.getEyePosition().distanceToSqr(at) > REACH * REACH) {
+			// Out of reach: stand at the foot of the trunk (a log high in a tree is no place to path to), and give up on a
+			// log after a few seconds or as soon as there is no way to it, instead of waiting 15 s.
+			BlockPos to = foot != null ? foot : log;
+			boolean there = g.goTo(to, Vec3.atCenterOf(to), 2.0);
+			boolean stuck = g.isSkipped(to) || ++walking > WALK_LIMIT;
+			if (stuck || there) {
+				BlockPos leaf = stuck && !there ? leafAround(sl, a, to) : null;
+				if (leaf != null) { // natural leaves may be what shuts the trunk in: clear the one in the way, then walk again
+					if (g.ready()) {
+						breakNatural(g, sl, a, leaf);
+						g.unskip(to);
+						walking = 0;
+					}
+					return true;
+				}
+				g.skip(log, 400);
+				walking = 0;
+			}
+			return true;
+		}
+		walking = 0;
+		a.getNavigation().stop();
+		if (!g.ready()) {
+			return true;
+		}
+		BlockPos blocking = leafInTheWay(sl, a, at, log);
+		if (blocking != null) { // only the leaves between the clone's eyes and this log, never the whole canopy
+			a.getLookControl().setLookAt(blocking.getX() + 0.5, blocking.getY() + 0.5, blocking.getZ() + 0.5);
+			breakNatural(g, sl, a, blocking);
 			return true;
 		}
 		a.getLookControl().setLookAt(at.x, at.y, at.z);
 		BlockState st = sl.getBlockState(log);
-		for (ItemStack d : Block.getDrops(st, sl, log, null, a, a.lockedItem())) {
-			ItemStack left = a.carry().add(d);
-			if (!left.isEmpty()) {
-				Block.popResource(sl, log, left);
-			}
-		}
+		collectDrops(sl, a, st, log);
 		Item sapling = saplingFor(st.getBlock());
 		boolean base = sl.getBlockState(log.below()).is(BlockTags.DIRT);
 		sl.destroyBlock(log, false, a, 512);
@@ -77,6 +109,55 @@ final class ChopTask implements WorkTask {
 		g.acted((int) (st.getDestroySpeed(sl, log) * 5)); // a block still takes its break time
 		g.pickupFor(100);
 		return true;
+	}
+
+	private static void collectDrops(ServerLevel sl, Illusion a, BlockState st, BlockPos pos) {
+		for (ItemStack d : Block.getDrops(st, sl, pos, null, a, a.lockedItem())) {
+			ItemStack left = a.carry().add(d);
+			if (!left.isEmpty()) {
+				Block.popResource(sl, pos, left);
+			}
+		}
+	}
+
+	private static boolean naturalLeaves(BlockState n) {
+		return n.is(BlockTags.LEAVES) && n.hasProperty(LeavesBlock.PERSISTENT) && !n.getValue(LeavesBlock.PERSISTENT);
+	}
+
+	/** Breaks a natural leaf block: it drops its usual things (saplings, sticks, apples) into the carry, and costs a short pause. */
+	private static void breakNatural(WorkGoal g, ServerLevel sl, Illusion a, BlockPos leaf) {
+		collectDrops(sl, a, sl.getBlockState(leaf), leaf);
+		sl.destroyBlock(leaf, false, a, 512);
+		a.swingForAttack(InteractionHand.MAIN_HAND);
+		g.pause(Math.max(4, a.workTicks() / 2));
+		g.pickupFor(60);
+	}
+
+	/** The natural leaf block the clone's line of sight to the log runs into first, or null when the way is clear. */
+	private static BlockPos leafInTheWay(ServerLevel sl, Illusion a, Vec3 at, BlockPos log) {
+		var hit = sl.clip(new ClipContext(a.getEyePosition(), at, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, a));
+		if (hit.getType() == HitResult.Type.MISS || hit.getBlockPos().equals(log)) {
+			return null;
+		}
+		return naturalLeaves(sl.getBlockState(hit.getBlockPos())) ? hit.getBlockPos().immutable() : null;
+	}
+
+	/** A natural leaf within 2 blocks around the trunk foot (low enough to stand beside it) that the clone can reach, nearest first. */
+	private static BlockPos leafAround(ServerLevel sl, Illusion a, BlockPos foot) {
+		BlockPos best = null;
+		double bestD = Double.MAX_VALUE;
+		Vec3 eye = a.getEyePosition();
+		for (BlockPos p : BlockPos.betweenClosed(foot.offset(-2, 0, -2), foot.offset(2, 2, 2))) {
+			if (!naturalLeaves(sl.getBlockState(p))) {
+				continue;
+			}
+			double d = eye.distanceToSqr(Vec3.atCenterOf(p));
+			if (d <= REACH * REACH && d < bestD) {
+				bestD = d;
+				best = p.immutable();
+			}
+		}
+		return best;
 	}
 
 	/** Plants a carried sapling on a stump when the clone has one. Returns true while it is busy with that. */
@@ -131,6 +212,8 @@ final class ChopTask implements WorkTask {
 			if (natural(sl, found)) {
 				found.sort(Comparator.<BlockPos>comparingInt(BlockPos::getY).thenComparingDouble(p -> p.distSqr(from)));
 				tree = found;
+				foot = found.get(0);
+				walking = 0;
 				return;
 			}
 			notNatural.addAll(found);

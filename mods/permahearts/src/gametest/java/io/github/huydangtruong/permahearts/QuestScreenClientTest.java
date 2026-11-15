@@ -140,6 +140,7 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 	private static final int HS_UPGRADE = HS_ROW + 2 * Technique.values().length;
 	private static final int HS_RESET = HS_UPGRADE + 1;
 	private static final int HS_BACK = HS_UPGRADE + 2;
+	private static final int HS_INFO = HS_BACK + 1;
 
 	@SuppressWarnings("unchecked")
 	private static java.util.List<int[]> hotspots(ClientGameTestContext context) {
@@ -209,7 +210,7 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 		server.runCommand("technique emeralds @p 320");
 		context.waitTicks(5);
 		// open fire's detail page by clicking its row, upgrade twice
-		clickGui(context, hotspots(context).get(HS_ROW), LEFT);
+		clickGui(context, hotspots(context).get(HS_INFO), LEFT);
 		context.takeScreenshot("09d-technique-detail-level0");
 		clickGui(context, hotspots(context).get(HS_UPGRADE), LEFT);
 		clickGui(context, hotspots(context).get(HS_UPGRADE), LEFT);
@@ -232,9 +233,9 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 		clickGui(context, hotspots(context).get(HS_SLOT), LEFT); // left click slot 1: edit mode
 		context.takeScreenshot("09e2-slot1-edit-mode"); // gold outline, cross instead of the emerald box, + buttons
 		clickGui(context, hotspots(context).get(HS_EMERALD), LEFT); // the cross cancels
-		clickGui(context, hotspots(context).get(HS_CHECK), LEFT); // a + press outside edit mode only opens the detail page
-		check(techniqueData(server).inSlot(0) == null, "no slot should be filled outside edit mode");
-		clickGui(context, hotspots(context).get(HS_BACK), LEFT);
+		clickGui(context, hotspots(context).get(HS_CHECK), LEFT); // outside slot mode a row click only picks the technique (P-028)
+		check(techniqueData(server).inSlot(0) == null, "no slot should be filled by picking a technique");
+		clickGui(context, hotspots(context).get(HS_EMERALD), LEFT); // Cancel
 		clickGui(context, hotspots(context).get(HS_SLOT), LEFT);
 		clickGui(context, hotspots(context).get(HS_CHECK), LEFT); // + on fire
 		check(techniqueData(server).inSlot(0) == fire, "+ on fire with slot 1 in edit mode should slot it");
@@ -249,6 +250,23 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 		check(techniqueData(server).inSlot(0) == ice, "slot 1 should hold ice after the move");
 		check(techniqueData(server).inSlot(1) == null, "slot 2 should be empty after ice moved out of it");
 		context.takeScreenshot("09f2-after-move");
+		// P-028 technique first: pick fire's row, the row and the slots it can go to are outlined, the emerald box is a red Cancel
+		clickGui(context, hotspots(context).get(HS_ROW), LEFT);
+		context.takeScreenshot("97-technique-picked");
+		clickGui(context, hotspots(context).get(HS_SLOT + 1), LEFT); // only two slots are open here
+		check(techniqueData(server).inSlot(1) == fire, "picking fire then clicking an outlined slot should slot it");
+		// slot first, then the row name (not the +)
+		clickGui(context, hotspots(context).get(HS_SLOT + 1), LEFT);
+		clickGui(context, hotspots(context).get(HS_ROW + 2), LEFT);
+		check(techniqueData(server).inSlot(1) == t.getEnumConstants()[2], "slot 2 then the healing row should slot healing");
+		// Cancel drops a picked technique: the next slot click selects the slot instead of assigning
+		clickGui(context, hotspots(context).get(HS_ROW), LEFT);
+		clickGui(context, hotspots(context).get(HS_EMERALD), LEFT);
+		clickGui(context, hotspots(context).get(HS_SLOT), LEFT);
+		check(techniqueData(server).inSlot(0) == ice, "Cancel must clear the picked technique");
+		clickGui(context, hotspots(context).get(HS_EMERALD), LEFT);
+		clickGui(context, hotspots(context).get(HS_SLOT + 1), RIGHT); // back to the state the next steps expect
+		check(techniqueData(server).inSlot(1) == null, "right click clears slot 2");
 		// cooldown: ice (slot 1) on cooldown, left and right click on slot 1 do nothing
 		server.runOnServer(s -> {
 			var p = s.getPlayerList().getPlayers().get(0);
@@ -266,11 +284,12 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 		check(techniqueData(server).inSlot(0) == null, "right click on slot 1 should clear it");
 		// detail page of Blood Oath at level 20 (max): Upgrade greyed, Reset gives 0 (set by command)
 		scrollList(context, -10);
-		clickGui(context, hotspots(context).get(HS_ROW + 5), LEFT);
+		clickGui(context, hotspots(context).get(HS_INFO + 5), LEFT);
 		context.takeScreenshot("09g-technique-detail-max");
 		clickGui(context, hotspots(context).get(HS_BACK), LEFT);
 		scrollList(context, 10);
-		clickGui(context, hotspots(context).get(HS_ROW + 1), LEFT); // ice level 4: now -> next numbers
+		clickGui(context, hotspots(context).get(HS_INFO + 1), LEFT); // ice level 4: now -> next numbers
+		context.takeScreenshot("98-technique-detail-level"); // green level text and bar
 		context.takeScreenshot("09h-technique-detail-ice");
 		scrollList(context, -10); // the detail page scrolls: bring Reset into view (D57)
 		context.takeScreenshot("09h2-technique-detail-ice-scrolled");
