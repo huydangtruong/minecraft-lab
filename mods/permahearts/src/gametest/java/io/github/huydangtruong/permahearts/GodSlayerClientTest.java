@@ -27,7 +27,14 @@ public class GodSlayerClientTest implements FabricClientGameTest {
 			server.runOnServer(s -> {
 				GodSlayer b = GodSlayer.TYPE.create(s.overworld(), EntitySpawnReason.MOB_SUMMONED);
 				b.setBossLevel(1);
-				b.snapTo(4.5, 100, 0.5, 90f, 0f); // east of the player (who looks east), facing west: the camera sees its front
+				b.setYRot(110f);
+				b.yRotO = 110f;
+				b.setYBodyRot(110f);
+				b.yBodyRotO = 110f;
+				b.setYHeadRot(110f);
+				b.yHeadRotO = 110f;
+				// ahead and to the right of the player (who looks east), turned towards the camera behind the player
+				b.snapTo(2.5, 100, 2.3, 110f, 0f);
 				b.setNoAi(true);
 				s.overworld().addFreshEntity(b);
 			});
