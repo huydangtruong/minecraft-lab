@@ -29,7 +29,7 @@ Release steps: [workflow/release.md](../workflow/release.md). Release **only whe
 
 ## Open, not scheduled
 
-- **Flaky Illusion chop game tests:** `chop_fells_atall_birch` and another chop test fail now and then, pass on rerun. Not investigated.
+- **Flaky game tests left:** `golem_game_test_guardian_attacks_amonster_near_the_owner` and `thunder_game_test_a_pig_in_the_blast_becomes_azombified_piglin` failed once each in 10 runs. Not investigated. (Chop and afterburn flakes fixed.)
 
 - **BL-004**: a command to summon the Crimson Master with a chosen quest ([backlog/BACKLOG.md](../backlog/BACKLOG.md)).
 - **Not playtested by hand yet:**
