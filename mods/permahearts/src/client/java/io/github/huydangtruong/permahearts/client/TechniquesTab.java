@@ -41,11 +41,21 @@ public final class TechniquesTab {
 	private static final int BONUS = 0xFFC85A00;
 	private static final int GOLD = 0xFFFFC800;
 	private static final int GOOD = 0xFF1E8A2E;
+	/** The vanilla XP bar green, and the bar's dark background. */
+	private static final int XP_GREEN = 0xFF80FF20;
+	private static final int BAR_BACK = 0xFF373737;
+	private static final int BAR_H = 4;
+	private static final int BAR_W = 2 * SLOT_PITCH + SLOT;
+	private static final int INFO = 16;
+	private static final int CANCEL = 0xFFE08080;
+	private static final int CANCEL_HOVER = 0xFFF0A0A0;
 
 	private static final ItemStack EMERALD = new ItemStack(Items.EMERALD);
 
 	/** Selected slot (gold outline), -1 for none. */
 	private static int selectedSlot = -1;
+	/** Technique picked in the list (yellow outline, free slots outlined too), null for none. Never set together with a slot. */
+	private static Technique selectedTechnique;
 	/** Technique whose detail page is open, null for the list. */
 	private static Technique detail;
 	/** List scroll in pixels (0 = top). */
@@ -55,6 +65,10 @@ public final class TechniquesTab {
 
 	public static int selectedSlot() {
 		return selectedSlot;
+	}
+
+	public static Technique selectedTechnique() {
+		return selectedTechnique;
 	}
 
 	public static Technique detail() {
@@ -166,6 +180,9 @@ public final class TechniquesTab {
 		if (selectedSlot >= d.slotsOpen()) {
 			selectedSlot = -1;
 		}
+		if (selectedTechnique != null && d.level(selectedTechnique) < 1) {
+			selectedTechnique = null;
+		}
 		if (detail == null) {
 			drawSlots(g, font, d, now, tx, y0 + 19, mx, my);
 			drawList(g, font, d, tx, right, y0, h, mx, my);
@@ -197,7 +214,7 @@ public final class TechniquesTab {
 					g.text(font, s, x + (SLOT - font.width(s)) / 2, y + 6, 0xFFFFFFFF, true);
 				}
 			}
-			if (i == selectedSlot) {
+			if (i == selectedSlot || selectedTechnique != null && canGo(d, selectedTechnique, i, now)) {
 				g.outline(x - 1, y - 1, SLOT + 2, SLOT + 2, GOLD);
 				g.outline(x, y, SLOT, SLOT, GOLD);
 			}
@@ -211,8 +228,8 @@ public final class TechniquesTab {
 			}
 		}
 		int ex = emeraldX(tx);
-		boolean editing = selectedSlot >= 0;
-		box(g, ex, y, editing && in(mx, my, ex, y, SLOT, SLOT) ? 0xFFA8A8A8 : 0xFF8B8B8B);
+		boolean editing = selectedSlot >= 0 || selectedTechnique != null;
+		box(g, ex, y, !editing ? 0xFF8B8B8B : in(mx, my, ex, y, SLOT, SLOT) ? CANCEL_HOVER : CANCEL);
 		if (editing) {
 			g.blitSprite(RenderPipelines.GUI_TEXTURED, sprite("cross"), ex + 2, y + 2, 16, 16);
 			if (in(mx, my, ex, y, SLOT, SLOT)) {
@@ -249,14 +266,31 @@ public final class TechniquesTab {
 			boolean inView = my >= viewTop && my < viewTop + viewH;
 			boolean hover = in(mx, my, tx, y, right - tx, ROW_H) && inView;
 			int level = d.level(t);
-			g.fill(tx, y, right, y + ROW_H, hover ? 0xFFBDBDBD : 0xFFABABAB);
+			boolean clickable = level >= 1 && (selectedSlot >= 0 ? canAssign(d, t) : true);
+			g.fill(tx, y, right, y + ROW_H, hover && clickable ? 0xFFBDBDBD : 0xFFABABAB);
 			g.outline(tx, y, right - tx, ROW_H, 0xFF8B8B8B);
+			if (t == selectedTechnique) {
+				g.outline(tx, y, right - tx, ROW_H, GOLD);
+				g.outline(tx + 1, y + 1, right - tx - 2, ROW_H - 2, GOLD);
+			}
 			g.blitSprite(RenderPipelines.GUI_TEXTURED, icon(t), tx + 3, y + 3, 16, 16);
-			g.text(font, t.displayName(), tx + 24, y + 7, level > 0 ? TOTAL : BASE, false);
+			g.text(font, t.displayName(), tx + 24, y + 3, level > 0 ? TOTAL : BASE, false);
+			int[] bar = barRect(tx, y);
+			levelBar(g, bar[0], bar[1], BAR_W, level);
+			int[] info = infoRect(right, y);
+			boolean ih = in(mx, my, info[0], info[1], INFO, INFO) && inView;
+			g.blitSprite(RenderPipelines.GUI_TEXTURED, Identifier.withDefaultNamespace(ih ? "widget/button_highlighted" : "widget/button"), info[0], info[1], INFO, INFO);
+			g.text(font, "i", info[0] + (INFO - font.width("i")) / 2 + 1, info[1] + 4, 0xFFFFFFFF, true);
+			if (inView && hover) {
+				if (ih) {
+					g.setTooltipForNextFrame(font, Component.literal("Details"), mx, my);
+				} else if (in(mx, my, bar[0], bar[1] - 1, BAR_W, BAR_H + 2)) {
+					g.setTooltipForNextFrame(font, Component.literal("Lv " + level + " / " + TechniqueRules.MAX_LEVEL), mx, my);
+				} else if (level == 0) {
+					g.setTooltipForNextFrame(font, Component.literal("Learn it first: click i"), mx, my);
+				}
+			}
 			boolean showPlus = assign && level >= 1 && d.slotOf(t) != selectedSlot;
-			String lv = "Lv " + level;
-			int lvRight = right - (showPlus ? PLUS + 6 : 4);
-			g.text(font, lv, lvRight - font.width(lv), y + 7, level > 0 ? BONUS : BASE, false);
 			if (showPlus) {
 				int[] c = plusRect(right, y);
 				boolean can = canAssign(d, t);
@@ -284,13 +318,47 @@ public final class TechniquesTab {
 		return selectedSlot >= 0 && d.level(t) >= 1 && d.slotOf(t) != selectedSlot && !d.slotOnCooldown(selectedSlot, now());
 	}
 
+	/** True when the learned technique can go into that slot: open, not already there, and its current technique is not cooling down. */
+	private static boolean canGo(TechniqueData d, Technique t, int slot, long now) {
+		return d.level(t) >= 1 && slot < d.slotsOpen() && d.slotOf(t) != slot && !d.slotOnCooldown(slot, now);
+	}
+
+	/** The "i" (details) button of a row, where the level text used to be, left of the + button. */
+	private static int[] infoRect(int right, int rowY) {
+		return new int[] {right - PLUS - 2 - 2 - INFO, rowY + 3, INFO, INFO};
+	}
+
+	/** The level bar under a technique name: {x, y}. */
+	private static int[] barRect(int tx, int rowY) {
+		return new int[] {tx + 24, rowY + 14};
+	}
+
+	/** The vanilla-XP-green level bar, {@code level / MAX_LEVEL} full. */
+	private static void levelBar(GuiGraphicsExtractor g, int x, int y, int w, int level) {
+		g.fill(x, y, x + w, y + BAR_H, BAR_BACK);
+		int fill = w * Math.max(0, Math.min(TechniqueRules.MAX_LEVEL, level)) / TechniqueRules.MAX_LEVEL;
+		if (fill > 0) {
+			g.fill(x, y, x + fill, y + BAR_H, XP_GREEN);
+		}
+	}
+
 	private static void drawDetail(GuiGraphicsExtractor g, Font font, TechniqueData d, long now, Technique t, int tx, int right, int y0, int h, int mx, int my) {
 		int level = d.level(t);
 		int[] bk = backRect(tx, right, y0, h);
 		g.blitSprite(RenderPipelines.GUI_TEXTURED, icon(t), tx + 40, bk[1], 16, 16);
 		g.text(font, Component.literal(t.displayName()).withStyle(ChatFormatting.BOLD), tx + 60, bk[1], TOTAL, false);
 		String lv = "Lv " + level + " / " + TechniqueRules.MAX_LEVEL;
-		g.text(font, lv, tx + 60, bk[1] + 9, level > 0 ? BONUS : BASE, false);
+		int lx = tx + 60;
+		int ly = bk[1] + 9;
+		for (int ox = -1; ox <= 1; ox++) { // a dark outline, like vanilla's level number, so the green reads on the light panel
+			for (int oy = -1; oy <= 1; oy++) {
+				if (ox != 0 || oy != 0) {
+					g.text(font, lv, lx + ox, ly + oy, 0xFF202020, false);
+				}
+			}
+		}
+		g.text(font, lv, lx, ly, XP_GREEN, false);
+		levelBar(g, lx, ly + 11, BAR_W, level);
 		button(g, font, bk, "Back", true, mx, my);
 
 		// scrolling body: description (italic, wrapped), stats, Upgrade, Reset
@@ -419,6 +487,11 @@ public final class TechniquesTab {
 					if (d.inSlot(i) != null) {
 						send(TechniqueNet.CLEAR_SLOT, "", i);
 					}
+				} else if (selectedTechnique != null) {
+					if (canGo(d, selectedTechnique, i, now)) { // an outlined slot takes it; any other does nothing
+						send(TechniqueNet.ASSIGN, selectedTechnique.id(), i);
+						selectedTechnique = null;
+					}
 				} else {
 					selectedSlot = selectedSlot == i ? -1 : i;
 				}
@@ -426,8 +499,9 @@ public final class TechniquesTab {
 			}
 		}
 		if (in(mx, my, emeraldX(tx), slotY, SLOT, SLOT)) {
-			if (selectedSlot >= 0) {
-				selectedSlot = -1; // the cross cancels edit mode
+			if (selectedSlot >= 0 || selectedTechnique != null) {
+				selectedSlot = -1; // the red cross cancels either selection
+				selectedTechnique = null;
 				return true;
 			}
 			var p = Minecraft.getInstance().player;
@@ -450,15 +524,29 @@ public final class TechniquesTab {
 			if (!in(mx, my, tx, y, right - tx, ROW_H)) {
 				continue;
 			}
+			Technique t = all[i];
 			int[] c = plusRect(right, y);
-			if (assign && d.level(all[i]) >= 1 && d.slotOf(all[i]) != selectedSlot && in(mx, my, c[0], c[1], c[2], c[3])) {
-				if (canAssign(d, all[i])) {
-					send(TechniqueNet.ASSIGN, all[i].id(), selectedSlot);
+			int[] info = infoRect(right, y);
+			int[] bar = barRect(tx, y);
+			if (in(mx, my, info[0], info[1], INFO, INFO)) { // "i": the only way to the detail page
+				detail = t;
+				detailScroll = 0;
+				selectedSlot = -1;
+				selectedTechnique = null;
+			} else if (assign && d.level(t) >= 1 && d.slotOf(t) != selectedSlot && in(mx, my, c[0], c[1], c[2], c[3])) {
+				if (canAssign(d, t)) {
+					send(TechniqueNet.ASSIGN, t.id(), selectedSlot);
 					selectedSlot = -1; // edit mode ends after a successful +
 				}
-			} else {
-				detail = all[i];
-				detailScroll = 0;
+			} else if (in(mx, my, bar[0], bar[1] - 1, BAR_W, BAR_H + 2) || d.level(t) < 1) {
+				// the bar only has a tooltip; an unlearned row does nothing
+			} else if (assign) { // slot first: the row name puts the technique into the chosen slot, like the +
+				if (canAssign(d, t)) {
+					send(TechniqueNet.ASSIGN, t.id(), selectedSlot);
+					selectedSlot = -1;
+				}
+			} else { // technique first: pick it (again to drop it)
+				selectedTechnique = selectedTechnique == t ? null : t;
 				selectedSlot = -1;
 			}
 			return true;
@@ -519,7 +607,7 @@ public final class TechniquesTab {
 		}
 		out.add(new int[] {emeraldX(tx) + SLOT / 2, y0 + 19 + SLOT / 2});
 		for (int i = 0; i < Technique.values().length; i++) {
-			out.add(new int[] {tx + 40, rowY(y0, i) + ROW_H / 2});
+			out.add(new int[] {tx + 40, rowY(y0, i) + 7}); // on the name, above the level bar
 		}
 		for (int i = 0; i < Technique.values().length; i++) {
 			int[] c = plusRect(right, rowY(y0, i));
@@ -531,6 +619,10 @@ public final class TechniquesTab {
 		out.add(new int[] {up[0] + up[2] / 2, up[1] + up[3] / 2});
 		out.add(new int[] {re[0] + re[2] / 2, re[1] + re[3] / 2});
 		out.add(new int[] {bk[0] + bk[2] / 2, bk[1] + bk[3] / 2});
+		for (int i = 0; i < Technique.values().length; i++) { // the "i" buttons, after Back
+			int[] r = infoRect(right, rowY(y0, i));
+			out.add(new int[] {r[0] + INFO / 2, r[1] + INFO / 2});
+		}
 		return out;
 	}
 }

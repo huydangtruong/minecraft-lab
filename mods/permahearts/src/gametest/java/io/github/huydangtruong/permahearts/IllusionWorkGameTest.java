@@ -132,10 +132,15 @@ public class IllusionWorkGameTest {
 		}
 		var leaf = Blocks.OAK_LEAVES.defaultBlockState().setValue(LeavesBlock.PERSISTENT, false).setValue(LeavesBlock.DISTANCE, 1);
 		c.setBlock(x, logs + 1, z, leaf);
-		c.setBlock(x - 1, logs, z, leaf);
-		c.setBlock(x + 1, logs, z, leaf);
-		c.setBlock(x, logs, z - 1, leaf);
-		c.setBlock(x, logs, z + 1, leaf);
+		for (int y = Math.max(2, logs - 2); y <= logs; y++) { // natural leaves all round the upper logs: they block the way to them
+			for (int dx = -1; dx <= 1; dx++) {
+				for (int dz = -1; dz <= 1; dz++) {
+					if (dx != 0 || dz != 0) {
+						c.setBlock(x + dx, y, z + dz, leaf);
+					}
+				}
+			}
+		}
 	}
 
 	private static int logsLeft(GameTestHelper c, int x, int z, int logs, net.minecraft.world.level.block.Block log) {
@@ -185,6 +190,8 @@ public class IllusionWorkGameTest {
 	public void chopFellsATallBirchCompletely(GameTestHelper c) {
 		ServerPlayer p = owner(c, new ItemStack(Items.IRON_AXE));
 		tree(c, 6, 2, 7, Blocks.BIRCH_LOG);
+		var kept = Blocks.OAK_LEAVES.defaultBlockState().setValue(LeavesBlock.PERSISTENT, true);
+		c.setBlock(3, 1, 4, kept); // a player-placed leaf block in the work area must stay
 		Illusion a = castOne(c, p);
 		long start = c.getLevel().getGameTime();
 		c.succeedWhen(() -> {
@@ -193,6 +200,16 @@ public class IllusionWorkGameTest {
 				System.out.println("CHOPTIME birch7 ticks=" + (c.getLevel().getGameTime() - start));
 			}
 			c.assertTrue(left == 0, "the birch is felled, " + left + " logs left" + dbg(a));
+			c.assertTrue(c.getBlockState(new BlockPos(3, 1, 4)).is(Blocks.OAK_LEAVES), "player-placed leaves are never broken");
+			int leaves = 0;
+			for (int y = 5; y <= 7; y++) {
+				for (int dx = -1; dx <= 1; dx++) {
+					for (int dz = -1; dz <= 1; dz++) {
+						leaves += c.getBlockState(new BlockPos(6 + dx, y, 2 + dz)).is(Blocks.OAK_LEAVES) ? 1 : 0;
+					}
+				}
+			}
+			c.assertTrue(leaves >= 12, "only the leaves in the way are broken, not the canopy: " + leaves + " of 24 left");
 			FlightBladeGameTest.drop(c, p);
 		});
 	}
