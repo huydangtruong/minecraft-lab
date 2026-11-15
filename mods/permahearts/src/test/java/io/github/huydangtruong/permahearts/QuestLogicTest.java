@@ -72,9 +72,9 @@ class QuestLogicTest {
 		Random r = new Random(7);
 		for (int i = 0; i < 200; i++) {
 			int d = QuestGenerator.daysUntilNext(r);
-			assertTrue(d == 4, "next " + d);
+			assertTrue(d == 5, "next " + d);
 			int back = QuestGenerator.daysUntilReturn(r);
-			assertTrue(back == 4, "return " + back);
+			assertTrue(back == 5, "return " + back);
 			double[] o = QuestGenerator.planOffset(r);
 			double dist = Math.hypot(o[0], o[1]);
 			assertTrue(dist >= 449.9 && dist <= 550.1, "dist " + dist);
@@ -110,7 +110,12 @@ class QuestLogicTest {
 		for (int seed = 0; seed < 500; seed++) {
 			for (QuestLine l : QuestGenerator.generate(seed, new Random(seed)).lines()) {
 				if (l.type() == QuestType.KILL) {
-					assertEquals(l.target().equals("minecraft:witch") ? 8 : 16, l.required(), l.target());
+					int want = switch (l.target()) {
+						case "minecraft:witch" -> 6;
+						case "minecraft:blaze", "minecraft:wither_skeleton", "minecraft:phantom" -> 8;
+						default -> 16;
+					};
+					assertEquals(want, l.required(), l.target());
 				}
 				if (l.type() == QuestType.COLLECT) {
 					assertTrue(List.of(16, 32, 48, 64).contains(l.required()), l.target());
@@ -184,5 +189,68 @@ class QuestLogicTest {
 		var d = WandererData.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow();
 		assertEquals(Phase.PRESENT, d.phase());
 		assertTrue(d.bloodMoon().isEmpty() && d.boss().isEmpty());
+	}
+
+	@Test
+	void typeWeightsD88() {
+		// 4 lines at most per quest, so count the types of many first lines (Death Match off, then on).
+		int[] off = new int[QuestType.values().length];
+		int[] on = new int[QuestType.values().length];
+		int n = 60000;
+		for (int seed = 0; seed < n; seed++) {
+			off[QuestGenerator.generate(seed, new Random(seed), 1).lines().get(0).type().ordinal()]++;
+			on[QuestGenerator.generate(seed, new Random(seed), 2).lines().get(0).type().ordinal()]++;
+		}
+		double[] wantOff = new double[QuestType.values().length];
+		wantOff[QuestType.COLLECT.ordinal()] = 27;
+		wantOff[QuestType.KILL.ordinal()] = 27;
+		wantOff[QuestType.EXPLORE.ordinal()] = 15;
+		wantOff[QuestType.BLOOD_MOON.ordinal()] = 15;
+		wantOff[QuestType.BOSS.ordinal()] = 16;
+		for (QuestType t : QuestType.values()) {
+			assertEquals(wantOff[t.ordinal()], 100.0 * off[t.ordinal()] / n, 1.0, "off " + t);
+			double wantOn = wantOff[t.ordinal()] * 100 / 112 + (t == QuestType.DEATH_MATCH ? 12.0 * 100 / 112 : 0);
+			assertEquals(wantOn, 100.0 * on[t.ordinal()] / n, 1.0, "on " + t);
+		}
+		assertEquals(0, off[QuestType.DEATH_MATCH.ordinal()]);
+	}
+
+	@Test
+	void newCollectAndKillTargetsAppear() {
+		var collect = new HashSet<String>();
+		var kill = new HashSet<String>();
+		for (int seed = 0; seed < 5000; seed++) {
+			for (QuestLine l : QuestGenerator.generate(seed, new Random(seed)).lines()) {
+				if (l.type() == QuestType.COLLECT) {
+					collect.add(l.target());
+					if (l.target().equals("minecraft:porkchop")) {
+						assertEquals(48, l.required());
+					}
+				}
+				if (l.type() == QuestType.KILL) {
+					kill.add(l.target());
+				}
+			}
+		}
+		assertTrue(collect.contains("minecraft:porkchop"));
+		assertTrue(kill.containsAll(List.of("minecraft:witch", "minecraft:blaze", "minecraft:wither_skeleton", "minecraft:phantom")), kill.toString());
+		assertEquals(48, QuestGenerator.collectAmount("minecraft:porkchop"));
+	}
+
+	@Test
+	void noTwoLinesOnTheSameMobAcrossKillAndBoss() {
+		boolean blazeKill = false;
+		boolean blazeBoss = false;
+		for (int seed = 0; seed < 20000; seed++) {
+			var mobs = new HashSet<String>();
+			for (QuestLine l : QuestGenerator.generate(seed, new Random(seed), 2).lines()) {
+				if (l.type() == QuestType.KILL || l.type() == QuestType.BOSS) {
+					assertTrue(mobs.add(l.target()), "same mob twice, seed " + seed + ": " + l.target());
+					blazeKill |= l.type() == QuestType.KILL && l.target().equals("minecraft:blaze");
+					blazeBoss |= l.type() == QuestType.BOSS && l.target().equals("minecraft:blaze");
+				}
+			}
+		}
+		assertTrue(blazeKill && blazeBoss, "both blaze lines are generated (just never together)");
 	}
 }
