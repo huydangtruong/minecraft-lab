@@ -22,6 +22,10 @@ Files: `technique/illusion/ChopTask.java`, `technique/illusion/WorkGoal.java`, `
   - A top log 6+ blocks up is out of reach. The clone then tries to walk into the tree, has no path, and stalls up to 15 s (`goTo` skips only after 300 ticks).
   - Fix: measure from the eye position, allow reaching logs straight above from the trunk base, and skip a log at once when the path fails instead of waiting 15 s.
   - Also check `workTicks` and the `acted(destroySpeed*5)` pause add up to something sane.
+- **Leaves (Huy, after playtest):**
+  - The clone does not break leaves, and leaves block its view of and path to the logs.
+  - When natural leaves (`PERSISTENT == false`) sit on the ray from its eyes to a wanted log, or block its path or standing spot, it breaks those leaves. Each break gets a short pause, and the drops are picked up.
+  - Only the leaves in the way, never the whole canopy, never player-placed leaves.
 - **Target speed:** a level-1 clone fells a whole 6-log oak in **≤ 12 s** of game time; the 7-log tree is fully felled too (no log left floating).
 - **Drop bug:**
   - When the clone has no chest, everything it carries must end up on the ground when it delivers or its time runs out. Keep D73: dropped at the owner's feet when the owner is in the work area, else where the clone stands; never deleted.
