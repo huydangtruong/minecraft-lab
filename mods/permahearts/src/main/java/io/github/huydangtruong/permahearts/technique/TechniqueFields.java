@@ -1,8 +1,10 @@
 package io.github.huydangtruong.permahearts.technique;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -37,6 +39,28 @@ public final class TechniqueFields {
 
 	private static final List<Field> FIELDS = new ArrayList<>();
 
+	/**
+	 * D94: entities burning because of a fire field (inside it or in the afterburn after leaving). The extra burn damage
+	 * runs from here, once per second, until the entity stops burning, the afterburn ends or it dies/is removed.
+	 */
+	private static final class Burning {
+		final LivingEntity entity;
+		final UUID owner;
+		int techLevel;
+		long end;
+		long nextDamage;
+
+		Burning(LivingEntity entity, UUID owner, int techLevel, long end, long nextDamage) {
+			this.entity = entity;
+			this.owner = owner;
+			this.techLevel = techLevel;
+			this.end = end;
+			this.nextDamage = nextDamage;
+		}
+	}
+
+	private static final Map<UUID, Burning> BURNING = new HashMap<>();
+
 	private TechniqueFields() {}
 
 	public static void add(Kind kind, ServerLevel level, Vec3 center, double radius, double seconds, int techLevel, UUID owner) {
@@ -48,11 +72,18 @@ public final class TechniqueFields {
 		return FIELDS.size();
 	}
 
+	/** Entities currently tracked for the fire afterburn (tests). */
+	public static int burningCount() {
+		return BURNING.size();
+	}
+
 	public static void clear() {
 		FIELDS.clear();
+		BURNING.clear();
 	}
 
 	public static void tick(MinecraftServer server) {
+		tickBurning(server);
 		if (FIELDS.isEmpty()) {
 			return;
 		}
@@ -76,7 +107,7 @@ public final class TechniqueFields {
 		switch (f.kind()) {
 			case FIRE -> {
 				if (age % 10 == 0) {
-					burn(level, f, owner, age % 20 == 0);
+					burn(level, f, owner);
 				}
 			}
 			case ICE -> {
@@ -104,16 +135,55 @@ public final class TechniqueFields {
 		});
 	}
 
-	private static void burn(ServerLevel level, Field f, ServerPlayer owner, boolean secondTick) {
-		double extra = TechniqueRules.fireBurnPerSecond(f.techLevel()) - 1;
+	private static void burn(ServerLevel level, Field f, ServerPlayer owner) {
+		long now = level.getGameTime();
+		long end = now + Math.round(TechniqueRules.fireAfterburnSeconds(f.techLevel()) * 20);
 		for (LivingEntity e : inside(level, f)) {
 			if (!TechniqueDamage.affectable(e, owner)) {
 				continue;
 			}
-			e.igniteForSeconds(3);
-			// Vanilla burning hurts 1 per second; D72: fireBurnPerSecond above 1 adds the rest on top (fractional damage is fine).
-			if (secondTick && extra > 0) {
-				TechniqueDamage.hurt(level, e, owner, null, DamageTypes.IN_FIRE, (float) extra);
+			if (e.isInWater()) {
+				continue; // water puts it out at once
+			}
+			e.igniteForTicks((int) (end - now));
+			if (!e.isOnFire()) {
+				continue; // fire immune
+			}
+			Burning b = BURNING.get(e.getUUID());
+			if (b == null) {
+				BURNING.put(e.getUUID(), new Burning(e, f.owner(), f.techLevel(), end, now + 20));
+			} else {
+				b.techLevel = f.techLevel();
+				b.end = end;
+			}
+		}
+	}
+
+	/** D94: vanilla fire hurts 1 per second; fireBurnPerSecond above 1 adds the rest on top, while the entity burns because of a field. */
+	private static void tickBurning(MinecraftServer server) {
+		if (BURNING.isEmpty()) {
+			return;
+		}
+		for (Iterator<Burning> it = BURNING.values().iterator(); it.hasNext();) {
+			Burning b = it.next();
+			LivingEntity e = b.entity;
+			if (e.isRemoved() || !e.isAlive() || !e.isOnFire() || !(e.level() instanceof ServerLevel level)) {
+				it.remove();
+				continue;
+			}
+			long now = level.getGameTime();
+			if (now > b.end) {
+				it.remove();
+				continue;
+			}
+			if (now >= b.nextDamage) {
+				b.nextDamage = now + 20;
+				double extra = TechniqueRules.fireBurnPerSecond(b.techLevel) - 1;
+				if (extra > 0) {
+					ServerPlayer owner = server.getPlayerList().getPlayer(b.owner);
+					e.setInvulnerableTime(0); // the vanilla tick may have just hurt it: don't let that swallow the extra
+					TechniqueDamage.hurt(level, e, owner, null, DamageTypes.IN_FIRE, (float) extra);
+				}
 			}
 		}
 	}

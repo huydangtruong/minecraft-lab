@@ -147,9 +147,16 @@ public final class TechniqueRules {
 		return scaled(4, 0.2, level);
 	}
 
-	/** Burn damage per second in the field: 1 at level 1, +0.2 per level (D45 halves the step after 10). D72: was 1, or 2 from level 6. */
+	/** D94: burn damage per second while on fire because of the technique: 2 at level 1, 5 at level 20, linear (no D45 halving). */
 	public static double fireBurnPerSecond(int level) {
-		return scaled(1, 0.2, level);
+		int l = Math.max(1, Math.min(MAX_LEVEL, level));
+		return 2 + 3.0 * (l - 1) / (MAX_LEVEL - 1);
+	}
+
+	/** D94: seconds an entity keeps burning after it leaves the field: 3 at level 1, +0.2 per level (6.8 at level 20). */
+	public static double fireAfterburnSeconds(int level) {
+		int l = Math.max(1, Math.min(MAX_LEVEL, level));
+		return 3 + 0.2 * (l - 1);
 	}
 
 	public static double iceRange(int level) {
@@ -513,6 +520,7 @@ public final class TechniqueRules {
 				new Stat("Impact", num(fireImpactDamage(level)) + " damage"),
 				new Stat("Fire field", num(fireFieldRadius(level)) + " radius, " + num(fireFieldSeconds(level)) + " s"),
 				new Stat("Burn", num(fireBurnPerSecond(level)) + " / s"),
+				new Stat("Afterburn", num(fireAfterburnSeconds(level)) + " s"),
 				new Stat("Cooldown", t.cooldownSeconds() + " s"));
 			case ICE -> List.of(
 				new Stat("Range", num(iceRange(level)) + " blocks"),
