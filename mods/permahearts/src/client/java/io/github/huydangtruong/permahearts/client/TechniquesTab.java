@@ -345,7 +345,6 @@ public final class TechniquesTab {
 			}
 		}
 		g.text(font, lv, lx, ly, XP_GREEN, false);
-		levelBar(g, lx, ly + 11, BAR_W, level);
 		button(g, font, bk, "Back", true, mx, my);
 
 		// scrolling body: description (italic, wrapped), stats, Upgrade, Reset
