@@ -5,7 +5,7 @@
 > Đã chọn ô trước thì bấm vào tên chiêu cũng đặt được, không cần dấu cộng.
 
 - **Status:** ready
-- **Mod / decision:** `permahearts`, D82, D83 · **Branch:** `feat/P-028-chop-picking` · **Depends on:** none
+- **Mod / decision:** `permahearts`, D82, D83, D84 · **Branch:** `feat/P-028-chop-picking` · **Depends on:** none
 
 ## Goal
 
@@ -35,6 +35,12 @@ Files: `technique/illusion/ChopTask.java`, `technique/illusion/WorkGoal.java`, `
     - items dropped at the owner's feet being swallowed or hidden.
   - The game test asserts that after the clone is gone, log `ItemEntity`s exist (or the owner's inventory gained them, if picked up) and the count equals the logs broken.
 - Keep the rest of D73 unchanged (chest delivery, pickup, replanting).
+
+## Part 1b: Farming without tilling (D84)
+
+- `FarmTask` never turns dirt or grass into farmland (no hoe tilling). It harvests, replants, and plants seeds on existing empty farmland.
+- When all farmland is planted and nothing is ripe, it delivers its seeds and crops to the chest, or drops them with no chest (D73 rules).
+- Game test: no new farmland appears, all empty farmland gets planted, and the leftovers end up in the chest or on the ground.
 
 ## Part 2: Techniques tab (D83)
 
