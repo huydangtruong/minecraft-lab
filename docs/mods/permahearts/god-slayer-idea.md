@@ -69,7 +69,39 @@
    - **Có ai ≥ 30 tim:** chữ to giữa màn hình, tiếng trống, rồi nó xuất hiện cách người đó khoảng 60 block và lao tới.
    - **Không ai đủ:** mọi người nhận một câu khinh thường trong chat, ví dụ "God Slayer: *Weaklings. Come back when your hearts can bear my blade.*" Nó không xuất hiện.
 
-## Câu hỏi cho Huy
+
+## Huy trả lời (2026-11-15, lần 2), thay các đề xuất ở trên khi khác nhau
+
+- **Dưới nước:** không biến thành con khác. Ý là **dùng lại AI của Elder Guardian** (boss trong đền dưới biển, bắn tia laser) khi ở dưới nước.
+  - Mục tiêu chung: **tận dụng AI của các quái có sẵn** trong game (Elder Guardian dưới nước, Vex khi bay, …) để đỡ phải code mới.
+- **Đòn đánh** (song kiếm, lao chém, hỏa cầu phá block, phi đao, tia dưới nước): Huy thấy hợp lý.
+- **"50 ngày" là nói lộn.** Mỗi lần xuất hiện, nó đuổi người chơi **tối đa 10 phút**, hoặc tới khi **giết hết mọi người chơi**.
+- **Cách xuất hiện:**
+  - xuất hiện ngẫu nhiên ở vị trí một người chơi;
+  - **60 giây trước**, mọi người thấy thông báo trên màn hình: "God Slayer sắp xuất hiện ở vị trí của người chơi A".
+- **Săn lần lượt:**
+  - giết xong một người, nó tìm trong danh sách người chơi người nào **nó chưa giết** và **dịch chuyển tới người đó**, kể cả ở chiều không gian khác;
+  - ví dụ: xuất hiện ở chỗ A, giết được B; A đã trốn xuống Nether thì nó lập tức dịch chuyển xuống Nether đuổi A.
+- **Mạnh dần:**
+  - **khởi điểm 500 máu, mỗi nhát kiếm 30 sát thương**;
+  - **mỗi lần bị hạ** nó mạnh hơn và **mở khóa skill mới**.
+- **Skill mở dần (ví dụ của Huy):**
+  - **Tự nổ:** phá hủy một vùng quanh nó, gây sát thương người đứng gần và người đang đánh nó.
+  - **Đấu trường:**
+    - tạo vùng tròn quanh nó, người chơi **không thoát ra được**, như có tường chắn;
+    - tồn tại khoảng 10 giây.
+  - **Gọi đệ:**
+    - mỗi lần dùng gọi **4 con** quái bất kỳ trong game (Vindicator, Piglin Brute, Evoker, … mọi loại quái);
+  - **Che tầm nhìn:** làm người chơi mù hoàn toàn, hoặc chỉ thấy 1–2 block, như Warden (con quái dưới lòng đất).
+- **Chưa làm.** Ghi vào backlog (BL-007), brainstorm tiếp sau.
+- **Còn mở:**
+  - mỗi lần thua nó mạnh lên bao nhiêu;
+  - thứ tự mở skill;
+  - phần thưởng khi hạ;
+  - bay có xuyên tường không;
+  - có luật game bật/tắt không.
+
+## Câu hỏi cho Huy (lần 1)
 
 1. **"Cứ 50 ngày" nghĩa là gì?**
    - Gợi ý: nó **đuổi theo người chơi tối đa 50 ngày Minecraft**. Không giết được nó thì hết 50 ngày nó bỏ đi, chờ lần xét tiếp theo.
