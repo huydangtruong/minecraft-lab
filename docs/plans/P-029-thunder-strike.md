@@ -3,7 +3,7 @@
 > **Tóm tắt cho Huy (VN, ≤ 3 dòng):** chiêu mới Thunder Strike (icon mây xám, sét vàng). Nhắm tâm màn hình vào chỗ muốn đánh, bấm chuột trái hoặc phải: vùng đó sáng lên 1 giây rồi sét đánh xuống, nổ cỡ creeper.
 > Lv 1 gây 14 sát thương, mỗi level +2 (Lv 20 là 52). Vùng phá tăng 5% mỗi level. Hồi chiêu 24 s.
 
-- **Status:** ready (start after P-028 is merged: same files)
+- **Status:** merged
 - **Mod / decision:** `permahearts`, D86 · **Branch:** `feat/P-029-thunder-strike` · **Depends on:** P-028
 
 ## Goal
