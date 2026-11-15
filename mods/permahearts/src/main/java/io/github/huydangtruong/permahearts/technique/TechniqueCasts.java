@@ -186,7 +186,10 @@ public final class TechniqueCasts {
 				len = 1;
 			}
 			TechniqueDamage.hurt(sl, e, caster, null, DamageTypes.MAGIC, damage);
-			double resist = 1 - Mth.clamp(e.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE), 0, 1);
+			// The God Slayer has full knockback resistance but still feels a tenth of the push (P-032).
+			double resist = e instanceof io.github.huydangtruong.permahearts.godslayer.GodSlayer
+				? io.github.huydangtruong.permahearts.godslayer.GodSlayerRules.CONTROL_RESIST
+				: 1 - Mth.clamp(e.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE), 0, 1);
 			e.setDeltaMovement(dx / len * push * resist, 0.3 * resist + 0.05, dz / len * push * resist);
 			e.needsSync = true; // sends the new velocity to players
 		}

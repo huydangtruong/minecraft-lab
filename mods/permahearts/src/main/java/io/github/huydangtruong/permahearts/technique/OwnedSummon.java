@@ -7,7 +7,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 
 /** A summoned fighter that belongs to a player (Violet Guardian, Warrior Angel): shared owner and kill credit logic. */
-interface OwnedSummon {
+public interface OwnedSummon {
 	UUID owner();
 
 	/** The owner if online in the same level as the summon, else null. */

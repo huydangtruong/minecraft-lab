@@ -87,6 +87,8 @@ public class PermaHearts implements ModInitializer {
 		WandererMenus.init();
 		io.github.huydangtruong.permahearts.reward.RewardBoxes.init(); // P-027: reward boxes
 		WandererScheduler.register();
+		io.github.huydangtruong.permahearts.godslayer.GodSlayer.init(); // P-032: God Slayer boss
+		io.github.huydangtruong.permahearts.godslayer.GodSlayerHunt.register();
 		io.github.huydangtruong.permahearts.stats.StatsSync.register();
 		GameRuleEvents.changeCallback(ENABLED).register((Boolean value, MinecraftServer server) -> {
 			for (ServerPlayer p : server.getPlayerList().getPlayers()) {
@@ -99,6 +101,7 @@ public class PermaHearts implements ModInitializer {
 			HeartsCommand.register(d);
 			TestModeCommand.register(d);
 			QuestCommand.register(d);
+			io.github.huydangtruong.permahearts.godslayer.BossCommand.register(d);
 			io.github.huydangtruong.permahearts.technique.TechniqueCommand.register(d);
 		});
 		// Right-click on the Wanderer opens the quest screen instead of the trade screen (SUCCESS also blocks vanilla).
