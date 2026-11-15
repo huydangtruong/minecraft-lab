@@ -457,9 +457,9 @@ public final class TechniqueRules {
 		return 2 + (l - 1) * 18 / 19;
 	}
 
-	/** Seconds of cooldown after a warp (D80): 90 at level 1 down to 65 at level 20, straight line, rounded. */
+	/** Seconds of cooldown after a warp (D80, D81): 90 at level 1 down to 40 at level 20, straight line, rounded. */
 	public static int warpCooldownSeconds(int level) {
-		return (int) Math.round(linear(level, 90, 65));
+		return (int) Math.round(linear(level, 90, 40));
 	}
 
 	/** Cooldown of a technique at a level in seconds: the enum value, except Cosmic Warping which falls with the level. */

@@ -15,7 +15,7 @@ A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [w
 | 0.13.0 contains | Illusion technique (P-024, D71); D72 numbers (Warrior Angel, Cloud Travel, Undying Jutsu, Heaven Blast, Fireball, Frozen Breath); chieftain health 200 and the leader-bonus fix; Strength +2 (D70); "Death Match (PvP)" line |
 | 0.14.0 contains | Illusion work modes and hostile mobs targeting the clones (P-025, D73); Quantum Leap rename (turquoise) and Cosmic Warping portals (P-026, D74, D75); quest reward boxes (P-027, D76); technique slots cost 64, 128, 256, 512 emeralds (D77); clones plant bare farmland and pick up wool near the sheep. Not playtested by hand |
 | 0.15.0 contains | Cooldown balance and Healing Light renamed Healing Domain, heals 12 → 48 hearts (D80); Cosmic Warping places a portal after a 1 s hold (D79); fix: reward box cards could not be clicked (any box), now left or right click; yellow "Immortal Cultivation <version>" game rule group and yellow key category (D78) |
-| On `main`, not released | Nothing |
+| On `main`, not released | Cosmic Warping cooldown 90 s (Lv 1) to 40 s (Lv 20) (D81) |
 
 Release steps: [workflow/release.md](../workflow/release.md). Release **only when Huy says so**.
 

@@ -4,7 +4,7 @@ Tên trong game (D56): Lửa = Fireball, Băng = Frozen Breath, Hồi máu = Hea
 
 Sinh từ `technique/TechniqueRules.java`: sửa số liệu ở đó rồi tạo lại bảng này. Sát thương tính bằng máu (2 = 1 tim), "r" là bán kính tính bằng block.
 
-**Hồi chiêu** (không đổi theo level, D80): Lửa 16 giây · Băng 18 giây · Hồi máu 40 giây · Xuyên tường 60 giây · Hất tung 20 giây · Hiến Tế 45 giây · Bay 80 giây · Huyết Kiếm 12 giây (sau mỗi lần đánh trúng) · Quantum Leap 40 giây · Violet Guardian 120 giây · Warrior Angel 120 giây · Aqua Marine 100 giây · Illusion 110 giây · Cosmic Warping 90 giây ở Lv 1 giảm đều còn 65 giây ở Lv 20. Huyết Kiếm: sát thương = cơ bản + cộng thêm của chiêu + linh dược, hút máu bằng lượng máu trừ được.
+**Hồi chiêu** (không đổi theo level, D80): Lửa 16 giây · Băng 18 giây · Hồi máu 40 giây · Xuyên tường 60 giây · Hất tung 20 giây · Hiến Tế 45 giây · Bay 80 giây · Huyết Kiếm 12 giây (sau mỗi lần đánh trúng) · Quantum Leap 40 giây · Violet Guardian 120 giây · Warrior Angel 120 giây · Aqua Marine 100 giây · Illusion 110 giây · Cosmic Warping 90 giây ở Lv 1 giảm đều còn 40 giây ở Lv 20 (D81). Huyết Kiếm: sát thương = cơ bản + cộng thêm của chiêu + linh dược, hút máu bằng lượng máu trừ được.
 
 **Cố định:** Băng va chạm 2, vùng băng tồn tại 8 giây, chậm còn kéo dài 4 giây sau khi ra khỏi vùng (chậm chạy và chậm đánh cùng mức) · Hồi máu: vòng bán kính 4, đứng yên, 10 giây, hồi cho mọi sinh vật trong vòng · Lửa cháy 1 mỗi giây ở Lv 1, +0,2 mỗi level (D72; D45 giảm nửa sau Lv 10). Warrior Angel (D72): máu 16 → 30 (tuyến tính), sát thương 4 +1 mỗi level (Lv 20: 23).
 
