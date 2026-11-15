@@ -253,18 +253,20 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 		// P-028 technique first: pick fire's row, the row and the slots it can go to are outlined, the emerald box is a red Cancel
 		clickGui(context, hotspots(context).get(HS_ROW), LEFT);
 		context.takeScreenshot("97-technique-picked");
-		clickGui(context, hotspots(context).get(HS_SLOT + 2), LEFT);
-		check(techniqueData(server).inSlot(2) == fire, "picking fire then clicking an outlined slot should slot it");
+		clickGui(context, hotspots(context).get(HS_SLOT + 1), LEFT); // only two slots are open here
+		check(techniqueData(server).inSlot(1) == fire, "picking fire then clicking an outlined slot should slot it");
 		// slot first, then the row name (not the +)
-		clickGui(context, hotspots(context).get(HS_SLOT + 3), LEFT);
+		clickGui(context, hotspots(context).get(HS_SLOT + 1), LEFT);
 		clickGui(context, hotspots(context).get(HS_ROW + 2), LEFT);
-		check(techniqueData(server).inSlot(3) == t.getEnumConstants()[2], "slot 4 then the healing row should slot healing");
+		check(techniqueData(server).inSlot(1) == t.getEnumConstants()[2], "slot 2 then the healing row should slot healing");
 		// Cancel drops a picked technique: the next slot click selects the slot instead of assigning
 		clickGui(context, hotspots(context).get(HS_ROW), LEFT);
 		clickGui(context, hotspots(context).get(HS_EMERALD), LEFT);
-		clickGui(context, hotspots(context).get(HS_SLOT + 1), LEFT);
-		check(techniqueData(server).inSlot(1) == null, "Cancel must clear the picked technique");
+		clickGui(context, hotspots(context).get(HS_SLOT), LEFT);
+		check(techniqueData(server).inSlot(0) == ice, "Cancel must clear the picked technique");
 		clickGui(context, hotspots(context).get(HS_EMERALD), LEFT);
+		clickGui(context, hotspots(context).get(HS_SLOT + 1), RIGHT); // back to the state the next steps expect
+		check(techniqueData(server).inSlot(1) == null, "right click clears slot 2");
 		// cooldown: ice (slot 1) on cooldown, left and right click on slot 1 do nothing
 		server.runOnServer(s -> {
 			var p = s.getPlayerList().getPlayers().get(0);

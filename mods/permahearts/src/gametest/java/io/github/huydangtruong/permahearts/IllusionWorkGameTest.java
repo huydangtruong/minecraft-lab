@@ -355,6 +355,23 @@ public class IllusionWorkGameTest {
 		});
 	}
 
+	/** D85: the job comes from the first hotbar slot, not from the main hand; an empty first slot means FIGHT. */
+	@GameTest(maxTicks = 60)
+	public void theJobComesFromTheFirstHotbarSlotNotTheMainHand(GameTestHelper c) {
+		ServerPlayer p = owner(c, new ItemStack(Items.AIR));
+		p.getInventory().setItem(0, new ItemStack(Items.IRON_AXE));
+		p.getInventory().setItem(3, new ItemStack(Items.DIAMOND_SWORD));
+		p.getInventory().setSelectedSlot(3);
+		Illusion a = castOne(c, p);
+		c.assertTrue(a.job() == IllusionJob.CHOP && a.getMainHandItem().is(Items.IRON_AXE), "slot 0 axe gives CHOP, was " + a.job());
+		c.assertTrue(p.getInventory().getItem(0).is(Items.IRON_AXE) && p.getInventory().getItem(0).getCount() == 1, "the owner's item is untouched");
+		p.getInventory().setItem(0, ItemStack.EMPTY);
+		Illusion b = castOne(c, p);
+		c.assertTrue(b.job() == IllusionJob.FIGHT, "an empty slot 0 gives FIGHT even with a sword in hand, was " + b.job());
+		FlightBladeGameTest.drop(c, p);
+		c.succeed();
+	}
+
 	@GameTest(maxTicks = 120)
 	public void theJobStaysLockedWhenTheOwnerSwitchesItems(GameTestHelper c) {
 		ServerPlayer p = owner(c, new ItemStack(Items.IRON_HOE));

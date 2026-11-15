@@ -1,7 +1,7 @@
 package io.github.huydangtruong.permahearts.technique.illusion;
 
 /**
- * What an Illusion clone does (D73), chosen once at the cast from the item in the owner's main hand. Pure Java so the
+ * What an Illusion clone does (D73), chosen once at the cast from the item in the owner's first hotbar slot (D85; an empty slot gives FIGHT). Pure Java so the
  * item table can be unit-tested on item ids.
  */
 public enum IllusionJob {
