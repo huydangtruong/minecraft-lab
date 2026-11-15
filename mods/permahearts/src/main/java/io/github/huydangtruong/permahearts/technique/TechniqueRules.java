@@ -449,6 +449,37 @@ public final class TechniqueRules {
 		return PEARL_RANGE * teleportPearls(level);
 	}
 
+	// ---- Thunder Strike (D86) ----
+
+	/** Reach of the aim ray, in blocks. */
+	public static final double THUNDER_RANGE = 128;
+	/** Ticks between the cast (warning starts) and the strike. */
+	public static final int THUNDER_WARN_TICKS = 20;
+
+	/** Damage at the centre of the blast: 14 at level 1, +2 per level (52 at level 20). Half of it at the edge. */
+	public static double thunderDamage(int level) {
+		return 14 + 2 * (level - 1);
+	}
+
+	/** Explosion power: 3 (a creeper) at level 1, +5% of that per level (5.85 at level 20). */
+	public static double thunderPower(int level) {
+		return 3.0 * (1 + 0.05 * (level - 1));
+	}
+
+	/** Blocks from the centre inside which entities are hurt, and the radius of the warning ring. */
+	public static double thunderRadius(int level) {
+		return thunderPower(level) * 1.2;
+	}
+
+	/** Damage at a distance from the centre: full at 0, half at the radius, none beyond it. */
+	public static double thunderDamageAt(int level, double distance) {
+		double r = thunderRadius(level);
+		if (distance > r) {
+			return 0;
+		}
+		return thunderDamage(level) * (1 - 0.5 * Math.max(0, distance) / r);
+	}
+
 	// ---- Cosmic Warping (D75) ----
 
 	/** Portals one player may own: 2 at level 1 up to 20 at level 20, a straight line rounded down. */
@@ -545,6 +576,11 @@ public final class TechniqueRules {
 			case WARP -> List.of(
 				new Stat("Portals", String.valueOf(warpMaxPortals(level))),
 				new Stat("Cooldown", warpCooldownSeconds(level) + " s"));
+			case THUNDER -> List.of(
+				new Stat("Damage", num(thunderDamage(level))),
+				new Stat("Blast size", pct(thunderPower(level) / 3.0) + " of a creeper"),
+				new Stat("Range", num(THUNDER_RANGE) + " blocks"),
+				new Stat("Cooldown", t.cooldownSeconds() + " s"));
 			case SACRIFICE -> List.of(
 				new Stat("Costs", pct(sacrificeCost(level)) + " of current health"),
 				new Stat("Invulnerable", num(sacrificeSeconds(level)) + " s"),

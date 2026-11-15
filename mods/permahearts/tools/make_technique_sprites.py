@@ -1,6 +1,6 @@
 """Draws the technique icons (P-011 part A): 16x16 original pixel art, one per technique, plus a lock, a tick and a cross.
 
-- technique/{fire,ice,healing,phase,repulse,sacrifice,flight,blade,teleport,golem,angel,aqua,illusion,warp}.png, technique/lock.png, technique/check.png, technique/cross.png
+- technique/{fire,ice,healing,phase,repulse,sacrifice,flight,blade,teleport,golem,angel,aqua,illusion,warp,thunder}.png, technique/lock.png, technique/check.png, technique/cross.png
 Each icon is drawn as a body; a dark outline is added automatically around it.
 Run: python3 -I mods/permahearts/tools/make_technique_sprites.py
 """
@@ -426,6 +426,27 @@ def blade_art():
     return img
 
 
+THUNDER = [  # a grey cloud with a yellow lightning bolt coming out of it (D86), original art
+    "................",
+    "....cccc........",
+    "...cccccc.cc....",
+    "..ccccccccccc...",
+    ".cccccccccccccg.",
+    ".ccccccccccccggg",
+    ".gggggggggggggg.",
+    "..dddddddddddd..",
+    "......yyyh......",
+    ".....yyyh.......",
+    "....yyyyyyy.....",
+    "......yyyY......",
+    ".....yyyY.......",
+    ".....yyY........",
+    "....yyY.........",
+    "....yY..........",
+]
+THUNDER_PAL = {"c": "e4e8f0", "g": "aab2c0", "d": "7c8496", "y": "ffd62a", "Y": "f0a000", "h": "fff7a8"}
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     icons = {
@@ -443,6 +464,7 @@ def main():
         "aqua": (from_ascii(AQUA, AQUA_PAL), "0c3a5a"),
         "illusion": (illusion_art(), "1c2640"),
         "warp": (procedural(warp_color), "2a0a58"),
+        "thunder": (from_ascii(THUNDER, THUNDER_PAL), "2a2f3a"),
         "lock": (from_ascii(LOCK, LOCK_PAL), "1a1a20"),
         "check": (from_ascii(CHECK, CHECK_PAL), "0c4a14"),
         "cross": (from_ascii(CROSS, CROSS_PAL), "30303a"),
@@ -452,7 +474,7 @@ def main():
     for name, (body, edge) in icons.items():
         img = outline(body, edge)
         write_png(os.path.join(OUT, name + ".png"), img)
-        if name in ("fire", "ice", "healing", "phase", "repulse", "sacrifice", "flight", "blade", "teleport", "golem", "angel", "aqua", "illusion", "warp"):
+        if name in ("fire", "ice", "healing", "phase", "repulse", "sacrifice", "flight", "blade", "teleport", "golem", "angel", "aqua", "illusion", "warp", "thunder"):
             write_png(os.path.join(items, "focus_" + name + ".png"), img)
     print("wrote technique sprites to", os.path.normpath(OUT))
 
