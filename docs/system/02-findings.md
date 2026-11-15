@@ -238,3 +238,9 @@ Tên và chữ ký dưới đây lấy từ `javap` jar 26.3 và mã Fabric API 
 ## Known flaky client test
 
 - `GolemClientTest` "the husk bleeds" failed once (2026-11-15, before 0.15.0): the screenshot shows the husk below the crosshair, so the blade swing missed. It passed on the rerun and in the runs before. If it fails again, aim the player at the husk (`lookAt`) before the left click.
+
+## Illusion chop and farm (P-028, D82/D84)
+
+- Chop slowness: `ChopTask` measured reach from the clone's feet (6 blocks) and walked towards the log itself. A log high in a tree is out of reach and has no path, so `goTo` waited 300 ticks (15 s) before skipping it, which is half of a level-1 clone's life. Natural leaves around the upper logs shut the way as well. Now: reach from the eyes, walk to the foot of the trunk, give up on a log after 5 s or at once when there is no path, and break the natural leaves (`PERSISTENT == false`) that the eye-to-log ray (`ClipContext`, COLLIDER) hits first.
+- Chop drop: not reproducible in a server test. Logs end on the ground (`dropCarry`) when the clone has no chest and its time runs out, and the count matches. The likely cause of what Huy saw is that the drop lands at the owner's feet (D73) and the owner picks it up at once; `IllusionWorkGameTest` now asserts the count.
+
