@@ -55,25 +55,27 @@ class TechniqueRulesTest {
 
 	@Test
 	void numbersAtLevels1_10_20() {
-		assertArrayEquals(new double[] {16, 34, 44}, at(TechniqueRules::fireRange));
+		assertArrayEquals(new double[] {24, 42, 52}, at(TechniqueRules::fireRange)); // D72
+		assertArrayEquals(new double[] {24, 42, 52}, at(TechniqueRules::iceRange));
+		assertArrayEquals(new double[] {3, 4.8, 5.8}, at(TechniqueRules::fireFieldRadius), 1e-9);
+		assertArrayEquals(new double[] {1, 2.8, 3.8}, at(TechniqueRules::fireBurnPerSecond), 1e-9);
+		assertArrayEquals(new double[] {1.5, 3.75, 5.0}, at(TechniqueRules::repulsePush), 1e-9);
 		assertArrayEquals(new double[] {4, 13, 18}, at(TechniqueRules::fireImpactDamage));
-		assertEquals(1, TechniqueRules.fireBurnPerSecond(5));
-		assertEquals(2, TechniqueRules.fireBurnPerSecond(6));
 		assertArrayEquals(new double[] {0.40, 0.40 + 0.56 * 9 / 19, 0.96}, at(TechniqueRules::iceSlow), 1e-9);
 		assertArrayEquals(new double[] {0.40, 0.40 + 0.56 * 9 / 19, 0.96}, at(TechniqueRules::iceAttackSlow), 1e-9);
 		assertEquals(8, TechniqueRules.iceAreaSeconds(5));
 		assertEquals(4, TechniqueRules.iceLingerSeconds(5));
 		assertArrayEquals(new double[] {20, 56, 76}, at(TechniqueRules::healingTotal));
 		assertArrayEquals(new double[] {10, 14.5, 17}, at(TechniqueRules::phaseSeconds), 1e-9);
-		assertArrayEquals(new double[] {2, 6.5, 9}, at(TechniqueRules::repulseDamage), 1e-9);
+		assertArrayEquals(new double[] {5, 9.5, 12}, at(TechniqueRules::repulseDamage), 1e-9);
 		assertArrayEquals(new double[] {0.80, 0.50, 0.30}, at(TechniqueRules::sacrificeCost), 1e-9);
-		assertArrayEquals(new double[] {5, 8, 10}, at(TechniqueRules::sacrificeSeconds), 1e-9);
+		assertArrayEquals(new double[] {8, 12.5, 17.5}, at(TechniqueRules::sacrificeSeconds), 1e-9);
 		assertEquals(45, Technique.SACRIFICE.cooldownSeconds());
 		assertEquals(8, TechniqueRules.phaseSightRange(1));
 		assertEquals(10, TechniqueRules.phaseSightRange(2));
 		assertEquals(27, TechniqueRules.phaseSightRange(10));
 		assertEquals(48, TechniqueRules.phaseSightRange(20));
-		assertArrayEquals(new double[] {10, 10 + 20.0 * 9 / 19, 30}, at(TechniqueRules::flightSeconds), 1e-9);
+		assertArrayEquals(new double[] {15, 15 + 25.0 * 9 / 19, 40}, at(TechniqueRules::flightSeconds), 1e-9);
 		assertArrayEquals(new double[] {-0.20, -0.20 + 1.2 * 9 / 19, 1.0}, at(TechniqueRules::flightSpeedBonus), 1e-9);
 		assertArrayEquals(new double[] {8, 12.5, 17.5}, at(TechniqueRules::bladeDamage), 1e-9);
 		assertEquals(0.04f, TechniqueRules.flyingSpeed(1), 1e-6f); // 80% of creative (0.05)
@@ -106,14 +108,12 @@ class TechniqueRulesTest {
 		for (int[] k : angels) {
 			assertEquals(k[1], TechniqueRules.angelCount(k[0]), "angels at level " + k[0]);
 		}
-		assertEquals(1.0, TechniqueRules.angelHealthFactor(1), 1e-9);
-		assertEquals(2.0, TechniqueRules.angelHealthFactor(20), 1e-9);
-		assertEquals(0.5, TechniqueRules.angelDamageFactor(1), 1e-9);
-		assertEquals(2.0, TechniqueRules.angelDamageFactor(20), 1e-9);
-		assertEquals(14, TechniqueRules.angelHealth(1), 1e-9);
-		assertEquals(28, TechniqueRules.angelHealth(20), 1e-9);
-		assertEquals(2, TechniqueRules.angelDamage(1), 1e-9);
-		assertEquals(8, TechniqueRules.angelDamage(20), 1e-9);
+		assertEquals(16, TechniqueRules.angelHealth(1), 1e-9); // D72
+		assertEquals(30, TechniqueRules.angelHealth(20), 1e-9);
+		assertEquals(4, TechniqueRules.angelDamage(1), 1e-9);
+		assertEquals(13, TechniqueRules.angelDamage(10), 1e-9);
+		assertEquals(23, TechniqueRules.angelDamage(20), 1e-9);
+		assertEquals("8.5 s", TechniqueRules.stats(Technique.SACRIFICE, 2).get(1).value());
 		assertEquals(60, TechniqueRules.ANGEL_SECONDS);
 		assertEquals("6", TechniqueRules.stats(Technique.ANGEL, 20).get(0).value());
 		assertEquals("60 s", TechniqueRules.stats(Technique.ANGEL, 1).get(3).value());
@@ -174,7 +174,7 @@ class TechniqueRulesTest {
 
 	@Test
 	void statLines() {
-		assertEquals("16 blocks", TechniqueRules.stats(Technique.FIRE, 1).get(0).value());
+		assertEquals("24 blocks", TechniqueRules.stats(Technique.FIRE, 1).get(0).value());
 		assertEquals("10 hearts", TechniqueRules.stats(Technique.HEALING, 1).get(1).value());
 		assertEquals("2.9", TechniqueRules.num(2.9000001));
 	}

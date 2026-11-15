@@ -111,7 +111,7 @@ public final class TechniqueFields {
 				continue;
 			}
 			e.igniteForSeconds(3);
-			// Vanilla burning hurts 1 per second; levels 6+ add the rest of fireBurnPerSecond on top.
+			// Vanilla burning hurts 1 per second; D72: fireBurnPerSecond above 1 adds the rest on top (fractional damage is fine).
 			if (secondTick && extra > 0) {
 				TechniqueDamage.hurt(level, e, owner, null, DamageTypes.IN_FIRE, (float) extra);
 			}

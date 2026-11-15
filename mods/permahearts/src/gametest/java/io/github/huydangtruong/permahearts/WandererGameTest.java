@@ -390,7 +390,7 @@ public class WandererGameTest {
 			context.assertTrue(Wanderer.startEvent(s, 0, p), "summon should work");
 			List<? extends Mob> bosses = tagged(s, QuestBoss.TAG);
 			context.assertTrue(bosses.size() == 1 && bosses.get(0) instanceof net.minecraft.world.entity.monster.illager.Evoker, "one evoker boss");
-			context.assertTrue(bosses.get(0).getMaxHealth() == 150f, "boss max health 150");
+			context.assertTrue(bosses.get(0).getMaxHealth() == 200f, "boss max health 200");
 			List<? extends Mob> minions = tagged(s, QuestBoss.MINION_TAG);
 			context.assertTrue(minions.size() == 4, "four minions, found " + minions.size());
 			for (Mob m : minions) {
@@ -417,7 +417,7 @@ public class WandererGameTest {
 			List<? extends Mob> bosses = tagged(s, QuestBoss.TAG);
 			context.assertTrue(bosses.size() == 1 && bosses.get(0) instanceof net.minecraft.world.entity.monster.Ghast, "one ghast boss");
 			Mob ghast = bosses.get(0);
-			context.assertTrue(ghast.getMaxHealth() == 150f, "boss max health 150");
+			context.assertTrue(ghast.getMaxHealth() == 200f, "boss max health 200");
 			context.assertTrue(ghast.getY() >= npc.getY() + 5, "ghast floats above the ground, y=" + ghast.getY() + " npc y=" + npc.getY());
 			context.assertTrue(context.getLevel().noCollision(ghast), "ghast spawned in free air");
 			List<? extends Mob> minions = tagged(s, QuestBoss.MINION_TAG);
@@ -551,7 +551,7 @@ public class WandererGameTest {
 			context.assertTrue(bosses.size() == 1, "one boss, found " + bosses.size());
 			context.assertTrue(bosses.get(0) instanceof Zombie, "zombie boss");
 			Mob boss = bosses.get(0);
-			context.assertTrue(boss.getMaxHealth() == 150f, "boss max health 150, was " + boss.getMaxHealth());
+			context.assertTrue(boss.getMaxHealth() == 200f, "boss max health 200, was " + boss.getMaxHealth());
 			context.assertTrue(boss.getAttributeValue(Attributes.SCALE) == 2.0, "boss scale 2");
 			int minions = tagged(s, QuestBoss.MINION_TAG).size();
 			context.assertTrue(minions == 4, "four minions, found " + minions);

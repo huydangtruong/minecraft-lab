@@ -444,7 +444,7 @@ public class TechniqueEffectsGameTest {
 			boolean plain = target.hurtServer(level, level.damageSources().playerAttack(caster), 2f);
 			c.assertTrue(!plain && target.getHealth() == 20f, "control: PvP off should refuse player attacks");
 			TechniqueCasts.cast(caster, Technique.REPULSE, 1, 1f);
-			c.assertTrue(Math.abs(target.getHealth() - (20f - 2f)) < 0.01f, "repulse should hurt the other player by 2, health " + target.getHealth());
+			c.assertTrue(Math.abs(target.getHealth() - (20f - (float) TechniqueRules.repulseDamage(1))) < 0.01f, "repulse should hurt the other player by 5 (D72), health " + target.getHealth());
 			c.succeed();
 		} finally {
 			server.getGameRules().set(GameRules.PVP, pvp, server);

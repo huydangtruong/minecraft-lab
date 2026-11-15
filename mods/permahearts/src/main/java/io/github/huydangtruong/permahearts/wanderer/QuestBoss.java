@@ -32,7 +32,7 @@ import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.levelgen.Heightmap;
 
 /**
- * The quest boss: a giant zombie, skeleton, evoker, blaze, vindicator or ghast with 150 health and four minions
+ * The quest boss: a giant zombie, skeleton, evoker, blaze, vindicator or ghast with 200 health and four minions
  * (an evoker brings pillagers with crossbows, D34; a ghast brings phantoms, D35). The boss UUID is saved in
  * WandererData.boss; the boss bar is runtime only. tick() runs once per second from the scheduler.
  */
@@ -44,7 +44,7 @@ public final class QuestBoss {
 	public static final int XP_MULTIPLIER = 10;
 	/** D66: a chieftain's base attack damage is this many times its vanilla value (was 1.5). */
 	public static final double DAMAGE_MULTIPLIER = 2.0;
-	public static final float HEALTH = 150f;
+	public static final float HEALTH = 200f; // D72: was 150
 	public static final double SCALE = 2.0;
 	public static final int MINIONS = 4;
 	private static final double BAR_RANGE = 64.0;
