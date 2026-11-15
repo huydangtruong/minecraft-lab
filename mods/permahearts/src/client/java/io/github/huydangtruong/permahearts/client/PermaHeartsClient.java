@@ -18,6 +18,7 @@ public class PermaHeartsClient implements ClientModInitializer {
 			Identifier.fromNamespaceAndPath("permahearts", "skill_bar"), new SkillBarHud());
 		ClientSkills.register();
 		MenuScreens.register(WandererMenus.TYPE, WandererScreen::new);
+		MenuScreens.register(io.github.huydangtruong.permahearts.reward.RewardBoxes.MENU, RewardBoxScreen::new); // P-027
 		StatsPanel.register();
 		LayeredHeartsHud.register();
 		ModeHotbarHud.register();

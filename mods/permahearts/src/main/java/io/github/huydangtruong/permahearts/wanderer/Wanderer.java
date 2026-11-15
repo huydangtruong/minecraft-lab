@@ -1,7 +1,7 @@
 package io.github.huydangtruong.permahearts.wanderer;
 
-import io.github.huydangtruong.permahearts.ElixirItems;
-import io.github.huydangtruong.permahearts.ElixirStat;
+import io.github.huydangtruong.permahearts.reward.RewardBoxes;
+import io.github.huydangtruong.permahearts.reward.RewardTier;
 import io.github.huydangtruong.permahearts.HeartsAttachment;
 import io.github.huydangtruong.permahearts.Messages;
 import java.util.HashMap;
@@ -295,7 +295,7 @@ public final class Wanderer {
 		return true;
 	}
 
-	/** First come, first served: the elixir for a done line, or EMPTY if it is not done or already taken. */
+	/** First come, first served: the reward box for a done line, or EMPTY if it is not done or already taken. */
 	public static ItemStack claim(MinecraftServer server, int line, ServerPlayer by) {
 		WandererData d = data(server);
 		if (d.quest().isEmpty()) {
@@ -305,12 +305,10 @@ public final class Wanderer {
 		if (after.isEmpty()) {
 			return ItemStack.EMPTY;
 		}
-		Optional<ElixirStat> stat = ElixirStat.byId(d.quest().get().lines().get(line).reward());
-		if (stat.isEmpty()) {
-			return ItemStack.EMPTY;
-		}
+		// D76: the box of the line's tier. The stored reward id (an elixir, from saves before reward boxes) is ignored.
+		RewardTier tier = RewardTier.forLine(d.quest().get().lines().get(line).type());
 		save(server, d.withQuest(after));
-		return new ItemStack(ElixirItems.get(stat.get()));
+		return RewardBoxes.stack(tier);
 	}
 
 	/** If every line is done and claimed: the NPC says goodbye and leaves, and the next visit is 4 days away. */
@@ -431,9 +429,7 @@ public final class Wanderer {
 		return targetName(l.type(), l.target());
 	}
 
-	public static Component rewardName(String reward) {
-		return ElixirStat.byId(reward)
-			.map(s -> (Component) Component.translatable(ElixirItems.get(s).getDescriptionId()))
-			.orElse(Component.literal(reward));
+	public static Component rewardName(QuestType type) {
+		return RewardBoxes.name(RewardTier.forLine(type));
 	}
 }

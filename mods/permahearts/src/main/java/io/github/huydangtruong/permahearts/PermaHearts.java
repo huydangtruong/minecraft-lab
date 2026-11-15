@@ -82,6 +82,7 @@ public class PermaHearts implements ModInitializer {
 		io.github.huydangtruong.permahearts.technique.FocusItems.init();
 		io.github.huydangtruong.permahearts.technique.TechniqueCasts.init(); // P-011 part C: technique effects
 		WandererMenus.init();
+		io.github.huydangtruong.permahearts.reward.RewardBoxes.init(); // P-027: reward boxes
 		WandererScheduler.register();
 		io.github.huydangtruong.permahearts.stats.StatsSync.register();
 		GameRuleEvents.changeCallback(ENABLED).register((Boolean value, MinecraftServer server) -> {
