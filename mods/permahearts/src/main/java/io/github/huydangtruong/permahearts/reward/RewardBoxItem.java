@@ -36,6 +36,6 @@ public class RewardBoxItem extends Item {
 	@Override
 	public void appendHoverText(ItemStack stack, Item.TooltipContext context, TooltipDisplay display,
 		Consumer<Component> builder, TooltipFlag flag) {
-		builder.accept(RewardMessages.boxTooltip(tier.options()));
+		builder.accept(RewardMessages.boxTooltip(tier.options(), tier.picks()));
 	}
 }

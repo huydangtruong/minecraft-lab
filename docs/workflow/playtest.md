@@ -222,16 +222,19 @@ Kiểm bằng máy: `./gradlew :permahearts:build` (game test `ThousandMileStepG
 
 Kiểm bằng máy: `./gradlew :permahearts:build` (JUnit `WarpRulesTest`, game test `WarpGameTest`: đặt 2 cổng + từ chối cổng thứ 3, không phá được, xoá, dịch chuyển + hồi chiêu, tới người chơi khác, tên) và `runClientGameTest` (`WarpClientTest`: ảnh `90-warp-menu`, `91-warp-portal`).
 
-## P-027: Hộp thưởng (D76)
+## P-027, P-030: Hộp thưởng (D76, D89, D90)
 
-Mỗi dòng nhiệm vụ trả một **hộp thưởng** thay cho linh dược. Cấp theo loại dòng: thu thập và giết = hộp **bạc** (3 thẻ), khám phá và Blood Moon = hộp **vàng** (4 thẻ), boss và Death Match = hộp **kim cương** (5 thẻ). Mỗi hộp chọn 1 thẻ.
+Mỗi dòng nhiệm vụ trả một **hộp thưởng**, loại hộp **bốc ngẫu nhiên lúc nhận** (không hiện trước). Thường: bạc 40% / vàng 30% / kim cương 20% / ngọc lục bảo 10%; hạ thủ lĩnh và Blood Moon: 20 / 30 / 30 / 20. Hộp bạc 3 thẻ, vàng 4, kim cương 5 (chọn 1); **hộp ngọc lục bảo 6 thẻ, chọn 2**.
 
-1. Lấy hộp bằng lệnh: `/give @s permahearts:gold_reward_box` (cũng có `silver_reward_box`, `diamond_reward_box`, và trong tab Creative "Food & Drinks").
+1. Lấy hộp bằng lệnh: `/give @s permahearts:gold_reward_box` (cũng có `silver_reward_box`, `diamond_reward_box`, `emerald_reward_box`, và trong tab Creative "Food & Drinks").
 2. Bấm chuột phải khi cầm hộp: mở màn hình các thẻ. Mỗi thẻ là một bình linh dược hoặc một món đồ (sắt, vàng, kim cương, ngọc lục bảo, redstone, lapis, ngọc ender, thuốc súng). Thẻ đồ có 20% là thẻ đặc biệt (hộp vàng và kim cương): 4 táo vàng phép hoặc 32 ngọc lục bảo; hộp kim cương còn có 1 thỏi netherite. Hộp bạc không có thẻ đặc biệt.
-3. Bấm một thẻ: thẻ có viền vàng. Nút **Claim** chỉ sáng khi chọn đủ số thẻ (1). Di chuột vào thẻ để xem tên món.
+3. Bấm một thẻ: thẻ có viền vàng. Nút **Claim** chỉ sáng khi chọn đủ số thẻ (1; hộp ngọc lục bảo 2). Di chuột vào thẻ để xem tên món.
 4. Bấm **Claim**: nhận món, hộp biến mất, có tiếng lên cấp. Bấm **Close** (hoặc Esc): hộp còn nguyên, và mở lại vẫn ra đúng các thẻ cũ (thẻ được ra lúc mở lần đầu).
-5. Hoàn thành một dòng nhiệm vụ rồi nói chuyện với Wanderer: nhận hộp đúng bậc. Màn hình nhiệm vụ cũng hiện hộp ở phần thưởng. Nhiệm vụ lưu từ bản cũ (phần thưởng là linh dược) cũng cho hộp.
-6. Kiểm bằng máy: `./gradlew :permahearts:build` (`RewardBoxTest`, `RewardBoxGameTest`) và `runClientGameTest` (ảnh `90-reward-box-*`, `92-quest-box-rewards`, `93-reward-box-diamond-*`).
+5. Hoàn thành một dòng nhiệm vụ rồi nói chuyện với Wanderer: ô thưởng chỉ hiện hộp xám "?" ("Random Reward Box"). Lấy ra khỏi ô thì nhận hộp thật (loại ngẫu nhiên). Nhiệm vụ lưu từ bản cũ cũng vậy.
+6. **Hộp ngọc lục bảo** (xanh lá, 6 thẻ): dòng chữ trên cùng ghi "Pick 2 rewards", chọn 1 thẻ thì ghi "1 left". Thẻ đồ có 25% là đặc biệt: Totem of Undying, Bottle of Enlightenment, sách Mending, Sharpness V, Protection V (thẻ sách ghi tên phép, vd "Sharpness V"). Chọn 2 thẻ khác nhau, Claim: nhận cả hai. Đóng khi mới chọn 1 thẻ: không lấy gì, hộp còn nguyên.
+7. **Bottle of Enlightenment**: `/give @s permahearts:enlightenment_bottle`, cầm uống (giữ chuột phải ~1,6 giây): +16 level, tiêu 1 bình.
+8. Lữ Khách giờ tới sau **5 ngày** (lần đầu và sau mỗi lần rời đi). Nhiệm vụ mới có thêm thịt lợn (48), giết Blaze / Wither Skeleton / Phantom (8 con), phù thủy còn 6 con; không có 2 dòng cùng một con.
+9. Kiểm bằng máy: `./gradlew :permahearts:build` (`RewardBoxTest`, `RewardBoxGameTest`, `QuestLogicTest`) và `runClientGameTest` (ảnh `90-reward-box-*`, `92-quest-box-rewards`, `93-reward-box-diamond-*`, `101-emerald-box`, `102-emerald-box-picked`, `103-emerald-box-two-picked`).
 
 ## P-028: bảng chiêu thức mới (D83)
 

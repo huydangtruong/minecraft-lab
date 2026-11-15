@@ -44,8 +44,54 @@ public class RewardBoxClientTest implements FabricClientGameTest {
 			boxScreen(context, server, RewardTier.SILVER, "89-reward-box-silver");
 			boxScreen(context, server, RewardTier.GOLD, "90-reward-box-gold");
 			boxScreen(context, server, RewardTier.DIAMOND, "93-reward-box-diamond");
+			emeraldScreen(context, server);
 			questScreen(context, server);
 		}
+	}
+
+	/** P-030 / D89: the emerald box has 6 cards and 2 picks. Screenshots before any pick and after the first; then a real second pick and Claim. */
+	private static void emeraldScreen(ClientGameTestContext context, TestServerContext server) {
+		server.runOnServer(s -> {
+			ServerPlayer p = s.getPlayerList().getPlayers().get(0);
+			p.getInventory().clearContent();
+			ItemStackHelper.give(p, RewardTier.EMERALD);
+			p.getMainHandItem().set(RewardBoxes.DATA, new RewardBoxData(List.of(
+				new RewardOption("minecraft:totem_of_undying", 1), new RewardOption("permahearts:enlightenment_bottle", 1),
+				RewardOption.book("minecraft:mending", 1), RewardOption.book("minecraft:sharpness", 5),
+				RewardOption.book("minecraft:protection", 5), new RewardOption("minecraft:diamond", 16))));
+			RewardBoxes.open(p, InteractionHand.MAIN_HAND);
+		});
+		context.waitForScreen(AbstractContainerScreen.class);
+		context.waitTicks(10);
+		context.takeScreenshot("101-emerald-box");
+		clickGui(context, 8 + 25, 30 + 40, InputConstants.MOUSE_BUTTON_LEFT); // card 0: the totem
+		context.waitTicks(10);
+		context.getInput().setCursorPos(5, 5);
+		context.waitTicks(5);
+		context.takeScreenshot("102-emerald-box-picked");
+		clickGui(context, 8 + 54 * 3 + 25, 30 + 40, InputConstants.MOUSE_BUTTON_LEFT); // card 3: Sharpness V
+		context.waitTicks(10);
+		int mask = server.computeOnServer(s -> ((RewardBoxMenu) s.getPlayerList().getPlayers().get(0).containerMenu).selected());
+		if (mask != 0b1001) {
+			throw new AssertionError("two clicks should select cards 0 and 3, mask was " + mask);
+		}
+		context.getInput().setCursorPos(5, 5);
+		context.waitTicks(5);
+		context.takeScreenshot("103-emerald-box-two-picked");
+		clickGui(context, -1, 30 + 80 + 8 + 10, InputConstants.MOUSE_BUTTON_LEFT); // Claim
+		context.waitTicks(10);
+		String result = server.computeOnServer(s -> {
+			ServerPlayer sp = s.getPlayerList().getPlayers().get(0);
+			boolean totem = sp.getInventory().contains(st -> st.is(net.minecraft.world.item.Items.TOTEM_OF_UNDYING));
+			boolean book = sp.getInventory().contains(st -> st.is(net.minecraft.world.item.Items.ENCHANTED_BOOK));
+			return (sp.containerMenu instanceof RewardBoxMenu ? "menu still open; " : "")
+				+ (RewardBoxes.tierOf(sp.getMainHandItem()).isPresent() ? "box still in hand; " : "")
+				+ (totem ? "" : "no totem; ") + (book ? "" : "no book; ");
+		});
+		if (!result.isEmpty()) {
+			throw new AssertionError("emerald claim by mouse failed: " + result);
+		}
+		context.waitTicks(5);
 	}
 
 	private static void boxScreen(ClientGameTestContext context, TestServerContext server, RewardTier tier, String name) {
@@ -102,6 +148,7 @@ public class RewardBoxClientTest implements FabricClientGameTest {
 			case SILVER -> "minecraft:gold_ingot";
 			case GOLD -> "permahearts:elixir_fury";
 			case DIAMOND -> "permahearts:elixir_iron_skin";
+			case EMERALD -> throw new IllegalStateException("own test");
 		};
 		clickGui(context, -1, 30 + 80 + 8 + 10, InputConstants.MOUSE_BUTTON_LEFT);
 		context.waitTicks(10);
@@ -139,7 +186,7 @@ public class RewardBoxClientTest implements FabricClientGameTest {
 		return new int[] {(mc.getWindow().getGuiScaledWidth() - (16 + 54 * n - 4)) / 2, (mc.getWindow().getGuiScaledHeight() - 146) / 2};
 	}
 
-	/** Done lines of a quest show their box as the reward (silver for collect and kill, gold for explore, diamond for a boss). */
+	/** Done lines of a quest show a "?" box as the reward: the tier is rolled when the line is claimed (D90). */
 	private static void questScreen(ClientGameTestContext context, TestServerContext server) {
 		float[] yawAtSpawn = new float[1];
 		server.runOnServer(s -> {

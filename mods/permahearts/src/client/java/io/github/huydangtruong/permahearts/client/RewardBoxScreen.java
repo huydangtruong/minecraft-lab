@@ -1,6 +1,7 @@
 package io.github.huydangtruong.permahearts.client;
 
 import io.github.huydangtruong.permahearts.reward.RewardBoxMenu;
+import io.github.huydangtruong.permahearts.reward.RewardBoxes;
 import io.github.huydangtruong.permahearts.reward.RewardMessages;
 import io.github.huydangtruong.permahearts.reward.RewardOption;
 import io.github.huydangtruong.permahearts.reward.RewardSelection;
@@ -9,9 +10,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
@@ -19,7 +18,7 @@ import java.util.List;
 
 /**
  * The choose screen of a reward box (D76): a row of cards (icon, count, name), click one to select it (gold outline),
- * then Claim. Same vanilla-looking panel as the quest screen. Selection lives on the server (menu data slot).
+ * then Claim (the emerald box: pick 2 cards, then Claim). Same vanilla-looking panel as the quest screen. Selection lives on the server (menu data slot).
  */
 public class RewardBoxScreen extends AbstractContainerScreen<RewardBoxMenu> {
 	private static final int CARD_W = 50;
@@ -74,8 +73,19 @@ public class RewardBoxScreen extends AbstractContainerScreen<RewardBoxMenu> {
 		return -1;
 	}
 
-	private static ItemStack stackOf(RewardOption o) {
-		return new ItemStack(BuiltInRegistries.ITEM.getValue(Identifier.parse(o.itemId())), o.count());
+	private ItemStack stackOf(RewardOption o) {
+		return RewardBoxes.cardStack(o, minecraft.level.registryAccess());
+	}
+
+	/** The card name; an enchanted book shows its enchantment ("Sharpness V") instead of "Enchanted Book". */
+	private static Component label(ItemStack stack) {
+		var stored = stack.get(net.minecraft.core.component.DataComponents.STORED_ENCHANTMENTS);
+		if (stored != null && !stored.isEmpty()) {
+			var e = stored.entrySet().iterator().next();
+			// Plain literal: the vanilla name is grey, which is hard to read on the card.
+			return Component.literal(net.minecraft.world.item.enchantment.Enchantment.getFullname(e.getKey(), e.getIntValue()).getString());
+		}
+		return stack.getHoverName();
 	}
 
 	@Override
@@ -112,11 +122,17 @@ public class RewardBoxScreen extends AbstractContainerScreen<RewardBoxMenu> {
 			g.fakeItem(stack, 0, 0);
 			g.pose().popMatrix();
 			g.centeredText(font, Component.literal("x" + o.count()), x + CARD_W / 2, y + 38, 0xFFFFFFFF);
-			// Names are drawn at 80% so a long word ("Enchanted") fits the card without breaking mid-word.
-			List<FormattedCharSequence> lines = font.split(stack.getHoverName(), (int) ((CARD_W - 2) / 0.8f));
+			// Names are drawn at 80% so a long word ("Enchanted") fits the card without breaking mid-word; smaller still
+			// for a longer word ("Enlightenment").
+			Component name = label(stack);
+			float scale = 0.8f;
+			for (String word : name.getString().split(" ")) {
+				scale = Math.min(scale, (CARD_W - 2) / (float) Math.max(1, font.width(word)));
+			}
+			List<FormattedCharSequence> lines = font.split(name, (int) ((CARD_W - 2) / scale));
 			g.pose().pushMatrix();
 			g.pose().translate(x + CARD_W / 2f, y + 49);
-			g.pose().scale(0.8f, 0.8f);
+			g.pose().scale(scale, scale);
 			for (int k = 0; k < Math.min(3, lines.size()); k++) {
 				FormattedCharSequence line = lines.get(k);
 				g.text(font, line, -font.width(line) / 2, k * 10, TEXT, false);
@@ -128,7 +144,7 @@ public class RewardBoxScreen extends AbstractContainerScreen<RewardBoxMenu> {
 	@Override
 	protected void extractLabels(GuiGraphicsExtractor g, int mouseX, int mouseY) {
 		g.text(font, title, MARGIN, 6, TEXT, false);
-		g.text(font, RewardMessages.hint(menu.tier().picks()), MARGIN, 18, TEXT_DIM, false);
+		g.text(font, RewardMessages.hint(menu.tier().picks(), Integer.bitCount(menu.selected())), MARGIN, 18, TEXT_DIM, false);
 	}
 
 	@Override

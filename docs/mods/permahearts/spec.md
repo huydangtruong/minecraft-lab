@@ -40,16 +40,16 @@
 
 ## Lữ Khách và nhiệm vụ (0.5.0–0.6.0, D12–D14)
 
-- Đúng **4 ngày Minecraft** (D32): chọn một người chơi ở Overworld, lấy điểm cách ~450–550 block (D27) hướng ngẫu nhiên, báo mọi người "Một Lữ Khách đang chờ ở X, Z". NPC hiện khi có người trong ~96 block. Trên mặt nước: đặt bè gỗ 3×3.
+- Đúng **5 ngày Minecraft** (D87, trước là 4 ở D32): chọn một người chơi ở Overworld, lấy điểm cách ~450–550 block (D27) hướng ngẫu nhiên, báo mọi người "Một Lữ Khách đang chờ ở X, Z". NPC hiện khi có người trong ~96 block. Trên mặt nước: đặt bè gỗ 3×3.
 - NPC: Wandering Trader đứng yên, bất tử, không biến mất, tên "Lữ Khách". Bấm vào: màn hình nhiệm vụ (không phải bảng trao đổi).
 - Màn hình: lời giới thiệu + **Nhận** → danh sách 2–4 dòng. Mọi người thấy cùng tiến độ.
-  - **Thu thập**: "Tìm 64 Sắt" + ô bỏ đồ; bỏ vào là trừ đồ, cộng tiến độ, dư trả lại. Số lượng (D18): 64 sắt / than / redstone / lapis / cà rốt / khoai tây / lúa mì / gỗ sồi · 48 vàng / thịt cừu / thịt bò / xương / tơ / da · 32 thuốc súng / ngọc ender · 16 kim cương / ngọc lục bảo.
-  - **Giết**: "Giết 16 Zombie" + số đếm; ai giết cũng tính. 16 zombie / skeleton / nhện / creeper / enderman / drowned · 8 phù thủy.
+  - **Thu thập**: "Tìm 64 Sắt" + ô bỏ đồ; bỏ vào là trừ đồ, cộng tiến độ, dư trả lại. Số lượng (D18): 64 sắt / than / redstone / lapis / cà rốt / khoai tây / lúa mì / gỗ sồi · 48 vàng / thịt cừu / thịt bò / thịt lợn / xương / tơ / da · 32 thuốc súng / ngọc ender · 16 kim cương / ngọc lục bảo.
+  - **Giết**: "Giết 16 Zombie" + số đếm; ai giết cũng tính. 16 zombie / skeleton / nhện / creeper / enderman / drowned · 6 phù thủy · 8 Blaze / Wither Skeleton / Phantom (D88). Một lần tới không có 2 dòng cùng một con (kể cả dòng giết và dòng hạ thủ lĩnh). Tỉ lệ loại dòng (D88): thu thập 27, giết 27, khám phá 15, Blood Moon 15, hạ thủ lĩnh 16 (Death Match 12 thêm vào khi có 2+ người).
   - **Trăng máu** (0.6.0): ngẫu nhiên 1 trong 6 loại (D29): đêm **Zombie**, **Piglin Brute** (không biến thành zombie piglin), **Creeper**, **Skeleton**, **Spider** hoặc **Zombie Horseman** (zombie cầm giáo sắt cưỡi ngựa zombie, như bản gốc; một kỵ sĩ tính là 1 con trong giới hạn 30; dòng này không đi cùng dòng giết zombie hay trùm zombie). Nút Bắt đầu → trời thành đêm, mỗi 10 giây **3 con** loại đó quanh mỗi người chơi **trong vùng 96×96 quanh Crimson Master** (tối đa 30 con sống, D33), không ngủ được; trong lúc Trăng máu: người trong vùng không ra được, người ngoài vùng (vd. hồi sinh ở xa) không vào được; tới gần mép (8 block) thấy bụi đỏ đánh dấu mép; Creative/Spectator được miễn; người bấm sống tới sáng là xong, chết thì dòng quay về chưa làm.
   - **Thám hiểm** (0.6.0): "Đặt chân tới một Làng/Đền sa mạc/…".
   - **Hạ thủ lĩnh** (0.6.0): nút Triệu hồi → trùm to gấp đôi, 200 máu (D72), 4 đệ tử, cạnh NPC. Trùm: Zombie, Skeleton, Evoker (đệ tử là Pillager cầm nỏ, D34), Blaze, Vindicator Chieftain, Ghast (D35: bay lơ lửng ngoài trời, đệ tử là 4 Phantom, không rời xa quá 24 block quanh NPC và không cao quá 16 block trên đầu người chơi, bắn nhanh hơn 20%, cầu lửa vẫn phá block).
-- Dòng xong → ô thưởng có 1 linh dược ngẫu nhiên; ai lấy trước được. Xong hết + lấy hết thưởng → NPC chào và đi, đếm lại 4 ngày (D32).
-- Lệnh: `/quest` (NPC ở đâu, còn bao lâu, tiến độ), `/quest giveup` (ai cũng dùng được, như nút Give up: Master rời đi, lần sau 4 ngày; D28). Admin: `/quest summon` (gọi NPC ngay cạnh mình với nhiệm vụ mới), `/quest skip` (NPC xuất hiện ngay ở ~500 block), `/quest complete <dòng>`, `/quest reset`.
+- Dòng xong → ô thưởng có 1 linh dược ngẫu nhiên; ai lấy trước được. Xong hết + lấy hết thưởng → NPC chào và đi, đếm lại 5 ngày (D87).
+- Lệnh: `/quest` (NPC ở đâu, còn bao lâu, tiến độ), `/quest giveup` (ai cũng dùng được, như nút Give up: Master rời đi, lần sau 5 ngày; D28, D87). Admin: `/quest summon` (gọi NPC ngay cạnh mình với nhiệm vụ mới), `/quest skip` (NPC xuất hiện ngay ở ~500 block), `/quest complete <dòng>`, `/quest reset`.
 
 ## 0.7.1 (P-008, D19, D20)
 
@@ -57,7 +57,7 @@
 - **Lữ Khách không bị quái nhắm** (bất tử vĩnh viễn nên quái bỏ qua).
 - Trùm và quái Trăng máu **xuất hiện ngang tầm** người chơi / Lữ Khách (kể cả trong hang), tìm chỗ đứng quanh Y đó chứ không lấy mặt đất.
 - Trùm bị mất (rơi, unload) thì nút quay về **Summon**; summon lại được, bản cũ nếu trở lại sẽ bị xóa.
-- **Ở 2 ngày Minecraft** (D32) kể từ lúc báo tọa độ; màn hình có dòng đếm ngược "Leaves in"; chat báo trước ~2 phút thực; không rời khi Trăng máu hoặc trùm đang chạy. Rời đi (hết giờ, Give up, xong hết) thì 4 ngày sau mới có Lữ Khách mới; chuyến đầu tiên của world cũng 4 ngày.
+- **Ở 2 ngày Minecraft** (D32) kể từ lúc báo tọa độ; màn hình có dòng đếm ngược "Leaves in"; chat báo trước ~2 phút thực; không rời khi Trăng máu hoặc trùm đang chạy. Rời đi (hết giờ, Give up, xong hết) thì 5 ngày sau mới có Lữ Khách mới; chuyến đầu tiên của world cũng 5 ngày (D87).
 - Thủ lĩnh và đệ tử không bị mặt trời thiêu (mũ không vỡ).
 - `/quest` in thêm thời gian còn lại.
 
@@ -99,9 +99,12 @@
 - Kỹ thuật: cờ `permahearts:dm_protected` trên người chơi được đặt lúc ALLOW_DEATH; mixin `PlayerMixin` bỏ qua `Player#dropEquipment` và `Player#getBaseExperienceReward`; đồ và XP chép sang người mới ở COPY_FROM; tim giữ nguyên ở AFTER_RESPAWN.
 
 
-## Hộp thưởng nhiệm vụ (D76, P-027)
+## Hộp thưởng nhiệm vụ (D76, D89, D90, P-027, P-030)
 
-- Mỗi dòng nhiệm vụ trả một hộp thưởng (thay linh dược): `permahearts:silver_reward_box` (thu thập, giết; 3 thẻ), `gold_reward_box` (khám phá, Blood Moon; 4 thẻ), `diamond_reward_box` (boss, Death Match; 5 thẻ). Chọn 1 thẻ (`picks`).
+- Mỗi dòng nhiệm vụ trả một hộp thưởng (thay linh dược). **Loại hộp được bốc lúc nhận thưởng, không hiện trước** (D90): ô thưởng ở màn hình nhiệm vụ chỉ hiện hộp xám có dấu "?" (`permahearts:mystery_box`, tên "Random Reward Box", không nhận được). Tỉ lệ: dòng thường (thu thập, giết, khám phá, Death Match) bạc 40 / vàng 30 / kim cương 20 / ngọc lục bảo 10; hạ thủ lĩnh và Blood Moon bạc 20 / vàng 30 / kim cương 30 / ngọc lục bảo 20. Không lưu gì thêm trong save nhiệm vụ.
+- Bốn hộp: `silver_reward_box` (3 thẻ, chọn 1), `gold_reward_box` (4 thẻ, chọn 1), `diamond_reward_box` (5 thẻ, chọn 1), `emerald_reward_box` (**6 thẻ, chọn 2**, màu xanh lá, độ hiếm EPIC).
 - Mỗi thẻ: 50% một bình linh dược ngẫu nhiên (x1), 50% một món đồ. Món đồ: sắt 64, vàng 64, kim cương 16, ngọc lục bảo 16, redstone 64, lapis 64, ngọc ender 32, thuốc súng 32 (số lượng lấy từ bảng thu thập của QuestGenerator), không trùng nhau. Thẻ đồ có 20% là thẻ đặc biệt: vàng = 4 táo vàng phép hoặc 32 ngọc lục bảo; kim cương = thêm 1 thỏi netherite; bạc không có.
-- Thẻ ra lúc mở lần đầu và lưu trong component `permahearts:reward_box`; đóng rồi mở lại vẫn các thẻ cũ. Chọn thẻ, bấm Claim: máy chủ kiểm lại, đưa đồ (đầy túi thì rơi dưới chân), trừ 1 hộp, phát tiếng lên cấp. Close giữ hộp.
-- Nhiệm vụ lưu cũ có phần thưởng linh dược vẫn cho hộp theo loại dòng. Màn hình nhiệm vụ hiện biểu tượng hộp.
+- **Hộp ngọc lục bảo**: thẻ đồ có **25%** là đặc biệt: 1 Totem of Undying, 1 Bottle of Enlightenment, sách Mending, sách Sharpness V, sách Protection V (hai sách khác phép thì được ra cùng hộp). Chọn đủ 2 thẻ khác nhau rồi bấm Claim: nhận cả hai, hộp biến mất. Đóng màn hình khi mới chọn 1 thẻ thì **không lấy gì**, hộp còn nguyên (lựa chọn chưa lưu).
+- **Bottle of Enlightenment** (`permahearts:enlightenment_bottle`): xếp chồng 16, độ hiếm RARE, có ánh sáng. Uống (chuột phải, 32 tick như bình thuốc) được **+16 level kinh nghiệm**, tiêu 1 bình (không tiêu trong Creative). Không chế được, chỉ ra từ hộp ngọc lục bảo (có trong tab Creative "Food & Drinks" để thử).
+- Thẻ ra lúc mở lần đầu và lưu trong component `permahearts:reward_box` (thẻ sách lưu thêm `enchant` và `level`, save cũ không có hai trường này vẫn đọc được); đóng rồi mở lại vẫn các thẻ cũ. Chọn thẻ, bấm Claim: máy chủ kiểm lại, đưa đồ (đầy túi thì rơi dưới chân), trừ 1 hộp, phát tiếng lên cấp. Close giữ hộp.
+- Nhiệm vụ lưu cũ có phần thưởng linh dược vẫn cho hộp (bốc ngẫu nhiên lúc nhận).

@@ -305,13 +305,14 @@ public final class Wanderer {
 		if (after.isEmpty()) {
 			return ItemStack.EMPTY;
 		}
-		// D76: the box of the line's tier. The stored reward id (an elixir, from saves before reward boxes) is ignored.
-		RewardTier tier = RewardTier.forLine(d.quest().get().lines().get(line).type());
+		// D90: the box tier is rolled now, not stored; the quest screen only shows a "?" box. The stored reward id (an
+		// elixir, from saves before reward boxes) is ignored.
+		RewardTier tier = RewardTier.roll(d.quest().get().lines().get(line).type(), RNG);
 		save(server, d.withQuest(after));
 		return RewardBoxes.stack(tier);
 	}
 
-	/** If every line is done and claimed: the NPC says goodbye and leaves, and the next visit is 4 days away. */
+	/** If every line is done and claimed: the NPC says goodbye and leaves, and the next visit is 5 days away. */
 	public static void farewellIfFinished(MinecraftServer server) {
 		WandererData d = data(server);
 		if (d.phase() != Phase.PRESENT || d.quest().isEmpty() || !d.quest().get().allDoneAndClaimed()) {
@@ -348,7 +349,7 @@ public final class Wanderer {
 
 	/**
 	 * The visit ends: events stop (no fail message), their mobs, the boss and the minions go, the NPC leaves with all
-	 * unclaimed rewards, and the next Wanderer comes in 4 days.
+	 * unclaimed rewards, and the next Wanderer comes in 5 days.
 	 */
 	public static void leave(MinecraftServer server, Component message) {
 		WandererData d = data(server);
@@ -429,7 +430,8 @@ public final class Wanderer {
 		return targetName(l.type(), l.target());
 	}
 
+	/** What a done line shows as its reward: the box is rolled at claim (D90), so only "Random Reward Box". */
 	public static Component rewardName(QuestType type) {
-		return RewardBoxes.name(RewardTier.forLine(type));
+		return Component.translatable(RewardBoxes.MYSTERY.getDescriptionId());
 	}
 }
