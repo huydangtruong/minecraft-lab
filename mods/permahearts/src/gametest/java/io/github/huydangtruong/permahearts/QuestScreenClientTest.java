@@ -231,6 +231,7 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 		var ice = t.getEnumConstants()[1];
 		clickGui(context, hotspots(context).get(HS_SLOT), LEFT); // left click slot 1: edit mode
 		context.takeScreenshot("09e2-slot1-edit-mode"); // gold outline, cross instead of the emerald box
+		context.takeScreenshot("104-technique-rows"); // D91: slot selected, no + buttons, "i" at the right edge
 		clickGui(context, hotspots(context).get(HS_EMERALD), LEFT); // the cross cancels
 		clickGui(context, hotspots(context).get(HS_ROW), LEFT); // outside slot mode a row click only picks the technique (P-028)
 		check(techniqueData(server).inSlot(0) == null, "no slot should be filled by picking a technique");
