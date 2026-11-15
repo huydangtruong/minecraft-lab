@@ -96,7 +96,7 @@ public final class TechniquesTab {
 			case GOLEM -> "Summon loyal violet iron golems that fight for you for 90 seconds. More and stronger at higher levels.";
 			case AQUA -> "Breathe, swim fast and dig freely underwater.";
 			case ILLUSION -> "Creates illusions of yourself that fight for you. Who attacks you, or whom you attack, becomes their target. The item in your first hotbar slot picks their job (an empty first slot means they fight): hoe farms, rod fishes, axe chops, shears shear, bucket milks, wheat/carrots/seeds breed. Drops go to a chest near the cast point.";
-			case THUNDER -> "Aim the crosshair and click (left or right). The spot glows for 1 s, then lightning strikes it with a creeper-sized blast. Pigs, villagers, creepers and mooshrooms in the blast change like under real lightning. With nothing in sight it hits the ground far ahead.";
+			case THUNDER -> "Aim and click: the spot glows for 1 s, then lightning strikes and explodes like a creeper.";
 			case WARP -> "Hold right click for 1 s to open a portal where you look. Left click warps you to any of your portals, or to another player.";
 			case ANGEL -> "Summons warrior angels that fly through walls and fight for you.";
 		};
