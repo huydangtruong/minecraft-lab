@@ -7,7 +7,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * One per quest, shared by every open menu. Slot i shows the reward box (D76) for line i while that line is done and not
+ * One per quest, shared by every open menu. Slot i shows the "?" reward box (D76, D90) for line i while that line is done and not
  * claimed. Taking it out (any path vanilla uses) claims the line, so the other player's slot goes empty on their next sync.
  */
 final class RewardContainer implements Container {
@@ -49,8 +49,8 @@ final class RewardContainer implements Container {
 
 	@Override
 	public ItemStack getItem(int i) {
-		return line(i).map(l -> io.github.huydangtruong.permahearts.reward.RewardBoxes.stack(
-			io.github.huydangtruong.permahearts.reward.RewardTier.forLine(l.type()))).orElse(ItemStack.EMPTY);
+		// D90: the box tier is rolled at claim, so the slot shows the "?" box; taking it gives the real one.
+		return line(i).map(l -> new ItemStack(io.github.huydangtruong.permahearts.reward.RewardBoxes.MYSTERY)).orElse(ItemStack.EMPTY);
 	}
 
 	private ItemStack take(int i) {

@@ -12,8 +12,10 @@ import java.util.random.RandomGenerator;
 public final class RewardRoll {
 	/** Each card is an elixir with this chance, otherwise an item. */
 	public static final double ELIXIR_CHANCE = 0.5;
-	/** An item card is a special with this chance (GOLD and DIAMOND only). */
+	/** An item card is a special with this chance (GOLD and DIAMOND). */
 	public static final double SPECIAL_CHANCE = 0.2;
+	/** Same for the emerald box (D89). */
+	public static final double EMERALD_SPECIAL_CHANCE = 0.25;
 
 	/** Base item pool, same for every tier; amounts come from the collect quests (QuestGenerator). */
 	public static final List<String> BASE_ITEMS = List.of(
@@ -26,13 +28,23 @@ public final class RewardRoll {
 		new RewardOption("minecraft:enchanted_golden_apple", 4), new RewardOption("minecraft:netherite_ingot", 1),
 		new RewardOption("minecraft:emerald", 32));
 
+	public static final List<RewardOption> EMERALD_SPECIALS = List.of(
+		new RewardOption("minecraft:totem_of_undying", 1), new RewardOption("permahearts:enlightenment_bottle", 1),
+		RewardOption.book("minecraft:mending", 1), RewardOption.book("minecraft:sharpness", 5),
+		RewardOption.book("minecraft:protection", 5));
+
 	private RewardRoll() {}
+
+	public static double specialChance(RewardTier tier) {
+		return tier == RewardTier.EMERALD ? EMERALD_SPECIAL_CHANCE : SPECIAL_CHANCE;
+	}
 
 	public static List<RewardOption> specials(RewardTier tier) {
 		return switch (tier) {
 			case SILVER -> List.of();
 			case GOLD -> GOLD_SPECIALS;
 			case DIAMOND -> DIAMOND_SPECIALS;
+			case EMERALD -> EMERALD_SPECIALS;
 		};
 	}
 
@@ -52,8 +64,8 @@ public final class RewardRoll {
 				continue;
 			}
 			RewardOption pick = null;
-			if (!specials.isEmpty() && rng.nextDouble() < SPECIAL_CHANCE) {
-				List<RewardOption> free = specials.stream().filter(o -> !usedItems.contains(o.itemId())).toList();
+			if (!specials.isEmpty() && rng.nextDouble() < specialChance(tier)) {
+				List<RewardOption> free = specials.stream().filter(o -> !usedItems.contains(o.key())).toList();
 				if (!free.isEmpty()) {
 					pick = free.get(rng.nextInt(free.size()));
 				}
@@ -63,7 +75,7 @@ public final class RewardRoll {
 				String id = free.get(rng.nextInt(free.size()));
 				pick = new RewardOption(id, QuestGenerator.collectAmount(id));
 			}
-			usedItems.add(pick.itemId());
+			usedItems.add(pick.key());
 			out.add(pick);
 		}
 		return List.copyOf(out);

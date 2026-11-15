@@ -14,6 +14,8 @@ import io.github.huydangtruong.permahearts.wanderer.Wanderer;
 import java.util.List;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -22,6 +24,8 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.phys.AABB;
 
 /**
@@ -40,9 +44,9 @@ public class RewardBoxGameTest {
 		return box;
 	}
 
-	/** A line saved before reward boxes keeps its elixir id in "reward"; the claim ignores it and gives the tier's box. */
+	/** D90: a claim gives some reward box (tier rolled then), unrolled; a line saved before reward boxes keeps its elixir id and is ignored. */
 	@GameTest(maxTicks = 100)
-	public void claimGivesTheTierBox(GameTestHelper context) {
+	public void claimGivesARandomUnrolledBox(GameTestHelper context) {
 		MinecraftServer s = context.getLevel().getServer();
 		try {
 			enable(context, true);
@@ -59,10 +63,11 @@ public class RewardBoxGameTest {
 			for (int i = 0; i < 4; i++) {
 				Wanderer.complete(s, i);
 			}
-			context.assertTrue(Wanderer.claim(s, 0, p).is(RewardBoxes.item(RewardTier.SILVER)), "COLLECT gives a silver box");
-			context.assertTrue(Wanderer.claim(s, 1, p).is(RewardBoxes.item(RewardTier.DIAMOND)), "BOSS gives a diamond box");
-			context.assertTrue(Wanderer.claim(s, 2, p).is(RewardBoxes.item(RewardTier.GOLD)), "EXPLORE gives a gold box");
-			context.assertTrue(Wanderer.claim(s, 3, p).is(RewardBoxes.item(RewardTier.SILVER)), "KILL gives a silver box, any old reward id");
+			for (int i = 0; i < 4; i++) {
+				ItemStack got = Wanderer.claim(s, i, p);
+				context.assertTrue(RewardBoxes.tierOf(got).isPresent(), "line " + i + " gives a reward box, got " + got);
+				context.assertTrue(got.get(RewardBoxes.DATA) == null, "the box is not rolled yet");
+			}
 			context.succeed();
 		} finally {
 			Wanderer.reset(s);
@@ -167,6 +172,100 @@ public class RewardBoxGameTest {
 		context.assertTrue(p.getMainHandItem().is(RewardBoxes.item(RewardTier.SILVER)), "the box is kept");
 		context.assertTrue(p.getInventory().countItem(Items.DIAMOND) == 0 && p.getInventory().countItem(Items.IRON_INGOT) == 0
 			&& p.getInventory().countItem(Items.GUNPOWDER) == 0, "nothing was given");
+		context.succeed();
+	}
+
+	private static RewardOption[] sixCards() {
+		return new RewardOption[] {
+			new RewardOption("minecraft:diamond", 16), RewardRoll.elixir(ElixirStat.FURY), new RewardOption("minecraft:iron_ingot", 64),
+			RewardOption.book("minecraft:mending", 1), new RewardOption("minecraft:totem_of_undying", 1),
+			RewardOption.book("minecraft:sharpness", 5)};
+	}
+
+	/** D89: the emerald box takes two different cards, then Claim gives both and uses the box up. */
+	@GameTest(maxTicks = 100)
+	public void emeraldBoxTwoPicksGiveBothAndConsumeTheBox(GameTestHelper context) {
+		ServerPlayer p = context.makeMockServerPlayerInLevel();
+		p.getInventory().clearContent();
+		p.setItemInHand(InteractionHand.MAIN_HAND, fixedBox(RewardTier.EMERALD, sixCards()));
+		RewardBoxes.open(p, InteractionHand.MAIN_HAND);
+		RewardBoxMenu menu = (RewardBoxMenu) p.containerMenu;
+		context.assertTrue(menu.options().size() == 6 && menu.tier().picks() == 2, "6 cards, 2 picks");
+		menu.clickMenuButton(p, 0);
+		context.assertTrue(!menu.canClaim(), "one pick is not enough");
+		context.assertTrue(!menu.clickMenuButton(p, RewardBoxMenu.CLAIM_BUTTON), "Claim with one pick does nothing");
+		context.assertTrue(!p.getMainHandItem().isEmpty(), "the box is kept after one pick");
+		menu.clickMenuButton(p, 4);
+		menu.clickMenuButton(p, 2); // a third card is ignored
+		context.assertTrue(menu.selected() == 0b10001, "two cards selected, was " + menu.selected());
+		context.assertTrue(menu.clickMenuButton(p, RewardBoxMenu.CLAIM_BUTTON), "claim works");
+		context.assertTrue(p.getInventory().countItem(Items.DIAMOND) == 16, "16 diamonds");
+		context.assertTrue(p.getInventory().countItem(Items.TOTEM_OF_UNDYING) == 1, "a totem");
+		context.assertTrue(p.getInventory().countItem(Items.IRON_INGOT) == 0, "nothing else");
+		context.assertTrue(p.getInventory().countItem(RewardBoxes.item(RewardTier.EMERALD)) == 0, "the box is used up");
+		context.succeed();
+	}
+
+	/** Closing the screen after one pick takes nothing: the box stays whole and can be opened again. */
+	@GameTest(maxTicks = 100)
+	public void emeraldBoxClosedAfterOnePickKeepsEverything(GameTestHelper context) {
+		ServerPlayer p = context.makeMockServerPlayerInLevel();
+		p.getInventory().clearContent();
+		p.setItemInHand(InteractionHand.MAIN_HAND, fixedBox(RewardTier.EMERALD, sixCards()));
+		RewardBoxes.open(p, InteractionHand.MAIN_HAND);
+		((RewardBoxMenu) p.containerMenu).clickMenuButton(p, 1);
+		p.closeContainer();
+		context.assertTrue(p.getMainHandItem().is(RewardBoxes.item(RewardTier.EMERALD)), "box kept");
+		context.assertTrue(!RewardBoxes.claim(p, InteractionHand.MAIN_HAND, 0b10), "a one-card claim is refused");
+		context.assertTrue(!RewardBoxes.claim(p, InteractionHand.MAIN_HAND, 0b111), "a three-card claim is refused");
+		context.assertTrue(p.getInventory().countItem(Items.DIAMOND) == 0 && p.getInventory().countItem(Items.IRON_INGOT) == 0, "nothing given");
+		RewardBoxes.open(p, InteractionHand.MAIN_HAND);
+		context.assertTrue(((RewardBoxMenu) p.containerMenu).selected() == 0, "reopened with no pick");
+		context.succeed();
+	}
+
+	/** A Mending card gives a book that stores Mending; Sharpness V stores level 5. */
+	@GameTest(maxTicks = 100)
+	public void enchantedBookCardsCarryTheirEnchantment(GameTestHelper context) {
+		ServerPlayer p = context.makeMockServerPlayerInLevel();
+		p.getInventory().clearContent();
+		p.setItemInHand(InteractionHand.MAIN_HAND, fixedBox(RewardTier.EMERALD, sixCards()));
+		RewardBoxes.open(p, InteractionHand.MAIN_HAND);
+		RewardBoxMenu menu = (RewardBoxMenu) p.containerMenu;
+		menu.clickMenuButton(p, 3);
+		menu.clickMenuButton(p, 5);
+		context.assertTrue(menu.clickMenuButton(p, RewardBoxMenu.CLAIM_BUTTON), "claim works");
+		var enchants = p.level().registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
+		int mending = 0;
+		int sharp = 0;
+		int books = 0;
+		for (ItemStack st : p.getInventory().getNonEquipmentItems()) {
+			if (st.is(Items.ENCHANTED_BOOK)) {
+				books++;
+				ItemEnchantments stored = st.get(DataComponents.STORED_ENCHANTMENTS);
+				context.assertTrue(stored != null, "a book stores its enchantment");
+				mending += stored.getLevel(enchants.getOrThrow(Enchantments.MENDING));
+				sharp += stored.getLevel(enchants.getOrThrow(Enchantments.SHARPNESS));
+			}
+		}
+		context.assertTrue(books == 2 && mending == 1 && sharp == 5, "books " + books + " mending " + mending + " sharpness " + sharp);
+		context.succeed();
+	}
+
+	@GameTest(maxTicks = 100)
+	public void bottleOfEnlightenmentGivesSixteenLevelsAndIsConsumed(GameTestHelper context) {
+		ServerPlayer p = context.makeMockServerPlayerInLevel();
+		p.getInventory().clearContent();
+		p.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
+		p.experienceLevel = 0;
+		p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(RewardBoxes.BOTTLE, 2));
+		ItemStack hand = p.getMainHandItem();
+		context.assertTrue(hand.getUseDuration(p) == 32, "drinks for 32 ticks, was " + hand.getUseDuration(p));
+		hand.finishUsingItem(p.level(), p);
+		context.assertTrue(p.experienceLevel == 16, "16 levels, was " + p.experienceLevel);
+		context.assertTrue(p.getMainHandItem().getCount() == 1, "one bottle consumed, left " + p.getMainHandItem().getCount());
+		p.getMainHandItem().finishUsingItem(p.level(), p);
+		context.assertTrue(p.experienceLevel == 32, "second bottle: 32 levels, was " + p.experienceLevel);
 		context.succeed();
 	}
 }

@@ -15,7 +15,7 @@ public final class QuestGenerator {
 		new Entry("minecraft:iron_ingot", 64), new Entry("minecraft:coal", 64), new Entry("minecraft:redstone", 64),
 		new Entry("minecraft:lapis_lazuli", 64), new Entry("minecraft:carrot", 64), new Entry("minecraft:potato", 64),
 		new Entry("minecraft:wheat", 64), new Entry("minecraft:oak_log", 64),
-		new Entry("minecraft:gold_ingot", 64), new Entry("minecraft:mutton", 48), new Entry("minecraft:beef", 48),
+		new Entry("minecraft:gold_ingot", 64), new Entry("minecraft:mutton", 48), new Entry("minecraft:beef", 48), new Entry("minecraft:porkchop", 48),
 		new Entry("minecraft:bone", 48), new Entry("minecraft:string", 48), new Entry("minecraft:leather", 48),
 		new Entry("minecraft:gunpowder", 32), new Entry("minecraft:ender_pearl", 32),
 		new Entry("minecraft:diamond", 16), new Entry("minecraft:emerald", 16));
@@ -33,7 +33,8 @@ public final class QuestGenerator {
 	private static final List<Entry> KILL = List.of(
 		new Entry("minecraft:zombie", 16), new Entry("minecraft:skeleton", 16), new Entry("minecraft:spider", 16),
 		new Entry("minecraft:creeper", 16), new Entry("minecraft:enderman", 16), new Entry("minecraft:drowned", 16),
-		new Entry("minecraft:witch", 8));
+		new Entry("minecraft:witch", 6), new Entry("minecraft:blaze", 8),
+		new Entry("minecraft:wither_skeleton", 8), new Entry("minecraft:phantom", 8));
 
 	private record Weighted(String id, int weight) {}
 
@@ -77,14 +78,15 @@ public final class QuestGenerator {
 	private static final int DEATH_MATCH_WEIGHT = 12;
 
 	private static QuestType pickType(RandomGenerator rng, boolean offerDeathMatch) {
-		int r = rng.nextInt(30 + 30 + 15 + 12 + 13 + (offerDeathMatch ? DEATH_MATCH_WEIGHT : 0));
-		if (r < 30) {
+		// D88: collect 27, kill 27, explore 15, Blood Moon 15, boss 16 (total 100); Death Match 12 on top when offered.
+		int r = rng.nextInt(100 + (offerDeathMatch ? DEATH_MATCH_WEIGHT : 0));
+		if (r < 27) {
 			return QuestType.COLLECT;
-		} else if (r < 60) {
+		} else if (r < 54) {
 			return QuestType.KILL;
-		} else if (r < 75) {
+		} else if (r < 69) {
 			return QuestType.EXPLORE;
-		} else if (r < 87) {
+		} else if (r < 84) {
 			return QuestType.BLOOD_MOON;
 		}
 		return r < 100 ? QuestType.BOSS : QuestType.DEATH_MATCH;
@@ -157,14 +159,14 @@ public final class QuestGenerator {
 		return new Quest(id, List.copyOf(lines), false);
 	}
 
-	/** Always 4 days (D32); rng kept so callers and saves stay the same. */
+	/** Always 5 days (D87, was 4 in D32); rng kept so callers and saves stay the same. */
 	public static int daysUntilNext(RandomGenerator rng) {
-		return 4;
+		return 5;
 	}
 
-	/** 4 days (D32): the wait after a Wanderer left (time up, Give up or all lines claimed). */
+	/** 5 days (D87): the wait after a Wanderer left (time up, Give up or all lines claimed). */
 	public static int daysUntilReturn(RandomGenerator rng) {
-		return 4;
+		return 5;
 	}
 
 	/** {dx, dz}: random direction, distance 450..550 (D27). */

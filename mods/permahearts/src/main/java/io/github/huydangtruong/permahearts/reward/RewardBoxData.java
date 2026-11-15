@@ -13,6 +13,8 @@ public record RewardBoxData(List<RewardOption> options) {
 	public static final StreamCodec<ByteBuf, RewardOption> OPTION_STREAM_CODEC = StreamCodec.composite(
 		ByteBufCodecs.STRING_UTF8, RewardOption::itemId,
 		ByteBufCodecs.VAR_INT, RewardOption::count,
+		ByteBufCodecs.STRING_UTF8, RewardOption::enchant,
+		ByteBufCodecs.VAR_INT, RewardOption::enchantLevel,
 		RewardOption::new);
 
 	public static final StreamCodec<ByteBuf, List<RewardOption>> OPTIONS_STREAM_CODEC =
