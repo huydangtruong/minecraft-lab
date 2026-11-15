@@ -65,7 +65,12 @@ public class WarpClientTest implements FabricClientGameTest {
 			context.waitTicks(15);
 			check(context.computeOnClient(mc -> ClientSkills.focusOf(mc.player) == Technique.WARP), "the focus is in hand");
 
-			// two right clicks place two portals, the third is refused
+			// D79: a short right click places nothing; then two 1 s holds place two portals, the third is refused
+			rightClick(context, 4);
+			context.waitTicks(10);
+			int none = server.computeOnServer(s -> WarpSavedData.of(s).get().portals().size());
+			check(none == 0, "a short click must not place a portal, portals: " + none);
+			context.takeScreenshot("89-warp-short-click-hint");
 			rightClick(context);
 			context.waitTicks(10);
 			server.runCommand("tp @a[name=!Friend] 0 100 -3 0 36");
@@ -92,9 +97,14 @@ public class WarpClientTest implements FabricClientGameTest {
 		}
 	}
 
+	/** A right click held long enough to place a portal (D79: 1 s, plus a little). */
 	private static void rightClick(ClientGameTestContext context) {
+		rightClick(context, 24);
+	}
+
+	private static void rightClick(ClientGameTestContext context, int ticks) {
 		context.getInput().holdMouse(RIGHT);
-		context.waitTicks(4);
+		context.waitTicks(ticks);
 		context.getInput().releaseMouse(RIGHT);
 	}
 

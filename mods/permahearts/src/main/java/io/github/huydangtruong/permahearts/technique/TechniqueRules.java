@@ -15,9 +15,21 @@ public final class TechniqueRules {
 	/** Seconds a charged throw needs to reach full power (like a bow). */
 	public static final float FULL_CHARGE_SECONDS = 1f;
 
+	/** D79: Cosmic Warping places a portal only after right click is held this long (no portal from a misclick). */
+	public static final float WARP_PLACE_SECONDS = 1f;
+
 	/** Seconds of holding right click to reach full charge: Thousand Mile Step takes 3 times as long as the orbs (D58). */
 	public static float fullChargeSeconds(Technique t) {
-		return t == Technique.TELEPORT ? 3 * FULL_CHARGE_SECONDS : FULL_CHARGE_SECONDS;
+		return switch (t) {
+			case TELEPORT -> 3 * FULL_CHARGE_SECONDS;
+			case WARP -> WARP_PLACE_SECONDS;
+			default -> FULL_CHARGE_SECONDS;
+		};
+	}
+
+	/** D79: true when a Cosmic Warping charge is full, so the portal may be placed. */
+	public static boolean warpPlaceReady(float charge) {
+		return charge >= 1f;
 	}
 
 	private TechniqueRules() {}

@@ -60,6 +60,9 @@ public final class TechniqueNet {
 		}
 	}
 
+	/** D79: shown when right click is let go before the 1 s charge of Cosmic Warping. */
+	public static final String WARP_HOLD_HINT = "Hold right click for 1 s to open a portal";
+
 	private TechniqueNet() {}
 
 	public static void register() {
@@ -109,6 +112,9 @@ public final class TechniqueNet {
 			return "Learn " + t.displayName() + " first";
 		}
 		if (t == Technique.WARP) {
+			if (!TechniqueRules.warpPlaceReady(charge)) {
+				return WARP_HOLD_HINT; // D79: a short click places nothing
+			}
 			// D75: right click only places a portal (no cooldown, the refusal is a red overlay sent by Warp); the cooldown starts after a warp
 			io.github.huydangtruong.permahearts.technique.warp.Warp.place(p, level);
 			return null;

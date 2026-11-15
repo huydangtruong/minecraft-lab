@@ -276,7 +276,7 @@ public final class ClientSkills {
 		if (down && !useWasDown) {
 			if (t.charged()) {
 				TechniqueData d = data(mc.player);
-				long left = d.cooldownLeft(t, mc.level.getGameTime());
+				long left = t == Technique.WARP ? 0 : d.cooldownLeft(t, mc.level.getGameTime()); // D75: placing a portal has no cooldown
 				if (left > 0) {
 					cast(mc, selected, 1f); // only shows the cooldown message
 				} else {
@@ -289,8 +289,13 @@ public final class ClientSkills {
 		} else if (down && charging) {
 			chargeTicks++;
 		} else if (!down && charging) {
+			float c = currentCharge();
 			charging = false;
-			cast(mc, selected, currentCharge());
+			if (t == Technique.WARP && !TechniqueRules.warpPlaceReady(c)) {
+				mc.player.sendOverlayMessage(Component.literal(TechniqueNet.WARP_HOLD_HINT)); // D79: let go too early, no portal
+			} else {
+				cast(mc, selected, c);
+			}
 		}
 		useWasDown = down;
 	}

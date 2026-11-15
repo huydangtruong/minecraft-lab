@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.mojang.serialization.JsonOps;
+import io.github.huydangtruong.permahearts.technique.SkillBarLogic;
 import io.github.huydangtruong.permahearts.technique.Technique;
 import io.github.huydangtruong.permahearts.technique.TechniqueRules;
 import io.github.huydangtruong.permahearts.technique.warp.PortalRecord;
@@ -16,6 +17,17 @@ import org.junit.jupiter.api.Test;
 
 /** P-026: the pure rules of Quantum Leap's rename and Cosmic Warping (D74, D75). */
 class WarpRulesTest {
+	@Test
+	void placingAPortalNeedsAOneSecondHold() { // D79
+		assertTrue(Technique.WARP.charged());
+		assertEquals(1f, TechniqueRules.fullChargeSeconds(Technique.WARP));
+		assertTrue(!TechniqueRules.warpPlaceReady(SkillBarLogic.charge(4, TechniqueRules.fullChargeSeconds(Technique.WARP))), "a click");
+		assertTrue(!TechniqueRules.warpPlaceReady(SkillBarLogic.charge(19, 1f)), "0.95 s");
+		assertTrue(TechniqueRules.warpPlaceReady(SkillBarLogic.charge(20, 1f)), "1 s");
+		assertTrue(TechniqueRules.warpPlaceReady(SkillBarLogic.charge(60, 1f)), "longer");
+		assertTrue(!TechniqueRules.warpPlaceReady(Float.NaN), "a forged NaN charge");
+	}
+
 	@Test
 	void teleportIsQuantumLeapButKeepsItsId() {
 		assertEquals("Quantum Leap", Technique.TELEPORT.displayName());

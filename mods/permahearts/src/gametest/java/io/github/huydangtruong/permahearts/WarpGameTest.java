@@ -49,6 +49,8 @@ public class WarpGameTest {
 	public void levelOnePlacesTwoPortalsAndRefusesTheThird(GameTestHelper c) {
 		ServerPlayer p = warper(c, 5.5, 5.5);
 		p.setXRot(60f);
+		c.assertTrue(TechniqueNet.WARP_HOLD_HINT.equals(TechniqueNet.cast(p, 0, 0.5f)), "D79: a half charge is refused with the hint");
+		c.assertTrue(count(c, p) == 0, "no portal from a half charge, was " + count(c, p));
 		c.assertTrue(TechniqueNet.cast(p, 0, 1f) == null, "the cast is accepted");
 		c.assertTrue(count(c, p) == 1, "one portal after the first right click, was " + count(c, p));
 		p.setXRot(40f);
