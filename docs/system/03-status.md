@@ -26,7 +26,7 @@ Release steps: [workflow/release.md](../workflow/release.md). Release **only whe
 
 ## In flight
 
-- **God Slayer, P-032**: merged into `main`. Not playtested by hand (see playtest.md "God Slayer"). Next: the new look (D98) with the Heaven Blast stun (BL-008), then P-033 (skills for Lv 2 to 10 through `GodSlayerSkills`).
+- **P-034 God Slayer look + Heaven Blast stun** (D98, D99): a Sonnet dev works on `feat/P-034-dev` in a `.claude/worktrees/` worktree and merges into `feat/P-034-look-stun` (local; the manager pushes). Then P-033 (God Slayer skills Lv 2 to 10 through `GodSlayerSkills`), no plan yet.
 
 - **Windows installer bug** (reported by Huy's friend): picking a profile other than "26.3 Fabric Essential" says SUCCESS, but that profile's mods folder still has the old jar. Reading `minecraft-lab.ps1` (`Find-Profiles` / `Select-Profile`) found nothing yet. Waiting for the friend's `Mods folder:` line and that profile's Game directory.
 
