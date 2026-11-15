@@ -125,6 +125,78 @@ public class IllusionWorkGameTest {
 		});
 	}
 
+	private static void tree(GameTestHelper c, int x, int z, int logs, net.minecraft.world.level.block.Block log) {
+		c.setBlock(x, 0, z, Blocks.DIRT);
+		for (int y = 1; y <= logs; y++) {
+			c.setBlock(x, y, z, log);
+		}
+		var leaf = Blocks.OAK_LEAVES.defaultBlockState().setValue(LeavesBlock.PERSISTENT, false).setValue(LeavesBlock.DISTANCE, 1);
+		c.setBlock(x, logs + 1, z, leaf);
+		c.setBlock(x - 1, logs, z, leaf);
+		c.setBlock(x + 1, logs, z, leaf);
+		c.setBlock(x, logs, z - 1, leaf);
+		c.setBlock(x, logs, z + 1, leaf);
+	}
+
+	private static int logsLeft(GameTestHelper c, int x, int z, int logs, net.minecraft.world.level.block.Block log) {
+		int n = 0;
+		for (int y = 1; y <= logs; y++) {
+			if (c.getBlockState(new BlockPos(x, y, z)).is(log)) {
+				n++;
+			}
+		}
+		return n;
+	}
+
+	private static int logItems(GameTestHelper c, ServerPlayer p, net.minecraft.world.item.Item item) {
+		int n = c.getLevel().getEntitiesOfClass(ItemEntity.class, arena(c), e -> e.getItem().is(item)).stream().mapToInt(e -> e.getItem().getCount()).sum();
+		for (int i = 0; i < p.getInventory().getContainerSize(); i++) {
+			if (p.getInventory().getItem(i).is(item)) {
+				n += p.getInventory().getItem(i).getCount();
+			}
+		}
+		return n;
+	}
+
+	/** P-028 (D82): a level-1 clone fells a 6-log oak in 12 s, and with no chest every log ends up on the ground or with the owner. */
+	@GameTest(maxTicks = 900)
+	public void chopFellsASixLogOakWithin12SecondsAndDropsTheLogsWithoutAChest(GameTestHelper c) {
+		ServerPlayer p = owner(c, new ItemStack(Items.IRON_AXE));
+		tree(c, 6, 2, 6, Blocks.OAK_LOG);
+		Illusion a = castOne(c, p);
+		long start = c.getLevel().getGameTime();
+		long[] felled = {-1};
+		c.succeedWhen(() -> {
+			if (felled[0] < 0 && logsLeft(c, 6, 2, 6, Blocks.OAK_LOG) == 0) {
+				felled[0] = c.getLevel().getGameTime() - start;
+				System.out.println("CHOPTIME oak6 ticks=" + felled[0]);
+			}
+			c.assertTrue(felled[0] >= 0, "the oak is felled" + dbg(a) + " left=" + logsLeft(c, 6, 2, 6, Blocks.OAK_LOG));
+			c.assertTrue(felled[0] <= 240, "felled within 12 s, took " + felled[0] + " ticks");
+			c.assertTrue(!a.isAlive(), "wait until the clone is gone" + dbg(a));
+			int n = logItems(c, p, Items.OAK_LOG);
+			c.assertTrue(n == 6, "all 6 logs dropped or picked up by the owner, found " + n);
+			FlightBladeGameTest.drop(c, p);
+		});
+	}
+
+	/** P-028 (D82): a tall tree is felled completely, no log left floating. */
+	@GameTest(maxTicks = 900)
+	public void chopFellsATallBirchCompletely(GameTestHelper c) {
+		ServerPlayer p = owner(c, new ItemStack(Items.IRON_AXE));
+		tree(c, 6, 2, 7, Blocks.BIRCH_LOG);
+		Illusion a = castOne(c, p);
+		long start = c.getLevel().getGameTime();
+		c.succeedWhen(() -> {
+			int left = logsLeft(c, 6, 2, 7, Blocks.BIRCH_LOG);
+			if (left == 0) {
+				System.out.println("CHOPTIME birch7 ticks=" + (c.getLevel().getGameTime() - start));
+			}
+			c.assertTrue(left == 0, "the birch is felled, " + left + " logs left" + dbg(a));
+			FlightBladeGameTest.drop(c, p);
+		});
+	}
+
 	@GameTest(maxTicks = 1200)
 	public void shearTakesTheWoolOfASheepToTheChest(GameTestHelper c) {
 		ServerPlayer p = owner(c, new ItemStack(Items.SHEARS));

@@ -28,13 +28,19 @@ import net.minecraft.world.phys.Vec3;
  */
 final class ChopTask implements WorkTask {
 	private static final int MAX_LOGS = 64;
-	private static final double REACH = 6.0;
+	/** Reach from the clone's eyes to the centre of a log. */
+	private static final double REACH = 5.5;
+	/** Ticks the clone may walk towards one log before it gives up on it (5 s). */
+	private static final int WALK_LIMIT = 100;
 
 	private List<BlockPos> tree = new ArrayList<>();
 	private final Set<BlockPos> notNatural = new HashSet<>();
 	/** Where a trunk stood and the sapling item that belongs there. */
 	private final List<Stump> stumps = new ArrayList<>();
 	private boolean had;
+	/** The lowest log of the tree being felled: the clone walks to its foot to reach the logs above. */
+	private BlockPos foot;
+	private int walking;
 
 	private record Stump(BlockPos pos, Item sapling) {}
 
@@ -55,7 +61,20 @@ final class ChopTask implements WorkTask {
 		}
 		BlockPos log = tree.get(0);
 		Vec3 at = Vec3.atCenterOf(log);
-		if (!g.goTo(log, at, REACH) || !g.ready()) {
+		if (a.getEyePosition().distanceToSqr(at) > REACH * REACH) {
+			// Out of reach: stand at the foot of the trunk (a log high in a tree is no place to path to), and give up on a
+			// log after a few seconds or as soon as there is no way to it, instead of waiting 15 s.
+			BlockPos to = foot != null ? foot : log;
+			boolean there = g.goTo(to, Vec3.atCenterOf(to), 2.0);
+			if (g.isSkipped(to) || ++walking > WALK_LIMIT || there) {
+				g.skip(log, 400);
+				walking = 0;
+			}
+			return true;
+		}
+		walking = 0;
+		a.getNavigation().stop();
+		if (!g.ready()) {
 			return true;
 		}
 		a.getLookControl().setLookAt(at.x, at.y, at.z);
@@ -131,6 +150,8 @@ final class ChopTask implements WorkTask {
 			if (natural(sl, found)) {
 				found.sort(Comparator.<BlockPos>comparingInt(BlockPos::getY).thenComparingDouble(p -> p.distSqr(from)));
 				tree = found;
+				foot = found.get(0);
+				walking = 0;
 				return;
 			}
 			notNatural.addAll(found);
