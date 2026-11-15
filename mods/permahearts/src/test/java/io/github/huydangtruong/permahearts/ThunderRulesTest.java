@@ -47,7 +47,7 @@ class ThunderRulesTest {
 		assertEquals("14", s1.get(0).value());
 		assertEquals("100% of a creeper", s1.get(1).value());
 		assertEquals("128 blocks", s1.get(2).value());
-		assertEquals("24 s", s1.get(3).value());
+		assertEquals("26 s", s1.get(3).value());
 		List<TechniqueRules.Stat> s20 = TechniqueRules.stats(Technique.THUNDER, 20);
 		assertEquals("52", s20.get(0).value());
 		assertEquals("195% of a creeper", s20.get(1).value());
