@@ -265,7 +265,7 @@ Mở Cultivation, tab Techniques.
 ## God Slayer (P-032, D96, D97)
 
 1. Là OP, gõ `/boss summon` (hoặc `/boss summon <người>`): chữ lớn "God Slayer" giữa màn hình, tin chat tên người bị săn, tiếng trống, 10 giây cuối có đếm ngược. Gõ lại lúc đó: báo đang bận.
-2. Sau 60 giây boss hiện ra cách người bị săn 15 đến 20 ô, có khói đen. Cao khoảng 3 ô, da đỏ, tóc trắng, hai sừng, hai katana. Thanh máu đỏ chia 10 phần, tên "God Slayer — Lv 1", màn hình tối đi. Ra xa hơn 96 ô thì thanh biến mất.
+2. Sau 60 giây boss hiện ra cách người bị săn 15 đến 20 ô, có khói đen. Cao 5 ô (gấp 2,5 người chơi), da đỏ, tóc trắng dài, sừng cong lớn, dạng chân hai tay mở, hai katana lớn dựng đứng ở hai bên; chạy thì chân đung đưa, chém thì tay phải giơ lên rồi bổ xuống. Thanh máu đỏ chia 10 phần, tên "God Slayer — Lv 1", màn hình tối đi. Ra xa hơn 96 ô thì thanh biến mất.
 3. Nó chạy rất nhanh và chém khi tới gần 3,5 ô: ở Lv 1 trừ 30 máu mỗi giây một nhát (độ khó Normal). Bạn đứng trên cao hoặc bay: nó bay lên bắt. Xuống nước: nó bơi nhanh hơn cá heo rất nhiều. Đứng sau tường: nó đập tường (khi `mobGriefing` bật), tắt thì nó dịch chuyển tới cạnh bạn. Cách xa hơn 48 ô cũng dịch chuyển.
 4. Đánh nó bằng kiếm hoặc chiêu thức: mỗi nhát mất tối đa 40 máu. Lửa, nổ, quái khác, dung nham, rơi không làm nó mất máu. Frostbite và Repulse chỉ còn 10%. Không dắt, không cưỡi, không đẩy được.
 5. Đi vào Nether lúc nó đang săn: nó theo sang. Người bị săn chết: nó quay sang người khác (tin chat), hết người thì nó thắng.
@@ -274,3 +274,4 @@ Mở Cultivation, tab Techniques.
 8. Tự xuất hiện: từ ngày 100, mỗi lần Crimson Master đến lần thứ 4, 8, 12. Có người từ 30 tim thì săn người đó, không ai đủ thì tin chat "Weaklings. Come back when your hearts can bear my blade.".
 9. Tắt game giữa lúc săn: mở lại không còn boss, không còn đồng hồ.
 10. Kiểm bằng máy: `GodSlayerRulesTest`, `GodSlayerGameTest`, `GodSlayerClientTest` (ảnh `90-god-slayer-front`).
+10. Heaven Blast choáng (P-034): vây vài Husk, dùng Hất tung. Chúng bị đẩy ra rồi đứng đơ khoảng 1 giây ở Lv 1 (lâu hơn ở level cao, tới 2,9 s), có hạt sao quay trên đầu, không đi, không đánh; hết giờ thì lại đuổi bạn. Bảng chiêu có dòng "Stun". Dùng lên boss: chỉ choáng chừng 0,1 giây.
