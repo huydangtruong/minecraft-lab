@@ -1,7 +1,7 @@
 # P-025 — Illusion work modes (farm, fish, chop, shear, milk, breed)
 
 > Tóm tắt (VN): món đồ trên tay lúc dùng chiêu quyết định việc của phân thân: cuốc làm ruộng, cần câu câu cá, rìu chặt cây, kéo cắt lông cừu, xô vắt sữa, lúa mì / cà rốt / khoai tây cho thú ăn. Thành quả bỏ vào rương gần nhất. Có đánh nhau thì đánh bằng món đang cầm rồi quay lại làm. Tồn tại 30 → 50 giây, hồi 110 giây.
-> Decision: D73 (builds on D71, P-024). Branch: dev on `feat/P-025-dev`, merges into `feat/P-025-illusion-work`.
+> Decision: D73 (builds on D71, P-024). Also fixes: hostile mobs ignore the clones. Branch: dev on `feat/P-025-dev`, merges into `feat/P-025-illusion-work`.
 
 - **Status:** ready
 - **Dev:** one Sonnet subagent
@@ -89,6 +89,23 @@ Keep the D71 target list as it is: whoever hits the owner, or whom the owner hit
 - In a work job, also fight hostile mobs that come **within 6 blocks** of the clone or the owner. Ignore farther ones, so the work goes on.
 - Fight with the **locked item**. Damage stays at factor × the owner's current attack damage, as in P-024. Keep that rule as it is; do not invent tool damage.
 - When the target list is empty again, return to the job.
+
+## Bug fix in the same batch: hostile mobs ignore the clones (Huy)
+
+Zombies, skeletons, creepers and the like always target the real player and never a clone. That gives away which one is real.
+
+- **Wanted behaviour:** a hostile mob picking a target among the owner and the owner's clones has an **equal chance** for each of them that it can see and reach within its follow range. So mobs split between the real one and the clones.
+- **Where to hook:** check with javap. Two likely options:
+  - a mixin on `NearestAttackableTargetGoal`, where it picks a player target: if the found player owns live clones, swap the target for a random one among the player and those clones;
+  - or add a target goal for `Illusion` to `Monster`s when they load.
+  - Keep it to hostile mobs (`Enemy`). Leave neutral mobs (wolves, iron golems) as vanilla.
+- **Retargeting:**
+  - Keep the choice while that target is alive and valid. A mob does not flip every tick.
+  - When a mob's clone target vanishes, the mob picks again by the same rule.
+- **Combat effects:**
+  - A creeper exploding next to a clone hurts it normally.
+  - A clone hit by a mob adds that mob to the target list (it already fights `Enemy` mobs).
+- **Test:** a game test with a zombie in a small closed room with the owner and 3 clones (all equally near). Over a few re-picks or several zombies, at least one zombie targets a clone. Use enough zombies, or force re-picks, so the test is not flaky.
 
 ## Code shape
 
