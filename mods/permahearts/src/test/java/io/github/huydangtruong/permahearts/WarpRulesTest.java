@@ -50,10 +50,10 @@ class WarpRulesTest {
 	}
 
 	@Test
-	void cooldownShrinksFrom160To65Seconds() {
-		assertEquals(160, TechniqueRules.warpCooldownSeconds(1));
+	void cooldownShrinksFrom90To65Seconds() {
+		assertEquals(90, TechniqueRules.warpCooldownSeconds(1)); // D80
 		assertEquals(65, TechniqueRules.warpCooldownSeconds(20));
-		assertEquals(160 * 20, TechniqueRules.cooldownTicks(Technique.WARP, 1));
+		assertEquals(90 * 20, TechniqueRules.cooldownTicks(Technique.WARP, 1));
 		assertEquals(65 * 20, TechniqueRules.cooldownTicks(Technique.WARP, 20));
 	}
 

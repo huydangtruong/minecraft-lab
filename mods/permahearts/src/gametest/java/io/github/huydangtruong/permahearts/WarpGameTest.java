@@ -116,7 +116,7 @@ public class WarpGameTest {
 		long now = c.getLevel().getServer().overworld().getGameTime();
 		c.assertTrue(TechniqueAttachment.get(p).onCooldown(Technique.WARP, now), "the cooldown started");
 		long left = TechniqueAttachment.get(p).cooldownLeft(Technique.WARP, now);
-		c.assertTrue(left == TechniqueRules.cooldownTicks(Technique.WARP, 1), "160 s at level 1, was " + left + " ticks");
+		c.assertTrue(left == TechniqueRules.cooldownTicks(Technique.WARP, 1), "90 s at level 1, was " + left + " ticks");
 		FlightBladeGameTest.place(c, p, 9.5, 1, 9.5, 0f, 0f);
 		before = p.position();
 		c.assertTrue(Warp.warpToPortal(p, rec.id()) != null, "a second warp during the cooldown is refused");

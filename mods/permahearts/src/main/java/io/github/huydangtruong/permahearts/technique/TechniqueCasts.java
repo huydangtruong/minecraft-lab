@@ -127,7 +127,7 @@ public final class TechniqueCasts {
 			t == Technique.FIRE ? SoundEvents.BLAZE_SHOOT : SoundEvents.SNOWBALL_THROW, SoundSource.PLAYERS, 1f, 1f);
 	}
 
-	// ---- Healing Light ----
+	// ---- Healing Domain ----
 
 	private static void healingLight(ServerPlayer caster, int level) {
 		ServerLevel sl = caster.level();

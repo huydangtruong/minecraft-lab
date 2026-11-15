@@ -191,9 +191,9 @@ public final class TechniqueRules {
 		return 10;
 	}
 
-	/** Health (half hearts) healed over the circle's whole duration: 20 = 10 hearts at level 1. */
+	/** Health (half hearts) healed over the circle's whole duration (D80): 12 hearts at level 1 up to 48 at level 20, straight line. */
 	public static double healingTotal(int level) {
-		return scaled(20, 4, level);
+		return linear(level, 24, 96);
 	}
 
 	public static double phaseSeconds(int level) {
@@ -457,10 +457,9 @@ public final class TechniqueRules {
 		return 2 + (l - 1) * 18 / 19;
 	}
 
-	/** Seconds of cooldown after a warp: 160 at level 1, 5 less per level (65 at level 20). */
+	/** Seconds of cooldown after a warp (D80): 90 at level 1 down to 65 at level 20, straight line, rounded. */
 	public static int warpCooldownSeconds(int level) {
-		int l = Math.max(1, Math.min(MAX_LEVEL, level));
-		return 160 - 5 * (l - 1);
+		return (int) Math.round(linear(level, 90, 65));
 	}
 
 	/** Cooldown of a technique at a level in seconds: the enum value, except Cosmic Warping which falls with the level. */

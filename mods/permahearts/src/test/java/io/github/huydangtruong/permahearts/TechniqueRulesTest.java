@@ -67,7 +67,7 @@ class TechniqueRulesTest {
 		assertArrayEquals(new double[] {0.40, 0.40 + 0.56 * 9 / 19, 0.96}, at(TechniqueRules::iceAttackSlow), 1e-9);
 		assertEquals(8, TechniqueRules.iceAreaSeconds(5));
 		assertEquals(4, TechniqueRules.iceLingerSeconds(5));
-		assertArrayEquals(new double[] {20, 56, 76}, at(TechniqueRules::healingTotal));
+		assertArrayEquals(new double[] {24, 24 + 72.0 * 9 / 19, 96}, at(TechniqueRules::healingTotal)); // D80: 12 -> 48 hearts
 		assertArrayEquals(new double[] {10, 14.5, 17}, at(TechniqueRules::phaseSeconds), 1e-9);
 		assertArrayEquals(new double[] {5, 9.5, 12}, at(TechniqueRules::repulseDamage), 1e-9);
 		assertArrayEquals(new double[] {0.80, 0.50, 0.30}, at(TechniqueRules::sacrificeCost), 1e-9);
@@ -83,15 +83,15 @@ class TechniqueRulesTest {
 		assertEquals(0.04f, TechniqueRules.flyingSpeed(1), 1e-6f); // 80% of creative (0.05)
 		assertEquals(0.1f, TechniqueRules.flyingSpeed(20), 1e-6f); // 200% of creative
 		assertArrayEquals(new double[] {150, 50 * (3 + 47.0 * 9 / 19), 2500}, at(TechniqueRules::teleportRange), 1e-9);
-		assertEquals(60, Technique.TELEPORT.cooldownSeconds());
+		assertEquals(40, Technique.TELEPORT.cooldownSeconds());
 		assertEquals(3 * TechniqueRules.fullChargeSeconds(Technique.FIRE), TechniqueRules.fullChargeSeconds(Technique.TELEPORT), 1e-9);
 		assertEquals(3f, TechniqueRules.fullChargeSeconds(Technique.TELEPORT), 1e-9);
 		assertEquals("3 s", TechniqueRules.stats(Technique.TELEPORT, 1).get(2).value());
 		assertEquals(0.5f, io.github.huydangtruong.permahearts.technique.SkillBarLogic.charge(30, 3f), 1e-6);
-		assertEquals(120, Technique.FLIGHT.cooldownSeconds());
+		assertEquals(80, Technique.FLIGHT.cooldownSeconds());
 		assertEquals(12, Technique.BLADE.cooldownSeconds());
 		assertArrayEquals(new double[] {2, 2 + 4 * 9 / 19.0, 6}, at(TechniqueRules::bladeKnockback), 1e-9);
-		assertEquals(180, Technique.GOLEM.cooldownSeconds());
+		assertEquals(120, Technique.GOLEM.cooldownSeconds());
 		assertEquals(1, TechniqueRules.golemCount(1));
 		assertEquals(1, TechniqueRules.golemCount(9));
 		assertEquals(2, TechniqueRules.golemCount(10));
@@ -119,7 +119,7 @@ class TechniqueRulesTest {
 		assertEquals(60, TechniqueRules.ANGEL_SECONDS);
 		assertEquals("6", TechniqueRules.stats(Technique.ANGEL, 20).get(0).value());
 		assertEquals("60 s", TechniqueRules.stats(Technique.ANGEL, 1).get(3).value());
-		assertEquals(120, Technique.AQUA.cooldownSeconds());
+		assertEquals(100, Technique.AQUA.cooldownSeconds());
 		assertEquals("Aqua Marine", Technique.AQUA.displayName());
 		assertEquals("aqua", Technique.AQUA.id());
 		assertArrayEquals(new double[] {30, 30 + 40.0 * 9 / 19, 70}, at(TechniqueRules::aquaSeconds), 1e-9);
@@ -146,8 +146,10 @@ class TechniqueRulesTest {
 		assertEquals("24 blocks/s", TechniqueRules.stats(Technique.AQUA, 20).get(2).value());
 		assertEquals("\u00d72 aqua affinity", TechniqueRules.stats(Technique.AQUA, 20).get(3).value());
 		assertEquals(16, Technique.FIRE.cooldownSeconds());
-		assertEquals(24, Technique.ICE.cooldownSeconds());
-		assertEquals(60, Technique.HEALING.cooldownSeconds());
+		assertEquals(18, Technique.ICE.cooldownSeconds());
+		assertEquals(40, Technique.HEALING.cooldownSeconds());
+		assertEquals(60, Technique.PHASE.cooldownSeconds());
+		assertEquals("Healing Domain", Technique.HEALING.displayName());
 	}
 
 	@Test
@@ -205,7 +207,7 @@ class TechniqueRulesTest {
 	@Test
 	void statLines() {
 		assertEquals("24 blocks", TechniqueRules.stats(Technique.FIRE, 1).get(0).value());
-		assertEquals("10 hearts", TechniqueRules.stats(Technique.HEALING, 1).get(1).value());
+		assertEquals("12 hearts", TechniqueRules.stats(Technique.HEALING, 1).get(1).value());
 		assertEquals("2.9", TechniqueRules.num(2.9000001));
 	}
 
