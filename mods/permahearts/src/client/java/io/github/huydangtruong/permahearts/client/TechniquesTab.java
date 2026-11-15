@@ -32,7 +32,6 @@ public final class TechniquesTab {
 	private static final int LIST_TOP = 44;
 	/** Pixels the list moves per mouse wheel notch. */
 	private static final int SCROLL_STEP = 12;
-	private static final int PLUS = 18;
 	private static final int LINE = 10;
 
 	private static final int TEXT = 0xFF404040;
@@ -97,7 +96,7 @@ public final class TechniquesTab {
 			case GOLEM -> "Summon loyal violet iron golems that fight for you for 90 seconds. More and stronger at higher levels.";
 			case AQUA -> "Breathe, swim fast and dig freely underwater.";
 			case ILLUSION -> "Creates illusions of yourself that fight for you. Who attacks you, or whom you attack, becomes their target. The item in your first hotbar slot picks their job (an empty first slot means they fight): hoe farms, rod fishes, axe chops, shears shear, bucket milks, wheat/carrots/seeds breed. Drops go to a chest near the cast point.";
-			case THUNDER -> "Aim the crosshair and click (left or right). The spot glows for 1 s, then lightning strikes it with a creeper-sized blast. Pigs, villagers, creepers and mooshrooms in the blast change like under real lightning. With nothing in sight it hits the ground far ahead.";
+			case THUNDER -> "Aim and click: the spot glows for 1 s, then lightning strikes and explodes like a creeper.";
 			case WARP -> "Hold right click for 1 s to open a portal where you look. Left click warps you to any of your portals, or to another player.";
 			case ANGEL -> "Summons warrior angels that fly through walls and fight for you.";
 		};
@@ -291,15 +290,6 @@ public final class TechniquesTab {
 					g.setTooltipForNextFrame(font, Component.literal("Learn it first: click i"), mx, my);
 				}
 			}
-			boolean showPlus = assign && level >= 1 && d.slotOf(t) != selectedSlot;
-			if (showPlus) {
-				int[] c = plusRect(right, y);
-				boolean can = canAssign(d, t);
-				boolean ch = can && in(mx, my, c[0], c[1], c[2], c[3]) && inView;
-				g.blitSprite(RenderPipelines.GUI_TEXTURED, Identifier.withDefaultNamespace(!can ? "widget/button_disabled" : ch ? "widget/button_highlighted" : "widget/button"),
-					c[0], c[1], c[2], c[3]);
-				g.blitSprite(RenderPipelines.GUI_TEXTURED, sprite("plus"), c[0] + 1, c[1] + 1, 16, 16);
-			}
 		}
 		g.disableScissor();
 		int max = maxScroll(h);
@@ -311,10 +301,6 @@ public final class TechniquesTab {
 		}
 	}
 
-	private static int[] plusRect(int right, int rowY) {
-		return new int[] {right - PLUS - 2, rowY + 2, PLUS, PLUS};
-	}
-
 	private static boolean canAssign(TechniqueData d, Technique t) {
 		return selectedSlot >= 0 && d.level(t) >= 1 && d.slotOf(t) != selectedSlot && !d.slotOnCooldown(selectedSlot, now());
 	}
@@ -324,9 +310,9 @@ public final class TechniquesTab {
 		return d.level(t) >= 1 && slot < d.slotsOpen() && d.slotOf(t) != slot && !d.slotOnCooldown(slot, now);
 	}
 
-	/** The "i" (details) button of a row, where the level text used to be, left of the + button. */
+	/** The "i" (details) button of a row, where the level text used to be; at the right edge of the row (D91). */
 	private static int[] infoRect(int right, int rowY) {
-		return new int[] {right - PLUS - 2 - 2 - INFO, rowY + 3, INFO, INFO};
+		return new int[] {right - 2 - INFO, rowY + 3, INFO, INFO};
 	}
 
 	/** The level bar under a technique name: {x, y}. */
@@ -359,7 +345,6 @@ public final class TechniquesTab {
 			}
 		}
 		g.text(font, lv, lx, ly, XP_GREEN, false);
-		levelBar(g, lx, ly + 11, BAR_W, level);
 		button(g, font, bk, "Back", true, mx, my);
 
 		// scrolling body: description (italic, wrapped), stats, Upgrade, Reset
@@ -526,7 +511,6 @@ public final class TechniquesTab {
 				continue;
 			}
 			Technique t = all[i];
-			int[] c = plusRect(right, y);
 			int[] info = infoRect(right, y);
 			int[] bar = barRect(tx, y);
 			if (in(mx, my, info[0], info[1], INFO, INFO)) { // "i": the only way to the detail page
@@ -534,14 +518,9 @@ public final class TechniquesTab {
 				detailScroll = 0;
 				selectedSlot = -1;
 				selectedTechnique = null;
-			} else if (assign && d.level(t) >= 1 && d.slotOf(t) != selectedSlot && in(mx, my, c[0], c[1], c[2], c[3])) {
-				if (canAssign(d, t)) {
-					send(TechniqueNet.ASSIGN, t.id(), selectedSlot);
-					selectedSlot = -1; // edit mode ends after a successful +
-				}
 			} else if (in(mx, my, bar[0], bar[1] - 1, BAR_W, BAR_H + 2) || d.level(t) < 1) {
 				// the bar only has a tooltip; an unlearned row does nothing
-			} else if (assign) { // slot first: the row name puts the technique into the chosen slot, like the +
+			} else if (assign) { // slot first: the row name puts the technique into the chosen slot
 				if (canAssign(d, t)) {
 					send(TechniqueNet.ASSIGN, t.id(), selectedSlot);
 					selectedSlot = -1;
@@ -609,10 +588,6 @@ public final class TechniquesTab {
 		out.add(new int[] {emeraldX(tx) + SLOT / 2, y0 + 19 + SLOT / 2});
 		for (int i = 0; i < Technique.values().length; i++) {
 			out.add(new int[] {tx + 40, rowY(y0, i) + 7}); // on the name, above the level bar
-		}
-		for (int i = 0; i < Technique.values().length; i++) {
-			int[] c = plusRect(right, rowY(y0, i));
-			out.add(new int[] {c[0] + PLUS / 2, c[1] + PLUS / 2});
 		}
 		int[] up = lastUp; // where the detail page last drew them
 		int[] re = lastRe;

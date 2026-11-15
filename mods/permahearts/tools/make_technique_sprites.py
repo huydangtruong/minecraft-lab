@@ -426,13 +426,12 @@ def blade_art():
     return img
 
 
-THUNDER = [  # a grey cloud with a yellow lightning bolt coming out of it (D86), original art
+THUNDER = [  # a grey cloud with a yellow lightning bolt coming out of it (D86), original art; empty rows above and below so the outline closes
     "................",
     "....cccc........",
     "...cccccc.cc....",
     "..ccccccccccc...",
-    ".cccccccccccccg.",
-    ".ccccccccccccggg",
+    ".ccccccccccccgg.",
     ".gggggggggggggg.",
     "..dddddddddddd..",
     "......yyyh......",
@@ -443,6 +442,7 @@ THUNDER = [  # a grey cloud with a yellow lightning bolt coming out of it (D86),
     ".....yyY........",
     "....yyY.........",
     "....yY..........",
+    "................",
 ]
 THUNDER_PAL = {"c": "e4e8f0", "g": "aab2c0", "d": "7c8496", "y": "ffd62a", "Y": "f0a000", "h": "fff7a8"}
 

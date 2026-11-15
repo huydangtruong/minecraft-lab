@@ -136,8 +136,7 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 	private static final int HS_SLOT = 0;
 	private static final int HS_EMERALD = 4;
 	private static final int HS_ROW = 5;
-	private static final int HS_CHECK = HS_ROW + Technique.values().length;
-	private static final int HS_UPGRADE = HS_ROW + 2 * Technique.values().length;
+	private static final int HS_UPGRADE = HS_ROW + Technique.values().length;
 	private static final int HS_RESET = HS_UPGRADE + 1;
 	private static final int HS_BACK = HS_UPGRADE + 2;
 	private static final int HS_INFO = HS_BACK + 1;
@@ -231,22 +230,23 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 		var fire = t.getEnumConstants()[0];
 		var ice = t.getEnumConstants()[1];
 		clickGui(context, hotspots(context).get(HS_SLOT), LEFT); // left click slot 1: edit mode
-		context.takeScreenshot("09e2-slot1-edit-mode"); // gold outline, cross instead of the emerald box, + buttons
+		context.takeScreenshot("09e2-slot1-edit-mode"); // gold outline, cross instead of the emerald box
+		context.takeScreenshot("104-technique-rows"); // D91: slot selected, no + buttons, "i" at the right edge
 		clickGui(context, hotspots(context).get(HS_EMERALD), LEFT); // the cross cancels
-		clickGui(context, hotspots(context).get(HS_CHECK), LEFT); // outside slot mode a row click only picks the technique (P-028)
+		clickGui(context, hotspots(context).get(HS_ROW), LEFT); // outside slot mode a row click only picks the technique (P-028)
 		check(techniqueData(server).inSlot(0) == null, "no slot should be filled by picking a technique");
 		clickGui(context, hotspots(context).get(HS_EMERALD), LEFT); // Cancel
 		clickGui(context, hotspots(context).get(HS_SLOT), LEFT);
-		clickGui(context, hotspots(context).get(HS_CHECK), LEFT); // + on fire
-		check(techniqueData(server).inSlot(0) == fire, "+ on fire with slot 1 in edit mode should slot it");
+		clickGui(context, hotspots(context).get(HS_ROW), LEFT); // the fire row
+		check(techniqueData(server).inSlot(0) == fire, "the fire row with slot 1 in edit mode should slot it");
 		clickGui(context, hotspots(context).get(HS_SLOT + 1), LEFT); // edit slot 2
-		clickGui(context, hotspots(context).get(HS_CHECK + 1), LEFT); // + on ice
-		check(techniqueData(server).inSlot(1) == ice, "+ on ice with slot 2 in edit mode should slot it");
+		clickGui(context, hotspots(context).get(HS_ROW + 1), LEFT); // the ice row
+		check(techniqueData(server).inSlot(1) == ice, "the ice row with slot 2 in edit mode should slot it");
 		check(techniqueData(server).inSlot(0) == fire, "slot 1 keeps fire");
 		// move: edit slot 1, + on ice -> slot 1 ice, slot 2 empty
 		clickGui(context, hotspots(context).get(HS_SLOT), LEFT);
 		context.takeScreenshot("09f-move-before"); // fire + ice slotted, editing slot 1
-		clickGui(context, hotspots(context).get(HS_CHECK + 1), LEFT);
+		clickGui(context, hotspots(context).get(HS_ROW + 1), LEFT);
 		check(techniqueData(server).inSlot(0) == ice, "slot 1 should hold ice after the move");
 		check(techniqueData(server).inSlot(1) == null, "slot 2 should be empty after ice moved out of it");
 		context.takeScreenshot("09f2-after-move");
@@ -255,7 +255,7 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 		context.takeScreenshot("97-technique-picked");
 		clickGui(context, hotspots(context).get(HS_SLOT + 1), LEFT); // only two slots are open here
 		check(techniqueData(server).inSlot(1) == fire, "picking fire then clicking an outlined slot should slot it");
-		// slot first, then the row name (not the +)
+		// slot first, then the row name 
 		clickGui(context, hotspots(context).get(HS_SLOT + 1), LEFT);
 		clickGui(context, hotspots(context).get(HS_ROW + 2), LEFT);
 		check(techniqueData(server).inSlot(1) == t.getEnumConstants()[2], "slot 2 then the healing row should slot healing");
@@ -297,6 +297,19 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 		check(techniqueData(server).level(t.getEnumConstants()[1]) == 0, "Reset click should clear ice");
 		clickGui(context, hotspots(context).get(HS_BACK), LEFT);
 		context.takeScreenshot("09i-techniques-after-reset");
+		server.runCommand("technique set @p thunder 7");
+		scrollList(context, -10);
+		for (int i = 0; i < 40; i++) { // one wheel notch is one step: scroll to the last row
+			context.getInput().scroll(-10);
+		}
+		context.waitTicks(3);
+		clickGui(context, hotspots(context).get(HS_INFO + Technique.THUNDER.ordinal()), LEFT);
+		context.takeScreenshot("105-thunder-detail"); // short description (3 lines), no bar under the level text
+		clickGui(context, hotspots(context).get(HS_BACK), LEFT);
+		for (int i = 0; i < 40; i++) {
+			context.getInput().scroll(10);
+		}
+		context.waitTicks(3);
 		server.runCommand("technique cooldowns @p clear");
 	}
 
