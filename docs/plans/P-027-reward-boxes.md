@@ -3,7 +3,7 @@
 > Tóm tắt (VN): mỗi dòng nhiệm vụ thưởng rương quà thay cho bình linh dược. Rương bạc 3 ô, vàng 4 ô, kim cương 5 ô. Chuột phải mở màn hình, chọn 1 ô (viền vàng), Claim hoặc Close. Quà giữ nguyên khi đóng mở lại.
 > Decision: D76. Branch: dev on `feat/P-027-dev`, merges into `feat/P-027-reward-boxes`.
 
-- **Status:** ready
+- **Status:** merged
 - **Dev:** one Sonnet subagent. Another dev works on P-026 (techniques, a new technique, `technique/`) at the same time. Do not touch technique code.
 
 ## Today

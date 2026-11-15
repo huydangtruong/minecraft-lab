@@ -2,7 +2,7 @@
 
 > Tóm tắt cho Huy: file này ghi việc đang làm dở và bước tiếp theo, để một phiên Claude mới đọc là làm tiếp được.
 > Manager cập nhật file này cuối mỗi đợt việc (merge, phát hành, quyết định mới).
-> Snapshot: 2026-11-15, after release 0.13.0.
+> Snapshot: 2026-11-15, after merging P-025, P-026, P-027 and D77 (not released).
 
 A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [workflow/team.md](../workflow/team.md) → the plan of the work in flight. Do not read the whole repo.
 
@@ -13,13 +13,11 @@ A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [w
 | Last release | `permahearts-v0.13.0` (GitHub Releases on `huydangtruong/minecraft-lab`), `mod_version=0.13.0` |
 | 0.12.0 contains | Warrior Angel (P-021, D62, D63), Aqua Marine (P-022, P-023, D64, D69), chieftain XP x10 and damage x2 (D65, D66), stronger Strength/Swiftness/Mining elixirs (D67), gold quest 64 (D68) |
 | 0.13.0 contains | Illusion technique (P-024, D71); D72 numbers (Warrior Angel, Cloud Travel, Undying Jutsu, Heaven Blast, Fireball, Frozen Breath); chieftain health 200 and the leader-bonus fix; Strength +2 (D70); "Death Match (PvP)" line |
-| On `main`, not released | Illusion work modes and hostile mobs targeting the clones (P-025, D73). Not playtested by hand |
+| On `main`, not released | Illusion work modes and hostile mobs targeting the clones (P-025, D73); Quantum Leap rename (turquoise) and Cosmic Warping portals (P-026, D74, D75); quest reward boxes (P-027, D76); technique slots cost 64, 128, 256, 512 emeralds (D77). Next version 0.14.0. Not playtested by hand |
 
 Release steps: [workflow/release.md](../workflow/release.md). Release **only when Huy says so**.
 
 ## In flight
-
-- **P-026 Quantum Leap + Cosmic Warping** (D74, D75) and **P-027 reward boxes** (D76; dev done on `feat/P-027-dev`, build green, waiting for merge and Huy's playtest): two Sonnet devs in parallel worktrees under `.claude/worktrees/`, branches `feat/P-026-dev` → `feat/P-026-cosmic-warping` and `feat/P-027-dev` → `feat/P-027-reward-boxes`. If the session dies: check those worktrees for commits, else start new devs from the plans.
 
 - **Windows installer bug** (reported by Huy's friend): picking a profile other than "26.3 Fabric Essential" says SUCCESS, but that profile's mods folder still has the old jar. Reading `minecraft-lab.ps1` (`Find-Profiles` / `Select-Profile`) found nothing yet. Waiting for the friend's `Mods folder:` line and that profile's Game directory.
 

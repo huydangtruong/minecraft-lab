@@ -78,22 +78,22 @@ public class IllusionWorkGameTest {
 	}
 
 	private static boolean replanted(GameTestHelper c, int x, int z) {
-		return c.getBlockState(new BlockPos(x, 1, z)).is(Blocks.WHEAT) && c.getBlockState(new BlockPos(x, 1, z)).getValue(CropBlock.AGE) == 0;
+		return c.getBlockState(new BlockPos(x, 1, z)).is(Blocks.WHEAT) && c.getBlockState(new BlockPos(x, 1, z)).getValue(CropBlock.AGE) < 7; // a new crop may grow a stage while the test waits
 	}
 
 	@GameTest(maxTicks = 1200)
 	public void farmHarvestsReplantsAndFillsTheChestWithoutXp(GameTestHelper c) {
 		ServerPlayer p = owner(c, new ItemStack(Items.IRON_HOE));
 		Container chest = chest(c, 2, 1, 5);
-		ripeWheat(c, 9, 2);
-		ripeWheat(c, 10, 2);
-		ripeWheat(c, 9, 3);
+		ripeWheat(c, 6, 2); // everything inside x/z 0..7: row 8 is the barrier wall
+		ripeWheat(c, 7, 2);
+		ripeWheat(c, 6, 3);
 		int xp = p.totalExperience;
 		Illusion a = castOne(c, p);
 		c.assertTrue(a.job() == IllusionJob.FARM && a.getMainHandItem().is(Items.IRON_HOE), "the hoe sets the FARM job");
 		c.succeedWhen(() -> {
 			c.assertTrue(count(chest, s -> s.is(Items.WHEAT)) >= 3, "wheat in the chest, was " + count(chest, s -> s.is(Items.WHEAT)) + dbg(a));
-			c.assertTrue(replanted(c, 9, 2) && replanted(c, 10, 2) && replanted(c, 9, 3), "the three crops are replanted");
+			c.assertTrue(replanted(c, 6, 2) && replanted(c, 7, 2) && replanted(c, 6, 3), "the three crops are replanted" + dbg(a));
 			c.assertTrue(p.totalExperience == xp && c.getLevel().getEntitiesOfClass(ExperienceOrb.class, arena(c)).isEmpty(), "no XP from farming");
 			FlightBladeGameTest.drop(c, p);
 		});
@@ -109,18 +109,18 @@ public class IllusionWorkGameTest {
 		}
 		var leaf = Blocks.OAK_LEAVES.defaultBlockState().setValue(LeavesBlock.PERSISTENT, false).setValue(LeavesBlock.DISTANCE, 1);
 		c.setBlock(7, 5, 5, leaf);
-		c.setBlock(8, 4, 5, leaf);
+		c.setBlock(7, 4, 4, leaf);
 		c.setBlock(6, 4, 5, leaf);
 		// a built wall: logs touching player-placed (persistent) leaves
 		var kept = Blocks.OAK_LEAVES.defaultBlockState().setValue(LeavesBlock.PERSISTENT, true);
-		c.setBlock(4, 1, 9, Blocks.OAK_LOG);
-		c.setBlock(4, 2, 9, Blocks.OAK_LOG);
-		c.setBlock(5, 2, 9, kept);
+		c.setBlock(3, 1, 7, Blocks.OAK_LOG);
+		c.setBlock(3, 2, 7, Blocks.OAK_LOG);
+		c.setBlock(4, 2, 7, kept);
 		Illusion a = castOne(c, p);
 		c.assertTrue(a.job() == IllusionJob.CHOP, "an axe sets the CHOP job");
 		c.succeedWhen(() -> {
 			c.assertTrue(count(chest, s -> s.is(Items.OAK_LOG)) >= 4, "the four trunk logs are in the chest, was " + count(chest, s -> s.is(Items.OAK_LOG)));
-			c.assertTrue(c.getBlockState(new BlockPos(4, 1, 9)).is(Blocks.OAK_LOG) && c.getBlockState(new BlockPos(4, 2, 9)).is(Blocks.OAK_LOG), "the built wall stays");
+			c.assertTrue(c.getBlockState(new BlockPos(3, 1, 7)).is(Blocks.OAK_LOG) && c.getBlockState(new BlockPos(3, 2, 7)).is(Blocks.OAK_LOG), "the built wall stays");
 			FlightBladeGameTest.drop(c, p);
 		});
 	}
@@ -129,7 +129,8 @@ public class IllusionWorkGameTest {
 	public void shearTakesTheWoolOfASheepToTheChest(GameTestHelper c) {
 		ServerPlayer p = owner(c, new ItemStack(Items.SHEARS));
 		Container chest = chest(c, 2, 1, 5);
-		var sheep = c.spawn(EntityTypes.SHEEP, new Vec3(7.5, 1, 7.5));
+		var sheep = c.spawn(EntityTypes.SHEEP, new Vec3(6.5, 1, 6.5));
+		sheep.setNoAi(true); // a sheep that wanders into the corner by the barrier wall made this test flaky
 		Illusion a = castOne(c, p);
 		c.assertTrue(a.job() == IllusionJob.SHEAR, "shears set the SHEAR job");
 		c.succeedWhen(() -> {
@@ -144,11 +145,12 @@ public class IllusionWorkGameTest {
 		ServerPlayer p = owner(c, new ItemStack(Items.BUCKET));
 		Container chest = chest(c, 2, 1, 5);
 		chest.setItem(0, new ItemStack(Items.BUCKET));
-		c.spawn(EntityTypes.COW, new Vec3(7.5, 1, 7.5));
+		Cow cow = c.spawn(EntityTypes.COW, new Vec3(6.5, 1, 6.5));
+		cow.setNoAi(true); // a cow that wanders into the corner by the barrier wall made this test flaky
 		Illusion a = castOne(c, p);
 		c.assertTrue(a.job() == IllusionJob.MILK, "a bucket sets the MILK job");
 		c.succeedWhen(() -> {
-			c.assertTrue(count(chest, s -> s.is(Items.MILK_BUCKET)) == 1, "one milk bucket in the chest");
+			c.assertTrue(count(chest, s -> s.is(Items.MILK_BUCKET)) == 1, "one milk bucket in the chest" + dbg(a));
 			c.assertTrue(count(chest, s -> s.is(Items.BUCKET)) == 0, "the empty bucket was used up");
 			FlightBladeGameTest.drop(c, p);
 		});
@@ -173,7 +175,7 @@ public class IllusionWorkGameTest {
 		Container chest = chest(c, 2, 1, 5);
 		chest.setItem(0, new ItemStack(Items.WHEAT, 2));
 		Cow one = c.spawn(EntityTypes.COW, new Vec3(7.5, 1, 7.5));
-		Cow two = c.spawn(EntityTypes.COW, new Vec3(6.5, 1, 8.5));
+		Cow two = c.spawn(EntityTypes.COW, new Vec3(5.5, 1, 7.5)); // inside x/z 0..7: row 8 is the barrier wall
 		Illusion a = castOne(c, p);
 		c.assertTrue(a.job() == IllusionJob.BREED, "wheat sets the BREED job");
 		c.assertTrue(p.getMainHandItem().getCount() == 32 && a.carry().count(s -> s.is(Items.WHEAT)) == 32, "64 wheat is split 32 for the owner and 32 for the clone");
@@ -233,7 +235,7 @@ public class IllusionWorkGameTest {
 		boolean pvp = server.getGameRules().get(GameRules.PVP);
 		server.getGameRules().set(GameRules.PVP, false, server);
 		Container chest = chest(c, 2, 1, 5);
-		ripeWheat(c, 10, 2);
+		ripeWheat(c, 7, 2);
 		FlightBladeGameTest.place(c, q, 3.5, 1, 7.5, 0f, 0f);
 		q.setHealth(20f);
 		Illusion a = castOne(c, p);
@@ -246,7 +248,7 @@ public class IllusionWorkGameTest {
 				server.getGameRules().set(GameRules.PVP, pvp, server);
 				FlightBladeGameTest.drop(c, q);
 			}
-			c.assertTrue(replanted(c, 10, 2) && count(chest, s -> s.is(Items.WHEAT)) >= 1, "back at work: the crop is harvested and replanted" + dbg(a));
+			c.assertTrue(replanted(c, 7, 2) && count(chest, s -> s.is(Items.WHEAT)) >= 1, "back at work: the crop is harvested and replanted" + dbg(a));
 			FlightBladeGameTest.drop(c, p);
 		});
 	}

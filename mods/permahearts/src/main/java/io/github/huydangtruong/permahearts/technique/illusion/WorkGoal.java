@@ -36,6 +36,7 @@ public final class WorkGoal extends Goal {
 	private boolean delivering;
 	private long deliverSince;
 	private long pickupUntil;
+	private Vec3 pickupAt; // where the last action was: its drops can land out of the clone's reach
 	private BlockPos chestPos;
 	private long nextChestScan;
 	private int idle;
@@ -97,6 +98,12 @@ public final class WorkGoal extends Goal {
 	/** Lets the clone pick up item drops within 3 blocks for this many more ticks. */
 	public void pickupFor(int ticks) {
 		pickupUntil = Math.max(pickupUntil, a.level().getGameTime() + ticks);
+	}
+
+	/** Same, and also picks up drops within 3 blocks of {@code at} (the clone acts from up to 3.5 blocks away). */
+	public void pickupFor(int ticks, Vec3 at) {
+		pickupFor(ticks);
+		pickupAt = at;
 	}
 
 	/** True about every 10 ticks: tasks search the area only then. */
@@ -275,10 +282,18 @@ public final class WorkGoal extends Goal {
 
 	/** Picks up item drops near the clone while the pickup window is open; never what the owner dropped. */
 	private void pickUp(ServerLevel sl, long now) {
-		if (now >= pickupUntil || now % 3 != 0) {
+		if (now >= pickupUntil) {
+			pickupAt = null;
 			return;
 		}
-		List<ItemEntity> items = sl.getEntitiesOfClass(ItemEntity.class, a.getBoundingBox().inflate(3.0),
+		if (now % 3 != 0) {
+			return;
+		}
+		net.minecraft.world.phys.AABB box = a.getBoundingBox().inflate(3.0);
+		if (pickupAt != null) {
+			box = box.minmax(new net.minecraft.world.phys.AABB(pickupAt, pickupAt).inflate(3.0));
+		}
+		List<ItemEntity> items = sl.getEntitiesOfClass(ItemEntity.class, box,
 			e -> e.isAlive() && !e.hasPickUpDelay() && !(e.getOwner() != null && e.getOwner().getUUID().equals(a.owner())));
 		for (ItemEntity e : items) {
 			ItemStack left = a.carry().add(e.getItem());

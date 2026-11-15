@@ -157,8 +157,12 @@ final class FarmTask implements WorkTask {
 		g.pickupFor(20);
 	}
 
+	/** Empty farmland (a harvest that dropped no seed leaves one) or dirt/grass next to farmland near water. */
 	private static boolean canTill(ServerLevel sl, BlockPos p, Illusion a) {
 		BlockState st = sl.getBlockState(p);
+		if (st.getBlock() == Blocks.FARMLAND && sl.getBlockState(p.above()).isAir()) {
+			return true;
+		}
 		if ((st.getBlock() != Blocks.DIRT && st.getBlock() != Blocks.GRASS_BLOCK) || !sl.getBlockState(p.above()).isAir()) {
 			return false;
 		}
@@ -187,9 +191,11 @@ final class FarmTask implements WorkTask {
 		if (seed.isEmpty()) {
 			return;
 		}
-		sl.setBlock(pos, Blocks.FARMLAND.defaultBlockState(), 3);
+		if (sl.getBlockState(pos).getBlock() != Blocks.FARMLAND) {
+			sl.setBlock(pos, Blocks.FARMLAND.defaultBlockState(), 3);
+			sl.playSound(null, pos, SoundEvents.HOE_TILL.value(), SoundSource.BLOCKS, 1f, 1f);
+		}
 		sl.setBlock(pos.above(), cropOf(seed).defaultBlockState(), 3);
-		sl.playSound(null, pos, SoundEvents.HOE_TILL.value(), SoundSource.BLOCKS, 1f, 1f);
 		a.swingForAttack(InteractionHand.MAIN_HAND);
 		g.acted(0);
 	}

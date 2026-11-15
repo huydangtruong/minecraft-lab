@@ -37,7 +37,7 @@ final class ShearTask implements WorkTask {
 		target.shear(sl, SoundSource.NEUTRAL, a.lockedItem());
 		a.swingForAttack(InteractionHand.MAIN_HAND);
 		g.acted(0);
-		g.pickupFor(60);
+		g.pickupFor(60, target.position());
 		target = null;
 		return true;
 	}

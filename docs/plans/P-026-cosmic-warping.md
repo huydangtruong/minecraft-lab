@@ -3,7 +3,7 @@
 > Tóm tắt (VN): đổi Thiên Lý Bộ thành Quantum Leap (màu xanh ngọc). Thêm chiêu thứ 14 Cosmic Warping: chuột phải tạo cổng tím (mỗi người một màu bên trong), chuột trái mở menu chọn cổng hoặc người chơi để dịch chuyển ngay. 2 → 20 cổng, hồi 160 → 65 giây.
 > Decisions: D74, D75. Branch: dev on `feat/P-026-dev`, merges into `feat/P-026-cosmic-warping`.
 
-- **Status:** ready
+- **Status:** merged
 - **Dev:** one Sonnet subagent. Another dev works on P-027 (reward boxes, `wanderer/`) at the same time. Do not touch quest or reward code.
 
 ## Part 1 — Quantum Leap (D74)
