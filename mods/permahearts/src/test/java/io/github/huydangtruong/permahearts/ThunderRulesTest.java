@@ -35,8 +35,8 @@ class ThunderRulesTest {
 	void rangeWarningAndCooldown() {
 		assertEquals(128, TechniqueRules.THUNDER_RANGE);
 		assertEquals(20, TechniqueRules.THUNDER_WARN_TICKS);
-		assertEquals(24, Technique.THUNDER.cooldownSeconds());
-		assertEquals(24, TechniqueRules.cooldownSeconds(Technique.THUNDER, 20));
+		assertEquals(26, Technique.THUNDER.cooldownSeconds());
+		assertEquals(26, TechniqueRules.cooldownSeconds(Technique.THUNDER, 20));
 		assertTrue(!Technique.THUNDER.charged());
 	}
 

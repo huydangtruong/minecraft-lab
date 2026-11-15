@@ -18,7 +18,7 @@ public enum Technique {
 	AQUA("aqua", "Aqua Marine", 100, false), // D80: was 120 s; // D64: breathe, swim fast and dig fast underwater for a while
 	ILLUSION("illusion", "Illusion", 110, false), // D71: clones of the caster that fight for them; D73: they also work (110 s, was 100)
 	WARP("warp", "Cosmic Warping", 90, true), // D75: portal network; the real cooldown falls with the level (TechniqueRules.cooldownSeconds)
-	THUNDER("thunder", "Thunder Strike", 24, false); // D86: aim, 1 s warning, then lightning and a creeper-sized blast
+	THUNDER("thunder", "Thunder Strike", 26, false); // D86: aim, 1 s warning, then lightning and a creeper-sized blast
 
 	private final String id;
 	private final String displayName;
