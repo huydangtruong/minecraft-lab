@@ -99,6 +99,9 @@ class GodSlayerRulesTest {
 	void frostAndCountdown() {
 		assertEquals(5, GodSlayerRules.frostPercent(50));
 		assertEquals(1, GodSlayerRules.frostPercent(3));
+		assertEquals(2, GodSlayerRules.stunTicks(20)); // D99: a tenth of Heaven Blast's stun
+		assertEquals(6, GodSlayerRules.stunTicks(58));
+		assertEquals(1, GodSlayerRules.stunTicks(3));
 		assertEquals(60, GodSlayerRules.secondsLeft(1200));
 		assertEquals(1, GodSlayerRules.secondsLeft(1));
 		assertEquals(0, GodSlayerRules.secondsLeft(0));

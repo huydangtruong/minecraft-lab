@@ -3,6 +3,7 @@ package io.github.huydangtruong.permahearts.godslayer;
 import io.github.huydangtruong.permahearts.PermaHearts;
 import io.github.huydangtruong.permahearts.godslayer.GodSlayerRules.Mode;
 import io.github.huydangtruong.permahearts.technique.Frostbite;
+import io.github.huydangtruong.permahearts.technique.Stun;
 import io.github.huydangtruong.permahearts.technique.OwnedSummon;
 import java.util.List;
 import java.util.UUID;
@@ -44,7 +45,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * The God Slayer (P-032): an Oni with two katanas, about 3 blocks tall at level 1, that hunts one player at a time.
+ * The God Slayer (P-032): an Oni with two katanas, 5 blocks tall at every level (D98), that hunts one player at a time.
  * It runs on the ground, flies after a target in the air (it does not pass walls), swims at three times a dolphin,
  * breaks blocks in its way like a Wither (when mob griefing is on) and teleports next to its target when it cannot
  * reach it. Only damage caused by a player (or the player's projectile or summon) hurts it, one hit takes at most 40.
@@ -54,11 +55,8 @@ public final class GodSlayer extends PathfinderMob {
 	public static final ResourceKey<EntityType<?>> KEY = ResourceKey.create(Registries.ENTITY_TYPE,
 		Identifier.fromNamespaceAndPath(PermaHearts.MOD_ID, "god_slayer"));
 	public static final EntityType<GodSlayer> TYPE = Registry.register(BuiltInRegistries.ENTITY_TYPE, KEY,
-		EntityType.Builder.<GodSlayer>of(GodSlayer::new, MobCategory.MISC).sized(0.6f, 1.95f).eyeHeight(1.74f)
+		EntityType.Builder.<GodSlayer>of(GodSlayer::new, MobCategory.MISC).sized(1.6f, 4.8f).eyeHeight(4.3f)
 			.clientTrackingRange(10).updateInterval(1).fireImmune().noSave().noLootTable().build(KEY));
-
-	/** The body is this much bigger than a player at level 1 (about 2.9 blocks tall); the level scale comes on top. */
-	private static final double BASE_BODY_SCALE = 1.5;
 
 	private int bossLevel = 1;
 	private UUID targetId;
@@ -76,8 +74,6 @@ public final class GodSlayer extends PathfinderMob {
 		xpReward = 0;
 		setPersistenceRequired();
 		skills = GodSlayerSkills.forLevel(1);
-		setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(GodSlayerItems.KATANA));
-		setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(GodSlayerItems.KATANA));
 	}
 
 	/** Registers the attributes. Called once from PermaHearts. */
@@ -90,8 +86,7 @@ public final class GodSlayer extends PathfinderMob {
 			.add(Attributes.KNOCKBACK_RESISTANCE, 1)
 			.add(Attributes.ATTACK_DAMAGE, GodSlayerRules.BASE_SLASH_DAMAGE)
 			.add(Attributes.STEP_HEIGHT, 1.5)
-			.add(Attributes.SAFE_FALL_DISTANCE, 64)
-			.add(Attributes.SCALE, BASE_BODY_SCALE));
+			.add(Attributes.SAFE_FALL_DISTANCE, 64));
 	}
 
 	// ---- level and target ----
@@ -105,7 +100,6 @@ public final class GodSlayer extends PathfinderMob {
 		bossLevel = GodSlayerRules.clampLevel(level);
 		getAttribute(Attributes.MAX_HEALTH).setBaseValue(GodSlayerRules.maxHealth(bossLevel));
 		getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(GodSlayerRules.slashDamage(bossLevel));
-		getAttribute(Attributes.SCALE).setBaseValue(BASE_BODY_SCALE * GodSlayerRules.scale(bossLevel));
 		setHealth(getMaxHealth());
 		skills = GodSlayerSkills.forLevel(bossLevel);
 		active = null;
@@ -169,6 +163,10 @@ public final class GodSlayer extends PathfinderMob {
 			int percent = GodSlayerRules.frostPercent(effect.getAmplifier() + 1);
 			effect = new MobEffectInstance(Frostbite.EFFECT, effect.getDuration(), percent - 1, effect.isAmbient(),
 				effect.isVisible(), effect.showIcon());
+		}
+		if (effect.getEffect().equals(Stun.EFFECT)) {
+			effect = new MobEffectInstance(Stun.EFFECT, GodSlayerRules.stunTicks(effect.getDuration()), effect.getAmplifier(),
+				effect.isAmbient(), effect.isVisible(), effect.showIcon());
 		}
 		return super.addEffect(effect, source);
 	}

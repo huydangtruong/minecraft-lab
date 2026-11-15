@@ -125,6 +125,11 @@ public final class GodSlayerRules {
 		return Math.max(1, (int) Math.round(percent * CONTROL_RESIST));
 	}
 
+	/** Stun ticks on the boss: a tenth, at least 1 tick (P-034, D99). */
+	public static int stunTicks(int ticks) {
+		return Math.max(1, (int) Math.round(ticks * CONTROL_RESIST));
+	}
+
 	/** Is this Crimson Master visit one that brings the boss: day 100 or later, every 4th visit. */
 	public static boolean isHuntVisit(long day, int visitCount) {
 		return day >= MIN_DAY && visitCount > 0 && visitCount % VISIT_PERIOD == 0;

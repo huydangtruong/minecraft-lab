@@ -57,9 +57,11 @@ public class GodSlayerGameTest {
 	public void startsWith500HealthAtLevel1(GameTestHelper c) {
 		GodSlayer b = boss(c, 5.5, 1, 5.5, 1);
 		c.assertTrue(b.getMaxHealth() == 500f && b.getHealth() == 500f, "Lv 1 = 500 health, was " + b.getMaxHealth());
-		c.assertTrue(boss(c, 8.5, 1, 8.5, 3).getMaxHealth() == 700f, "Lv 3 = 700 health");
-		double tall = b.getAttributeValue(Attributes.SCALE) * 1.95;
-		c.assertTrue(tall > 2.7 && tall < 3.2, "about 3 blocks tall, was " + tall);
+		GodSlayer b10 = boss(c, 8.5, 1, 8.5, 10);
+		c.assertTrue(boss(c, 2.5, 1, 8.5, 3).getMaxHealth() == 700f, "Lv 3 = 700 health");
+		// D98: 5 blocks tall (hitbox 4.8) at every level, strength is only numbers
+		c.assertTrue(Math.abs(b.getBbHeight() - 4.8f) < 0.01f && Math.abs(b10.getBbHeight() - 4.8f) < 0.01f,
+			"hitbox 4.8 tall at every level, was " + b.getBbHeight() + " and " + b10.getBbHeight());
 		c.succeed();
 	}
 

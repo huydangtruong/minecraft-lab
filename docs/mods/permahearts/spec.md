@@ -114,10 +114,10 @@
 
 Boss Oni "God Slayer" săn người chơi. Đợt này làm lõi: chạy, chém Lv 1, săn theo lượt, thưởng. Chiêu mạnh hơn theo cấp thêm ở P-033.
 
-- **Cơ thể**: cao khoảng 3 ô, da đỏ, tóc trắng, hai sừng, giáp vai đen, hai katana. Thanh máu đỏ chia 10 phần "God Slayer — Lv N", làm tối màn hình, hiện trong 96 ô cùng chiều không gian.
-- **Cấp**: 1 đến 10, lưu theo world. Máu 500 ở Lv 1, thêm 100 mỗi cấp. Chém 30 sát thương ở Lv 1, mạnh dần theo cấp; cấp cao thì to hơn một chút.
+- **Cơ thể** (P-034, D98): cao 5 ô ở mọi cấp (hộp va chạm 1,6 x 4,8), da đỏ, tóc trắng dài, sừng cong lớn, giáp vai đen, đai lưng, răng nanh, tư thế dạng chân hai tay mở, hai katana lớn dựng đứng là một phần mô hình (chân đung đưa khi chạy, tay phải giơ rồi chém xuống). Thanh máu đỏ chia 10 phần "God Slayer — Lv N", làm tối màn hình, hiện trong 96 ô cùng chiều không gian.
+- **Cấp**: 1 đến 10, lưu theo world. Máu 500 ở Lv 1, thêm 100 mỗi cấp. Chém 30 sát thương ở Lv 1, mạnh dần theo cấp; cấp cao chỉ mạnh hơn, không to hơn.
 - **Di chuyển**: đất (tốc độ 0,4, tầm nhìn 128, bước lên 1,5 ô), trên không (bay, không xuyên tường), trong nước (gấp 3 lần cá heo). Tự chọn theo chỗ người bị săn đứng. Đập khối cản đường như Wither theo `mobGriefing`; tắt thì dịch chuyển (khi kẹt, cách xa hơn 48 ô, hoặc khác chiều không gian thì theo sang).
-- **Chống ăn gian**: chỉ người chơi, đạn của người chơi hoặc quái triệu hồi của người chơi gây sát thương, mỗi nhát tối đa 40. Miễn lửa, không dắt, không cưỡi, không bị đẩy lùi, piston không đẩy được. Frostbite và Repulse còn 10%. Tự hồi 2% máu mỗi giây khi không ai đánh được nó. Không biến mất, không rơi đồ.
+- **Chống ăn gian**: chỉ người chơi, đạn của người chơi hoặc quái triệu hồi của người chơi gây sát thương, mỗi nhát tối đa 40. Miễn lửa, không dắt, không cưỡi, không bị đẩy lùi, piston không đẩy được. Frostbite và Repulse còn 10%, Heaven Blast chỉ choáng 10% thời gian. Tự hồi 2% máu mỗi giây khi không ai đánh được nó. Không biến mất, không rơi đồ.
 - **Cuộc săn**: nghỉ, cảnh báo 60 giây (chữ lớn, tin chat, tiếng trống, đếm ngược 10 giây cuối), săn tối đa 10 phút. Người bị săn chết thì boss chuyển sang người khác.
   - Hạ được boss: +100 level kinh nghiệm, 5 hộp thưởng, cấp boss +1 (tối đa 10).
   - Hết giờ hoặc hết người: boss trêu rồi biến mất trong khói, cấp giữ nguyên.
@@ -125,3 +125,7 @@ Boss Oni "God Slayer" săn người chơi. Đợt này làm lõi: chạy, chém 
 - **Kích hoạt**: mỗi lần Crimson Master đến thì đếm một lượt. Từ ngày 100, lượt thứ 4, 8, 12: có người từ 30 tim thì săn một người trong số đó, không có thì tin chat "Weaklings...".
 - **Lệnh (OP)**: `/boss summon [người]`, `/boss giveup`, `/boss level [1..10]`.
 - Dữ liệu: `GodSlayerSavedData` (cấp, số lượt, pha, hạn giờ, UUID boss, người bị săn, danh sách đã chết).
+
+## Heaven Blast choáng (P-034, D99)
+
+Heaven Blast choáng mọi sinh vật không phải người chơi bị đẩy: `1,0 + 0,1 x (level - 1)` giây (1,0 s ở Lv 1, 2,9 s ở Lv 20). Bị choáng thì không đi, không nhảy, không đánh (hiệu ứng "Stunned", mixin vào `Mob`); vẫn rơi và bị đẩy theo vật lý. Dòng chỉ số "Stun" trong bảng chiêu. Người chơi không bao giờ bị choáng. Hạt sao quay vòng trên đầu lúc choáng.

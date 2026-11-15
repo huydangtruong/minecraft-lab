@@ -2,7 +2,9 @@ package io.github.huydangtruong.permahearts;
 
 import com.mojang.authlib.GameProfile;
 import io.github.huydangtruong.permahearts.technique.Frostbite;
+import io.github.huydangtruong.permahearts.godslayer.GodSlayer;
 import io.github.huydangtruong.permahearts.technique.PhaseState;
+import io.github.huydangtruong.permahearts.technique.Stun;
 import io.github.huydangtruong.permahearts.technique.Technique;
 import io.github.huydangtruong.permahearts.technique.TechniqueCasts;
 import io.github.huydangtruong.permahearts.technique.TechniqueFields;
@@ -21,6 +23,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.CommonListenerCookie;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
@@ -358,6 +361,85 @@ public class TechniqueEffectsGameTest {
 			c.assertTrue(p.getHealth() == pHealth, "the caster must not be hurt");
 			c.succeed();
 		});
+	}
+
+	/** D99: Heaven Blast stuns a mob for 1.0 s at Lv 1: it neither walks towards its target nor hits it, then it moves again. */
+	@GameTest(maxTicks = 140)
+	public void repulseStunsAMobThenItWalksAgain(GameTestHelper c) {
+		enable(c, true);
+		floor(c);
+		ServerPlayer p = survivor(c);
+		try {
+			place(c, p, 8.5, 1, 5.5, 0f, 0f);
+			p.setHealth(20f);
+			Husk h = husk(c, 6.5, 5.5, false);
+			h.setTarget(p);
+			TechniqueCasts.cast(p, Technique.REPULSE, 1, 1f);
+			c.assertTrue(h.hasEffect(Stun.EFFECT), "the husk should be stunned");
+			int ticks = h.getEffect(Stun.EFFECT).getDuration();
+			c.assertTrue(ticks >= 19 && ticks <= 20, "Lv 1 stun is 1 s = 20 ticks, was " + ticks);
+			float health = p.getHealth();
+			c.assertTrue(!h.doHurtTarget(c.getLevel(), p) && p.getHealth() == health, "a stunned husk cannot hit");
+			double[] at12 = new double[1];
+			c.runAfterDelay(12, () -> at12[0] = h.position().distanceTo(p.position()));
+			c.runAfterDelay(19, () -> {
+				double d = h.position().distanceTo(p.position());
+				c.assertTrue(d >= at12[0] - 0.05, "a stunned husk must not walk towards its target: " + at12[0] + " -> " + d);
+			});
+			double[] at24 = new double[1];
+			c.runAfterDelay(24, () -> {
+				at24[0] = h.position().distanceTo(p.position());
+				c.assertTrue(!h.hasEffect(Stun.EFFECT), "the stun should be over after 1 s");
+			});
+			c.runAfterDelay(80, () -> {
+				double d = h.position().distanceTo(p.position());
+				c.assertTrue(d < at24[0] - 1.0, "after the stun the husk walks to its target again: " + at24[0] + " -> " + d);
+				drop(c, p);
+				c.succeed();
+			});
+		} catch (RuntimeException e) {
+			drop(c, p);
+			throw e;
+		}
+	}
+
+	@GameTest(maxTicks = 40)
+	public void repulseStunLastsLongerWithLevelAndPlayersAreNeverStunned(GameTestHelper c) {
+		enable(c, true);
+		floor(c);
+		ServerPlayer caster = c.makeMockServerPlayerInLevel();
+		ServerPlayer other = survivor(c);
+		try {
+			place(c, caster, 5.5, 1, 5.5, 0f, 0f);
+			place(c, other, 7.5, 1, 5.5, 0f, 0f);
+			Husk h = husk(c, 5.5, 7.5, true);
+			TechniqueCasts.cast(caster, Technique.REPULSE, 20, 1f);
+			int ticks = h.getEffect(Stun.EFFECT).getDuration();
+			c.assertTrue(ticks >= 57 && ticks <= 58, "Lv 20 stun is 2.9 s = 58 ticks, was " + ticks);
+			c.assertTrue(!other.hasEffect(Stun.EFFECT), "a player is never stunned");
+			c.succeed();
+		} finally {
+			drop(c, other);
+		}
+	}
+
+	@GameTest(maxTicks = 40)
+	public void godSlayerIsStunnedForATenthOfTheTime(GameTestHelper c) {
+		enable(c, true);
+		floor(c);
+		ServerPlayer caster = c.makeMockServerPlayerInLevel();
+		place(c, caster, 5.5, 1, 5.5, 0f, 0f);
+		GodSlayer b = GodSlayer.TYPE.create(c.getLevel(), EntitySpawnReason.MOB_SUMMONED);
+		Vec3 v = c.absoluteVec(new Vec3(5.5, 1, 8.5));
+		b.snapTo(v.x, v.y, v.z, 0f, 0f);
+		b.setNoAi(true);
+		c.getLevel().addFreshEntity(b);
+		TechniqueCasts.cast(caster, Technique.REPULSE, 1, 1f);
+		c.assertTrue(b.hasEffect(Stun.EFFECT), "the boss is stunned too");
+		int ticks = b.getEffect(Stun.EFFECT).getDuration();
+		c.assertTrue(ticks == 2, "the boss is stunned for 10% of 20 ticks = 2, was " + ticks);
+		b.discard();
+		c.succeed();
 	}
 
 	@GameTest(maxTicks = 100)
