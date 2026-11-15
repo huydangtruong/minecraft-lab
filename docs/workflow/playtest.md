@@ -240,3 +240,14 @@ Mở Cultivation, tab Techniques.
 2. **Chọn chiêu trước**: bấm vào dòng một chiêu đã học: dòng viền vàng, các ô có thể đặt cũng viền vàng, ô emerald thành nút Cancel đỏ nhạt. Bấm ô viền vàng để đặt. Bấm lại dòng đó hoặc Cancel để bỏ chọn. Dòng chiêu chưa học: không làm gì (tooltip "Learn it first: click i").
 3. **Chọn ô trước**: bấm một ô, rồi bấm vào tên chiêu (không cần dấu cộng) là đặt luôn. Dấu cộng vẫn dùng được. Chuột phải vào ô vẫn xoá ô đó.
 4. Trang chi tiết: chữ "Lv N / 20" màu xanh lá có viền tối, thanh xanh lá bên dưới.
+
+## P-029: Thunder Strike (D86)
+
+1. Cho mình chiêu: nâng bằng tab Techniques, đặt vào một ô, bấm phím chiêu để vào chế độ chiêu.
+2. Nhắm tâm vào một con mob hoặc bức tường cách 10 ô, bấm chuột trái (hoặc phải): vòng tia lửa vàng trắng hiện quanh điểm đó 1 giây, rồi sét đánh, nổ cỡ creeper, mob bị thương, khối vỡ. Không có lửa.
+3. Đứng sát điểm nhắm: mình không bị thương. Có Violet Guardian thì nó cũng không bị thương.
+4. Nhắm lên trời hoặc ra xa: vẫn đánh, vào mặt đất dưới điểm xa 128 ô.
+5. Đứng gần một con heo khi sét đánh: heo thành zombified piglin. Dân làng thành witch, creeper thành creeper tích điện.
+6. `/gamerule mobGriefing false`: sét vẫn gây sát thương nhưng không phá khối.
+7. Hồi chiêu 24 giây tính từ lúc bấm.
+8. Kiểm bằng máy: `ThunderRulesTest`, `ThunderGameTest`, `ThunderClientTest` (ảnh `99-thunder-warning`, `100-thunder-strike`).

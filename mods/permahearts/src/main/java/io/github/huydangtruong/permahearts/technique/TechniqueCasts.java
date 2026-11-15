@@ -51,6 +51,7 @@ public final class TechniqueCasts {
 		VioletGuardian.init();
 		WarriorAngel.init();
 		Illusion.init();
+		Thunder.init();
 		PhaseState.ATTACHMENT.identifier();
 		Flight.init();
 		AquaMarine.init();
@@ -100,6 +101,9 @@ public final class TechniqueCasts {
 			}
 			case WARP -> {
 				return io.github.huydangtruong.permahearts.technique.warp.Warp.place(caster, lvl);
+			}
+			case THUNDER -> {
+				return Thunder.cast(caster, lvl);
 			}
 			case ILLUSION -> {
 				Illusion.summon(caster, lvl);
