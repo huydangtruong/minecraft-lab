@@ -12,9 +12,9 @@ Tóm tắt lời Huy, chưa phải quyết định cuối. Câu hỏi còn mở 
 
 - Tối đa **4 ô** dùng cùng lúc. Mở ô bằng **ngọc lục bảo**, bỏ dần vào như nộp đồ cho Crimson Master:
   - ô 1: 64
-  - ô 2: thêm 256
-  - ô 3: thêm 512
-  - ô 4: thêm 1024
+  - ô 2: thêm 128 (D77, trước 256)
+  - ô 3: thêm 256 (D77, trước 512)
+  - ô 4: thêm 512 (D77, trước 1024)
 - Tab Techniques: phần trên là các ô chiêu và ô nộp ngọc lục bảo; phần dưới là danh sách chiêu (hàng dọc).
 - Gắn chiêu vào ô:
   1. Bấm một ô → viền vàng.

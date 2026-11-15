@@ -34,7 +34,7 @@ public class SkillBarClientTest implements FabricClientGameTest {
 			server.runCommand("tp @a 0 100 0 -90 12");
 			server.runOnServer(s -> TechniqueAttachment.set(s.getPlayerList().getPlayers().get(0),
 				TechniqueData.DEFAULT.withLevel(Technique.FIRE, 10, 50).withLevel(Technique.ICE, 3, 10)
-					.withLevel(Technique.HEALING, 5, 20).withEmeralds(64 + 256 + 512)
+					.withLevel(Technique.HEALING, 5, 20).withEmeralds(64 + 128 + 256)
 					.withSlot(0, Technique.FIRE).withSlot(1, Technique.ICE).withSlot(2, Technique.HEALING)));
 			context.runOnClient(mc -> mc.options.setCameraType(CameraType.FIRST_PERSON));
 			context.waitTicks(40);

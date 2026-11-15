@@ -36,14 +36,14 @@ class TechniqueRulesTest {
 	void emeraldSlots() {
 		assertEquals(0, TechniqueRules.slotsFor(63));
 		assertEquals(1, TechniqueRules.slotsFor(64));
-		assertEquals(1, TechniqueRules.slotsFor(319));
-		assertEquals(2, TechniqueRules.slotsFor(320));
-		assertEquals(3, TechniqueRules.slotsFor(832));
-		assertEquals(4, TechniqueRules.slotsFor(1856));
-		assertEquals(1856, TechniqueRules.MAX_EMERALDS);
+		assertEquals(1, TechniqueRules.slotsFor(191));
+		assertEquals(2, TechniqueRules.slotsFor(192));
+		assertEquals(3, TechniqueRules.slotsFor(448));
+		assertEquals(4, TechniqueRules.slotsFor(960));
+		assertEquals(960, TechniqueRules.MAX_EMERALDS);
 		assertEquals(10, TechniqueRules.missingForNextSlot(54));
-		assertEquals(256, TechniqueRules.nextSlotStep(100));
-		assertEquals(0, TechniqueRules.missingForNextSlot(1856));
+		assertEquals(128, TechniqueRules.nextSlotStep(100));
+		assertEquals(0, TechniqueRules.missingForNextSlot(960));
 	}
 
 	@Test

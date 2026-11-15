@@ -8,7 +8,7 @@ Sinh từ `technique/TechniqueRules.java`: sửa số liệu ở đó rồi tạ
 
 **Cố định:** Băng va chạm 2, vùng băng tồn tại 8 giây, chậm còn kéo dài 4 giây sau khi ra khỏi vùng (chậm chạy và chậm đánh cùng mức) · Hồi máu: vòng bán kính 4, đứng yên, 10 giây, hồi cho mọi sinh vật trong vòng · Lửa cháy 1 mỗi giây ở Lv 1, +0,2 mỗi level (D72; D45 giảm nửa sau Lv 10). Warrior Angel (D72): máu 16 → 30 (tuyến tính), sát thương 4 +1 mỗi level (Lv 20: 23).
 
-**Mở ô chiêu** bằng ngọc lục bảo: ô 1 = 64 · ô 2 = +256 · ô 3 = +512 · ô 4 = +1024 (tổng 1856). **Reset** một chiêu trả lại 1/2 số XP đã bỏ vào.
+**Mở ô chiêu** bằng ngọc lục bảo: ô 1 = 64 · ô 2 = +128 · ô 3 = +256 · ô 4 = +512 (tổng 960, D77). **Reset** một chiêu trả lại 1/2 số XP đã bỏ vào.
 
 | Lv | XP nâng lên Lv này | XP tổng | Lửa: tầm / va chạm / bãi lửa / cháy | Băng: tầm / vùng / chậm đi / chậm đánh | Hồi máu: tim trong 10 giây | Xuyên tường: thời gian / nhìn xuyên | Hất tung: bán kính / lực / sát thương | Hiến Tế: máu mất / bất tử | Bay: thời gian / tốc độ (so với Creative) | Huyết Kiếm: sát thương cộng thêm |
 |---|---|---|---|---|---|---|---|---|---|---|

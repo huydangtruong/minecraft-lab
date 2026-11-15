@@ -39,8 +39,8 @@ class TechniqueDataTest {
 		assertEquals(0, TechniqueData.DEFAULT.withEmeralds(63).slotsOpen());
 		assertEquals(1, TechniqueData.DEFAULT.withEmeralds(64).slotsOpen());
 		assertEquals(2, TechniqueData.DEFAULT.withEmeralds(320).slotsOpen());
-		assertEquals(4, TechniqueData.DEFAULT.withEmeralds(5000).slotsOpen(), "emeralds are capped at 1856");
-		assertEquals(1856, TechniqueData.DEFAULT.withEmeralds(5000).emeralds());
+		assertEquals(4, TechniqueData.DEFAULT.withEmeralds(5000).slotsOpen(), "emeralds are capped at 960");
+		assertEquals(960, TechniqueData.DEFAULT.withEmeralds(5000).emeralds());
 	}
 
 	@Test

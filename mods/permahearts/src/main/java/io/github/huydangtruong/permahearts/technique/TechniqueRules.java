@@ -10,8 +10,8 @@ public final class TechniqueRules {
 	public static final int MAX_LEVEL = 20;
 	public static final int MAX_SLOTS = 4;
 	/** Emeralds for slot 1, 2, 3, 4 (each on top of the previous). */
-	public static final int[] SLOT_STEPS = {64, 256, 512, 1024};
-	public static final int MAX_EMERALDS = 64 + 256 + 512 + 1024;
+	public static final int[] SLOT_STEPS = {64, 128, 256, 512}; // D77: was 64, 256, 512, 1024
+	public static final int MAX_EMERALDS = 64 + 128 + 256 + 512;
 	/** Seconds a charged throw needs to reach full power (like a bow). */
 	public static final float FULL_CHARGE_SECONDS = 1f;
 
