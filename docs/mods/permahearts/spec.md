@@ -8,6 +8,7 @@
 - **Thanh HeartXP** (D9): góc dưới bên trái (cách mép trái và mép dưới 8px), chữ "HeartXP 320/500" (ở trần: "HeartXP MAX") trên một thanh đỏ. Ẩn khi Creative/Spectator và khi tắt HUD (F1). Chỉ thấy khi client cũng cài mod.
 - Dữ liệu lưu theo người chơi trong save của world (Essential: save của máy host), đồng bộ xuống client của chính người đó.
 - Lệnh: `/hearts` (tim, HeartXP, tổng kill, số lần chết); `/hearts set <targets> <1..50>` và `/hearts xp <targets> <0..499>` cần quyền gamemaster.
+- `/testmode full` (chỉ OP): lưu trạng thái hiện tại, rồi cho đủ bộ netherite phù phép tối đa, 50 tim, mỗi linh dược như đã uống 10 lần. `/testmode reset` trả về đúng như trước (D92).
 - Mọi chữ của mod (giao diện, tên item, tin nhắn) chỉ có **tiếng Anh** (D16). Tên đồ/quái của game gốc vẫn theo ngôn ngữ game.
 - Host và bạn phải cài **cùng phiên bản** mod.
 

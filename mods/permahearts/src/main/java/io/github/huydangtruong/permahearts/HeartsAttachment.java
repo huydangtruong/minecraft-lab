@@ -48,7 +48,20 @@ public final class HeartsAttachment {
 		Identifier.fromNamespaceAndPath(PermaHearts.MOD_ID, "dm_protected"),
 		b -> b.persistent(Codec.BOOL).copyOnDeath().initializer(() -> false));
 
+	/** /testmode full saves the player's state here (D92). Saved, kept on death, server side only. */
+	public static final AttachmentType<TestSnapshot> TEST_SNAPSHOT = AttachmentRegistry.create(
+		Identifier.fromNamespaceAndPath(PermaHearts.MOD_ID, "test_snapshot"),
+		b -> b.persistent(TestSnapshot.CODEC).copyOnDeath());
+
 	private HeartsAttachment() {}
+
+	public static void setTestSnapshot(ServerPlayer p, TestSnapshot s) {
+		if (s == null) {
+			p.removeAttached(TEST_SNAPSHOT);
+		} else {
+			p.setAttached(TEST_SNAPSHOT, s);
+		}
+	}
 
 	public static boolean isDeathMatchProtected(ServerPlayer p) {
 		return p.getAttachedOrElse(DM_PROTECTED, false);

@@ -77,7 +77,7 @@ Cần bật công tắc thế giới. Lệnh trợ giúp (op): `/technique set <
 2. Nhặt 30 ngọc lục bảo, bấm vào chúng trong túi để cầm lên chuột, bấm vào ô ngọc lục bảo của bảng: ô ghi "30/64", ngọc trên chuột hết. Nạp thêm tới 64: ô khóa đầu mở. Chỉ lấy đủ số cần (tối đa 1856 ngọc tổng cộng), phần dư ở lại trên chuột.
 3. `/xp add @s 40 levels`, bấm hàng "Flame Burst": trang chi tiết (tên, "Lv 0 / 20", dòng mô tả, thông số cấp 1). Bấm "Learn (6 levels)": thanh cấp XP giảm 6, chiêu lên Lv 1; thông số hiện dạng "16 → 18 blocks" (hiện tại → cấp sau). Bấm tiếp: cấp 2 tốn 7 cấp XP; nút xám khi không đủ XP.
 4. Bấm "Reset +N XP": chiêu về Lv 0, nhận lại một nửa số điểm XP đã trả. Trang chi tiết có một dòng đầu: nút "Back" bên trái, rồi biểu tượng và tên chiêu, dòng "Lv N / 20" nằm dưới tên (không còn hàng ô chiêu ở trang này). Bấm "Back" để về danh sách. Danh sách có hàng cao hơn, cuộn bằng con lăn chuột (thanh cuộn mảnh bên phải); hàng 4 ô chiêu luôn dính ở trên cùng.
-5. Bấm TRÁI một ô đã mở: chế độ sửa (viền vàng), ô ngọc lục bảo biến thành nút ✕ (chữ bên cạnh ẩn). Bấm ✕ hoặc bấm lại đúng ô đó để thoát. Trong chế độ sửa, mỗi chiêu từ Lv 1 trở lên (trừ chiêu đang ở ô đó) có nút + ở cuối hàng: bấm + để đặt chiêu vào ô, rồi thoát chế độ sửa. Chiêu đang ở ô khác thì dời đi và ô cũ thành trống (ví dụ ô 1 Fire, ô 2 Ice, sửa ô 1, bấm + ở Ice: ô 1 Ice, ô 2 trống). Bấm PHẢI vào ô để gỡ chiêu.
+5. Bấm TRÁI một ô đã mở: chế độ sửa (viền vàng), ô ngọc lục bảo biến thành nút ✕ (chữ bên cạnh ẩn). Bấm ✕ hoặc bấm lại đúng ô đó để thoát. Trong chế độ sửa, **không có nút +** (D91): bấm vào dòng chiêu (từ Lv 1 trở lên) là đặt chiêu vào ô rồi thoát chế độ sửa; nút "i" nằm sát mép phải của dòng. Chiêu đang ở ô khác thì dời đi và ô cũ thành trống (ví dụ ô 1 Fire, ô 2 Ice, sửa ô 1, bấm dòng Ice: ô 1 Ice, ô 2 trống). Bấm PHẢI vào ô để gỡ chiêu.
 6. Chiêu trong ô đang hồi (thử bằng phần C) thì ô xám có số giây; bấm trái hay phải vào ô đó đều không làm gì (di chuột vào ô thấy số giây còn lại), và Reset chiêu cũng bị từ chối. `/technique cooldowns @s clear` xóa hồi chiêu.
 7. Bấm vào bảng khi đang cầm đồ: đồ không bị rơi ra ngoài.
 8. Tắt công tắc thế giới: nâng cấp/gắn/nạp ngọc đều bị từ chối (dòng báo trên hotbar), không mất gì.
@@ -254,3 +254,10 @@ Mở Cultivation, tab Techniques.
 6. `/gamerule mobGriefing false`: sét vẫn gây sát thương nhưng không phá khối.
 7. Hồi chiêu 24 giây tính từ lúc bấm.
 8. Kiểm bằng máy: `ThunderRulesTest`, `ThunderGameTest`, `ThunderClientTest` (ảnh `99-thunder-warning`, `100-thunder-strike`).
+
+## /testmode (P-031, D92)
+
+1. Là OP, bật luật chơi rồi gõ `/testmode full`: mũ, áo, quần, giày netherite mặc sẵn, kiếm/cúp/rìu/xẻng/cuốc netherite trong túi, mỗi món có 2 phù phép tối đa (xem tooltip); 50 tim (100 máu); `/hearts` thấy mỗi linh dược +10. Tin "Test mode on. /testmode reset to go back.".
+2. Gõ `/testmode full` lần nữa: không ghi đè bản đã lưu.
+3. Nhặt thêm vài món, rồi `/testmode reset`: tim, linh dược, túi đồ và giáp về đúng như trước khi gõ full; đồ nhặt thêm mất. Tin "Test mode off.". Gõ reset lần nữa: "Test mode is not on.".
+4. Người không phải OP gõ `/testmode` không được.
