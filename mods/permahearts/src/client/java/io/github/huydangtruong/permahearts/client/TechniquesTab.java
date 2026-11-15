@@ -589,60 +589,6 @@ public final class TechniquesTab {
 		for (int i = 0; i < Technique.values().length; i++) {
 			out.add(new int[] {tx + 40, rowY(y0, i) + 7}); // on the name, above the level bar
 		}
-		int[] up = lastUp;
-		int[] re = lastRe;
-		int[] bk = backRect(tx, right, y0, h);
-		int level = d.level(t);
-		boolean inBody = my >= detailTop(y0) && my < detailBottom(y0, h);
-		if (inBody && in(mx, my, up[0], up[1], up[2], up[3])) {
-			if (level < TechniqueRules.MAX_LEVEL && xpLevels() >= TechniqueRules.upgradeCost(level + 1)) {
-				send(TechniqueNet.UPGRADE, t.id(), 0);
-			}
-			return true;
-		}
-		if (inBody && in(mx, my, re[0], re[1], re[2], re[3])) {
-			if (level > 0 && !d.onCooldown(t, now())) {
-				send(TechniqueNet.RESET, t.id(), 0);
-			}
-			return true;
-		}
-		if (in(mx, my, bk[0], bk[1], bk[2], bk[3])) {
-			detail = null;
-			return true;
-		}
-		return false;
-	}
-
-	/** Mouse wheel over the list. Returns true when it was over the list (scrolled or not). */
-	public static boolean scroll(int x0, int y0, int w, int h, double mx, double my, double amount) {
-		if (detail != null) {
-			if (!in(mx, my, x0 + 7, detailTop(y0), w - 14, detailBottom(y0, h) - detailTop(y0))) {
-				return false;
-			}
-			detailScroll = Math.max(0, detailScroll - (int) Math.signum(amount) * SCROLL_STEP); // clamped when drawn
-			return true;
-		}
-		if (!in(mx, my, x0 + 7, y0 + LIST_TOP, w - 14, listH(h))) {
-			return false;
-		}
-		scroll = Math.max(0, Math.min(maxScroll(h), scroll - (int) Math.signum(amount) * SCROLL_STEP));
-		return true;
-	}
-
-	// ---- tests ----
-
-	/** Centres of the clickable things in GUI coordinates, for the client test: slots 0..3, emerald box, list rows. */
-	public static List<int[]> hotspots(int x0, int y0, int w, int h) {
-		int tx = x0 + 7;
-		int right = x0 + w - 7;
-		List<int[]> out = new ArrayList<>();
-		for (int i = 0; i < TechniqueRules.MAX_SLOTS; i++) {
-			out.add(new int[] {slotX(tx, i) + SLOT / 2, y0 + 19 + SLOT / 2});
-		}
-		out.add(new int[] {emeraldX(tx) + SLOT / 2, y0 + 19 + SLOT / 2});
-		for (int i = 0; i < Technique.values().length; i++) {
-			out.add(new int[] {tx + 40, rowY(y0, i) + 7}); // on the name, above the level bar
-		}
 		int[] up = lastUp; // where the detail page last drew them
 		int[] re = lastRe;
 		int[] bk = backRect(tx, right, y0, h);

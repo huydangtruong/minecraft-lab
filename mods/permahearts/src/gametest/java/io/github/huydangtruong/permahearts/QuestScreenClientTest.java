@@ -297,6 +297,12 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 		check(techniqueData(server).level(t.getEnumConstants()[1]) == 0, "Reset click should clear ice");
 		clickGui(context, hotspots(context).get(HS_BACK), LEFT);
 		context.takeScreenshot("09i-techniques-after-reset");
+		server.runCommand("technique set @p thunder 7");
+		scrollList(context, -10);
+		clickGui(context, hotspots(context).get(HS_INFO + Technique.THUNDER.ordinal()), LEFT);
+		context.takeScreenshot("105-thunder-detail"); // short description (3 lines), no bar under the level text
+		clickGui(context, hotspots(context).get(HS_BACK), LEFT);
+		scrollList(context, 10);
 		server.runCommand("technique cooldowns @p clear");
 	}
 

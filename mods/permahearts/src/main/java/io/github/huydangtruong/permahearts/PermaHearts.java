@@ -97,6 +97,7 @@ public class PermaHearts implements ModInitializer {
 		});
 		CommandRegistrationCallback.EVENT.register((d, c, s) -> {
 			HeartsCommand.register(d);
+			TestModeCommand.register(d);
 			QuestCommand.register(d);
 			io.github.huydangtruong.permahearts.technique.TechniqueCommand.register(d);
 		});
