@@ -120,7 +120,7 @@ public final class TechniqueRules {
 	}
 
 	public static double fireRange(int level) {
-		return scaled(16, 2, level);
+		return scaled(24, 2, level); // D72: was 16 at level 1
 	}
 
 	public static double fireImpactDamage(int level) {
@@ -128,20 +128,20 @@ public final class TechniqueRules {
 	}
 
 	public static double fireFieldRadius(int level) {
-		return scaled(2, 0.1, level);
+		return scaled(3, 0.2, level); // D72: was 2 + 0.1 per level
 	}
 
 	public static double fireFieldSeconds(int level) {
 		return scaled(4, 0.2, level);
 	}
 
-	/** Burn damage per second in the field: like normal fire, stronger from level 6 (the colour stays the same). */
+	/** Burn damage per second in the field: 1 at level 1, +0.2 per level (D45 halves the step after 10). D72: was 1, or 2 from level 6. */
 	public static double fireBurnPerSecond(int level) {
-		return level >= 6 ? 2 : 1;
+		return scaled(1, 0.2, level);
 	}
 
 	public static double iceRange(int level) {
-		return scaled(16, 2, level);
+		return scaled(24, 2, level); // D72: was 16 at level 1
 	}
 
 	public static double iceImpactDamage(int level) {
@@ -205,11 +205,11 @@ public final class TechniqueRules {
 
 	/** Knockback strength (horizontal push, a little upward too). */
 	public static double repulsePush(int level) {
-		return scaled(1.0, 0.15, level);
+		return scaled(1.5, 0.25, level); // D72: was 1.0 + 0.15
 	}
 
 	public static double repulseDamage(int level) {
-		return scaled(2, 0.5, level);
+		return scaled(5, 0.5, level); // D72: was 2 at level 1
 	}
 
 	/** Share of the caster's current health given up (D46): 80% at level 1, 50% at 10, 30% at 20. */
@@ -217,9 +217,9 @@ public final class TechniqueRules {
 		return piecewise(level, 0.80, 0.50, 0.30);
 	}
 
-	/** Seconds of invulnerability (D46): 5 at level 1, 8 at 10, 10 at 20. */
+	/** Seconds of invulnerability (D72): 8 at level 1, +0.5 per level, 17.5 at 20. D46 had 5 / 8 / 10. */
 	public static double sacrificeSeconds(int level) {
-		return piecewise(level, 5, 8, 10);
+		return 8 + 0.5 * (Math.max(1, Math.min(MAX_LEVEL, level)) - 1);
 	}
 
 	/** A straight line from (1, at1) to (20, at20). */
@@ -234,9 +234,9 @@ public final class TechniqueRules {
 		return l <= 10 ? at1 + (at10 - at1) * (l - 1) / 9.0 : at10 + (at20 - at10) * (l - 10) / 10.0;
 	}
 
-	/** Seconds of creative-like flight (D54): 10 at level 1 up to 30 at 20. */
+	/** Seconds of creative-like flight: 15 at level 1 up to 40 at 20 (D72; D54 had 10 to 30). */
 	public static double flightSeconds(int level) {
-		return linear(level, 10, 30); // D54: 10 s at level 1, 30 s at 20
+		return linear(level, 15, 40);
 	}
 
 	/** Flight speed on top of the creative flying speed (D54): -20% (80% of creative) at level 1 up to +100% at 20. */
@@ -289,25 +289,14 @@ public final class TechniqueRules {
 		return l >= 20 ? 6 : l >= 15 ? 5 : l >= 10 ? 4 : l >= 5 ? 3 : 2;
 	}
 
-	/** Multiple of a vanilla vex's health (D63): 1.0 at level 1 up to 2.0 at 20. */
-	public static double angelHealthFactor(int level) {
-		return linear(level, 1.0, 2.0);
-	}
-
-	/** Multiple of a vanilla vex's attack damage (D63): 0.5 at level 1 up to 2.0 at 20. */
-	public static double angelDamageFactor(int level) {
-		return linear(level, 0.5, 2.0);
-	}
-
-	/** Vanilla vex health and attack damage (Vex.createAttributes, checked with javap: 14 and 4). */
-	public static final double VEX_BASE_HEALTH = 14, VEX_BASE_DAMAGE = 4;
-
+	/** Angel health (D72): 16 at level 1 up to 30 at 20. D63 used a multiple of a vanilla vex's 14. */
 	public static double angelHealth(int level) {
-		return VEX_BASE_HEALTH * angelHealthFactor(level);
+		return linear(level, 16, 30);
 	}
 
+	/** Angel attack damage (D72): 4 at level 1, +1 per level, 23 at 20. */
 	public static double angelDamage(int level) {
-		return VEX_BASE_DAMAGE * angelDamageFactor(level);
+		return 4 + (Math.max(1, Math.min(MAX_LEVEL, level)) - 1);
 	}
 
 	/** Seconds the angels stay (D63). */

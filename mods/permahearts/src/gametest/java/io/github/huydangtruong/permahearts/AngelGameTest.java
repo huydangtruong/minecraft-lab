@@ -34,15 +34,13 @@ public class AngelGameTest {
 	public void angelCountAndPowerFollowTheLevel(GameTestHelper c) {
 		ServerPlayer p = owner(c);
 		arm(p, Technique.ANGEL, 1);
-		double vexHealth = Vex.createAttributes().build().getValue(Attributes.MAX_HEALTH);
-		double vexDamage = Vex.createAttributes().build().getValue(Attributes.ATTACK_DAMAGE);
 		int[][] cases = {{1, 2}, {5, 3}, {10, 4}, {15, 5}, {20, 6}};
 		for (int[] k : cases) {
 			c.assertTrue(TechniqueCasts.cast(p, Technique.ANGEL, k[0], 1f), "cast works at level " + k[0]);
 			var mine = WarriorAngel.angelsOf(c.getLevel(), p.getUUID());
 			c.assertTrue(mine.size() == k[1], "level " + k[0] + " summons " + k[1] + ", was " + mine.size() + " (recasting removes the old ones)");
-			double hp = vexHealth * TechniqueRules.angelHealthFactor(k[0]);
-			double dmg = vexDamage * TechniqueRules.angelDamageFactor(k[0]);
+			double hp = TechniqueRules.angelHealth(k[0]);
+			double dmg = TechniqueRules.angelDamage(k[0]);
 			for (WarriorAngel a : mine) {
 				c.assertTrue(Math.abs(a.getMaxHealth() - hp) < 1e-3 && Math.abs(a.getHealth() - hp) < 1e-3, "health " + a.getHealth() + " at level " + k[0]);
 				c.assertTrue(Math.abs(a.getAttributeValue(Attributes.ATTACK_DAMAGE) - dmg) < 1e-3, "damage " + a.getAttributeValue(Attributes.ATTACK_DAMAGE));
@@ -51,7 +49,7 @@ public class AngelGameTest {
 		}
 		var lv1 = TechniqueCasts.cast(p, Technique.ANGEL, 1, 1f);
 		var a = WarriorAngel.angelsOf(c.getLevel(), p.getUUID()).get(0);
-		c.assertTrue(lv1 && a.getMaxHealth() == vexHealth && a.getAttributeValue(Attributes.ATTACK_DAMAGE) == vexDamage / 2, "level 1: vex health, half vex damage");
+		c.assertTrue(lv1 && a.getMaxHealth() == 16 && a.getAttributeValue(Attributes.ATTACK_DAMAGE) == 4, "level 1: 16 health, 4 damage");
 		FlightBladeGameTest.drop(c, p);
 		c.succeed();
 	}

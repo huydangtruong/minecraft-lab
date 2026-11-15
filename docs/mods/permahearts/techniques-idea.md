@@ -35,7 +35,7 @@ Tóm tắt lời Huy, chưa phải quyết định cuối. Câu hỏi còn mở 
 - **Lửa**: phóng ra một bãi lửa thiêu đối phương.
   - Giữ chuột phải càng lâu thì bay càng xa, như bắn cung.
   - Nâng cấp tăng: tầm xa tối đa, sát thương va chạm, và (nhẹ hơn) sát thương lửa.
-  - Lv 1 cháy như lửa thường; Lv 6 cháy mạnh hơn.
+  - Lv 1 cháy như lửa thường (1 mỗi giây); +0,2 mỗi level (D72).
 - **Băng**: ném quả cầu băng (cách ném như Lửa).
   - Chạm đất thì tạo vùng; ai trong vùng bị đi chậm và đánh chậm.
   - Mức chậm tăng theo level.
