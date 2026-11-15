@@ -228,3 +228,9 @@ Tên và chữ ký dưới đây lấy từ `javap` jar 26.3 và mã Fabric API 
 - `KeyBindsList$CategoryEntry` draws the category name with no colour. A `§e` (`§e`) prefix in the lang value makes it yellow.
 - The lang files are not expanded by default. The root `build.gradle` replaces `@MOD_VERSION@` in `assets/*/lang/*.json` with the mod version.
 - Screens for client tests: `WorldCreationGameRulesScreen(GameRules, Consumer<Optional<GameRules>>)` with `new GameRules(FeatureFlags.DEFAULT_FLAGS)`; `KeyBindsScreen(Screen, Options)`. The search box has focus, so `typeChars` filters the rule list.
+
+## Mouse buttons in screens (reward box bug, 0.14.0)
+
+- 26.3 numbers mouse buttons like SDL: `InputConstants.MOUSE_BUTTON_LEFT = 1`, `MOUSE_BUTTON_RIGHT = 3`, not 0 and 1 as in older versions. Always compare `MouseButtonEvent.button()` with these constants, never with a number.
+- `RewardBoxScreen` checked `button() == 0`, so no click selected a card in any reward box. The client test missed it because it built a fake `MouseButtonEvent` with button 0. Client tests must click with `context.getInput().setCursorPos(...)` + `pressMouse(InputConstants.MOUSE_BUTTON_LEFT)`.
+- Cards now take both left and right click (Huy).

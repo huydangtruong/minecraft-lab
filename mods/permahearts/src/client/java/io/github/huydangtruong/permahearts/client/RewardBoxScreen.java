@@ -4,6 +4,7 @@ import io.github.huydangtruong.permahearts.reward.RewardBoxMenu;
 import io.github.huydangtruong.permahearts.reward.RewardMessages;
 import io.github.huydangtruong.permahearts.reward.RewardOption;
 import io.github.huydangtruong.permahearts.reward.RewardSelection;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -80,7 +81,8 @@ public class RewardBoxScreen extends AbstractContainerScreen<RewardBoxMenu> {
 	@Override
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
 		int card = cardAt(event.x(), event.y());
-		if (card >= 0 && event.button() == 0) {
+		// 26.3 numbers buttons like SDL: left 1, right 3. Both pick a card (Huy).
+		if (card >= 0 && (event.button() == InputConstants.MOUSE_BUTTON_LEFT || event.button() == InputConstants.MOUSE_BUTTON_RIGHT)) {
 			minecraft.gameMode.handleInventoryButtonClick(menu.containerId, card);
 			return true;
 		}

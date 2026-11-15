@@ -9,6 +9,7 @@ import io.github.huydangtruong.permahearts.wanderer.Quest;
 import io.github.huydangtruong.permahearts.wanderer.QuestLine;
 import io.github.huydangtruong.permahearts.wanderer.QuestType;
 import io.github.huydangtruong.permahearts.wanderer.Wanderer;
+import com.mojang.blaze3d.platform.InputConstants;
 import java.util.List;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
@@ -40,6 +41,7 @@ public class RewardBoxClientTest implements FabricClientGameTest {
 			server.runCommand("weather clear");
 			server.runCommand("gamemode survival @a");
 			context.waitTicks(40);
+			boxScreen(context, server, RewardTier.SILVER, "89-reward-box-silver");
 			boxScreen(context, server, RewardTier.GOLD, "90-reward-box-gold");
 			boxScreen(context, server, RewardTier.DIAMOND, "93-reward-box-diamond");
 			questScreen(context, server);
@@ -52,7 +54,10 @@ public class RewardBoxClientTest implements FabricClientGameTest {
 			p.getInventory().clearContent();
 			ItemStackHelper.give(p, tier);
 			// A fixed roll so the picture is repeatable and shows every kind of card.
-			List<RewardOption> options = tier == RewardTier.GOLD
+			List<RewardOption> options = tier == RewardTier.SILVER
+				? List.of(new RewardOption("minecraft:iron_ingot", 64), new RewardOption("minecraft:gold_ingot", 64),
+					new RewardOption("permahearts:elixir_strength", 1))
+				: tier == RewardTier.GOLD
 				? List.of(new RewardOption("minecraft:diamond", 16), new RewardOption("permahearts:elixir_fury", 1),
 					new RewardOption("minecraft:enchanted_golden_apple", 4), new RewardOption("minecraft:ender_pearl", 32))
 				: List.of(new RewardOption("minecraft:netherite_ingot", 1), new RewardOption("permahearts:elixir_iron_skin", 1),
@@ -64,15 +69,9 @@ public class RewardBoxClientTest implements FabricClientGameTest {
 		context.waitForScreen(AbstractContainerScreen.class);
 		context.waitTicks(10);
 		context.takeScreenshot(name + "-open"); // nothing selected: Claim is disabled
-		// A real click on the second card, in GUI coordinates (the screen's own mouseClicked).
-		context.runOnClient(mc -> {
-			var screen = (AbstractContainerScreen<?>) mc.gui.screen();
-			int[] at = panelOrigin(mc);
-			int left = at[0];
-			int top = at[1];
-			screen.mouseClicked(new net.minecraft.client.input.MouseButtonEvent(left + 8 + 54 + 25, top + 30 + 40,
-				new net.minecraft.client.input.MouseButtonInfo(0, 0)), false);
-		});
+		// A real click (mouse input, not a faked event) on the second card: right button on the diamond box, left on the others.
+		clickGui(context, 8 + 54 + 25, 30 + 40,
+			tier == RewardTier.DIAMOND ? InputConstants.MOUSE_BUTTON_RIGHT : InputConstants.MOUSE_BUTTON_LEFT);
 		context.waitTicks(10);
 		int mask = server.computeOnServer(s -> {
 			ServerPlayer sp = s.getPlayerList().getPlayers().get(0);
@@ -98,8 +97,40 @@ public class RewardBoxClientTest implements FabricClientGameTest {
 		context.getInput().setCursorPos(5, 5);
 		context.waitTicks(5);
 		context.takeScreenshot(name + "-selected");
-		context.runOnClient(mc -> mc.player.closeContainer());
+		// A real click on Claim: the box is used up and card 1 lands in the inventory.
+		String card1 = switch (tier) {
+			case SILVER -> "minecraft:gold_ingot";
+			case GOLD -> "permahearts:elixir_fury";
+			case DIAMOND -> "permahearts:elixir_iron_skin";
+		};
+		clickGui(context, -1, 30 + 80 + 8 + 10, InputConstants.MOUSE_BUTTON_LEFT);
+		context.waitTicks(10);
+		String claimed = server.computeOnServer(s -> {
+			ServerPlayer sp = s.getPlayerList().getPlayers().get(0);
+			return (sp.containerMenu instanceof RewardBoxMenu ? "menu still open; " : "")
+				+ (RewardBoxes.tierOf(sp.getMainHandItem()).isPresent() ? "box still in hand; " : "")
+				+ (sp.getInventory().contains(st -> net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(st.getItem()).toString().equals(card1))
+					? "" : "card 1 (" + card1 + ") not given; ")
+				+ "inventory " + sp.getInventory().getNonEquipmentItems();
+		});
+		if (claimed.contains("still") || claimed.contains("not given")) {
+			throw new AssertionError(tier + " claim by mouse failed: " + claimed);
+		}
 		context.waitTicks(5);
+	}
+
+	/** A real left click at GUI coordinates relative to the box panel's top-left; x = -1 means the Claim button's centre. */
+	private static void clickGui(ClientGameTestContext context, int dx, int dy, int button) {
+		double[] at = context.computeOnClient(mc -> {
+			double scale = mc.getWindow().getGuiScale();
+			int[] o = panelOrigin(mc);
+			int w = 16 + 54 * ((RewardBoxMenu) mc.player.containerMenu).options().size() - 4;
+			int x = dx >= 0 ? o[0] + dx : o[0] + w / 2 - 4 - 35;
+			return new double[] {x * scale, (o[1] + dy) * scale};
+		});
+		context.getInput().setCursorPos(at[0], at[1]);
+		context.waitTicks(2);
+		context.getInput().pressMouse(button);
 	}
 
 	/** Top-left of the box screen: it is centred, 16 + 54 per card - 4 wide and 146 high (same numbers as RewardBoxScreen). */
