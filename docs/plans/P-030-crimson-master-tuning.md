@@ -2,9 +2,9 @@
 
 > **Tóm tắt cho Huy (VN, ≤ 3 dòng):** Crimson Master chờ 5 ngày mới tới; đổi tỉ lệ loại nhiệm vụ; thêm thịt lợn 48, phù thủy còn 6, thêm Blaze / Wither Skeleton / Phantom mức 8.
 > Rương mới ngọc lục bảo (xanh lá, 6 thẻ, chọn 2) với Totem, bình +16 level, sách Mending / Sharpness V / Protection V.
-> Mỗi dòng nhiệm vụ bốc ngẫu nhiên loại rương: bạc 40%, vàng 30%, kim cương 20%, ngọc lục bảo 10%.
+> Rương bốc ngẫu nhiên lúc nhận, không hiện trước: thường bạc 40 / vàng 30 / kim cương 20 / ngọc lục bảo 10; hạ thủ lĩnh và trăng máu 20 / 30 / 30 / 20.
 
-- **Status:** ready
+- **Status:** in progress
 - **Mod / decision:** `permahearts`, D87, D88, D89, D90 · **Branch:** `feat/P-030-crimson-tuning` · **Depends on:** none
 
 ## Part 1: schedule and quests (D87, D88)
@@ -19,14 +19,17 @@ File: `wanderer/QuestGenerator.java` (pure Java, JUnit in its existing test).
 - Check that the kill counter counts these mobs (Phantom and Blaze are `Enemy`; the Wither Skeleton too). If the kill line has a dimension or spawn hint text, add one for Nether mobs if the code has such a place; otherwise nothing.
 - Existing saves keep their current quests; new numbers apply to new visits.
 
-## Part 2: random box tier per line (D90)
+## Part 2: random box tier, rolled at claim, hidden before (D90)
 
-Files: `reward/RewardTier.java`, `wanderer/Wanderer.java` (line 309, 433), `wanderer/RewardContainer.java` (line 53), the quest line record and its codec.
+Files: `reward/RewardTier.java`, `wanderer/Wanderer.java` (line 309, 433), `wanderer/RewardContainer.java` (line 53).
 
 - Add `EMERALD("emerald", 6, 2)` to `RewardTier`.
-- Pure rule `RewardTier.roll(RandomGenerator)`: SILVER 40, GOLD 30, DIAMOND 20, EMERALD 10, the same for every quest type.
-- The tier is **rolled when the quest is generated** and stored on the line (codec field, optional). The quest screen preview and the claim both use the stored tier.
-- Old saved lines without the field fall back to today's `forLine(type)`, so nothing breaks mid-visit.
+- Replace `forLine(type)` with a pure rule `RewardTier.roll(QuestType type, RandomGenerator rng)`:
+  - BOSS and BLOOD_MOON: SILVER 20, GOLD 30, DIAMOND 30, EMERALD 20;
+  - every other type (COLLECT, KILL, EXPLORE, DEATH_MATCH): SILVER 40, GOLD 30, DIAMOND 20, EMERALD 10.
+- The tier is **rolled when the line is claimed**, not stored on the quest. Nothing to change in the save format.
+- **The quest screen must not show which box a line gives.** Where it shows the box today (RewardContainer line 53, Wanderer line 433), show a neutral placeholder instead: no real box item, e.g. a grey "?" slot or an existing vanilla sprite, with the tooltip "Random reward box". The player sees the box only after claiming.
+- The claim message (if any) names the box received.
 
 ## Part 3: emerald box (D89)
 
@@ -53,7 +56,7 @@ Files: `reward/RewardRoll.java`, `reward/RewardOption.java`, `reward/RewardBoxes
   - `pickType` weight totals and porkchop / witch 6 / blaze / wither skeleton / phantom in the lists;
   - visit delay 5;
   - over many seeds, no visit has the same mob in two lines;
-  - `RewardTier.roll` over many seeds is near 40/30/20/10; EMERALD has 6 options and 2 picks;
+  - `RewardTier.roll` over many seeds is near 40/30/20/10, and 20/30/30/20 for BOSS and BLOOD_MOON; EMERALD has 6 options and 2 picks;
   - `RewardRoll.roll(EMERALD)` gives 6 cards, no duplicate item (books with different enchantments are allowed together), specials come only from `EMERALD_SPECIALS`;
   - `RewardOption` codec round-trip with and without the enchantment, and an old JSON without it.
 - **Server game tests:** opening an emerald box and picking 2 cards gives both items and uses up the box; a Mending book card gives a book that carries Mending; drinking the bottle raises the level by 16.
@@ -76,11 +79,10 @@ export JAVA_HOME=$(/usr/libexec/java_home -v 25)
 ## Done when
 
 - [ ] Visits every 5 days, new weights and lists, no duplicate mob in a visit.
-- [ ] Each line shows its rolled box; old saves still load.
+- [ ] The box is rolled at claim with the D90 odds and is not shown on the quest line; old saves still load.
 - [ ] Emerald box: green, 6 cards, pick 2, the five specials work, the bottle gives 16 levels.
 - [ ] Build and client tests green, screenshots looked at.
 
 ## Risks / ask first
 
-- If storing the tier on the quest line breaks the save format in a way the optional field cannot cover, stop and report.
 - Muted test clients only.
