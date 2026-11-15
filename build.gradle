@@ -65,6 +65,10 @@ subprojects {
 				'mod_name': project.mod_name,
 				'mod_description': project.mod_description
 		}
+		// D78: the game rule group title shows the mod version
+		filesMatching('assets/*/lang/*.json') {
+			filter { line -> line.replace('@MOD_VERSION@', project.version.toString()) }
+		}
 	}
 
 	tasks.withType(JavaCompile).configureEach {

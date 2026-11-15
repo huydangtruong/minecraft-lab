@@ -41,8 +41,11 @@ public class PermaHearts implements ModInitializer {
 	private static final Identifier AFTER_ATTACHMENT_COPY = Identifier.fromNamespaceAndPath(MOD_ID, "after_attachment_copy");
 
 	/** Per-world ImmortalCultivation switch (D10, D11). Default off; Game Rules screen at world creation or /gamerule permahearts:immortal_cultivation. */
+	/** Own game rule group (D78): the screen draws group titles in bold yellow; the title carries the mod version. */
+	public static final GameRuleCategory RULES = GameRuleCategory.register(Identifier.fromNamespaceAndPath(MOD_ID, "immortal_cultivation"));
+
 	public static final GameRule<Boolean> ENABLED = GameRuleBuilder.forBoolean(false)
-		.category(GameRuleCategory.PLAYER)
+		.category(RULES)
 		.buildAndRegister(Identifier.fromNamespaceAndPath(MOD_ID, "immortal_cultivation"));
 
 	/** A player finished eating (FoodPropertiesMixin): Vitality elixirs heal extra (D30). */

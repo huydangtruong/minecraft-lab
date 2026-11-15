@@ -12,7 +12,8 @@
   "permahearts.msg.disabled": "ImmortalCultivation is off in this world. Turn on: /gamerule permahearts:immortal_cultivation true",
   "permahearts.hud.label": "HeartXP %s/500",
   "permahearts.hud.max": "HeartXP MAX",
-  "gamerule.permahearts.immortal_cultivation": "ImmortalCultivation",
+  "gamerule.category.permahearts.immortal_cultivation": "Immortal Cultivation @MOD_VERSION@",
+  "gamerule.permahearts.immortal_cultivation": "Enabled",
   "gamerule.permahearts.immortal_cultivation.description": "Lose hearts on death, HeartXP, elixirs and the Crimson Master quests",
   "item.permahearts.silver_reward_box": "Silver Reward Box",
   "item.permahearts.gold_reward_box": "Gold Reward Box",
@@ -133,5 +134,5 @@
   "item.permahearts.focus_warp": "Cosmic Warping Focus",
   "entity.permahearts.warp_portal": "Warp Portal",
   "key.permahearts.technique": "Technique mode (toggle)",
-  "key.category.permahearts.main": "Immortal Cultivation"
+  "key.category.permahearts.main": "\u00a7eImmortal Cultivation"
 }
