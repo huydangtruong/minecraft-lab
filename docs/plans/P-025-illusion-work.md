@@ -3,7 +3,7 @@
 > Tóm tắt (VN): món đồ trên tay lúc dùng chiêu quyết định việc của phân thân: cuốc làm ruộng, cần câu câu cá, rìu chặt cây, kéo cắt lông cừu, xô vắt sữa, lúa mì / cà rốt / khoai tây cho thú ăn. Thành quả bỏ vào rương gần nhất. Có đánh nhau thì đánh bằng món đang cầm rồi quay lại làm. Tồn tại 30 → 50 giây, hồi 110 giây.
 > Decision: D73 (builds on D71, P-024). Also fixes: hostile mobs ignore the clones. Branch: dev on `feat/P-025-dev`, merges into `feat/P-025-illusion-work`.
 
-- **Status:** ready
+- **Status:** merged
 - **Dev:** one Sonnet subagent
 
 ## Numbers (pure Java in `TechniqueRules`, JUnit-tested)

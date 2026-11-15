@@ -24,4 +24,6 @@ Quy trình: [workflow/team.md](../workflow/team.md); mẫu: [TEMPLATE.md](TEMPLA
 | [P-022](P-022-aqua-marine.md) | Chiêu Aqua Marine (D64) | merged | Sonnet subagent |
 | [P-023](P-023-aqua-faster-clear.md) | Aqua Marine: bơi nhanh hơn, nhìn rõ dưới nước (D69) | merged | Sonnet subagent |
 | [P-024](P-024-illusion.md) | Chiêu Illusion: phân thân (D71) | merged | Sonnet subagent |
-| [P-025](P-025-illusion-work.md) | Illusion làm việc: ruộng, câu cá, chặt cây, cắt lông, vắt sữa, cho thú ăn (D73) | ready | Sonnet subagent |
+| [P-025](P-025-illusion-work.md) | Illusion làm việc: ruộng, câu cá, chặt cây, cắt lông, vắt sữa, cho thú ăn (D73) | merged | Sonnet subagent |
+| [P-026](P-026-cosmic-warping.md) | Quantum Leap đổi tên/màu + chiêu Cosmic Warping (D74, D75) | ready | Sonnet subagent |
+| [P-027](P-027-reward-boxes.md) | Rương quà bạc/vàng/kim cương cho nhiệm vụ (D76) | ready | Sonnet subagent |
