@@ -69,7 +69,12 @@ All jobs run inside the work area only. They count as the clone's actions, not t
   - Put the milk buckets in the chest.
 - **BREED:**
   - Feed adult animals that can breed and are not on cooldown: wheat for cows and sheep, carrots or potatoes for pigs.
-  - Use the vanilla love mode, so the 5-minute breeding cooldown applies. The food is free.
+  - Use the vanilla love mode, so the 5-minute breeding cooldown applies.
+  - **Food is never free (Huy):**
+    - At the cast, the stack in the owner's main hand is split equally between the owner and the clones. Example: 64 wheat and 1 clone → owner keeps 32, the clone carries 32; with 3 clones, 16 each. The owner keeps any remainder.
+    - Take the clones' shares out of the owner's stack. Each share goes in that clone's carry.
+    - A clone feeds from the nearby chest first (matching food), and from its own share only when the chest has none.
+    - Unused food goes back like any carried item: into the chest, or dropped at the owner's feet.
   - The baby gets the owner as "loved by" or no player at all. Breeding XP orbs are **not** spawned.
 
 **Collecting and storing**
@@ -104,7 +109,7 @@ Keep the D71 target list as it is: whoever hits the owner, or whom the owner hit
   - CHOP: a natural tree (non-persistent leaves) → logs in the chest; a log wall with persistent leaves stays untouched;
   - SHEAR: a sheep → wool in the chest;
   - MILK: a cow, a chest with 1 empty bucket → 1 milk bucket in the chest. No bucket → nothing changes;
-  - BREED: two cows plus wheat → a baby cow, and no XP orbs;
+  - BREED: two cows plus wheat → a baby cow, and no XP orbs. The owner's stack of 64 wheat becomes 32 with 1 clone. Wheat in the chest is used before the clone's share;
   - FISH: water and a chest → at least one item in the chest. Use a test hook to shorten the wait;
   - the job stays locked when the owner's main hand changes after the cast;
   - a working clone attacks a second player who hits the owner (PvP off), then goes back to work;
