@@ -299,10 +299,17 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 		context.takeScreenshot("09i-techniques-after-reset");
 		server.runCommand("technique set @p thunder 7");
 		scrollList(context, -10);
+		for (int i = 0; i < 40; i++) { // one wheel notch is one step: scroll to the last row
+			context.getInput().scroll(-10);
+		}
+		context.waitTicks(3);
 		clickGui(context, hotspots(context).get(HS_INFO + Technique.THUNDER.ordinal()), LEFT);
 		context.takeScreenshot("105-thunder-detail"); // short description (3 lines), no bar under the level text
 		clickGui(context, hotspots(context).get(HS_BACK), LEFT);
-		scrollList(context, 10);
+		for (int i = 0; i < 40; i++) {
+			context.getInput().scroll(10);
+		}
+		context.waitTicks(3);
 		server.runCommand("technique cooldowns @p clear");
 	}
 
