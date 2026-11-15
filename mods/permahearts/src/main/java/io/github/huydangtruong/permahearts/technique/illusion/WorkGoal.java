@@ -162,6 +162,9 @@ public final class WorkGoal extends Goal {
 			goKey = null;
 			return false;
 		}
+		if (!a.onGround() && !a.isInWater()) {
+			return false; // no path can start in the air, and onGround is still false on the first ticks after the spawn: wait, never skip the target for it
+		}
 		if (a.getNavigation().isDone() || a.tickCount % 10 == 0) {
 			if (!a.getNavigation().moveTo(p.x, p.y, p.z, 1.0) && !moveBeside(p)) {
 				skip(key, 200);
