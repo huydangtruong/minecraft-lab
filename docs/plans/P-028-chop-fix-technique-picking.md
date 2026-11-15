@@ -5,7 +5,7 @@
 > Đã chọn ô trước thì bấm vào tên chiêu cũng đặt được, không cần dấu cộng.
 
 - **Status:** ready
-- **Mod / decision:** `permahearts`, D82, D83, D84 · **Branch:** `feat/P-028-chop-picking` · **Depends on:** none
+- **Mod / decision:** `permahearts`, D82, D83, D84, D85 · **Branch:** `feat/P-028-chop-picking` · **Depends on:** none
 
 ## Goal
 
@@ -41,6 +41,12 @@ Files: `technique/illusion/ChopTask.java`, `technique/illusion/WorkGoal.java`, `
 - `FarmTask` never turns dirt or grass into farmland (no hoe tilling). It harvests, replants, and plants seeds on existing empty farmland.
 - When all farmland is planted and nothing is ripe, it delivers its seeds and crops to the chest, or drops them with no chest (D73 rules).
 - Game test: no new farmland appears, all empty farmland gets planted, and the leftovers end up in the chest or on the ground.
+
+## Part 1c: Job from the first hotbar slot (D85)
+
+- `Illusion` picks the job from the owner's inventory slot 0, not from the main hand. An empty slot 0 gives FIGHT.
+- A working clone holds a copy of slot 0 as its tool. FIGHT keeps today's gear copying.
+- Game test: sword in hand and axe in slot 0 gives CHOP; empty slot 0 gives FIGHT.
 
 ## Part 2: Techniques tab (D83)
 
