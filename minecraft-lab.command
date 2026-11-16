@@ -248,7 +248,7 @@ asset_url() { # release index, asset name
 
 # install_release <position in RT arrays>. Returns 1 on any problem; the mods folder is unchanged until the last step.
 install_release() {
-	local pos="$1" idx mod ver title work url jar want got mc fab fabjar fabsha
+	local pos="$1" idx mod ver title work url jar want got mc fab fabjar fabsha notes
 	idx="${RT_IDX[$pos]}"; mod="${RT_MOD[$pos]}"; ver="${RT_VER[$pos]}"; title="${RT_TITLE[$pos]}"
 	work="$TMP/work"; rm -rf "$work"; mkdir -p "$work"
 
@@ -314,6 +314,10 @@ install_release() {
 	printf '%sSUCCESS! %s %s is installed.%s\n' "$GREEN" "$title" "$ver" "$RESET"
 	echo "Mods folder: $MODS_DIR"
 	echo "Start Minecraft with the \"$PROFILE_NAME\" profile."
+	echo
+	echo "What's new in $title $ver:"
+	notes="$(jget "$idx.body" "$RJSON" | tr -d '\r')"
+	if [ -n "$(printf '%s' "$notes" | tr -d ' \t\n')" ]; then printf '%s\n' "$notes"; else echo "(no notes)"; fi
 	return 0
 }
 
@@ -373,7 +377,9 @@ versions_menu() { # mod id, title
 		if is_number_in_range "$REPLY" 0 "${#VPOS[@]}"; then
 			[ "$REPLY" -ne 0 ] || return 0
 			pos="${VPOS[$((REPLY - 1))]}"
-			install_release "$pos" || INSTALL_FAILED=1
+			# A good install shows the release notes and ends the session (the Terminal window keeps the text).
+			if install_release "$pos"; then exit 0; fi
+			INSTALL_FAILED=1
 			scan_installed
 			# Do not jump straight back into a menu: let the player read the result first.
 			echo

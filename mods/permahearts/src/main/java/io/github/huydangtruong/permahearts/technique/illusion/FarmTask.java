@@ -37,6 +37,9 @@ final class FarmTask implements WorkTask {
 	public boolean tick(WorkGoal g, ServerLevel sl) {
 		Illusion a = g.illusion();
 		if (target != null && (g.isSkipped(target) || !stillValid(g, sl, a))) {
+			if (g.isSkipped(target) && mode != Mode.FETCH) { // an unreachable crop: its neighbours (the same field) are not worth a try each
+				g.skipAround(target, 4, 600);
+			}
 			target = null;
 		}
 		if (target == null) {
@@ -50,7 +53,7 @@ final class FarmTask implements WorkTask {
 			}
 		}
 		Vec3 at = mode == Mode.FETCH ? Vec3.atCenterOf(target) : Vec3.atBottomCenterOf(target);
-		if (!g.goTo(target, at, mode == Mode.FETCH ? CHEST_REACH : REACH) || !g.ready()) {
+		if (!g.goTo(target, at, mode == Mode.FETCH ? CHEST_REACH : REACH, true) || !g.ready()) {
 			return true;
 		}
 		a.getLookControl().setLookAt(at.x, at.y, at.z);
@@ -70,7 +73,7 @@ final class FarmTask implements WorkTask {
 		BlockPos bestPlant = null;
 		double bt = Double.MAX_VALUE;
 		boolean emptySoil = false;
-		for (BlockPos p : WorkTask.cells(g, sl, 3, 3)) {
+		for (BlockPos p : WorkTask.cells(g, sl, 3, 6)) {
 			double d = p.distSqr(a.blockPosition());
 			if (d < bd && ripe(sl.getBlockState(p)) && !g.isSkipped(p)) {
 				bd = d;
@@ -126,14 +129,14 @@ final class FarmTask implements WorkTask {
 		return cropOf(s) != null;
 	}
 
-	/** A fully grown crop of the five plants the clone knows. */
+	/** A crop of the five plants the clone knows in its last two growth stages (D123); nether wart only when fully grown. */
 	static boolean ripe(BlockState st) {
 		Block b = st.getBlock();
 		if (b == Blocks.NETHER_WART) {
 			return st.getValue(NetherWartBlock.AGE) >= 3;
 		}
 		return (b == Blocks.WHEAT || b == Blocks.CARROTS || b == Blocks.POTATOES || b == Blocks.BEETROOTS)
-			&& b instanceof CropBlock c && c.isMaxAge(st);
+			&& b instanceof CropBlock c && c.getAge(st) >= c.getMaxAge() - 1;
 	}
 
 	private static Item seedOf(Block b) {
@@ -178,6 +181,10 @@ final class FarmTask implements WorkTask {
 	private void harvest(WorkGoal g, ServerLevel sl, Illusion a, BlockPos pos) {
 		BlockState st = sl.getBlockState(pos);
 		Block crop = st.getBlock();
+		if (crop instanceof CropBlock cb && !cb.isMaxAge(st)) { // D123: one stage short: let it ripen, so the drops are the ripe ones
+			st = cb.getStateForAge(cb.getMaxAge());
+			sl.setBlock(pos, st, 2);
+		}
 		List<ItemStack> drops = Block.getDrops(st, sl, pos, null, a, a.lockedItem());
 		Item seed = seedOf(crop);
 		boolean replant = crop.defaultBlockState().canSurvive(sl, pos);
