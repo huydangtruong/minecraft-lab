@@ -218,9 +218,10 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 		check(levelsLeft == 40 - 6 - 7, "levels left should be 27, was " + levelsLeft);
 		context.takeScreenshot("09e-technique-detail-level2");
 		clickGui(context, hotspots(context).get(HS_BACK), LEFT);
-		// learn ice and healing with the command, then assign with real clicks
+		// learn ice, Heaven Blast and healing with the command, then assign with real clicks
 		server.runCommand("technique set @p ice 4");
 		server.runCommand("technique set @p healing 1");
+		server.runCommand("technique set @p repulse 1"); // D114: Heaven Blast is a visible row (healing is below the fold)
 		server.runCommand("technique set @p sacrifice 20");
 		context.waitTicks(5);
 		context.takeScreenshot("09d2-techniques-list-top");
@@ -228,7 +229,7 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 		context.takeScreenshot("09d3-techniques-list-scrolled");
 		scrollList(context, 10);
 		var fire = t.getEnumConstants()[0];
-		var ice = t.getEnumConstants()[1];
+		var ice = t.getEnumConstants()[io.github.huydangtruong.permahearts.technique.Technique.ICE.ordinal()]; // D114: list order is grouped
 		clickGui(context, hotspots(context).get(HS_SLOT), LEFT); // left click slot 1: edit mode
 		context.takeScreenshot("09e2-slot1-edit-mode"); // gold outline, cross instead of the emerald box
 		context.takeScreenshot("104-technique-rows"); // D91: slot selected, no + buttons, "i" at the right edge
@@ -240,13 +241,13 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 		clickGui(context, hotspots(context).get(HS_ROW), LEFT); // the fire row
 		check(techniqueData(server).inSlot(0) == fire, "the fire row with slot 1 in edit mode should slot it");
 		clickGui(context, hotspots(context).get(HS_SLOT + 1), LEFT); // edit slot 2
-		clickGui(context, hotspots(context).get(HS_ROW + 1), LEFT); // the ice row
+		clickGui(context, hotspots(context).get(HS_ROW + io.github.huydangtruong.permahearts.technique.Technique.ICE.ordinal()), LEFT); // the ice row
 		check(techniqueData(server).inSlot(1) == ice, "the ice row with slot 2 in edit mode should slot it");
 		check(techniqueData(server).inSlot(0) == fire, "slot 1 keeps fire");
 		// move: edit slot 1, + on ice -> slot 1 ice, slot 2 empty
 		clickGui(context, hotspots(context).get(HS_SLOT), LEFT);
 		context.takeScreenshot("09f-move-before"); // fire + ice slotted, editing slot 1
-		clickGui(context, hotspots(context).get(HS_ROW + 1), LEFT);
+		clickGui(context, hotspots(context).get(HS_ROW + io.github.huydangtruong.permahearts.technique.Technique.ICE.ordinal()), LEFT);
 		check(techniqueData(server).inSlot(0) == ice, "slot 1 should hold ice after the move");
 		check(techniqueData(server).inSlot(1) == null, "slot 2 should be empty after ice moved out of it");
 		context.takeScreenshot("09f2-after-move");
@@ -257,8 +258,8 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 		check(techniqueData(server).inSlot(1) == fire, "picking fire then clicking an outlined slot should slot it");
 		// slot first, then the row name 
 		clickGui(context, hotspots(context).get(HS_SLOT + 1), LEFT);
-		clickGui(context, hotspots(context).get(HS_ROW + 2), LEFT);
-		check(techniqueData(server).inSlot(1) == t.getEnumConstants()[2], "slot 2 then the healing row should slot healing");
+		clickGui(context, hotspots(context).get(HS_ROW + io.github.huydangtruong.permahearts.technique.Technique.REPULSE.ordinal()), LEFT);
+		check(techniqueData(server).inSlot(1) == t.getEnumConstants()[io.github.huydangtruong.permahearts.technique.Technique.REPULSE.ordinal()], "slot 2 then the Heaven Blast row should slot it");
 		// Cancel drops a picked technique: the next slot click selects the slot instead of assigning
 		clickGui(context, hotspots(context).get(HS_ROW), LEFT);
 		clickGui(context, hotspots(context).get(HS_EMERALD), LEFT);
@@ -284,17 +285,17 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 		check(techniqueData(server).inSlot(0) == null, "right click on slot 1 should clear it");
 		// detail page of Blood Oath at level 20 (max): Upgrade greyed, Reset gives 0 (set by command)
 		scrollList(context, -10);
-		clickGui(context, hotspots(context).get(HS_INFO + 5), LEFT);
+		clickGui(context, hotspots(context).get(HS_INFO + io.github.huydangtruong.permahearts.technique.Technique.SACRIFICE.ordinal()), LEFT);
 		context.takeScreenshot("09g-technique-detail-max");
 		clickGui(context, hotspots(context).get(HS_BACK), LEFT);
 		scrollList(context, 10);
-		clickGui(context, hotspots(context).get(HS_INFO + 1), LEFT); // ice level 4: now -> next numbers
+		clickGui(context, hotspots(context).get(HS_INFO + io.github.huydangtruong.permahearts.technique.Technique.ICE.ordinal()), LEFT); // ice level 4: now -> next numbers
 		context.takeScreenshot("98-technique-detail-level"); // green level text and bar
 		context.takeScreenshot("09h-technique-detail-ice");
 		scrollList(context, -10); // the detail page scrolls: bring Reset into view (D57)
 		context.takeScreenshot("09h2-technique-detail-ice-scrolled");
 		clickGui(context, hotspots(context).get(HS_RESET), LEFT);
-		check(techniqueData(server).level(t.getEnumConstants()[1]) == 0, "Reset click should clear ice");
+		check(techniqueData(server).level(t.getEnumConstants()[io.github.huydangtruong.permahearts.technique.Technique.ICE.ordinal()]) == 0, "Reset click should clear ice");
 		clickGui(context, hotspots(context).get(HS_BACK), LEFT);
 		context.takeScreenshot("09i-techniques-after-reset");
 		server.runCommand("technique set @p thunder 7");
