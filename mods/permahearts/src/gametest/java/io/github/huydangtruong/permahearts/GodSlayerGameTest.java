@@ -115,14 +115,73 @@ public class GodSlayerGameTest {
 		GodSlayer b = boss(c, 1.5, 1, 1.5, 1);
 		b.setHuntTarget(p.getUUID());
 		c.runAfterDelay(2, () -> {
-			// 60 blocks away: far outside the 48 block limit (a snap, not a walk)
-			Vec3 far = p.position().add(60, 0, 0);
+			// 70 blocks away: outside the 64 block limit (D100) (a snap, not a walk)
+			Vec3 far = p.position().add(70, 0, 0);
 			p.teleportTo(c.getLevel(), far.x, far.y, far.z, java.util.Set.of(), 0f, 0f, false);
 		});
 		c.startSequence()
 			.thenIdle(4)
 			.thenWaitUntil(() -> c.assertTrue(b.distanceTo(p) < 12, "the boss teleported near its target, distance " + b.distanceTo(p)))
 			.thenExecute(() -> FlightBladeGameTest.drop(c, p))
+			.thenSucceed();
+	}
+
+	/** D100: a target 25 blocks away on open ground is chased on foot, never teleported to. */
+	@GameTest(maxTicks = 200)
+	public void runsAfterANearTargetInsteadOfTeleporting(GameTestHelper c) {
+		FlightBladeGameTest.enable(c);
+		ServerLevel level = c.getLevel();
+		// far from the other tests' structures (they share the world and count blocks)
+		net.minecraft.core.BlockPos o = c.absolutePos(new net.minecraft.core.BlockPos(0, 0, 0)).offset(4000, 0, 0);
+		for (int cx = -1; cx <= 3; cx++) {
+			for (int cz = -1; cz <= 1; cz++) {
+				level.setChunkForced((o.getX() >> 4) + cx, (o.getZ() >> 4) + cz, true);
+			}
+		}
+		for (int x = -10; x < 50; x++) {
+			for (int z = -10; z < 30; z++) {
+				level.setBlock(o.offset(x, 0, z), Blocks.STONE.defaultBlockState(), 3);
+				for (int y = 1; y <= 6; y++) {
+					level.setBlock(o.offset(x, y, z), Blocks.AIR.defaultBlockState(), 3);
+				}
+			}
+		}
+		ServerPlayer p = strong(c);
+		p.teleportTo(level, o.getX() + 2.5, o.getY() + 1, o.getZ() + 5.5, java.util.Set.of(), 0f, 0f, false);
+		GodSlayer b = GodSlayer.TYPE.create(level, EntitySpawnReason.MOB_SUMMONED);
+		b.setBossLevel(1);
+		b.snapTo(o.getX() + 1.5, o.getY() + 1, o.getZ() + 1.5, 0f, 0f);
+		level.addFreshEntity(b);
+		b.setHuntTarget(p.getUUID());
+		double[] last = {Double.NaN};
+		double[] biggestJump = {0};
+		double[] startDist = {0};
+		c.runAfterDelay(4, () -> {
+			p.teleportTo(level, o.getX() + 27.5, o.getY() + 1, o.getZ() + 5.5, java.util.Set.of(), 0f, 0f, false);
+			startDist[0] = b.distanceTo(p);
+			last[0] = b.getX();
+		});
+		c.startSequence()
+			.thenIdle(6)
+			.thenExecute(() -> {})
+			.thenWaitUntil(() -> {
+				if (!Double.isNaN(last[0])) {
+					biggestJump[0] = Math.max(biggestJump[0], Math.abs(b.getX() - last[0]));
+					last[0] = b.getX();
+				}
+				c.assertTrue(b.distanceTo(p) < 6, "the boss ran up to the target, distance " + b.distanceTo(p));
+			})
+			.thenExecute(() -> {
+				c.assertTrue(biggestJump[0] < 3, "no snap: the largest step in one tick was " + biggestJump[0]);
+				c.assertTrue(startDist[0] > 20 && startDist[0] < 30, "the target started 20-30 blocks away, " + startDist[0]);
+				b.discard();
+				for (int cx = -1; cx <= 3; cx++) {
+					for (int cz = -1; cz <= 1; cz++) {
+						level.setChunkForced((o.getX() >> 4) + cx, (o.getZ() >> 4) + cz, false);
+					}
+				}
+				FlightBladeGameTest.drop(c, p);
+			})
 			.thenSucceed();
 	}
 

@@ -59,9 +59,10 @@ class GodSlayerRulesTest {
 	@Test
 	void teleportRules() {
 		assertFalse(GodSlayerRules.shouldTeleport(10, true, 0));
-		assertFalse(GodSlayerRules.shouldTeleport(48, true, 99));
-		assertTrue(GodSlayerRules.shouldTeleport(48.5, true, 0));
-		assertTrue(GodSlayerRules.shouldTeleport(5, true, 100));
+		assertFalse(GodSlayerRules.shouldTeleport(64, true, 159));
+		assertFalse(GodSlayerRules.shouldTeleport(50, true, 0));
+		assertTrue(GodSlayerRules.shouldTeleport(64.5, true, 0));
+		assertTrue(GodSlayerRules.shouldTeleport(5, true, 160));
 		assertTrue(GodSlayerRules.shouldTeleport(5, false, 0));
 	}
 

@@ -66,6 +66,9 @@ public final class GodSlayer extends PathfinderMob {
 	private LivingEntity progressTarget;
 	private double bestDistance = Double.MAX_VALUE;
 	private int noProgress;
+	/** Ticks the boss has had no path to the target or has not moved itself, out of reach (D100). Drives the teleport. */
+	private int stuckTicks;
+	private Vec3 lastPos = Vec3.ZERO;
 	/** Entity tick of the last hit by a player; far in the past at the start. */
 	private int lastHitTick = Integer.MIN_VALUE / 2;
 
@@ -248,7 +251,7 @@ public final class GodSlayer extends PathfinderMob {
 		double dist = distanceTo(t);
 		boolean reach = inReachOf(t);
 		trackProgress(dist, reach);
-		if (GodSlayerRules.shouldTeleport(dist, true, noProgress)) {
+		if (GodSlayerRules.shouldTeleport(dist, true, stuckTicks)) {
 			teleportNear(t);
 			return;
 		}
@@ -256,6 +259,7 @@ public final class GodSlayer extends PathfinderMob {
 		mode = GodSlayerRules.chooseMode(inWater, heightAboveGround(t), t.getY() - getY(), noProgress, mode);
 		setNoGravity(mode != Mode.GROUND);
 		move(level, t, dist, reach);
+		trackStuck(reach);
 		if (tickCount % 4 == 0 && !reach && (horizontalCollision || noProgress >= 20)) {
 			breakBlocks(level, t);
 		}
@@ -269,6 +273,21 @@ public final class GodSlayer extends PathfinderMob {
 	private void resetProgress() {
 		bestDistance = Double.MAX_VALUE;
 		noProgress = 0;
+		stuckTicks = 0;
+		lastPos = position();
+	}
+
+	/** Stuck = out of reach and (on the ground: no path) or (not moving by itself). Running after a fast target is not stuck. */
+	private void trackStuck(boolean reach) {
+		Vec3 now = position();
+		boolean moved = now.distanceToSqr(lastPos) > 0.01 * 0.01;
+		lastPos = now;
+		boolean noPath = mode == Mode.GROUND && getNavigation().getPath() == null;
+		if (!reach && (noPath || !moved)) {
+			stuckTicks++;
+		} else {
+			stuckTicks = 0;
+		}
 	}
 
 	/** Counts the ticks without getting closer to the target. Being in reach is progress. */

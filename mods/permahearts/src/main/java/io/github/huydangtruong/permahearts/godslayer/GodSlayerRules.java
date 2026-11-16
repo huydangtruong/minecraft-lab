@@ -24,9 +24,10 @@ public final class GodSlayerRules {
 	public static final int VISIT_PERIOD = 4;
 	public static final int MIN_HEARTS = 30;
 
-	/** Beyond this distance (or in another dimension, or stuck this long) the boss teleports next to its target. */
-	public static final double TELEPORT_RANGE = 48;
-	public static final int STUCK_TICKS = 100;
+	/** Beyond this distance (or in another dimension, or stuck this long) the boss teleports next to its target (D100). */
+	public static final double TELEPORT_RANGE = 64;
+	/** 8 s without a path to the target, or without moving, while not in reach. A target that merely keeps its distance never counts. */
+	public static final int STUCK_TICKS = 160;
 
 	public static final double SLASH_REACH = 3.5;
 	public static final int SLASH_COOLDOWN = 20;
@@ -85,9 +86,9 @@ public final class GodSlayerRules {
 		return out;
 	}
 
-	/** Teleport to the target: another dimension, too far, or no progress toward it for too long. */
-	public static boolean shouldTeleport(double distance, boolean sameDimension, int ticksNoProgress) {
-		return !sameDimension || distance > TELEPORT_RANGE || ticksNoProgress >= STUCK_TICKS;
+	/** Teleport to the target: another dimension, farther than 64 blocks, or no path / not moving for 8 s while out of reach. */
+	public static boolean shouldTeleport(double distance, boolean sameDimension, int ticksStuck) {
+		return !sameDimension || distance > TELEPORT_RANGE || ticksStuck >= STUCK_TICKS;
 	}
 
 	/**
