@@ -32,6 +32,9 @@ public final class WandererScheduler {
 			if (PermaHearts.enabled(server)) {
 				BloodMoon.barrierTick(server); // every tick, so nobody slips across the arena edge (D33)
 			}
+			if (t % 20 == 0) {
+				DeathMatch.tickSky(server);
+			}
 			if (t % 20 == 0 && PermaHearts.enabled(server)) {
 				work(server, t % 100 == 0);
 				WandererBar.tick(server);

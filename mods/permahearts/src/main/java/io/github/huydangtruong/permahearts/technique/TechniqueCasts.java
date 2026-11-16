@@ -50,6 +50,7 @@ public final class TechniqueCasts {
 		Frostbite.init();
 		Stun.init();
 		Bleeding.init();
+		TechniqueTimers.init();
 		VioletGuardian.init();
 		WarriorAngel.init();
 		Illusion.init();
@@ -323,6 +324,7 @@ public final class TechniqueCasts {
 		for (ServerPlayer p : server.getPlayerList().getPlayers()) {
 			Flight.tick(p, t);
 			AquaMarine.tick(p, t);
+			TechniqueTimers.tick(p);
 			PhaseState phase = p.getAttached(PhaseState.ATTACHMENT);
 			if (phase != null && phase.endTick() >= 0) {
 				if (!phase.active(p.level().getGameTime())) {

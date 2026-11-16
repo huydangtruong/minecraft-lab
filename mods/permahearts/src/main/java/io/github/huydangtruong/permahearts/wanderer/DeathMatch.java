@@ -4,6 +4,11 @@ import io.github.huydangtruong.permahearts.Messages;
 import io.github.huydangtruong.permahearts.PermaHearts;
 import java.util.List;
 import java.util.Optional;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
@@ -17,7 +22,26 @@ public final class DeathMatch {
 	/** Test hook: when set, this is the number of players "online" (mock players are not in the player list). */
 	private static Integer onlineOverride;
 
+	/** D116: true on a player while a Death Match runs; synced to that player's client, which paints the sky purple. Not saved. */
+	public static final AttachmentType<Boolean> SKY = AttachmentRegistry.create(
+		Identifier.fromNamespaceAndPath(PermaHearts.MOD_ID, "death_match_sky"),
+		b -> b.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.targetOnly()));
+
 	private DeathMatch() {}
+
+	/** Once a second: sets the sky flag on every player (only writes on a change, so nothing is sent otherwise). */
+	public static void tickSky(MinecraftServer server) {
+		boolean on = PermaHearts.enabled(server) && running(server);
+		for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+			if (Boolean.TRUE.equals(p.getAttached(SKY)) != on) {
+				if (on) {
+					p.setAttached(SKY, true);
+				} else {
+					p.removeAttached(SKY);
+				}
+			}
+		}
+	}
 
 	public static void setOnlineForTest(Integer online) {
 		onlineOverride = online;
