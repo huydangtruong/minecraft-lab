@@ -134,6 +134,25 @@ public class IllusionWorkGameTest {
 		});
 	}
 
+	/** D120: no seeds in hand, empty farmland and a chest with seeds: the clone fetches them and plants. */
+	@GameTest(maxTicks = 1200)
+	public void farmTakesSeedsFromTheChestAndPlantsEmptyFarmland(GameTestHelper c) {
+		ServerPlayer p = owner(c, new ItemStack(Items.IRON_HOE));
+		Container chest = chest(c, 2, 1, 5);
+		chest.setItem(0, new ItemStack(Items.STICK, 3)); // other items stay
+		chest.setItem(1, new ItemStack(Items.WHEAT_SEEDS, 16));
+		c.setBlock(6, 0, 2, Blocks.FARMLAND);
+		c.setBlock(7, 0, 2, Blocks.FARMLAND);
+		c.setBlock(6, 0, 3, Blocks.FARMLAND);
+		Illusion a = castOne(c, p);
+		c.succeedWhen(() -> {
+			c.assertTrue(c.getBlockState(new BlockPos(6, 1, 2)).is(Blocks.WHEAT) && c.getBlockState(new BlockPos(7, 1, 2)).is(Blocks.WHEAT)
+				&& c.getBlockState(new BlockPos(6, 1, 3)).is(Blocks.WHEAT), "seeds fetched from the chest and planted, chest seeds=" + count(chest, x -> x.is(Items.WHEAT_SEEDS)) + " planted=" + c.getBlockState(new BlockPos(6, 1, 2)).is(Blocks.WHEAT) + c.getBlockState(new BlockPos(7, 1, 2)).is(Blocks.WHEAT) + c.getBlockState(new BlockPos(6, 1, 3)).is(Blocks.WHEAT) + dbg(a));
+			c.assertTrue(count(chest, s -> s.is(Items.STICK)) == 3, "only seeds were taken");
+			FlightBladeGameTest.drop(c, p);
+		});
+	}
+
 	@GameTest(maxTicks = 1200)
 	public void farmWithoutAChestDropsTheLeftoversAndNeverTills(GameTestHelper c) {
 		ServerPlayer p = owner(c, new ItemStack(Items.IRON_HOE));

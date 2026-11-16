@@ -92,7 +92,8 @@ class TechniqueRulesTest {
 		assertEquals(0.04f, TechniqueRules.flyingSpeed(1), 1e-6f); // 80% of creative (0.05)
 		assertEquals(0.1f, TechniqueRules.flyingSpeed(20), 1e-6f); // 200% of creative
 		assertArrayEquals(new double[] {150, 50 * (3 + 47.0 * 9 / 19), 2500}, at(TechniqueRules::teleportRange), 1e-9);
-		assertEquals(40, Technique.TELEPORT.cooldownSeconds());
+		assertEquals(40, TechniqueRules.cooldownSeconds(Technique.TELEPORT, 1)); // D121
+		assertEquals(21, TechniqueRules.cooldownSeconds(Technique.TELEPORT, 20));
 		assertEquals(3 * TechniqueRules.fullChargeSeconds(Technique.FIRE), TechniqueRules.fullChargeSeconds(Technique.TELEPORT), 1e-9);
 		assertEquals(3f, TechniqueRules.fullChargeSeconds(Technique.TELEPORT), 1e-9);
 		assertEquals("3 s", TechniqueRules.stats(Technique.TELEPORT, 1).get(2).value());

@@ -6,7 +6,7 @@ import java.util.UUID;
 
 /** P-042 (D117): the pure rules of the Notes panel. Lists are newest first. No Minecraft imports. */
 public final class NoteRules {
-	public static final int MAX_CHARS = 24;
+	public static final int MAX_CHARS = 32;
 	public static final int MAX_SHARED_PER_PLAYER = 16;
 	public static final int MAX_PRIVATE_PER_PLAYER = 24;
 	public static final String FULL_MESSAGE = "Delete an old note first";

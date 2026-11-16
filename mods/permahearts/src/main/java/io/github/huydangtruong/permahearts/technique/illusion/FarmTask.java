@@ -4,6 +4,9 @@ import io.github.huydangtruong.permahearts.technique.Illusion;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -16,20 +19,24 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * FARM: harvests ripe crops, replants at once, then plants the seeds it carries on farmland that already exists and is empty.
+ * FARM: harvests ripe crops, replants at once, then plants the seeds it carries (or takes from a chest nearby, D120) on farmland that already exists and is empty.
  * It never makes new farmland (D84): no planting of dirt or grass. When all farmland is planted and nothing is ripe it has no work,
  * so the WorkGoal delivers what it carries (chest, or dropped on the ground). The crops are broken like a player would (normal drops); the work counts as the clone's, so no XP and no tool wear.
  */
 final class FarmTask implements WorkTask {
 	private static final double REACH = 4.0;
+	private static final double CHEST_REACH = 3.0;
 	private BlockPos target;
-	private boolean planting;
+	private Mode mode = Mode.HARVEST;
 	private boolean had;
+
+	/** What the target is: a ripe crop, empty farmland, or the chest that holds seeds (D120). */
+	private enum Mode { HARVEST, PLANT, FETCH }
 
 	@Override
 	public boolean tick(WorkGoal g, ServerLevel sl) {
 		Illusion a = g.illusion();
-		if (target != null && (g.isSkipped(target) || !(planting ? canPlant(sl, target) : ripe(sl.getBlockState(target))))) {
+		if (target != null && (g.isSkipped(target) || !stillValid(g, sl, a))) {
 			target = null;
 		}
 		if (target == null) {
@@ -42,15 +49,15 @@ final class FarmTask implements WorkTask {
 				return false;
 			}
 		}
-		Vec3 at = Vec3.atBottomCenterOf(target);
-		if (!g.goTo(target, at, REACH) || !g.ready()) {
+		Vec3 at = mode == Mode.FETCH ? Vec3.atCenterOf(target) : Vec3.atBottomCenterOf(target);
+		if (!g.goTo(target, at, mode == Mode.FETCH ? CHEST_REACH : REACH) || !g.ready()) {
 			return true;
 		}
 		a.getLookControl().setLookAt(at.x, at.y, at.z);
-		if (planting) {
-			plant(g, sl, a, target);
-		} else {
-			harvest(g, sl, a, target);
+		switch (mode) {
+			case PLANT -> plant(g, sl, a, target);
+			case FETCH -> fetchSeeds(g, sl, a);
+			default -> harvest(g, sl, a, target);
 		}
 		target = null;
 		return true;
@@ -62,18 +69,61 @@ final class FarmTask implements WorkTask {
 		boolean seeds = hasSeeds(a);
 		BlockPos bestPlant = null;
 		double bt = Double.MAX_VALUE;
+		boolean emptySoil = false;
 		for (BlockPos p : WorkTask.cells(g, sl, 3, 3)) {
 			double d = p.distSqr(a.blockPosition());
 			if (d < bd && ripe(sl.getBlockState(p)) && !g.isSkipped(p)) {
 				bd = d;
 				best = p.immutable();
-			} else if (seeds && d < bt && canPlant(sl, p) && !g.isSkipped(p)) {
-				bt = d;
-				bestPlant = p.immutable();
+			} else if (d < bt && canPlant(sl, p) && !g.isSkipped(p)) {
+				emptySoil = true;
+				if (seeds) {
+					bt = d;
+					bestPlant = p.immutable();
+				}
 			}
 		}
-		planting = best == null;
+		mode = best != null ? Mode.HARVEST : Mode.PLANT;
 		target = best != null ? best : bestPlant;
+		if (target == null && emptySoil && !seeds) { // D120: empty farmland and no seeds in hand: fetch some from a chest nearby
+			Container ch = g.chest(sl);
+			BlockPos cp = g.chestPos();
+			if (ch != null && cp != null && !g.isSkipped(cp) && IllusionCarry.countIn(ch, FarmTask::isSeed) > 0) {
+				mode = Mode.FETCH;
+				target = cp.immutable();
+			}
+		}
+	}
+
+	private boolean stillValid(WorkGoal g, ServerLevel sl, Illusion a) {
+		return switch (mode) {
+			case PLANT -> canPlant(sl, target);
+			case FETCH -> {
+				Container ch = g.chest(sl);
+				yield !hasSeeds(a) && ch != null && target.equals(g.chestPos()) && IllusionCarry.countIn(ch, FarmTask::isSeed) > 0;
+			}
+			default -> ripe(sl.getBlockState(target));
+		};
+	}
+
+	/** D120: takes up to a stack of one kind of seed out of the chest. */
+	private void fetchSeeds(WorkGoal g, ServerLevel sl, Illusion a) {
+		Container ch = g.chest(sl);
+		if (ch != null) {
+			ItemStack got = IllusionCarry.takeFrom(ch, FarmTask::isSeed, 64);
+			if (!got.isEmpty()) {
+				ItemStack left = a.carry().add(got);
+				if (!left.isEmpty()) {
+					IllusionCarry.insert(ch, left);
+				}
+				sl.playSound(null, target, SoundEvents.CHEST_OPEN, SoundSource.BLOCKS, 0.5f, 1.2f);
+			}
+		}
+		g.acted(0);
+	}
+
+	private static boolean isSeed(ItemStack s) {
+		return cropOf(s) != null;
 	}
 
 	/** A fully grown crop of the five plants the clone knows. */
@@ -111,6 +161,12 @@ final class FarmTask implements WorkTask {
 		}
 		if (seed.is(Items.POTATO)) {
 			return Blocks.POTATOES;
+		}
+		if (seed.is(Items.MELON_SEEDS)) {
+			return Blocks.MELON_STEM;
+		}
+		if (seed.is(Items.PUMPKIN_SEEDS)) {
+			return Blocks.PUMPKIN_STEM;
 		}
 		return seed.is(Items.BEETROOT_SEEDS) ? Blocks.BEETROOTS : null;
 	}

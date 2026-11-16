@@ -17,6 +17,33 @@ public interface OwnedSummon {
 	}
 
 	/**
+	 * P-043: during a Death Match every other player is the owner's opponent: the summon may target and hit that player,
+	 * and only then (outside a match summons never attack players).
+	 */
+	static boolean isMatchOpponent(Mob summon, Entity target) {
+		if (!(target instanceof net.minecraft.server.level.ServerPlayer tp) || !tp.isAlive() || tp.isSpectator() || tp.isCreative()
+			|| !(summon.level() instanceof net.minecraft.server.level.ServerLevel sl)) {
+			return false;
+		}
+		Player owner = ownerOf(summon);
+		var server = sl.getServer();
+		return owner != null && tp != owner && io.github.huydangtruong.permahearts.PermaHearts.enabled(server)
+			&& io.github.huydangtruong.permahearts.wanderer.DeathMatch.running(server);
+	}
+
+	/** The nearest opponent of the owner in range of the summon during a Death Match, or null. */
+	static LivingEntity nearestMatchOpponent(Mob summon, double range) {
+		LivingEntity best = null;
+		for (Player p : summon.level().players()) {
+			if (isMatchOpponent(summon, p) && p.distanceToSqr(summon) < range * range
+				&& (best == null || p.distanceToSqr(summon) < best.distanceToSqr(summon))) {
+				best = p;
+			}
+		}
+		return best;
+	}
+
+	/**
 	 * D62: before a summon hurts a mob, the owner gets the vanilla player kill credit on it, like a tamed wolf's owner.
 	 * Then {@code getKillCredit()} returns the owner: kill quests, +1 heart per 100 kills and HeartXP all count it.
 	 */

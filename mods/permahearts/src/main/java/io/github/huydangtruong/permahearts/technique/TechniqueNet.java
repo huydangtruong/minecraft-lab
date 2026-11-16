@@ -127,7 +127,7 @@ public final class TechniqueNet {
 		if (!TechniqueCasts.cast(p, t, level, c)) {
 			return t == Technique.TELEPORT ? "No safe place to land" : "You cannot cast now";
 		}
-		TechniqueAttachment.set(p, TechniqueAttachment.get(p).withCooldown(t, now + t.cooldownTicks()));
+		TechniqueAttachment.set(p, TechniqueAttachment.get(p).withCooldown(t, now + TechniqueRules.cooldownTicks(t, level)));
 		return null;
 	}
 

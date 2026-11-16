@@ -23,8 +23,21 @@ public class NotesClientTest implements FabricClientGameTest {
 			if (!context.computeOnClient(mc -> StatsPanel.isOpen() && StatsPanel.tab() == StatsPanel.Tab.NOTES)) {
 				throw new AssertionError("the Notes button did not open the Notes page");
 			}
+			// P-043: the Cultivating edge tabs must not be drawn on the Notes page
+			long tabs = context.computeOnClient(mc -> mc.gui.screen().children().stream()
+				.filter(c -> c instanceof net.minecraft.client.gui.components.AbstractWidget w && w.visible
+					&& (w.getMessage().getString().equals("Stats") || w.getMessage().getString().equals("Techniques")))
+				.count());
+			if (tabs != 0) {
+				throw new AssertionError("the Notes page shows " + tabs + " Cultivating edge tab(s)");
+			}
 			context.runOnClient(mc -> {
 				NotesTab.setText("buy more iron");
+				NotesTab.send();
+			});
+			context.waitTicks(10);
+			context.runOnClient(mc -> {
+				NotesTab.setText("Meet at the Mushroom Island base"); // 32 characters: wraps onto two rows
 				NotesTab.send();
 			});
 			context.waitTicks(10);
@@ -32,7 +45,11 @@ public class NotesClientTest implements FabricClientGameTest {
 				NotesTab.setText("second private?");
 			});
 			context.takeScreenshot("notes-shared");
-			if (context.computeOnClient(mc -> NotesTab.current().size()) != 1) {
+			context.runOnClient(mc -> NotesTab.setDeleteMode(true));
+			context.waitTicks(3);
+			context.takeScreenshot("notes-delete");
+			context.runOnClient(mc -> NotesTab.setDeleteMode(false));
+			if (context.computeOnClient(mc -> NotesTab.current().size()) != 2) {
 				throw new AssertionError("the sent note did not come back in the shared list");
 			}
 			context.runOnClient(mc -> mc.player.closeContainer());

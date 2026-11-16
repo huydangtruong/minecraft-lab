@@ -170,7 +170,7 @@ public final class WarriorAngel extends Vex implements OwnedSummon {
 	/** Never attacks a player or another summon. */
 	@Override
 	public boolean canAttack(LivingEntity target) {
-		return !(target instanceof Player) && !(target instanceof OwnedSummon) && super.canAttack(target);
+		return (!(target instanceof Player) || OwnedSummon.isMatchOpponent(this, target)) && !(target instanceof OwnedSummon) && super.canAttack(target);
 	}
 
 	/** D62: a monster this angel hurts counts as hurt by the owner, so a kill is the owner's kill. */

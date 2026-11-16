@@ -500,7 +500,7 @@ public final class Illusion extends PathfinderMob implements OwnedSummon {
 				return false;
 			}
 			LivingEntity cur = c.getTarget();
-			if (cur != null && c.tickCount % 10 == 0 && c.level() instanceof ServerLevel sl && c.owner() != null) {
+			if (cur != null && !OwnedSummon.isMatchOpponent(c, cur) && c.tickCount % 10 == 0 && c.level() instanceof ServerLevel sl && c.owner() != null) {
 				Set<UUID> ids = IllusionTargets.idsOf(c.owner());
 				if (!ids.isEmpty() && !ids.contains(cur.getUUID()) && !IllusionTargets.of(sl, c.owner()).isEmpty()) {
 					return false;
@@ -510,6 +510,10 @@ public final class Illusion extends PathfinderMob implements OwnedSummon {
 		}
 
 		private LivingEntity pick(ServerLevel sl, Player o) {
+			LivingEntity opp = OwnedSummon.nearestMatchOpponent(c, 40); // P-043: the Death Match opponent
+			if (opp != null && c.canAttack(opp)) {
+				return opp;
+			}
 			LivingEntity best = null;
 			for (LivingEntity e : IllusionTargets.of(sl, o.getUUID())) {
 				if (e.distanceToSqr(c) < 40 * 40 && c.canAttack(e) && (best == null || e.distanceToSqr(c) < best.distanceToSqr(c))) {

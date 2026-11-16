@@ -9,6 +9,7 @@
 		"EntityInWallMixin",
 		"FoodDataMixin",
 		"FoodPropertiesMixin",
+		"GhastMixin",
 		"GhastShootFireballGoalMixin",
 		"LivingEntityXpMixin",
 		"MobStunMixin",
