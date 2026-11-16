@@ -54,6 +54,24 @@ public class GodSlayerClientTest implements FabricClientGameTest {
 			server.runOnServer(s -> turn(box[0], -90f));
 			context.waitTicks(25);
 			context.takeScreenshot("92-god-slayer-back");
+			// head turned to its max (the body stays): from behind, then from the side, to see that the head never cuts the mane
+			server.runOnServer(s -> box[0].setYHeadRot(-90f + 50f));
+			context.waitTicks(15);
+			context.takeScreenshot("back-turned-a");
+			server.runOnServer(s -> box[0].setYHeadRot(-90f - 50f));
+			context.waitTicks(15);
+			context.takeScreenshot("back-turned-b");
+			server.runOnServer(s -> {
+				turn(box[0], 0f);
+				box[0].setYHeadRot(50f);
+				box[0].setXRot(-30f);
+			});
+			context.waitTicks(15);
+			context.takeScreenshot("back-turned-side");
+			server.runOnServer(s -> {
+				turn(box[0], -90f);
+				box[0].setXRot(0f);
+			});
 
 			// face close-up: first person, the boss 3 blocks ahead facing the player, the player looks at its head
 			context.runOnClient(mc -> mc.options.setCameraType(CameraType.FIRST_PERSON));
