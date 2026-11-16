@@ -108,4 +108,15 @@ class GodSlayerRulesTest {
 		assertEquals(0, GodSlayerRules.secondsLeft(0));
 		assertEquals(1.5, GodSlayerRules.WATER_SPEED, 1e-9);
 	}
+
+	@Test
+	void warningHeartbeatAndEdge() {
+		assertEquals(24, GodSlayerRules.heartbeatInterval(60));
+		assertEquals(9, GodSlayerRules.heartbeatInterval(0));
+		assertTrue(GodSlayerRules.heartbeatInterval(10) < GodSlayerRules.heartbeatInterval(40));
+		assertEquals(0f, GodSlayerRules.edgeStrength(0), 1e-6);
+		assertTrue(GodSlayerRules.edgeStrength(1200) < GodSlayerRules.edgeStrength(600));
+		assertTrue(GodSlayerRules.edgeStrength(600) < GodSlayerRules.edgeStrength(20));
+		assertTrue(GodSlayerRules.edgeStrength(1) <= 1f);
+	}
 }

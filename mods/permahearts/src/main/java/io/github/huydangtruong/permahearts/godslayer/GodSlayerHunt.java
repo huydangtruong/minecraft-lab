@@ -1,5 +1,6 @@
 package io.github.huydangtruong.permahearts.godslayer;
 
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import io.github.huydangtruong.permahearts.HeartRules;
 import io.github.huydangtruong.permahearts.HeartsAttachment;
 import io.github.huydangtruong.permahearts.Messages;
@@ -48,6 +49,7 @@ public final class GodSlayerHunt {
 	private static ServerBossEvent bar;
 	private static int missingChecks;
 	private static int lastCountdown = -1;
+	private static long lastBeat = 0;
 
 	private GodSlayerHunt() {}
 
@@ -144,6 +146,7 @@ public final class GodSlayerHunt {
 		d.killed = new ArrayList<>();
 		d.setDirty();
 		lastCountdown = -1;
+		lastBeat = 0;
 		missingChecks = 0;
 		server.getPlayerList().broadcastSystemMessage(Messages.godSlayerWarningChat(name(target)), false);
 		for (ServerPlayer p : server.getPlayerList().getPlayers()) {
@@ -213,18 +216,30 @@ public final class GodSlayerHunt {
 	private static void tickWarning(MinecraftServer server, GodSlayerSavedData d) {
 		long left = d.warningEndTick - now(server);
 		if (left <= 0) {
+			for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+				ServerPlayNetworking.send(p, new GodSlayerNet.Warning(0)); // the red edge ends
+			}
 			appear(server, d);
 			return;
 		}
 		int secs = GodSlayerRules.secondsLeft(left);
+		// heartbeat for the whole warning, faster toward the end (D102)
+		long t = now(server);
+		if (t - lastBeat >= GodSlayerRules.heartbeatInterval(secs)) {
+			lastBeat = t;
+			float pitch = 0.9f + 0.5f * (1f - secs / 60f);
+			for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+				p.level().playSound(null, p.blockPosition(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.HOSTILE, 2f, pitch);
+			}
+		}
 		if (secs != lastCountdown) {
 			lastCountdown = secs;
 			for (ServerPlayer p : server.getPlayerList().getPlayers()) {
-				p.level().playSound(null, p.blockPosition(), SoundEvents.NOTE_BLOCK_BASEDRUM.value(), SoundSource.HOSTILE, 2f,
-					secs <= 10 ? 0.7f : 0.5f);
 				if (secs <= 10) {
-					p.sendOverlayMessage(Messages.godSlayerCountdown(secs));
+					p.level().playSound(null, p.blockPosition(), SoundEvents.NOTE_BLOCK_BASEDRUM.value(), SoundSource.HOSTILE, 2f, 0.7f);
 				}
+				p.sendOverlayMessage(Messages.godSlayerCountdown(secs)); // red number for the whole 60 s
+				ServerPlayNetworking.send(p, new GodSlayerNet.Warning((int) left)); // client interpolates the edge
 			}
 		}
 	}
@@ -424,6 +439,9 @@ public final class GodSlayerHunt {
 		}
 		hideBar();
 		d.clearHunt();
+		for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+			ServerPlayNetworking.send(p, new GodSlayerNet.Warning(0));
+		}
 	}
 
 	/** /boss giveup: removes the boss and clears the state. False if nothing was running. */

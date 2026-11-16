@@ -140,6 +140,21 @@ public final class GodSlayerRules {
 		return hearts >= MIN_HEARTS;
 	}
 
+	/** Ticks between two heartbeats during the warning: 24 at the start (60 s left), 9 at the end. */
+	public static int heartbeatInterval(int secondsLeft) {
+		double f = Math.max(0, Math.min(1, secondsLeft / 60.0));
+		return (int) Math.round(9 + 15 * f);
+	}
+
+	/** Strength of the red screen edge, 0..1: nothing at the start of the warning, full when it ends. */
+	public static float edgeStrength(long ticksLeft) {
+		if (ticksLeft <= 0) {
+			return 0f;
+		}
+		double f = 1.0 - Math.min(1.0, ticksLeft / (double) WARNING_TICKS);
+		return (float) Math.max(0.05, f * f);
+	}
+
 	/** Seconds shown in the warning countdown (rounded up). */
 	public static int secondsLeft(long ticksLeft) {
 		return (int) Math.max(0, (ticksLeft + 19) / 20);

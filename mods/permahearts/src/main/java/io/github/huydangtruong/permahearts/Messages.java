@@ -105,7 +105,7 @@ public final class Messages {
 	}
 
 	public static Component wandererPlanned(int x, int z) {
-		return Component.translatableWithFallback("permahearts.wanderer.planned", "The Crimson Master is waiting at X %s, Z %s", x, z);
+		return Component.translatableWithFallback("permahearts.wanderer.planned", "The Crimson Master is waiting at X %s, Z %s", x, z).withStyle(net.minecraft.ChatFormatting.GOLD);
 	}
 
 	public static Component wandererIntro() {
@@ -186,7 +186,7 @@ public final class Messages {
 
 	public static Component masterTitle() {
 		return Component.translatableWithFallback("permahearts.wanderer.title", "Crimson Master")
-			.withStyle(net.minecraft.ChatFormatting.DARK_RED, net.minecraft.ChatFormatting.BOLD);
+			.withStyle(net.minecraft.ChatFormatting.GOLD, net.minecraft.ChatFormatting.BOLD);
 	}
 
 	public static Component masterArrivedSubtitle(int x, int z) {
@@ -200,7 +200,7 @@ public final class Messages {
 	}
 
 	public static Component masterBar(int x, int z, String timeLeft) {
-		return Component.translatableWithFallback("permahearts.wanderer.bar", "Crimson Master: X %s, Z %s · leaves in %s", x, z, timeLeft);
+		return Component.translatableWithFallback("permahearts.wanderer.bar", "Crimson Master: X %s, Z %s · leaves in %s", x, z, timeLeft).withStyle(net.minecraft.ChatFormatting.GOLD);
 	}
 
 	public static Component leftAfterStay() {
@@ -354,20 +354,21 @@ public final class Messages {
 	}
 
 	public static Component godSlayerTitle() {
-		return Component.translatableWithFallback("permahearts.god_slayer.title", "God Slayer");
+		return Component.translatableWithFallback("permahearts.god_slayer.title", "God Slayer")
+			.withStyle(net.minecraft.ChatFormatting.RED, net.minecraft.ChatFormatting.BOLD);
 	}
 
 	public static Component godSlayerSubtitle(String name, int seconds) {
-		return Component.translatableWithFallback("permahearts.god_slayer.subtitle", "is coming for %s in %ss", name, seconds);
+		return Component.translatableWithFallback("permahearts.god_slayer.subtitle", "is coming for %s in %ss", name, seconds).withStyle(net.minecraft.ChatFormatting.RED);
 	}
 
 	public static Component godSlayerWarningChat(String name) {
 		return Component.translatableWithFallback("permahearts.god_slayer.warning_chat",
-			"God Slayer is coming for %s. It arrives in 60 seconds.", name);
+			"God Slayer is coming for %s. It arrives in 60 seconds.", name).withStyle(net.minecraft.ChatFormatting.RED);
 	}
 
 	public static Component godSlayerCountdown(int seconds) {
-		return Component.translatableWithFallback("permahearts.god_slayer.countdown", "God Slayer arrives in %s...", seconds);
+		return Component.translatableWithFallback("permahearts.god_slayer.countdown", "God Slayer arrives in %s...", seconds).withStyle(net.minecraft.ChatFormatting.RED, net.minecraft.ChatFormatting.BOLD);
 	}
 
 	public static Component godSlayerWeaklings() {

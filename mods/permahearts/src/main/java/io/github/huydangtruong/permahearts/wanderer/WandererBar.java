@@ -35,7 +35,7 @@ public final class WandererBar {
 		long left = Wanderer.ticksLeft(server);
 		Component name = Messages.masterBar(d.x(), d.z(), StayTime.format(left));
 		if (bar == null) {
-			bar = new ServerBossEvent(UUID.randomUUID(), name, BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.PROGRESS);
+			bar = new ServerBossEvent(UUID.randomUUID(), name, BossEvent.BossBarColor.YELLOW, BossEvent.BossBarOverlay.PROGRESS);
 		} else {
 			bar.setName(name);
 		}

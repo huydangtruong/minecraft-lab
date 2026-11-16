@@ -104,6 +104,7 @@ public final class GodSlayer extends PathfinderMob {
 	/** Registers the attributes. Called once from PermaHearts. */
 	public static void init() {
 		GodSlayerItems.init();
+		GodSlayerNet.init();
 		FabricDefaultAttributeRegistry.register(TYPE, Mob.createMobAttributes()
 			.add(Attributes.MAX_HEALTH, GodSlayerRules.BASE_HEALTH)
 			.add(Attributes.MOVEMENT_SPEED, GodSlayerRules.GROUND_SPEED_ATTRIBUTE)
