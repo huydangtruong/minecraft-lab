@@ -112,7 +112,7 @@ public final class StatsPanel {
 				nb.setPosition(left(inv) + 148, inv.height / 2 - 22);
 				int top = ((ContainerScreenAccess) inv).permahearts$topPos();
 				for (TabButton t : tabs) {
-					t.visible = open;
+					t.visible = open && tab != Tab.NOTES; // P-043: the Notes page has no edge tabs
 					t.setPosition(panelX(inv) - TAB_OUT + 2, top + 3 + t.tab.ordinal() * TAB_H);
 				}
 				NotesTab.placeBox(panelX(inv), top, W, H, open && tab == Tab.NOTES);
@@ -241,7 +241,7 @@ public final class StatsPanel {
 		}
 		int x0 = panelX(inv);
 		int y0 = ((ContainerScreenAccess) inv).permahearts$topPos();
-		boolean onTabs = x >= x0 - TAB_OUT && x < x0 && y >= y0 + 3 && y < y0 + 3 + TAB_COUNT * TAB_H;
+		boolean onTabs = tab != Tab.NOTES && x >= x0 - TAB_OUT && x < x0 && y >= y0 + 3 && y < y0 + 3 + TAB_COUNT * TAB_H;
 		return onTabs || x >= x0 && x < x0 + W && y >= y0 && y < y0 + H;
 	}
 

@@ -23,6 +23,14 @@ public class NotesClientTest implements FabricClientGameTest {
 			if (!context.computeOnClient(mc -> StatsPanel.isOpen() && StatsPanel.tab() == StatsPanel.Tab.NOTES)) {
 				throw new AssertionError("the Notes button did not open the Notes page");
 			}
+			// P-043: the Cultivating edge tabs must not be drawn on the Notes page
+			long tabs = context.computeOnClient(mc -> mc.gui.screen().children().stream()
+				.filter(c -> c instanceof net.minecraft.client.gui.components.AbstractWidget w && w.visible
+					&& (w.getMessage().getString().equals("Stats") || w.getMessage().getString().equals("Techniques")))
+				.count());
+			if (tabs != 0) {
+				throw new AssertionError("the Notes page shows " + tabs + " Cultivating edge tab(s)");
+			}
 			context.runOnClient(mc -> {
 				NotesTab.setText("buy more iron");
 				NotesTab.send();
