@@ -376,22 +376,31 @@ public final class GodSlayerHunt {
 		if (boss.getKillCredit() instanceof ServerPlayer killer) {
 			d.level = Math.min(GodSlayerRules.MAX_LEVEL, d.level + 1);
 			d.clearHunt();
-			reward(killer);
+			reward(killer, boss, server);
 			server.getPlayerList().broadcastSystemMessage(Messages.godSlayerFallen(d.level), false);
 		} else {
 			d.clearHunt(); // killed by something else (a command): no reward, the level stays
 		}
 	}
 
-	private static void reward(ServerPlayer killer) {
-		killer.giveExperienceLevels(GodSlayerRules.KILL_LEVELS);
+	private static void reward(ServerPlayer killer, GodSlayer boss, MinecraftServer server) {
+		java.util.Map<java.util.UUID, Integer> shares = GodSlayerRules.splitKillLevels(boss.damageBy);
+		if (shares.isEmpty()) {
+			shares.put(killer.getUUID(), GodSlayerRules.totalKillLevels(1));
+		}
+		for (java.util.Map.Entry<java.util.UUID, Integer> e : shares.entrySet()) {
+			ServerPlayer p = server.getPlayerList().getPlayer(e.getKey());
+			if (p != null && e.getValue() > 0) {
+				p.giveExperienceLevels(e.getValue());
+				p.sendSystemMessage(Messages.godSlayerReward(e.getValue(), p == killer ? GodSlayerRules.REWARD_BOXES : 0));
+			}
+		}
 		for (RewardTier tier : GodSlayerRules.rewardBoxes(RNG)) {
 			ItemStack stack = RewardBoxes.stack(tier);
 			if (!killer.getInventory().add(stack)) {
 				killer.spawnAtLocation(killer.level(), stack);
 			}
 		}
-		killer.sendSystemMessage(Messages.godSlayerReward(GodSlayerRules.KILL_LEVELS, GodSlayerRules.REWARD_BOXES));
 		killer.level().playSound(null, killer.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1f, 1f);
 	}
 

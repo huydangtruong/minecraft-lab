@@ -194,6 +194,9 @@ public final class GodSlayer extends PathfinderMob {
 
 	// ---- damage rules ----
 
+	/** D110: damage dealt per player this fight (kept for the fight only). */
+	public final java.util.Map<UUID, Float> damageBy = new java.util.LinkedHashMap<>();
+
 	/** Only a player, a player's projectile or a player's summon can hurt it; one hit takes at most 40. */
 	@Override
 	public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
@@ -210,6 +213,15 @@ public final class GodSlayer extends PathfinderMob {
 		boolean hurt = super.hurtServer(level, source, kill ? amount : GodSlayerRules.clampDamage(amount));
 		if (hurt && !kill) {
 			lastHitTick = tickCount;
+			UUID who = null;
+			if (cause instanceof net.minecraft.world.entity.player.Player pl) {
+				who = pl.getUUID();
+			} else if (cause instanceof OwnedSummon os) {
+				who = os.owner();
+			}
+			if (who != null) {
+				damageBy.merge(who, Math.min(amount, GodSlayerRules.clampDamage(amount)), Float::sum);
+			}
 		}
 		return hurt;
 	}
