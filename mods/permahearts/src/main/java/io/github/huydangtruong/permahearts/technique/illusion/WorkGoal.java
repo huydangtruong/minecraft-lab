@@ -173,6 +173,11 @@ public final class WorkGoal extends Goal {
 	 * (no path, or no progress for 15 s) is skipped for a while, so the task picks another target.
 	 */
 	public boolean goTo(Object key, Vec3 p, double reach) {
+		return goTo(key, p, reach, false);
+	}
+
+	/** With {@code strict}, a clone whose path has ended without getting closer for 3 s gives the key up (for targets on the ground, like crops). */
+	public boolean goTo(Object key, Vec3 p, double reach, boolean strict) {
 		if (a.position().distanceToSqr(p) <= reach * reach) {
 			a.getNavigation().stop();
 			return true;
@@ -182,7 +187,7 @@ public final class WorkGoal extends Goal {
 			goSince = a.tickCount;
 			goBest = Double.MAX_VALUE;
 			goBestAt = a.tickCount;
-		} else if (a.tickCount - goSince > 300 || a.tickCount - goBestAt > NO_PROGRESS) {
+		} else if (a.tickCount - goSince > 300 || (strict && a.tickCount - goBestAt > NO_PROGRESS && a.getNavigation().isDone())) {
 			skip(key, 600);
 			goKey = null;
 			return false;

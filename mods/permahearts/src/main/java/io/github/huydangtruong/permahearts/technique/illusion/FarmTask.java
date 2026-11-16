@@ -53,7 +53,7 @@ final class FarmTask implements WorkTask {
 			}
 		}
 		Vec3 at = mode == Mode.FETCH ? Vec3.atCenterOf(target) : Vec3.atBottomCenterOf(target);
-		if (!g.goTo(target, at, mode == Mode.FETCH ? CHEST_REACH : REACH) || !g.ready()) {
+		if (!g.goTo(target, at, mode == Mode.FETCH ? CHEST_REACH : REACH, true) || !g.ready()) {
 			return true;
 		}
 		a.getLookControl().setLookAt(at.x, at.y, at.z);
