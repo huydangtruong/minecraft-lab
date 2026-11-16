@@ -75,6 +75,10 @@ public final class GodSlayer extends PathfinderMob {
 	private UUID targetId;
 	private List<GodSlayerSkill> skills;
 	private GodSlayerSkill active;
+	private final GodSlayerDirector director = new GodSlayerDirector();
+	private final java.util.Map<GodSlayerDirector.Kind, GodSlayerSkill> specials = new java.util.EnumMap<>(GodSlayerDirector.Kind.class);
+	private GodSlayerSkill special;
+	private long specialAt;
 	private Mode mode = Mode.GROUND;
 	private LivingEntity progressTarget;
 	private double bestDistance = Double.MAX_VALUE;
@@ -161,6 +165,8 @@ public final class GodSlayer extends PathfinderMob {
 		setHealth(getMaxHealth());
 		skills = GodSlayerSkills.forLevel(bossLevel);
 		active = null;
+		special = null;
+		specialAt = 0;
 	}
 
 	public void setHuntTarget(UUID id) {
@@ -322,7 +328,12 @@ public final class GodSlayer extends PathfinderMob {
 		mode = GodSlayerRules.chooseMode(inWater, heightAboveGround(t), t.getY() - getY(), noProgress, mode);
 		setNoGravity(mode != Mode.GROUND);
 		setFlyingMode(mode == Mode.AIR);
-		move(level, t, dist, reach);
+		if (special != null) {
+			getNavigation().stop();
+			setDeltaMovement(0, mode == Mode.GROUND ? Math.min(0, getDeltaMovement().y) : 0, 0);
+		} else {
+			move(level, t, dist, reach);
+		}
 		trackStuck(reach);
 		if (tickCount % 4 == 0 && !reach && (horizontalCollision || noProgress >= 20)) {
 			breakBlocks(level, t);
@@ -412,6 +423,27 @@ public final class GodSlayer extends PathfinderMob {
 	}
 
 	private void fight(LivingEntity t) {
+		if (special != null) {
+			special.tick(this, t);
+			if (special.isDone()) {
+				special = null;
+				specialAt = level().getGameTime() + GodSlayerDirector.pressureTicks(new java.util.Random(random.nextLong()));
+			}
+			return;
+		}
+		if (specials.isEmpty()) {
+			specials.put(GodSlayerDirector.Kind.FIREBALL, new FireballSkill());
+		}
+		if (level().getGameTime() >= specialAt && bossLevel >= 2) {
+			GodSlayerDirector.Kind k = director.pick(new java.util.Random(random.nextLong()),bossLevel, kind -> specials.get(kind) != null
+				&& specials.get(kind).canStart(this, t));
+			if (k != null) {
+				special = specials.get(k);
+				special.tick(this, t);
+				return;
+			}
+			specialAt = level().getGameTime() + 20;
+		}
 		if (active != null) {
 			active.tick(this, t);
 			if (active.isDone()) {
