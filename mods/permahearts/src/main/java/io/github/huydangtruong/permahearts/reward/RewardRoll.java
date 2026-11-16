@@ -3,20 +3,13 @@ package io.github.huydangtruong.permahearts.reward;
 import io.github.huydangtruong.permahearts.ElixirStat;
 import io.github.huydangtruong.permahearts.wanderer.QuestGenerator;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.random.RandomGenerator;
 
 /** Rolls the cards of a reward box (D76). All the numbers of the rules are constants here. No Minecraft imports. */
 public final class RewardRoll {
 	/** Each card is an elixir with this chance, otherwise an item. */
 	public static final double ELIXIR_CHANCE = 0.5;
-	/** An item card is a special with this chance (GOLD and DIAMOND). */
-	public static final double SPECIAL_CHANCE = 0.2;
-	/** Same for the emerald box (D89). */
-	public static final double EMERALD_SPECIAL_CHANCE = 0.25;
-
 	/** Base item pool, same for every tier; amounts come from the collect quests (QuestGenerator). */
 	public static final List<String> BASE_ITEMS = List.of(
 		"minecraft:iron_ingot", "minecraft:gold_ingot", "minecraft:diamond", "minecraft:emerald",
@@ -35,10 +28,6 @@ public final class RewardRoll {
 
 	private RewardRoll() {}
 
-	public static double specialChance(RewardTier tier) {
-		return tier == RewardTier.EMERALD ? EMERALD_SPECIAL_CHANCE : SPECIAL_CHANCE;
-	}
-
 	public static List<RewardOption> specials(RewardTier tier) {
 		return switch (tier) {
 			case SILVER -> List.of();
@@ -52,31 +41,41 @@ public final class RewardRoll {
 		return new RewardOption("permahearts:elixir_" + stat.id(), 1);
 	}
 
-	/** tier.options() cards. Elixirs may repeat; item cards never share an item id. */
-	public static List<RewardOption> roll(RewardTier tier, RandomGenerator rng) {
-		List<RewardOption> out = new ArrayList<>();
-		Set<String> usedItems = new HashSet<>();
-		ElixirStat[] stats = ElixirStat.values();
+	public static final String HEART_ELIXIR = "permahearts:elixir_heart";
+
+	/** All item cards of a tier (D108): base items (amounts from collect quests), the emerald card is x32 from gold up, plus the specials. */
+	public static List<RewardOption> itemPool(RewardTier tier) {
+		List<RewardOption> pool = new ArrayList<>();
 		List<RewardOption> specials = specials(tier);
+		for (String id : BASE_ITEMS) {
+			RewardOption special = specials.stream().filter(o -> o.itemId().equals(id)).findFirst().orElse(null);
+			pool.add(special != null ? special : new RewardOption(id, QuestGenerator.collectAmount(id)));
+		}
+		for (RewardOption o : specials) {
+			if (!pool.contains(o)) {
+				pool.add(o);
+			}
+		}
+		return pool;
+	}
+
+	/** tier.options() cards: each 50% elixir (uniform, may repeat) or item (uniform, no repeats). */
+	public static List<RewardOption> roll(RewardTier tier, RandomGenerator rng) {
+		List<RewardOption> elixirs = new ArrayList<>();
+		for (ElixirStat s : ElixirStat.values()) {
+			elixirs.add(elixir(s));
+		}
+		if (tier != RewardTier.SILVER) {
+			elixirs.add(new RewardOption(HEART_ELIXIR, 1));
+		}
+		List<RewardOption> free = new ArrayList<>(itemPool(tier));
+		List<RewardOption> out = new ArrayList<>();
 		while (out.size() < tier.options()) {
 			if (rng.nextDouble() < ELIXIR_CHANCE) {
-				out.add(elixir(stats[rng.nextInt(stats.length)]));
-				continue;
+				out.add(elixirs.get(rng.nextInt(elixirs.size())));
+			} else {
+				out.add(free.remove(rng.nextInt(free.size())));
 			}
-			RewardOption pick = null;
-			if (!specials.isEmpty() && rng.nextDouble() < specialChance(tier)) {
-				List<RewardOption> free = specials.stream().filter(o -> !usedItems.contains(o.key())).toList();
-				if (!free.isEmpty()) {
-					pick = free.get(rng.nextInt(free.size()));
-				}
-			}
-			if (pick == null) {
-				List<String> free = BASE_ITEMS.stream().filter(id -> !usedItems.contains(id)).toList();
-				String id = free.get(rng.nextInt(free.size()));
-				pick = new RewardOption(id, QuestGenerator.collectAmount(id));
-			}
-			usedItems.add(pick.key());
-			out.add(pick);
 		}
 		return List.copyOf(out);
 	}

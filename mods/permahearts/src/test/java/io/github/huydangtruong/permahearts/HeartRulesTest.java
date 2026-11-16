@@ -111,4 +111,10 @@ class HeartRulesTest {
 		assertEquals(0.5f, HeartRules.xpFraction(at(10, 250)));
 		assertEquals(1f, HeartRules.xpFraction(at(300, 0)));
 	}
+
+	@Test
+	void addHeartIsPlusOneAndCapped() {
+		assertEquals(11, HeartRules.maxHearts(HeartRules.addHeart(at(10, 0))));
+		assertEquals(300, HeartRules.maxHearts(HeartRules.addHeart(at(300, 0))));
+	}
 }

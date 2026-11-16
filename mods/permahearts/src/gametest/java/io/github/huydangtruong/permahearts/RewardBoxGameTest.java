@@ -253,7 +253,7 @@ public class RewardBoxGameTest {
 	}
 
 	@GameTest(maxTicks = 100)
-	public void bottleOfEnlightenmentGivesSixteenLevelsAndIsConsumed(GameTestHelper context) {
+	public void bottleOfEnlightenmentGivesTwentyFourLevelsAndIsConsumed(GameTestHelper context) {
 		ServerPlayer p = context.makeMockServerPlayerInLevel();
 		p.getInventory().clearContent();
 		p.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
@@ -262,10 +262,10 @@ public class RewardBoxGameTest {
 		ItemStack hand = p.getMainHandItem();
 		context.assertTrue(hand.getUseDuration(p) == 32, "drinks for 32 ticks, was " + hand.getUseDuration(p));
 		hand.finishUsingItem(p.level(), p);
-		context.assertTrue(p.experienceLevel == 16, "16 levels, was " + p.experienceLevel);
+		context.assertTrue(p.experienceLevel == 24, "24 levels, was " + p.experienceLevel);
 		context.assertTrue(p.getMainHandItem().getCount() == 1, "one bottle consumed, left " + p.getMainHandItem().getCount());
 		p.getMainHandItem().finishUsingItem(p.level(), p);
-		context.assertTrue(p.experienceLevel == 32, "second bottle: 32 levels, was " + p.experienceLevel);
+		context.assertTrue(p.experienceLevel == 48, "second bottle: 48 levels, was " + p.experienceLevel);
 		context.succeed();
 	}
 }

@@ -219,7 +219,7 @@ public class PermaHearts implements ModInitializer {
 			if (entity.getKillCredit() instanceof ServerPlayer killer && enabled(killer.level().getServer())) {
 				Wanderer.onKill(killer.level().getServer(), killer, entity.getType());
 			}
-			if (entity instanceof Enemy && entity.getKillCredit() instanceof ServerPlayer sp
+			if ((entity instanceof Enemy || entity instanceof io.github.huydangtruong.permahearts.godslayer.GodSlayer) && entity.getKillCredit() instanceof ServerPlayer sp
 				&& enabled(sp.level().getServer())) {
 				onHostileKill(sp, HeartRules.xpFor(entity.getMaxHealth()));
 			}
