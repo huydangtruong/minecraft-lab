@@ -2,7 +2,7 @@
 
 > Tóm tắt cho Huy: file này ghi việc đang làm dở và bước tiếp theo, để một phiên Claude mới đọc là làm tiếp được.
 > Manager cập nhật file này cuối mỗi đợt việc (merge, phát hành, quyết định mới).
-> Snapshot: 2026-11-16, after release 0.24.0.
+> Snapshot: 2026-11-16, after release 0.24.1.
 
 A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [workflow/team.md](../workflow/team.md) → the plan of the work in flight. Do not read the whole repo.
 
@@ -10,7 +10,7 @@ A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [w
 
 | What | Where |
 |---|---|
-| Last release | `permahearts-v0.24.0` (GitHub Releases on `huydangtruong/minecraft-lab`), `mod_version=0.24.0` |
+| Last release | `permahearts-v0.24.1` (GitHub Releases on `huydangtruong/minecraft-lab`), `mod_version=0.24.1` |
 | 0.12.0 contains | Warrior Angel (P-021, D62, D63), Aqua Marine (P-022, P-023, D64, D69), chieftain XP x10 and damage x2 (D65, D66), stronger Strength/Swiftness/Mining elixirs (D67), gold quest 64 (D68) |
 | 0.13.0 contains | Illusion technique (P-024, D71); D72 numbers (Warrior Angel, Cloud Travel, Undying Jutsu, Heaven Blast, Fireball, Frozen Breath); chieftain health 200 and the leader-bonus fix; Strength +2 (D70); "Death Match (PvP)" line |
 | 0.14.0 contains | Illusion work modes and hostile mobs targeting the clones (P-025, D73); Quantum Leap rename (turquoise) and Cosmic Warping portals (P-026, D74, D75); quest reward boxes (P-027, D76); technique slots cost 64, 128, 256, 512 emeralds (D77); clones plant bare farmland and pick up wool near the sheep. Not playtested by hand |
@@ -25,13 +25,15 @@ A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [w
 | 0.22.0 contains | P-036: God Slayer look round 3 (D105): head attached, 95% wide, shorter above the eyes (13 rows, about 7%, integer boxes); longer, wider, flatter horns; katana edge forward with the tip slant; one white trapezoid hair piece; two-bone ^ ^ wings with 11 feathers per side from the approved mockup. Not playtested by hand |
 | 0.23.0 contains | P-037: God Slayer look round 4 (D106): thinner, narrower, lower head; slimmer horns; fixed mane in two pieces (upper on the head, lower on the chest, 10° back, past the belt); head turn clamped to 15° yaw / 10° pitch; arms more forward, longer upper arm. Countdown (D107): no heartbeat, drum every second for 60 s, thin pale red edge without square bands |
 | 0.24.0 contains | P-038: simple 50/50 reward roll (D108), Heart Elixir from gold boxes up, God Slayer kill gives HeartXP, Enlightenment +24. P-039: Illusion gives the whole feed stack, work radius +4 per 5 levels (D109); boss level reward 50 + 50 × damagers split by damage (D110). P-040: God Slayer skill director + Fireball Lv 2, Katana throw Lv 3, Flame breath Lv 4, Eye beam Lv 5 (D111). 30 random lines each for win / loss / scorn (D113). Not playtested by hand |
+| 0.24.1 contains | Technique list grouped: attack, control/defense, movement, allies (D114) |
 | On `main`, not released | Nothing |
 
 Release steps: [workflow/release.md](../workflow/release.md). Release **only when Huy says so**.
 
 ## In flight
 
-- **0.24.0 released** (P-038, P-039, P-040, D113). Waiting for Huy to play it.
+- **0.24.0 / 0.24.1 released.** Waiting for Huy to play it.
+- **In dev:** P-041 (effect icons with time left, purple Death Match sky; branch `feat/P-041-hud-sky`), P-042 (Notes panel; branch `feat/P-042-notes`).
 - **Next:** BL-024/D112 (God Slayer arrives 2–5 days after the 4th Crimson Master leaves; Master pauses until the fight ends). P-040 leftovers: Katana → teleport behind → Flame breath chain, `/boss skill` command, a real blade model and guardian-style beam. Then the rest of D97's skills (minions, blind, arena, self-destruct).
 - **BL-014** (player technique fire burns the God Slayer) is next in line with P-033.
 
