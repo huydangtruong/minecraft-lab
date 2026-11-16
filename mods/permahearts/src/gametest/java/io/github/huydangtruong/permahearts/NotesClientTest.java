@@ -37,10 +37,19 @@ public class NotesClientTest implements FabricClientGameTest {
 			});
 			context.waitTicks(10);
 			context.runOnClient(mc -> {
+				NotesTab.setText("Meet at the Mushroom Island base"); // 32 characters: wraps onto two rows
+				NotesTab.send();
+			});
+			context.waitTicks(10);
+			context.runOnClient(mc -> {
 				NotesTab.setText("second private?");
 			});
 			context.takeScreenshot("notes-shared");
-			if (context.computeOnClient(mc -> NotesTab.current().size()) != 1) {
+			context.runOnClient(mc -> NotesTab.setDeleteMode(true));
+			context.waitTicks(3);
+			context.takeScreenshot("notes-delete");
+			context.runOnClient(mc -> NotesTab.setDeleteMode(false));
+			if (context.computeOnClient(mc -> NotesTab.current().size()) != 2) {
 				throw new AssertionError("the sent note did not come back in the shared list");
 			}
 			context.runOnClient(mc -> mc.player.closeContainer());

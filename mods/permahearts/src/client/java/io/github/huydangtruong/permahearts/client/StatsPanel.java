@@ -138,7 +138,7 @@ public final class StatsPanel {
 				int x0 = panelX(inv);
 				int y0 = ((ContainerScreenAccess) inv).permahearts$topPos();
 				if (tab == Tab.NOTES) {
-					return !(ev.x() >= x0 && NotesTab.click(x0, y0, W, H, ev.x(), ev.y(), ev.button()));
+					return !NotesTab.click(x0, y0, W, H, ev.x(), ev.y(), ev.button());
 				}
 				return !TechniquesTab.click(x0, y0, W, H, ev.x(), ev.y(), ev.button());
 			});
@@ -241,7 +241,7 @@ public final class StatsPanel {
 		}
 		int x0 = panelX(inv);
 		int y0 = ((ContainerScreenAccess) inv).permahearts$topPos();
-		boolean onTabs = tab != Tab.NOTES && x >= x0 - TAB_OUT && x < x0 && y >= y0 + 3 && y < y0 + 3 + TAB_COUNT * TAB_H;
+		boolean onTabs = x >= x0 - TAB_OUT && x < x0 && y >= y0 + 3 && y < y0 + 3 + TAB_COUNT * TAB_H;
 		return onTabs || x >= x0 && x < x0 + W && y >= y0 && y < y0 + H;
 	}
 

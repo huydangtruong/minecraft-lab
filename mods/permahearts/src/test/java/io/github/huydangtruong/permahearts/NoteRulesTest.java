@@ -20,8 +20,8 @@ class NoteRulesTest {
 		assertEquals("hi", NoteRules.clean("  hi "));
 		assertNull(NoteRules.clean("   "));
 		assertNull(NoteRules.clean(null));
-		assertEquals("a".repeat(24), NoteRules.clean("a".repeat(24)));
-		assertNull(NoteRules.clean("a".repeat(25)));
+		assertEquals("a".repeat(32), NoteRules.clean("a".repeat(32)));
+		assertNull(NoteRules.clean("a".repeat(33)));
 	}
 
 	@Test
@@ -68,6 +68,6 @@ class NoteRulesTest {
 	@Test
 	void emptyOrLongTextRejected() {
 		assertFalse(NoteRules.add(List.of(), true, A, "A", "", 1, 1).ok());
-		assertFalse(NoteRules.add(List.of(), true, A, "A", "x".repeat(25), 1, 1).ok());
+		assertFalse(NoteRules.add(List.of(), true, A, "A", "x".repeat(33), 1, 1).ok());
 	}
 }

@@ -14,8 +14,8 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
 
 /**
- * Notes page of the profile panel (P-042, D117): tabs Shared / Private, a Delete toggle (an X on your own rows), the list
- * (newest on top, mouse wheel scrolls) and, at the bottom, a text box (24 characters) with a Send button. Everything is
+ * Notes page of the profile panel (P-042, D117): side tabs Shared / Private (like the Cultivating tabs), a Delete toggle (an X button on your own rows), notes wrapped in their author's colour, the list
+ * (newest on top, mouse wheel scrolls) and, at the bottom, a text box (32 characters) with a Send button. Everything is
  * validated by the server; the lists arrive through {@link NotesNet.Sync}.
  */
 public final class NotesTab {
@@ -26,10 +26,15 @@ public final class NotesTab {
 	private static final int SCROLL_STEP = 11;
 
 	// Layout, relative to the panel's top-left.
-	private static final int TABS_Y = 20;
-	private static final int TAB_H = 13;
-	private static final int TAB_W = 56;
-	private static final int LIST_TOP = 36;
+	private static final int TAB_H = 13; // Delete button height
+	/** Side tabs: the same size and sprites as the Cultivating panel's edge tabs. */
+	private static final int SIDE_OUT = 32;
+	private static final int SIDE_W = 35;
+	private static final int SIDE_H = 27;
+	private static final int LIST_TOP = 22;
+	private static final int X_W = 11;
+	private static net.minecraft.world.item.ItemStack sharedIcon;
+	private static net.minecraft.world.item.ItemStack privateIcon;
 	private static final int BOTTOM_H = 28;
 	private static final int BOX_H = 14;
 	private static final int SEND_W = 40;
@@ -111,6 +116,11 @@ public final class NotesTab {
 		}
 	}
 
+	/** Test hook: delete mode on or off. */
+	public static void setDeleteMode(boolean on) {
+		deleteMode = on;
+	}
+
 	/** Sends the box text to the server and clears the box. */
 	public static void send() {
 		if (box == null || box.getValue().isBlank()) {
@@ -130,8 +140,34 @@ public final class NotesTab {
 		return h - LIST_TOP - BOTTOM_H;
 	}
 
-	private static int maxScroll(int h) {
-		return Math.max(0, current().size() * ROW - listH(h));
+	private static int textWidth(int w) {
+		return w - 14 - 4 - (deleteMode ? X_W + 1 : 0);
+	}
+
+	/** The wrapped lines of every note of the current list (a note is as many rows as it needs). */
+	private static List<List<net.minecraft.util.FormattedCharSequence>> wrapped(Font font, int w) {
+		List<List<net.minecraft.util.FormattedCharSequence>> out = new java.util.ArrayList<>();
+		for (Note n : current()) {
+			out.add(font.split(Component.literal(n.text()), textWidth(w)));
+		}
+		return out;
+	}
+
+	private static int totalHeight(List<List<net.minecraft.util.FormattedCharSequence>> rows) {
+		int t = 0;
+		for (var r : rows) {
+			t += Math.max(1, r.size()) * ROW + 2;
+		}
+		return t;
+	}
+
+	private static int maxScroll(Font font, int w, int h) {
+		return Math.max(0, totalHeight(wrapped(font, w)) + 2 - listH(h));
+	}
+
+	/** The author's colour: the one their Cosmic Warping portals use (opaque). */
+	static int colorOf(UUID author) {
+		return 0xFF000000 | io.github.huydangtruong.permahearts.technique.warp.WarpColor.rgb(author);
 	}
 
 	private static boolean in(double mx, double my, int x, int y, int w, int h) {
@@ -145,49 +181,81 @@ public final class NotesTab {
 		int right = x0 + w - 7;
 		// Delete toggle, top right
 		drawButton(g, font, right - DEL_W, y0 + 4, DEL_W, TAB_H, deleteMode ? "Done" : "Delete", deleteMode, mx, my);
-		// Shared / Private tabs
-		drawButton(g, font, tx, y0 + TABS_Y, TAB_W, TAB_H, "Shared", sharedTab, mx, my);
-		drawButton(g, font, tx + TAB_W + 2, y0 + TABS_Y, TAB_W, TAB_H, "Private", !sharedTab, mx, my);
+		// Shared / Private: side tabs on the panel edge
+		drawSideTab(g, x0, y0, 0, sharedTab, sharedIcon());
+		drawSideTab(g, x0, y0, 1, !sharedTab, privateIcon());
 		List<Note> list = current();
 		int count = NoteRules.countBy(list, me());
 		String c = count + "/" + NoteRules.limit(sharedTab);
-		g.text(font, c, right - font.width(c), y0 + TABS_Y + 3, count >= NoteRules.limit(sharedTab) ? RED : BASE, false);
+		g.text(font, c, right - DEL_W - 5 - font.width(c), y0 + 8, count >= NoteRules.limit(sharedTab) ? RED : BASE, false);
 
 		// list
 		int top = y0 + LIST_TOP;
 		int viewH = listH(h);
-		scroll = Math.max(0, Math.min(maxScroll(h), scroll));
+		var rows = wrapped(font, w);
+		int max = Math.max(0, totalHeight(rows) + 2 - viewH);
+		scroll = Math.max(0, Math.min(max, scroll));
 		g.fill(tx - 1, top - 1, right + 1, top + viewH + 1, 0xFF8B8B8B);
-		g.fill(tx, top, right, top + viewH, 0xFFDBDBDB);
+		g.fill(tx, top, right, top + viewH, 0xFF303030);
 		g.enableScissor(tx, top, right, top + viewH);
 		UUID me = me();
+		int y = top - scroll + 2;
 		for (int i = 0; i < list.size(); i++) {
 			Note n = list.get(i);
-			int y = top + i * ROW - scroll + 2;
-			if (y + ROW < top || y > top + viewH) {
-				continue;
+			var lines = rows.get(i);
+			int rowH = Math.max(1, lines.size()) * ROW;
+			if (y + rowH >= top && y <= top + viewH) {
+				int color = colorOf(n.author());
+				for (int l = 0; l < lines.size(); l++) {
+					g.text(font, lines.get(l), tx + 2, y + l * ROW + 1, color, false);
+				}
+				if (deleteMode && NoteRules.canDelete(n, me)) {
+					drawX(g, font, right - X_W - 1, y, mx, my);
+				}
 			}
-			boolean del = deleteMode && NoteRules.canDelete(n, me);
-			int textW = right - tx - 4 - (deleteMode ? 10 : 0);
-			String line = sharedTab ? n.authorName() + ": " + n.text() : n.text();
-			g.text(font, font.plainSubstrByWidth(line, textW), tx + 2, y, TEXT, false);
-			if (del) {
-				boolean hot = in(mx, my, right - 11, y - 1, 10, ROW);
-				g.text(font, "X", right - 9, y, hot ? 0xFFFF5050 : RED, false);
-			}
+			y += rowH + 2;
 		}
 		if (list.isEmpty()) {
-			g.text(font, "No notes yet", tx + 2, top + 3, BASE, false);
+			g.text(font, "No notes yet", tx + 2, top + 3, 0xFFB0B0B0, false);
 		}
 		g.disableScissor();
-		int max = maxScroll(h);
 		if (max > 0) {
 			int barH = Math.max(8, viewH * viewH / (viewH + max));
 			int barY = top + (viewH - barH) * scroll / max;
-			g.fill(right - 2, barY, right, barY + barH, 0xFF707070);
+			g.fill(right - 2, barY, right, barY + barH, 0xFFB0B0B0);
 		}
 		// Send, bottom right (the text box is a real widget)
 		drawButton(g, font, right - SEND_W, y0 + h - 24, SEND_W, BOX_H, "Send", false, mx, my);
+	}
+
+	private static net.minecraft.world.item.ItemStack sharedIcon() {
+		if (sharedIcon == null) { // items are not bound when this class loads
+			sharedIcon = new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.WRITABLE_BOOK);
+		}
+		return sharedIcon;
+	}
+
+	private static net.minecraft.world.item.ItemStack privateIcon() {
+		if (privateIcon == null) {
+			privateIcon = new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.ENDER_CHEST);
+		}
+		return privateIcon;
+	}
+
+	private static void drawSideTab(GuiGraphicsExtractor g, int x0, int y0, int index, boolean selected, net.minecraft.world.item.ItemStack icon) {
+		int x = x0 - SIDE_OUT + 2 - (selected ? 2 : 0);
+		int y = y0 + 3 + index * SIDE_H;
+		g.blitSprite(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED,
+			net.minecraft.resources.Identifier.withDefaultNamespace(selected ? "recipe_book/tab_selected" : "recipe_book/tab"), x, y, SIDE_W, SIDE_H);
+		g.fakeItem(icon, x + 9, y + 5);
+	}
+
+	/** The delete button of a row: bordered, lighter on hover. */
+	private static void drawX(GuiGraphicsExtractor g, Font font, int x, int y, int mx, int my) {
+		boolean hover = in(mx, my, x, y, X_W, ROW);
+		g.fill(x, y, x + X_W, y + ROW, 0xFF000000);
+		g.fill(x + 1, y + 1, x + X_W - 1, y + ROW - 1, hover ? 0xFFE05050 : 0xFF8B2020);
+		g.text(font, "X", x + (X_W - font.width("X")) / 2 + 1, y + 2, 0xFFFFFFFF, false);
 	}
 
 	private static void drawButton(GuiGraphicsExtractor g, Font font, int x, int y, int w, int h, String label, boolean on, int mx, int my) {
@@ -216,8 +284,11 @@ public final class NotesTab {
 			deleteMode = !deleteMode;
 			return true;
 		}
-		if (in(mx, my, tx, y0 + TABS_Y, TAB_W, TAB_H) || in(mx, my, tx + TAB_W + 2, y0 + TABS_Y, TAB_W, TAB_H)) {
-			boolean toShared = mx < tx + TAB_W + 1;
+		for (int i = 0; i < 2; i++) {
+			if (!in(mx, my, x0 - SIDE_OUT, y0 + 3 + i * SIDE_H, SIDE_OUT, SIDE_H)) {
+				continue;
+			}
+			boolean toShared = i == 0;
 			if (toShared != sharedTab) {
 				sharedTab = toShared;
 				scroll = 0;
@@ -230,10 +301,17 @@ public final class NotesTab {
 		}
 		int top = y0 + LIST_TOP;
 		if (deleteMode && in(mx, my, tx, top, right - tx, listH(h))) {
+			Font font = Minecraft.getInstance().font;
 			List<Note> list = current();
-			int i = (int) ((my - top - 2 + scroll) / ROW);
-			if (i >= 0 && i < list.size() && NoteRules.canDelete(list.get(i), me()) && mx >= right - 12) {
-				ClientPlayNetworking.send(new NotesNet.Action(NotesNet.DELETE, sharedTab, "", list.get(i).id()));
+			var rows = wrapped(font, w);
+			int y = top - scroll + 2;
+			for (int i = 0; i < list.size(); i++) {
+				int rowH = Math.max(1, rows.get(i).size()) * ROW;
+				if (NoteRules.canDelete(list.get(i), me()) && in(mx, my, right - X_W - 1, y, X_W, ROW)) {
+					ClientPlayNetworking.send(new NotesNet.Action(NotesNet.DELETE, sharedTab, "", list.get(i).id()));
+					break;
+				}
+				y += rowH + 2;
 			}
 		}
 		return true;
@@ -244,7 +322,7 @@ public final class NotesTab {
 		if (!in(mx, my, x0 + 7, y0 + LIST_TOP, w - 14, listH(h))) {
 			return false;
 		}
-		scroll = Math.max(0, Math.min(maxScroll(h), scroll - (int) Math.signum(amount) * SCROLL_STEP));
+		scroll = Math.max(0, Math.min(maxScroll(Minecraft.getInstance().font, w, h), scroll - (int) Math.signum(amount) * SCROLL_STEP));
 		return true;
 	}
 }
