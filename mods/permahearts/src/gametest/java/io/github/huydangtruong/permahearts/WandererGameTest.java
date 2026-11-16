@@ -462,6 +462,32 @@ public class WandererGameTest {
 		}
 	}
 
+	/** D119: a reflected fireball (owner = player) leaves the Ghast boss alive; a plain ghast still dies (vanilla x1000). */
+	@GameTest(maxTicks = 40)
+	public void reflectedFireballSparesGhastBoss(GameTestHelper context) {
+		ServerPlayer p = testPlayer(context);
+		var level = context.getLevel();
+		Mob plain = net.minecraft.world.entity.EntityTypes.GHAST.create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
+		Mob boss = net.minecraft.world.entity.EntityTypes.GHAST.create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
+		boss.addTag(QuestBoss.TAG);
+		boss.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(200);
+		boss.setHealth(200f);
+		BlockPos at = context.absolutePos(new BlockPos(2, 2, 2));
+		plain.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, 0f, 0f);
+		boss.snapTo(at.getX() + 6.5, at.getY(), at.getZ() + 0.5, 0f, 0f);
+		level.addFreshEntity(plain);
+		level.addFreshEntity(boss);
+		var fireball = new net.minecraft.world.entity.projectile.hurtingprojectile.LargeFireball(level, p, net.minecraft.world.phys.Vec3.ZERO, 1);
+		var src = level.damageSources().fireball(fireball, p);
+		boss.hurtServer(level, src, 6f);
+		plain.hurtServer(level, src, 6f);
+		context.assertTrue(boss.getHealth() > 150f, "the boss survives a reflected fireball, health " + boss.getHealth());
+		context.assertTrue(boss.getHealth() < 200f, "the boss takes the normal fireball damage, health " + boss.getHealth());
+		context.assertTrue(plain.getHealth() <= 0f, "a plain ghast still dies to a reflected fireball");
+		boss.discard();
+		context.succeed();
+	}
+
 	/** Runs the shoot goal's tick once at the moment it fires, then returns its charge counter (the wait, negative). */
 	private static int cooldownAfterShot(Mob ghast, LivingEntity target) {
 		try {
