@@ -507,7 +507,14 @@ public final class TechniqueRules {
 
 	/** Cooldown of a technique at a level in seconds: the enum value, except Cosmic Warping which falls with the level. */
 	public static int cooldownSeconds(Technique t, int level) {
-		return t == Technique.WARP ? warpCooldownSeconds(level) : t.cooldownSeconds();
+		if (t == Technique.WARP) return warpCooldownSeconds(level);
+		if (t == Technique.TELEPORT) return teleportCooldownSeconds(level); // D121
+		return t.cooldownSeconds();
+	}
+
+	/** D121: Quantum Leap cooldown, 40 s at Lv 1, 1 s less per level (Lv 20 = 21 s). */
+	public static int teleportCooldownSeconds(int level) {
+		return 40 - (Math.max(1, level) - 1);
 	}
 
 	public static int cooldownTicks(Technique t, int level) {
@@ -561,7 +568,7 @@ public final class TechniqueRules {
 				new Stat("Range", num(teleportRange(level)) + " blocks"),
 				new Stat("Ender pearls", num(teleportPearls(level)) + "x"),
 				new Stat("Charge", num(fullChargeSeconds(t)) + " s"),
-				new Stat("Cooldown", t.cooldownSeconds() + " s"));
+				new Stat("Cooldown", cooldownSeconds(t, level) + " s"));
 			case GOLEM -> List.of(
 				new Stat("Guardians", String.valueOf(golemCount(level))),
 				new Stat("Health", num(golemHealth(level))),
