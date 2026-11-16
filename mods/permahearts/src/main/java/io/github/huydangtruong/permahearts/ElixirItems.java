@@ -33,6 +33,18 @@ public final class ElixirItems {
 		}
 	}
 
+	public static final Item HEART;
+
+	static {
+		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM,
+			Identifier.fromNamespaceAndPath(PermaHearts.MOD_ID, "elixir_heart"));
+		HEART = Registry.register(BuiltInRegistries.ITEM, key, new HeartElixirItem(new Item.Properties()
+			.setId(key).stacksTo(16).rarity(Rarity.EPIC)
+			.component(DataComponents.CONSUMABLE, Consumables.DEFAULT_DRINK)
+			.usingConvertsTo(Items.GLASS_BOTTLE)
+			.component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true)));
+	}
+
 	private ElixirItems() {}
 
 	public static Item get(ElixirStat stat) {
@@ -46,6 +58,7 @@ public final class ElixirItems {
 			for (ElixirStat stat : ElixirStat.values()) {
 				out.accept(get(stat));
 			}
+			out.accept(HEART);
 		});
 	}
 }

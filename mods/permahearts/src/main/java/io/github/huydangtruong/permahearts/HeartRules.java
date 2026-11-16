@@ -52,6 +52,11 @@ public final class HeartRules {
 			gained > 0 ? KillOutcome.GAINED : KillOutcome.PROGRESS, xp, gained);
 	}
 
+	/** Heart Elixir: +1 max heart, capped at MAX. */
+	public static HeartsData addHeart(HeartsData d) {
+		return withHearts(d, maxHearts(d) + 1);
+	}
+
 	public static HeartsData withHearts(HeartsData d, int n) {
 		int c = Math.max(MIN, Math.min(MAX, n));
 		return new HeartsData(c - BASE, c >= MAX ? 0 : d.heartXp(), d.totalHostileKills(), d.totalDeaths());

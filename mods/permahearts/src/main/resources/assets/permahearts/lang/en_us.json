@@ -32,6 +32,7 @@
   "permahearts.reward.close": "Close",
   "permahearts.reward.hint": "Choose %s reward(s)",
   "permahearts.reward.claimed": "You claimed your reward",
+  "item.permahearts.elixir_heart": "Heart Elixir",
   "item.permahearts.elixir_strength": "Elixir of Strength",
   "permahearts.stat.strength": "attack damage",
   "item.permahearts.elixir_fury": "Elixir of Fury",
