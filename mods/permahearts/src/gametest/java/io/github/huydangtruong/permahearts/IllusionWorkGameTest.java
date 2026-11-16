@@ -147,7 +147,7 @@ public class IllusionWorkGameTest {
 		Illusion a = castOne(c, p);
 		c.succeedWhen(() -> {
 			c.assertTrue(c.getBlockState(new BlockPos(6, 1, 2)).is(Blocks.WHEAT) && c.getBlockState(new BlockPos(7, 1, 2)).is(Blocks.WHEAT)
-				&& c.getBlockState(new BlockPos(6, 1, 3)).is(Blocks.WHEAT), "seeds fetched from the chest and planted" + dbg(a));
+				&& c.getBlockState(new BlockPos(6, 1, 3)).is(Blocks.WHEAT), "seeds fetched from the chest and planted, chest seeds=" + count(chest, x -> x.is(Items.WHEAT_SEEDS)) + " planted=" + c.getBlockState(new BlockPos(6, 1, 2)).is(Blocks.WHEAT) + c.getBlockState(new BlockPos(7, 1, 2)).is(Blocks.WHEAT) + c.getBlockState(new BlockPos(6, 1, 3)).is(Blocks.WHEAT) + dbg(a));
 			c.assertTrue(count(chest, s -> s.is(Items.STICK)) == 3, "only seeds were taken");
 			FlightBladeGameTest.drop(c, p);
 		});

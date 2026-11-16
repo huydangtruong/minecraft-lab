@@ -817,6 +817,67 @@ public class WandererGameTest {
 		}
 	}
 
+	/** P-043: in a Death Match the owner's Warrior Angels, Illusion clones and Violet Guardians target the opponent; outside one they never attack players. */
+	@GameTest(maxTicks = 400)
+	public void deathMatchSummonsTargetTheOpponent(GameTestHelper context) {
+		MinecraftServer s = context.getLevel().getServer();
+		enable(context, true);
+		FlightBladeGameTest.floor(context);
+		ServerPlayer owner = FlightBladeGameTest.survivor(context);
+		ServerPlayer foe = FlightBladeGameTest.survivor(context);
+		FlightBladeGameTest.place(context, owner, 3.5, 1, 3.5, 0f, 0f);
+		FlightBladeGameTest.place(context, foe, 9.5, 1, 9.5, 0f, 0f);
+		owner.setHealth(20f);
+		foe.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(100000); // the summons hit it: it must outlast the test
+		foe.setHealth(100000f);
+		var data = io.github.huydangtruong.permahearts.technique.TechniqueAttachment.get(owner);
+		for (var t : new io.github.huydangtruong.permahearts.technique.Technique[] {io.github.huydangtruong.permahearts.technique.Technique.ANGEL,
+			io.github.huydangtruong.permahearts.technique.Technique.GOLEM, io.github.huydangtruong.permahearts.technique.Technique.ILLUSION}) {
+			data = data.withLevel(t, 1, 10);
+		}
+		io.github.huydangtruong.permahearts.technique.TechniqueAttachment.set(owner,
+			data.withEmeralds(io.github.huydangtruong.permahearts.technique.TechniqueRules.MAX_EMERALDS));
+		io.github.huydangtruong.permahearts.technique.TechniqueCasts.cast(owner, io.github.huydangtruong.permahearts.technique.Technique.ANGEL, 1, 1f);
+		io.github.huydangtruong.permahearts.technique.TechniqueCasts.cast(owner, io.github.huydangtruong.permahearts.technique.Technique.GOLEM, 1, 1f);
+		io.github.huydangtruong.permahearts.technique.TechniqueCasts.cast(owner, io.github.huydangtruong.permahearts.technique.Technique.ILLUSION, 1, 1f);
+		AABB all = new AABB(owner.blockPosition()).inflate(30);
+		List<Mob> summons = new java.util.ArrayList<>();
+		summons.addAll(context.getLevel().getEntitiesOfClass(io.github.huydangtruong.permahearts.technique.WarriorAngel.class, all));
+		summons.addAll(context.getLevel().getEntitiesOfClass(io.github.huydangtruong.permahearts.technique.VioletGuardian.class, all));
+		summons.addAll(context.getLevel().getEntitiesOfClass(io.github.huydangtruong.permahearts.technique.Illusion.class, all));
+		context.assertTrue(summons.size() >= 3, "an angel, a guardian and a clone were summoned, found " + summons.size());
+		for (Mob m : summons) { // (clones may fight a player who hit their owner, D71: only the angel and the guardian are checked)
+			context.assertTrue(m instanceof io.github.huydangtruong.permahearts.technique.Illusion || !m.canAttack(foe), m.getClass().getSimpleName() + " never attacks a player outside a Death Match");
+		}
+		startMatchQuest(context, 3);
+		ServerPlayer starter = testPlayer(context);
+		java.util.Set<Mob> seen = new java.util.HashSet<>();
+		context.assertTrue(Wanderer.startEvent(s, 0, starter), "the match starts");
+		context.succeedWhen(() -> {
+			{
+				if (!DeathMatch.running(s)) { // another wanderer test reset the shared quest state: start the match again
+					startMatchQuest(context, 3);
+					Wanderer.startEvent(s, 0, starter);
+				}
+				for (Mob m : summons) {
+					if (m.getTarget() == foe) {
+						seen.add(m); // a target may flicker while the fight goes on: remember each summon that took it
+					}
+				}
+				for (Mob m : summons) {
+					context.assertTrue(m.canAttack(foe), m.getClass().getSimpleName() + " may attack the opponent in a match: running=" + DeathMatch.running(s) + " enabled=" + io.github.huydangtruong.permahearts.PermaHearts.enabled(s) + " ownerFound=" + (context.getLevel().getPlayerByUUID(owner.getUUID()) != null) + " foeAlive=" + foe.isAlive() + " spectator=" + foe.isSpectator() + " canBeSeen=" + foe.canBeSeenAsEnemy());
+					context.assertTrue(seen.contains(m), m.getClass().getSimpleName() + " targets the opponent, target=" + m.getTarget() + " inPlayers=" + context.getLevel().players().contains(foe) + " dist=" + m.distanceTo(foe) + " ownerDist=" + owner.distanceTo(foe) + " aliveMob=" + m.isAlive() + " noAi=" + m.isNoAi() + " creative=" + foe.isCreative());
+				}
+				io.github.huydangtruong.permahearts.technique.WarriorAngel.dismissAll(owner);
+				io.github.huydangtruong.permahearts.technique.VioletGuardian.dismissAll(owner);
+				io.github.huydangtruong.permahearts.technique.Illusion.dismissAll(owner);
+				endMatchTest(s);
+				FlightBladeGameTest.drop(context, owner);
+				FlightBladeGameTest.drop(context, foe);
+			}
+		});
+	}
+
 	@GameTest(maxTicks = 100)
 	public void deathMatchCountsDistinctVictims(GameTestHelper context) {
 		MinecraftServer s = context.getLevel().getServer();

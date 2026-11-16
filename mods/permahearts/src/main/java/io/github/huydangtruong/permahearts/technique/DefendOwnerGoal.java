@@ -38,11 +38,15 @@ final class DefendOwnerGoal<T extends Mob & OwnedSummon> extends TargetGoal {
 	}
 
 	private boolean valid(LivingEntity e, Player o) {
-		return e != null && e.isAlive() && !(e instanceof Player) && !(e instanceof OwnedSummon) && !e.isSpectator()
+		return e != null && e.isAlive() && (!(e instanceof Player) || OwnedSummon.isMatchOpponent(g, e)) && !(e instanceof OwnedSummon) && !e.isSpectator()
 			&& e.distanceToSqr(g) < 40 * 40 && e.distanceToSqr(o) < 32 * 32;
 	}
 
 	private LivingEntity pick(Player o) {
+		LivingEntity opponent = OwnedSummon.nearestMatchOpponent(g, 40); // P-043: the Death Match opponent comes first
+		if (opponent != null) {
+			return opponent;
+		}
 		if (o.tickCount - o.getLastHurtByMobTimestamp() < 100 && valid(o.getLastHurtByMob(), o)) {
 			return o.getLastHurtByMob();
 		}

@@ -179,7 +179,7 @@ public final class VioletGuardian extends IronGolem implements OwnedSummon {
 	/** Never attacks a player. */
 	@Override
 	public boolean canAttack(LivingEntity target) {
-		return !(target instanceof Player) && !(target instanceof OwnedSummon) && super.canAttack(target);
+		return (!(target instanceof Player) || OwnedSummon.isMatchOpponent(this, target)) && !(target instanceof OwnedSummon) && super.canAttack(target);
 	}
 
 	/** D62: a monster this guardian hurts counts as hurt by the owner, so a kill is the owner's kill. */
