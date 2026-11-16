@@ -29,6 +29,7 @@ Release steps: [workflow/release.md](../workflow/release.md). Release **only whe
 ## In flight
 
 - **Next: P-033** God Slayer skills Lv 2 to 10 through `GodSlayerSkills` (D97). No plan yet.
+- **P-036 in dev:** God Slayer look round 3 (BL-013, D105), plan `docs/plans/P-036-god-slayer-look-v3.md`, branch `feat/P-036-look-v3` (dev on `feat/P-036-dev` in a worktree). Huy asked to release right after it is merged.
 - **P-035 released in 0.21.0.** Waiting for Huy to look at the boss with `/boss freeze` and say whether the look is OK. Weak spots seen in the client screenshots: the "side" shot is still a three-quarter view, and the `fly_forward` lean shot is hard to read.
 
 - **Windows installer bug** (reported by Huy's friend): picking a profile other than "26.3 Fabric Essential" says SUCCESS, but that profile's mods folder still has the old jar. Reading `minecraft-lab.ps1` (`Find-Profiles` / `Select-Profile`) found nothing yet. Waiting for the friend's `Mods folder:` line and that profile's Game directory.

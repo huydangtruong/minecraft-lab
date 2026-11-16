@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>God Slayer wings mockup</title>
+<!-- Approved by Huy 2026-11-16 (BL-013, D105) with the slider values set as defaults below.
+     Units = model pixels (16 per block), y up, feet at y = 0, the back of the body is -z. The body is only a stand-in.
+     The wing geometry in build() and feather() is the reference P-036 must match. -->
+<style>
+:root{--bg:#f5f4ef;--fg:#222;--muted:#666}
+@media (prefers-color-scheme: dark){:root{--bg:#1d1d1f;--fg:#eee;--muted:#aaa}}
+body{background:var(--bg);color:var(--fg);font:14px system-ui,sans-serif;margin:16px}
+label{color:var(--muted);display:flex;gap:8px;align-items:center}
+#wrap{height:520px;border-radius:12px;cursor:grab;touch-action:none}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:10px 0}
+</style>
+</head>
+<body>
+<div><button data-v="3.14159">Sau lưng</button> <button data-v="2.4">Chéo sau</button> <button data-v="1.5708">Ngang</button> <button data-v="0">Trước mặt</button></div>
+<div class="grid">
+<label>Khúc trong ngẩng<input type="range" id="a1" min="10" max="65" step="1" value="29"><span id="a1o"></span></label>
+<label>Khúc ngoài chúc<input type="range" id="a2" min="-20" max="85" step="1" value="7"><span id="a2o"></span></label>
+<label>Sợi ngoài cùng xòe<input type="range" id="fan" min="0" max="110" step="1" value="73"><span id="fo"></span></label>
+<label>Cuối xương ngoài nghiêng lên<input type="range" id="lift" min="0" max="8" step="1" value="0"><span id="lo"></span></label>
+<label>Lông 4–7 dài thêm<input type="range" id="ext" min="0" max="16" step="1" value="5"><span id="eo"></span></label>
+<label>Lông 3 dài thêm<input type="range" id="e3" min="0" max="16" step="1" value="3"><span id="e3o"></span></label>
+</div>
+<div id="wrap"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const wrap=document.getElementById('wrap');
+let W=wrap.clientWidth,H=520;
+const scene=new THREE.Scene();
+const cam=new THREE.PerspectiveCamera(32,W/H,1,2000);
+const r=new THREE.WebGLRenderer({antialias:true,alpha:true});
+r.setPixelRatio(window.devicePixelRatio);r.setSize(W,H);wrap.appendChild(r.domElement);
+scene.add(new THREE.AmbientLight(0xffffff,0.72));
+const dl=new THREE.DirectionalLight(0xffffff,0.55);dl.position.set(60,120,-80);scene.add(dl);
+const dl2=new THREE.DirectionalLight(0xffffff,0.35);dl2.position.set(-60,80,100);scene.add(dl2);
+const M={};function m(c){return M[c]||(M[c]=new THREE.MeshLambertMaterial({color:c}));}
+function box(w,h,d,x,y,z,c,p){const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m(c));o.position.set(x,y,z);(p||scene).add(o);return o;}
+function beam(a,b,t,c,p){const d=new THREE.Vector3().subVectors(b,a);const L=d.length();const o=box(t,L,t,0,0,0,c,p);o.position.copy(a).addScaledVector(d,0.5);o.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.normalize());return o;}
+const BLACK=0x1d1c21,RED=0x7a1414,SKIN=0x8f1d1d,GOLD=0xc9a227,WHITE=0xe8e6df,STEEL=0xaab0b8,DARK=0x3a0f0f;
+// stand-in body
+[-1,1].forEach(s=>{box(10,30,10,s*7,15,0,BLACK);box(11,3,11,s*7,1.5,0,RED);});
+box(26,30,14,0,45,0,BLACK);box(27,3,15,0,31,0,GOLD);box(8,8,1,0,52,7.2,RED);
+box(13,13,13,0,67,0,SKIN);box(9,2,1,0,69,6.6,0xffe14a);
+[-1,1].forEach(s=>{box(4,4,4,s*8.5,74,0,GOLD);box(3,8,3,s*10,80,0,GOLD);
+const sh=new THREE.Vector3(s*15,57,0),hd=new THREE.Vector3(s*22,44,10);beam(sh,hd,8,BLACK);box(8,8,8,s*15,57,0,RED);
+beam(new THREE.Vector3(s*22,40,12),new THREE.Vector3(s*26,86,22),2.5,STEEL);box(6,1.5,4,s*22.6,47,13,GOLD);});
+// BL-013 hair idea: one white piece from the back of the head down to mid-back, widening like a trapezoid
+for(let i=0;i<7;i++){const y=74-i*5.6;const w=14+i*2.2;box(w,5.6,2,0,y,-7.5,WHITE);}
+box(14,3,14.5,0,74.5,-0.2,WHITE);
+// ---- wings (the approved part) ----
+const wings=new THREE.Group();scene.add(wings);
+// a feather: 4 wide, 1.2 thick, length L, black 3-long tip; its root sits 2 below the bone centre line and behind it,
+// rotated in the wing plane by ang degrees from straight down toward the outside
+function feather(p,s,ang,L,i){const t=ang*Math.PI/180;const dx=s*Math.sin(t),dy=-Math.cos(t);const q=new THREE.Vector3(p.x,p.y-2,p.z);
+const f=box(4,L,1.2,q.x+dx*L/2,q.y+dy*L/2,q.z-1.8,i%2?RED:DARK,wings);f.rotation.z=s*t;
+const e=box(4.4,3,1.5,q.x+dx*(L-1.5),q.y+dy*(L-1.5),q.z-1.8,BLACK,wings);e.rotation.z=s*t;}
+function build(a1,a2,fan,lift,ext,e3){
+while(wings.children.length){const c=wings.children.pop();c.geometry.dispose();}
+const r1=a1*Math.PI/180,r2=a2*Math.PI/180,rb=(a2-lift)*Math.PI/180;
+[-1,1].forEach(s=>{
+const root=new THREE.Vector3(s*4,55,-8);                                   // mid-back
+const d1=new THREE.Vector3(s*Math.cos(r1),Math.sin(r1),-0.22).normalize();
+const elbow=root.clone().addScaledVector(d1,34);                           // inner bone: 34 long, up a1 degrees
+const d2=new THREE.Vector3(s*Math.cos(r2),-Math.sin(r2),-0.12).normalize();
+const tip=elbow.clone().addScaledVector(d2,30);                            // feather line of the outer segment: down a2 degrees
+const db=new THREE.Vector3(s*Math.cos(rb),-Math.sin(rb),-0.12).normalize();
+const bend=elbow.clone().addScaledVector(db,33);                           // outer bone: 33 long, lift degrees above the feather line
+const N1=6,N2=5,N=N1+N2;let k=0;                                           // 6 feathers on the inner bone, 5 on the outer
+const plus=k=>{const o=N-k;return (o>=4&&o<=7?ext:0)+(o===3?e3:0);};      // o = number counted from the outside (1 = outermost)
+const ang=k=>4+(fan-4)*k/(N-1);                                            // evenly spaced: 4 deg (innermost) to fan (outermost)
+for(let i=0;i<N1;i++,k++){const p=root.clone().lerp(elbow,0.1+0.8*i/(N1-1));feather(p,s,ang(k),17+i*1.5+plus(k),k);}
+for(let i=0;i<N2;i++,k++){const p=elbow.clone().lerp(tip,0.06+0.92*i/(N2-1));feather(p,s,ang(k),32+i*5+plus(k),k);}
+beam(root,elbow,4.5,GOLD,wings);beam(elbow,bend,4.5,GOLD,wings);box(6,6,6,elbow.x,elbow.y,elbow.z,GOLD,wings);box(5,5,5,bend.x,bend.y,bend.z,GOLD,wings);
+});}
+let th=3.14159,ph=0.12;const R=280,tgt=new THREE.Vector3(0,46,0);
+function place(){cam.position.set(Math.sin(th)*Math.cos(ph)*R,tgt.y+Math.sin(ph)*R,Math.cos(th)*Math.cos(ph)*R);cam.lookAt(tgt);r.render(scene,cam);}
+const ids=['a1','a2','fan','lift','ext','e3'].map(i=>document.getElementById(i));
+const outs=['a1o','a2o','fo','lo','eo','e3o'].map(i=>document.getElementById(i));
+function upd(){ids.forEach((e,i)=>outs[i].textContent=e.value+(i<4?'°':''));build(...ids.map(e=>+e.value));place();}
+ids.forEach(e=>e.oninput=upd);
+document.querySelectorAll('button[data-v]').forEach(b=>b.onclick=()=>{th=+b.dataset.v;ph=0.12;place();});
+let drag=null;wrap.addEventListener('pointerdown',e=>{drag=[e.clientX,e.clientY,th,ph];wrap.setPointerCapture(e.pointerId);});
+wrap.addEventListener('pointermove',e=>{if(!drag)return;th=drag[2]-(e.clientX-drag[0])*0.01;ph=Math.max(-0.4,Math.min(1.2,drag[3]+(e.clientY-drag[1])*0.008));place();});
+wrap.addEventListener('pointerup',()=>{drag=null;});
+window.addEventListener('resize',()=>{W=wrap.clientWidth;cam.aspect=W/H;cam.updateProjectionMatrix();r.setSize(W,H);place();});
+upd();
+</script>
+</body>
+</html>
