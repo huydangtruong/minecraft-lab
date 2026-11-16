@@ -1,6 +1,6 @@
 # P-036 — God Slayer look, round 3 (BL-013)
 
-> **Tóm tắt cho Huy (VN, ≤ 3 dòng):** Gắn đầu liền thân, đầu nhỏ đi 10%; katana lưỡi quay ra trước, mũi vát ở đầu; tóc một mảnh trắng hình thang; cánh mới hai khúc xương theo mẫu Huy đã duyệt (D105).
+> **Tóm tắt cho Huy (VN, ≤ 3 dòng):** Gắn đầu liền thân, đầu hẹp còn 95% và phần trên mắt thấp đi 10%; katana lưỡi quay ra trước, mũi vát ở đầu; tóc một mảnh trắng hình thang; cánh mới hai khúc xương theo mẫu Huy đã duyệt (D105).
 
 - **Status:** ready
 - **Mod / decision:** `permahearts`, D105 · **Branch:** `feat/P-036-look-v3` · **Depends on:** P-035 (merged, released 0.21.0)
@@ -10,7 +10,7 @@
 ## 1. Head
 
 - **No gap** between the head and the body: today there is an empty space between them. The head (and the neck if any) must sit on the chest/collar so no sky shows through from any side.
-- **Head 10% smaller**: width (sides) −10% and height −10%; the forehead is too high, so take most of the height from above the eyes. Keep the eyes, brow, tusks readable (D101); horns move with the head.
+- **Head smaller** (Huy, updated): compared with 0.21.0, width (sides) **95%**; height: cut about **10% of the part above the eyes** only (forehead/top); from the eyes down stays. Keep the eyes, brow, tusks readable (D101); horns move with the head.
 
 ## 2. Katana (both blades)
 
