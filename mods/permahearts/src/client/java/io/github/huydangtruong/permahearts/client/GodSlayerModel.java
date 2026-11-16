@@ -21,47 +21,64 @@ import net.minecraft.util.Mth;
 public class GodSlayerModel extends EntityModel<GodSlayerRenderState> {
 	/** Texture offsets of every box, printed by `make_god_slayer_texture.py --uv`. */
 	private static final Map<String, int[]> UV = Map.ofEntries(
-		Map.entry("arm", new int[] {76, 145}),
-		Map.entry("belt", new int[] {62, 212}),
-		Map.entry("blade", new int[] {68, 86}),
-		Map.entry("brow", new int[] {0, 276}),
-		Map.entry("chest", new int[] {0, 53}),
-		Map.entry("collar", new int[] {0, 145}),
-		Map.entry("fang", new int[] {84, 264}),
-		Map.entry("feather", new int[] {0, 0}),
-		Map.entry("feather_short", new int[] {86, 53}),
-		Map.entry("fist", new int[] {62, 249}),
-		Map.entry("foot", new int[] {0, 249}),
-		Map.entry("forearm", new int[] {62, 168}),
-		Map.entry("guard", new int[] {100, 264}),
-		Map.entry("hair_back", new int[] {0, 86}),
-		Map.entry("hair_lock", new int[] {44, 168}),
-		Map.entry("hair_low", new int[] {62, 116}),
-		Map.entry("hair_side", new int[] {20, 0}),
-		Map.entry("hair_top", new int[] {0, 191}),
-		Map.entry("hair_up", new int[] {0, 233}),
-		Map.entry("handle", new int[] {88, 233}),
-		Map.entry("head", new int[] {0, 116}),
-		Map.entry("horn1", new int[] {36, 233}),
-		Map.entry("horn2", new int[] {64, 233}),
-		Map.entry("horn3", new int[] {42, 249}),
-		Map.entry("horn4", new int[] {56, 264}),
-		Map.entry("knot", new int[] {68, 264}),
-		Map.entry("shin", new int[] {26, 212}),
-		Map.entry("spike", new int[] {44, 264}),
-		Map.entry("tasset_front", new int[] {0, 264}),
-		Map.entry("tasset_side", new int[] {0, 212}),
-		Map.entry("thigh", new int[] {0, 168}),
-		Map.entry("waist", new int[] {68, 191}),
-		Map.entry("wing_bone", new int[] {38, 276}));
+		Map.entry("arm", new int[] {76, 104}),
+		Map.entry("belt", new int[] {62, 171}),
+		Map.entry("blade", new int[] {86, 42}),
+		Map.entry("bone_inner", new int[] {24, 0}),
+		Map.entry("bone_outer", new int[] {44, 0}),
+		Map.entry("brow", new int[] {78, 220}),
+		Map.entry("chest", new int[] {0, 42}),
+		Map.entry("collar", new int[] {0, 104}),
+		Map.entry("fang", new int[] {36, 220}),
+		Map.entry("feather_dark", new int[] {0, 0}),
+		Map.entry("feather_red", new int[] {12, 0}),
+		Map.entry("feather_tip", new int[] {68, 230}),
+		Map.entry("fist", new int[] {0, 207}),
+		Map.entry("foot", new int[] {64, 192}),
+		Map.entry("forearm", new int[] {44, 127}),
+		Map.entry("guard", new int[] {52, 220}),
+		Map.entry("hair_slice", new int[] {0, 230}),
+		Map.entry("hair_top", new int[] {0, 150}),
+		Map.entry("handle", new int[] {52, 192}),
+		Map.entry("head", new int[] {0, 75}),
+		Map.entry("horn1", new int[] {0, 192}),
+		Map.entry("horn2", new int[] {28, 192}),
+		Map.entry("horn3", new int[] {106, 192}),
+		Map.entry("horn4", new int[] {108, 207}),
+		Map.entry("joint_elbow", new int[] {28, 207}),
+		Map.entry("joint_tip", new int[] {0, 220}),
+		Map.entry("knot", new int[] {20, 220}),
+		Map.entry("shin", new int[] {26, 171}),
+		Map.entry("spike", new int[] {96, 207}),
+		Map.entry("tasset_front", new int[] {52, 207}),
+		Map.entry("tasset_side", new int[] {0, 171}),
+		Map.entry("thigh", new int[] {0, 127}),
+		Map.entry("waist", new int[] {68, 150}));
 
 	/** Resting pose angles: arms open outwards, forearms folded up so the katanas stand straight. */
 	private static final float ARM_OUT = 1.15f;
 	private static final float ARM_FORWARD = 0.9f;
 	private static final float FOREARM_UP = 1.5f;
-	private static final float HEAD_SCALE = 1.6f;
+	private static final float HEAD_SCALE = 1.44f; // 10% smaller than the 1.6 of P-035;
 	/** Forward lean of the body at full speed in the air: 45 degrees. */
 	private static final float MAX_LEAN = 0.785f;
+	/** The head pivot (its chin) sits 1 px into the collar so no gap shows. */
+	private static final float HEAD_Y = -20f;
+	private static final float HAIR_TOP = -38f;
+	private static final float HAIR_Z = 10.9f;
+	private static final int HAIR_SLICES = 7;
+	private static final float HAIR_STEP = 4.4f;
+	private static final float HAIR_W_TOP = 24f;
+	private static final float HAIR_W_BOTTOM = 32f;
+	private static final float WING_ROOT_X = 4f;
+	private static final float WING_ROOT_Y = -11f;
+	private static final float WING_ROOT_Z = 8.5f;
+	private static final float WING_UP = 29f * Mth.DEG_TO_RAD;
+	private static final float WING_DOWN = 7f * Mth.DEG_TO_RAD;
+	private static final float INNER_LEN = 34f;
+	private static final float OUTER_LEN = 33f;
+	/** Feather lengths, innermost to outermost: 6 on the inner bone, 5 on the outer one. */
+	private static final float[] FEATHER_LEN = {17f, 18.5f, 20f, 21.5f, 28f, 29.5f, 37f, 42f, 45f, 47f, 52f};
 	private static final float HIP_OUT = 0.28f;
 	private static final float THIGH_FWD = -0.3f;
 	private static final float SHIN_BACK = 0.55f;
@@ -107,9 +124,22 @@ public class GodSlayerModel extends EntityModel<GodSlayerRenderState> {
 		leftFoot = leftShin.getChild("foot");
 	}
 
-	private static CubeListBuilder box(String name, float x, float y, float z, int w, int h, int d) {
+	private static CubeListBuilder box(String name, float x, float y, float z, float w, float h, float d) {
 		int[] uv = UV.get(name);
 		return CubeListBuilder.create().texOffs(uv[0], uv[1]).addBox(x, y, z, w, h, d);
+	}
+
+	private static float[] unit(float x, float y, float z) {
+		float l = Mth.sqrt(x * x + y * y + z * z);
+		return new float[] {x / l, y / l, z / l};
+	}
+
+	/** A gold bone: a square box hanging along +y from its pivot, turned (z then x) so that +y points along dir. */
+	private static void bone(PartDefinition parent, String name, String boxName, float thick, float length, float[] from, float[] dir) {
+		float xRot = (float) Math.asin(dir[2]);
+		float zRot = (float) Math.atan2(-dir[0], dir[1]);
+		parent.addOrReplaceChild(name, box(boxName, -thick / 2, 0, -thick / 2, thick, length, thick),
+			PartPose.offsetAndRotation(from[0], from[1], from[2], xRot, 0, zRot));
 	}
 
 	public static LayerDefinition createLayer() {
@@ -127,22 +157,22 @@ public class GodSlayerModel extends EntityModel<GodSlayerRenderState> {
 
 		// ---- chest, mane down the back (no shoulder or armpit plates, D101) ----
 		PartDefinition chest = body.addOrReplaceChild("chest", box("chest", -14, -18, -7.5f, 28, 18, 15), PartPose.offset(0, -10, 0));
-		PartDefinition mane = chest.addOrReplaceChild("hair_back", box("hair_back", -14, -22, 7.5f, 28, 24, 6), PartPose.ZERO);
-		mane.addOrReplaceChild("hair_low", box("hair_low", -11, 0, -2, 22, 24, 5), PartPose.offsetAndRotation(0, 2, 10, 0.18f, 0, 0));
-		chest.addOrReplaceChild("hair_lock_right", box("hair_lock", -13, -17, -9, 5, 18, 4), PartPose.rotation(0, 0, 0.05f));
-		chest.addOrReplaceChild("hair_lock_left", box("hair_lock", 8, -17, -9, 5, 18, 4), PartPose.rotation(0, 0, -0.05f));
+		// one white piece from the top back of the head down to mid-back, a trapezoid: 7 stacked slices, wider at the bottom
+		PartDefinition mane = chest.addOrReplaceChild("hair_back", CubeListBuilder.create(), PartPose.offset(0, HAIR_TOP, HAIR_Z));
+		for (int i = 0; i < HAIR_SLICES; i++) {
+			float w = HAIR_W_TOP + (HAIR_W_BOTTOM - HAIR_W_TOP) * i / (HAIR_SLICES - 1);
+			mane.addOrReplaceChild("slice_" + i, box("hair_slice", -16, 0, 0, 32, 4, 2),
+				PartPose.offset(0, i * HAIR_STEP / (HAIR_STEP / 4f), 0).scaled(w / 32f, HAIR_STEP / 4f, 1f));
+		}
 
 		// ---- head: face, brow, tusks, horns, mane ----
-		PartDefinition head = chest.addOrReplaceChild("head", box("head", -8, -14, -7.5f, 16, 14, 15), PartPose.offset(0, -17, 0).scaled(HEAD_SCALE));
+		PartDefinition head = chest.addOrReplaceChild("head", box("head", -8, -14, -7.5f, 16, 14, 15), PartPose.offset(0, HEAD_Y, 0).withScale(HEAD_SCALE));
 		chest.addOrReplaceChild("collar", box("collar", -10, -4, -9, 20, 5, 18), PartPose.offset(0, -17, 0));
 		head.addOrReplaceChild("brow", box("brow", -8, -13, -9, 16, 3, 3), PartPose.ZERO);
 		// tusks grow out of the lower jaw, point forward and a little up (pitch -0.35), clear of the eyes
 		head.addOrReplaceChild("fang_right", box("fang", -1, -1, -6, 2, 2, 6), PartPose.offsetAndRotation(-6.5f, -1.5f, -7.5f, -0.4f, 0, 0));
 		head.addOrReplaceChild("fang_left", box("fang", -1, -1, -6, 2, 2, 6), PartPose.offsetAndRotation(6.5f, -1.5f, -7.5f, -0.4f, 0, 0));
 		head.addOrReplaceChild("hair_top", box("hair_top", -8.5f, -17, -8.5f, 17, 4, 17), PartPose.ZERO);
-		head.addOrReplaceChild("hair_up", box("hair_up", -7, -15, 7.5f, 14, 12, 4), PartPose.ZERO);
-		head.addOrReplaceChild("hair_side_right", box("hair_side", -11, -13, -6.5f, 3, 20, 13), PartPose.rotation(0, 0, 0.08f));
-		head.addOrReplaceChild("hair_side_left", box("hair_side", 8, -13, -6.5f, 3, 20, 13), PartPose.rotation(0, 0, -0.08f));
 		head.addOrReplaceChild("spike_1", box("spike", -1.5f, -8, -1.5f, 3, 8, 3), PartPose.offsetAndRotation(-5, -16, -3, -0.2f, 0, -0.45f));
 		head.addOrReplaceChild("spike_2", box("spike", -1.5f, -9, -1.5f, 3, 8, 3), PartPose.offsetAndRotation(0, -16, -5, -0.7f, 0, 0));
 		head.addOrReplaceChild("spike_3", box("spike", -1.5f, -8, -1.5f, 3, 8, 3), PartPose.offsetAndRotation(5, -16, -3, -0.2f, 0, 0.45f));
@@ -175,24 +205,38 @@ public class GodSlayerModel extends EntityModel<GodSlayerRenderState> {
 			katana.addOrReplaceChild("blade", box("blade", -2, 9, -1, 4, 28, 2), PartPose.ZERO);
 		}
 
-		// ---- wings: shown only while flying; a gold arm bone, a fan of membranes at its end and a short fan at the shoulder ----
+		// ---- wings (D105, the approved mockup): shown only while flying; per side a gold inner bone going out and up 29 degrees,
+		// a gold elbow, a gold outer bone going out and down 7 degrees, and 11 separate feathers hanging behind the bones ----
 		for (int side = -1; side <= 1; side += 2) {
 			String n = side < 0 ? "right" : "left";
 			PartDefinition wing = chest.addOrReplaceChild(n + "_wing", CubeListBuilder.create(),
-				PartPose.offsetAndRotation(side * 8, -15, 9, 0, -side * 0.15f, 0));
-			float x0 = side < 0 ? -40 : 0;
-			PartDefinition bone = wing.addOrReplaceChild("bone", box("wing_bone", x0, -1.5f, -1.5f, 40, 3, 3),
-				PartPose.rotation(0, 0, -side * 0.5f));
-			PartDefinition wrist = bone.addOrReplaceChild("wrist", CubeListBuilder.create(), PartPose.offset(side * 40, 0, 0));
-			float[] reach = {0.2f, 0.6f, 1.0f, 1.4f, 1.8f, 2.2f, 2.6f};
-			float[] length = {0.8f, 0.92f, 1f, 1f, 0.92f, 0.8f, 0.65f};
-			for (int i = 0; i < reach.length; i++) {
-				wrist.addOrReplaceChild("feather_" + i, box("feather", -4.5f, 0, -0.5f, 9, 52, 1),
-					PartPose.offsetAndRotation(0, 0, i * 0.02f, 0, 0, -side * (Mth.PI - reach[i])).scaled(1, length[i], 1));
-			}
-			for (int i = 0; i < 3; i++) {
-				wing.addOrReplaceChild("inner_" + i, box("feather_short", -4.5f, 0, -0.5f, 9, 32, 1),
-					PartPose.offsetAndRotation(0, 0, i * 0.02f, 0, 0, -side * (Mth.PI - (2.2f + i * 0.4f))));
+				PartPose.offset(side * WING_ROOT_X, WING_ROOT_Y, WING_ROOT_Z));
+			// bone directions in model axes (y down, the back is +z); the mockup has y up and the back at -z
+			float[] d1 = unit(side * Mth.cos(WING_UP), -Mth.sin(WING_UP), 0.22f);
+			float[] d2 = unit(side * Mth.cos(WING_DOWN), Mth.sin(WING_DOWN), 0.12f);
+			float[] elbow = {d1[0] * INNER_LEN, d1[1] * INNER_LEN, d1[2] * INNER_LEN};
+			float[] tip = {elbow[0] + d2[0] * OUTER_LEN, elbow[1] + d2[1] * OUTER_LEN, elbow[2] + d2[2] * OUTER_LEN};
+			bone(wing, "bone_inner", "bone_inner", 4.5f, INNER_LEN, new float[] {0, 0, 0}, d1);
+			bone(wing, "bone_outer", "bone_outer", 4.5f, OUTER_LEN, elbow, d2);
+			wing.addOrReplaceChild("elbow", box("joint_elbow", -3, -3, -3, 6, 6, 6), PartPose.offset(elbow[0], elbow[1], elbow[2]));
+			wing.addOrReplaceChild("wing_tip", box("joint_tip", -2.5f, -2.5f, -2.5f, 5, 5, 5), PartPose.offset(tip[0], tip[1], tip[2]));
+			for (int k = 0; k < FEATHER_LEN.length; k++) {
+				float[] p;
+				if (k < 6) {
+					float t = 0.1f + 0.8f * k / 5f;
+					p = new float[] {d1[0] * INNER_LEN * t, d1[1] * INNER_LEN * t, d1[2] * INNER_LEN * t};
+				} else {
+					float t = 0.06f + 0.92f * (k - 6) / 4f;
+					p = new float[] {elbow[0] + d2[0] * OUTER_LEN * t, elbow[1] + d2[1] * OUTER_LEN * t, elbow[2] + d2[2] * OUTER_LEN * t};
+				}
+				float angle = (4f + 6.9f * k) * Mth.DEG_TO_RAD;
+				float len = FEATHER_LEN[k];
+				// the root sits 2 px below the bone centre line and a little behind it; the feather hangs in the wing plane
+				PartDefinition f = wing.addOrReplaceChild("feather_" + k, box(k % 2 == 0 ? "feather_dark" : "feather_red", -2, 0, -0.6f, 4, 40, 1.2f),
+					PartPose.offsetAndRotation(p[0], p[1] + 2, p[2] + 1.8f, 0, 0, -side * angle).scaled(1, len / 40f, 1));
+				// the black tip is the last 3 px; the feather part is scaled along y, so the tip box is stretched back to 3 px
+				float inv = 40f / len;
+				f.addOrReplaceChild("tip", box("feather_tip", -2.2f, 0, -0.75f, 4.4f, 3 * inv, 1.5f), PartPose.offset(0, 40 - 3 * inv, 0));
 			}
 		}
 
@@ -247,7 +291,7 @@ public class GodSlayerModel extends EntityModel<GodSlayerRenderState> {
 		float sway = Mth.sin(time * 0.07f) * 0.03f;
 		rightArm.zRot += sway;
 		leftArm.zRot -= sway;
-		hairBack.xRot = 0.04f + Mth.sin(time * 0.09f) * 0.04f + speed * 0.25f;
+		hairBack.xRot = -0.08f + Mth.sin(time * 0.09f) * 0.04f + speed * 0.25f;
 		body.yRot = swing * 0.12f;
 
 		// slash: the right arm rises over the head, then swings down; blended in and out so it never jumps
