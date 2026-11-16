@@ -66,11 +66,11 @@ public class GodSlayerModel extends EntityModel<GodSlayerRenderState> {
 	private static final float HEAD_WIDTH = 1.37f;
 	private static final float HEAD_Y = -20f;
 	private static final float HEAD_YAW_FACTOR = 0.6f;
-	private static final float HAIR_TOP = -37f;
+	private static final float HAIR_TOP = -18f;
 	/** The mane is fixed (no sway); its bottom leans back by this angle (back is +z, a negative xRot swings the bottom to +z). */
 	private static final float HAIR_TILT = 10f * Mth.DEG_TO_RAD;
-	private static final float HAIR_Z = 15f;
-	private static final int HAIR_SLICES = 12;
+	private static final float HAIR_Z = 8f;
+	private static final int HAIR_SLICES = 7;
 	private static final float HAIR_STEP = 4.4f;
 	private static final float HAIR_W_TOP = 26f;
 	private static final float HAIR_W_BOTTOM = 33f;
@@ -161,7 +161,7 @@ public class GodSlayerModel extends EntityModel<GodSlayerRenderState> {
 
 		// ---- chest, mane down the back (no shoulder or armpit plates, D101) ----
 		PartDefinition chest = body.addOrReplaceChild("chest", box("chest", -14, -18, -7.5f, 28, 18, 15), PartPose.offset(0, -10, 0));
-		// one white piece from the top back of the head down to mid-back, a trapezoid: 7 stacked slices, wider at the bottom
+		// lower mane: from the chest top down past the belt, a trapezoid of stacked slices wider at the bottom, hanging against the back and leaning 10 degrees back
 		PartDefinition mane = chest.addOrReplaceChild("hair_back", CubeListBuilder.create(), PartPose.offset(0, HAIR_TOP, HAIR_Z));
 		for (int i = 0; i < HAIR_SLICES; i++) {
 			float w = HAIR_W_TOP + (HAIR_W_BOTTOM - HAIR_W_TOP) * i / (HAIR_SLICES - 1);
@@ -177,6 +177,14 @@ public class GodSlayerModel extends EntityModel<GodSlayerRenderState> {
 		head.addOrReplaceChild("fang_right", box("fang", -1, -1, -6, 2, 2, 6), PartPose.offsetAndRotation(-6.5f, -1.5f, -7f, -0.4f, 0, 0));
 		head.addOrReplaceChild("fang_left", box("fang", -1, -1, -6, 2, 2, 6), PartPose.offsetAndRotation(6.5f, -1.5f, -7f, -0.4f, 0, 0));
 		head.addOrReplaceChild("hair_top", box("hair_top", -8.5f, -12, -7.5f, 17, 2, 14), PartPose.ZERO);
+		// the upper mane is part of the head (it turns with it, so it can never be cut by it): a vertical plate touching the
+		// back of the hair, from the crown down to the chin; the lower mane (chest) continues it
+		PartDefinition upper = head.addOrReplaceChild("hair_upper", CubeListBuilder.create(), PartPose.ZERO);
+		for (int i = 0; i < 4; i++) {
+			float w = 24f + 1.5f * i / 3f;
+			upper.addOrReplaceChild("slice_" + i, box("hair_slice", -17, 0, 0, 34, 4, 2),
+				PartPose.offset(0, -12 + 3 * i, 6.5f).scaled(w / 34f / HEAD_WIDTH, 0.75f, 1f));
+		}
 		head.addOrReplaceChild("spike_1", box("spike", -1.5f, -8, -1.5f, 3, 8, 3), PartPose.offsetAndRotation(-5, -12, -3, -0.2f, 0, -0.45f));
 		head.addOrReplaceChild("spike_2", box("spike", -1.5f, -9, -1.5f, 3, 8, 3), PartPose.offsetAndRotation(0, -12, -5, -0.7f, 0, 0));
 		head.addOrReplaceChild("spike_3", box("spike", -1.5f, -8, -1.5f, 3, 8, 3), PartPose.offsetAndRotation(5, -12, -3, -0.2f, 0, 0.45f));
@@ -266,8 +274,8 @@ public class GodSlayerModel extends EntityModel<GodSlayerRenderState> {
 		float time = state.ageInTicks;
 
 		// the head follows where the boss looks, a little
-		head.yRot = Mth.clamp(state.yRot, -50f, 50f) * Mth.DEG_TO_RAD * HEAD_YAW_FACTOR;
-		head.xRot = Mth.clamp(state.xRot, -30f, 30f) * Mth.DEG_TO_RAD * 0.6f;
+		head.yRot = Mth.clamp(state.yRot, -25f, 25f) * Mth.DEG_TO_RAD * HEAD_YAW_FACTOR;
+		head.xRot = Mth.clamp(state.xRot, -17f, 17f) * Mth.DEG_TO_RAD * 0.6f;
 
 		// legs: the stance stays, the thighs swing forward and back, the shin folds when the leg goes back, feet stay flat
 		rightLeg.xRot = THIGH_FWD + swing * 0.9f;
