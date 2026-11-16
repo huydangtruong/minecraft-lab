@@ -1,5 +1,8 @@
 package io.github.huydangtruong.permahearts;
 
+import net.minecraft.ChatFormatting;
+import io.github.huydangtruong.permahearts.godslayer.GodSlayerLines;
+import java.util.concurrent.ThreadLocalRandom;
 import net.minecraft.network.chat.Component;
 import java.util.ArrayList;
 import java.util.List;
@@ -390,9 +393,18 @@ public final class Messages {
 		return Component.translatableWithFallback("permahearts.god_slayer.countdown", "God Slayer arrives in %s...", seconds).withStyle(net.minecraft.ChatFormatting.RED, net.minecraft.ChatFormatting.BOLD);
 	}
 
+	/** A random scorn line (D113) when nobody has enough hearts. */
 	public static Component godSlayerWeaklings() {
-		return Component.translatableWithFallback("permahearts.god_slayer.weaklings",
-			"God Slayer: Weaklings. Come back when your hearts can bear my blade.");
+		return godSlayerSays(GodSlayerLines.scorn(ThreadLocalRandom.current()));
+	}
+
+	/** A random line (D113) when the boss falls. */
+	public static Component godSlayerLost() {
+		return godSlayerSays(GodSlayerLines.lose(ThreadLocalRandom.current()));
+	}
+
+	private static Component godSlayerSays(String line) {
+		return Component.literal("God Slayer: " + line).withStyle(ChatFormatting.RED);
 	}
 
 	public static Component godSlayerNext(String name) {
@@ -404,8 +416,9 @@ public final class Messages {
 			"God Slayer has fallen. It will return stronger. (Lv %s)", level);
 	}
 
+	/** A random victory line (D113). */
 	public static Component godSlayerWon() {
-		return Component.translatableWithFallback("permahearts.god_slayer.won", "God Slayer: Pathetic. I will be back.");
+		return godSlayerSays(GodSlayerLines.win(ThreadLocalRandom.current()));
 	}
 
 	public static Component godSlayerGaveUp() {

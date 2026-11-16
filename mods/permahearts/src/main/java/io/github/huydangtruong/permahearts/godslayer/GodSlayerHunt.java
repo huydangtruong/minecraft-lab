@@ -377,6 +377,7 @@ public final class GodSlayerHunt {
 			d.level = Math.min(GodSlayerRules.MAX_LEVEL, d.level + 1);
 			d.clearHunt();
 			reward(killer, boss, server);
+			server.getPlayerList().broadcastSystemMessage(Messages.godSlayerLost(), false);
 			server.getPlayerList().broadcastSystemMessage(Messages.godSlayerFallen(d.level), false);
 		} else {
 			d.clearHunt(); // killed by something else (a command): no reward, the level stays
