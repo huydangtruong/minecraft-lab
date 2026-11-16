@@ -76,11 +76,11 @@ TEXH = 320  # sheet height
 
 # name: (w, h, d, kind). The same sizes are used by GodSlayerModel.java; the packed texture offsets are printed with --uv.
 BOXES = {
-    "head": (16, 14, 15, "head"),
+    "head": (16, 13, 15, "head"),
     "brow": (16, 3, 3, "skin"),
     "fang": (2, 2, 6, "fang"),
     "hair_top": (17, 4, 17, "hair"),
-    "hair_slice": (32, 4, 2, "hair"),
+    "hair_slice": (34, 4, 2, "hair"),
     "bone_inner": (5, 34, 5, "gold_flat"),
     "bone_outer": (5, 33, 5, "gold_flat"),
     "joint_elbow": (6, 6, 6, "gold_flat"),
@@ -250,7 +250,6 @@ def slant_blade(img, name):
 HEAD_FRONT = [
     "RRRRRRRRRRRRRRRR",
     "RRRRRRRRRRRRRRRR",
-    "RRRRRRRRRRRRRRRR",
     "RKKKRRRRRRRRKKKR",
     "RRKKKKRRRRKKKKRR",
     "RRRRKKKKKKKKRRRR",
@@ -268,11 +267,11 @@ HEAD_FRONT = [
 def paint_head(img):
     paint_box(img, "head")
     u, v = UV["head"]
-    f = box_uv(u, v, 16, 14, 15)["front"]
+    f = box_uv(u, v, 16, 13, 15)["front"]
     paint(img, f[0], f[1], HEAD_FRONT)
     # ears on the sides
     for face in ("right", "left"):
-        x, y, _, _ = box_uv(u, v, 16, 14, 15)[face]
+        x, y, _, _ = box_uv(u, v, 16, 13, 15)[face]
         paint(img, x + 5, y + 4, ["rr", "rr", "rr"])
 
 
@@ -323,12 +322,12 @@ def build_skin():
 def build_eyes():
     img = [[CLEAR] * TEX for _ in range(TEXH)]
     u, v = UV["head"]
-    fx, fy, _, _ = box_uv(u, v, 16, 14, 15)["front"]
+    fx, fy, _, _ = box_uv(u, v, 16, 13, 15)["front"]
     # the two slanted eyes of HEAD_FRONT (the dark K rows 2-5 are the brows; the eyes sit in the B sockets)
     left = ((2, 6), (3, 6), (3, 7), (4, 7), (5, 7), (5, 8), (6, 8))
     for dx, dy in left:
-        put(img, fx + dx, fy + dy, "E")
-        put(img, fx + 15 - dx, fy + dy, "E")
+        put(img, fx + dx, fy + dy - 1, "E")
+        put(img, fx + 15 - dx, fy + dy - 1, "E")
     # a faint glowing edge on the sharp side of each blade (front first column, back last column)
     bu, bv = UV["blade"]
     bf = box_uv(bu, bv, 4, 28, 2)

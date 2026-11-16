@@ -21,55 +21,56 @@ import net.minecraft.util.Mth;
 public class GodSlayerModel extends EntityModel<GodSlayerRenderState> {
 	/** Texture offsets of every box, printed by `make_god_slayer_texture.py --uv`. */
 	private static final Map<String, int[]> UV = Map.ofEntries(
-		Map.entry("arm", new int[] {76, 104}),
-		Map.entry("belt", new int[] {62, 171}),
+		Map.entry("arm", new int[] {76, 103}),
+		Map.entry("belt", new int[] {62, 170}),
 		Map.entry("blade", new int[] {86, 42}),
 		Map.entry("bone_inner", new int[] {24, 0}),
 		Map.entry("bone_outer", new int[] {44, 0}),
-		Map.entry("brow", new int[] {78, 220}),
+		Map.entry("brow", new int[] {78, 219}),
 		Map.entry("chest", new int[] {0, 42}),
-		Map.entry("collar", new int[] {0, 104}),
-		Map.entry("fang", new int[] {36, 220}),
+		Map.entry("collar", new int[] {0, 103}),
+		Map.entry("fang", new int[] {36, 219}),
 		Map.entry("feather_dark", new int[] {0, 0}),
 		Map.entry("feather_red", new int[] {12, 0}),
-		Map.entry("feather_tip", new int[] {68, 230}),
-		Map.entry("fist", new int[] {0, 207}),
-		Map.entry("foot", new int[] {64, 192}),
-		Map.entry("forearm", new int[] {44, 127}),
-		Map.entry("guard", new int[] {52, 220}),
-		Map.entry("hair_slice", new int[] {0, 230}),
-		Map.entry("hair_top", new int[] {0, 150}),
-		Map.entry("handle", new int[] {52, 192}),
+		Map.entry("feather_tip", new int[] {72, 229}),
+		Map.entry("fist", new int[] {0, 206}),
+		Map.entry("foot", new int[] {64, 191}),
+		Map.entry("forearm", new int[] {44, 126}),
+		Map.entry("guard", new int[] {52, 219}),
+		Map.entry("hair_slice", new int[] {0, 229}),
+		Map.entry("hair_top", new int[] {0, 149}),
+		Map.entry("handle", new int[] {52, 191}),
 		Map.entry("head", new int[] {0, 75}),
-		Map.entry("horn1", new int[] {0, 192}),
-		Map.entry("horn2", new int[] {28, 192}),
-		Map.entry("horn3", new int[] {106, 192}),
-		Map.entry("horn4", new int[] {108, 207}),
-		Map.entry("joint_elbow", new int[] {28, 207}),
-		Map.entry("joint_tip", new int[] {0, 220}),
-		Map.entry("knot", new int[] {20, 220}),
-		Map.entry("shin", new int[] {26, 171}),
-		Map.entry("spike", new int[] {96, 207}),
-		Map.entry("tasset_front", new int[] {52, 207}),
-		Map.entry("tasset_side", new int[] {0, 171}),
-		Map.entry("thigh", new int[] {0, 127}),
-		Map.entry("waist", new int[] {68, 150}));
+		Map.entry("horn1", new int[] {0, 191}),
+		Map.entry("horn2", new int[] {28, 191}),
+		Map.entry("horn3", new int[] {106, 191}),
+		Map.entry("horn4", new int[] {108, 206}),
+		Map.entry("joint_elbow", new int[] {28, 206}),
+		Map.entry("joint_tip", new int[] {0, 219}),
+		Map.entry("knot", new int[] {20, 219}),
+		Map.entry("shin", new int[] {26, 170}),
+		Map.entry("spike", new int[] {96, 206}),
+		Map.entry("tasset_front", new int[] {52, 206}),
+		Map.entry("tasset_side", new int[] {0, 170}),
+		Map.entry("thigh", new int[] {0, 126}),
+		Map.entry("waist", new int[] {68, 149}));
 
 	/** Resting pose angles: arms open outwards, forearms folded up so the katanas stand straight. */
 	private static final float ARM_OUT = 1.15f;
 	private static final float ARM_FORWARD = 0.9f;
 	private static final float FOREARM_UP = 1.5f;
-	private static final float HEAD_SCALE = 1.44f; // 10% smaller than the 1.6 of P-035;
+	private static final float HEAD_SCALE = 1.6f; // as in P-035 (depth and height); the width is 95% of that, see HEAD_WIDTH;
 	/** Forward lean of the body at full speed in the air: 45 degrees. */
 	private static final float MAX_LEAN = 0.785f;
 	/** The head pivot (its chin) sits 1 px into the collar so no gap shows. */
+	private static final float HEAD_WIDTH = 1.52f;
 	private static final float HEAD_Y = -20f;
-	private static final float HAIR_TOP = -38f;
-	private static final float HAIR_Z = 10.9f;
+	private static final float HAIR_TOP = -39f;
+	private static final float HAIR_Z = 12.1f;
 	private static final int HAIR_SLICES = 7;
 	private static final float HAIR_STEP = 4.4f;
-	private static final float HAIR_W_TOP = 24f;
-	private static final float HAIR_W_BOTTOM = 32f;
+	private static final float HAIR_W_TOP = 26f;
+	private static final float HAIR_W_BOTTOM = 33f;
 	private static final float WING_ROOT_X = 4f;
 	private static final float WING_ROOT_Y = -11f;
 	private static final float WING_ROOT_Z = 8.5f;
@@ -161,18 +162,18 @@ public class GodSlayerModel extends EntityModel<GodSlayerRenderState> {
 		PartDefinition mane = chest.addOrReplaceChild("hair_back", CubeListBuilder.create(), PartPose.offset(0, HAIR_TOP, HAIR_Z));
 		for (int i = 0; i < HAIR_SLICES; i++) {
 			float w = HAIR_W_TOP + (HAIR_W_BOTTOM - HAIR_W_TOP) * i / (HAIR_SLICES - 1);
-			mane.addOrReplaceChild("slice_" + i, box("hair_slice", -16, 0, 0, 32, 4, 2),
-				PartPose.offset(0, i * HAIR_STEP / (HAIR_STEP / 4f), 0).scaled(w / 32f, HAIR_STEP / 4f, 1f));
+			mane.addOrReplaceChild("slice_" + i, box("hair_slice", -17, 0, 0, 34, 4, 2),
+				PartPose.offset(0, i * HAIR_STEP / (HAIR_STEP / 4f), 0).scaled(w / 34f, HAIR_STEP / 4f, 1f));
 		}
 
 		// ---- head: face, brow, tusks, horns, mane ----
-		PartDefinition head = chest.addOrReplaceChild("head", box("head", -8, -14, -7.5f, 16, 14, 15), PartPose.offset(0, HEAD_Y, 0).withScale(HEAD_SCALE));
+		PartDefinition head = chest.addOrReplaceChild("head", box("head", -8, -13, -7.5f, 16, 13, 15), PartPose.offset(0, HEAD_Y / HEAD_SCALE, 0).scaled(HEAD_WIDTH, HEAD_SCALE, HEAD_SCALE));
 		chest.addOrReplaceChild("collar", box("collar", -10, -4, -9, 20, 5, 18), PartPose.offset(0, -17, 0));
 		head.addOrReplaceChild("brow", box("brow", -8, -13, -9, 16, 3, 3), PartPose.ZERO);
 		// tusks grow out of the lower jaw, point forward and a little up (pitch -0.35), clear of the eyes
 		head.addOrReplaceChild("fang_right", box("fang", -1, -1, -6, 2, 2, 6), PartPose.offsetAndRotation(-6.5f, -1.5f, -7.5f, -0.4f, 0, 0));
 		head.addOrReplaceChild("fang_left", box("fang", -1, -1, -6, 2, 2, 6), PartPose.offsetAndRotation(6.5f, -1.5f, -7.5f, -0.4f, 0, 0));
-		head.addOrReplaceChild("hair_top", box("hair_top", -8.5f, -17, -8.5f, 17, 4, 17), PartPose.ZERO);
+		head.addOrReplaceChild("hair_top", box("hair_top", -8.5f, -16, -8.5f, 17, 4, 17), PartPose.ZERO);
 		head.addOrReplaceChild("spike_1", box("spike", -1.5f, -8, -1.5f, 3, 8, 3), PartPose.offsetAndRotation(-5, -16, -3, -0.2f, 0, -0.45f));
 		head.addOrReplaceChild("spike_2", box("spike", -1.5f, -9, -1.5f, 3, 8, 3), PartPose.offsetAndRotation(0, -16, -5, -0.7f, 0, 0));
 		head.addOrReplaceChild("spike_3", box("spike", -1.5f, -8, -1.5f, 3, 8, 3), PartPose.offsetAndRotation(5, -16, -3, -0.2f, 0, 0.45f));
@@ -180,13 +181,13 @@ public class GodSlayerModel extends EntityModel<GodSlayerRenderState> {
 			String n = side < 0 ? "right" : "left";
 			// a horn is three cubes stepping outwards, then up, then curling back in
 			PartDefinition h1 = head.addOrReplaceChild("horn_" + n, box("horn1", -3.5f, -8, -3.5f, 7, 8, 7),
-				PartPose.offsetAndRotation(side * 7.5f, -9, 2, 0, 0, side * 1.1f).scaled(0.8f));
+				PartPose.offsetAndRotation(side * 7.5f, -9, 2, 0, 0, side * 1.35f).scaled(0.88f));
 			PartDefinition h2 = h1.addOrReplaceChild("horn2", box("horn2", -3, -9, -3, 6, 9, 6),
-				PartPose.offsetAndRotation(0, -7.5f, 0, 0, 0, side * -0.8f));
+				PartPose.offsetAndRotation(0, -7.5f, 0, 0, 0, side * -0.5f));
 			PartDefinition h3 = h2.addOrReplaceChild("horn3", box("horn3", -2.5f, -9, -2.5f, 5, 9, 5),
-				PartPose.offsetAndRotation(0, -8.5f, 0, 0, 0, side * -0.5f));
+				PartPose.offsetAndRotation(0, -8.5f, 0, 0, 0, side * -0.3f));
 			h3.addOrReplaceChild("horn4", box("horn4", -1.5f, -8, -1.5f, 3, 8, 3),
-				PartPose.offsetAndRotation(0, -8.5f, 0, 0, 0, side * -0.55f));
+				PartPose.offsetAndRotation(0, -8.5f, 0, 0, 0, side * -0.3f));
 		}
 
 		// ---- arms: raised forward-out (the shoulder yaws them forward), forearm folded up, a straight katana in each fist ----
@@ -293,7 +294,7 @@ public class GodSlayerModel extends EntityModel<GodSlayerRenderState> {
 		float sway = Mth.sin(time * 0.07f) * 0.03f;
 		rightArm.zRot += sway;
 		leftArm.zRot -= sway;
-		hairBack.xRot = -0.08f + Mth.sin(time * 0.09f) * 0.04f + speed * 0.25f;
+		hairBack.xRot = -0.14f + Mth.sin(time * 0.09f) * 0.04f + speed * 0.25f;
 		body.yRot = swing * 0.12f;
 
 		// slash: the right arm rises over the head, then swings down; blended in and out so it never jumps
