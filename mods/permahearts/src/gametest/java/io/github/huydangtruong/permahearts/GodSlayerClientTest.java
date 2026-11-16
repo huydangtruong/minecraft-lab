@@ -42,8 +42,15 @@ public class GodSlayerClientTest implements FabricClientGameTest {
 			context.waitTicks(20);
 			context.takeScreenshot("90-god-slayer-front");
 			server.runOnServer(s -> turn(box[0], 0f));
-			context.waitTicks(10);
+			context.waitTicks(30);
 			context.takeScreenshot("91-god-slayer-side");
+			// katana close-up: first person from the west, the boss turned to face south (a true side view of its right hand)
+			context.runOnClient(mc -> mc.options.setCameraType(CameraType.FIRST_PERSON));
+			server.runCommand("tp @a -3.2 103.6 1.7 -90 -28");
+			context.waitTicks(10);
+			context.takeScreenshot("98-god-slayer-katana");
+			context.runOnClient(mc -> mc.options.setCameraType(CameraType.THIRD_PERSON_BACK));
+			server.runCommand("tp @a 0.5 100 0.5 -90 -12");
 			server.runOnServer(s -> turn(box[0], -90f));
 			context.waitTicks(25);
 			context.takeScreenshot("92-god-slayer-back");

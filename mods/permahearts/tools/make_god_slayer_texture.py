@@ -27,6 +27,9 @@ PAL = {
     "K": "1b1b23",  # black cloth
     "k": "30303c",  # dark grey cloth highlight
     "G": "d8b04a",  # gold trim
+    "D": "3a0f0f",  # feather dark red
+    "Q": "7a1414",  # feather red
+    "Z": "1d1c21",  # feather tip black
     "W": "f4f1ea",  # white hair
     "w": "d6d1c4",  # hair shade
     "B": "4a1612",  # dark red / eye socket
@@ -73,13 +76,18 @@ TEXH = 320  # sheet height
 
 # name: (w, h, d, kind). The same sizes are used by GodSlayerModel.java; the packed texture offsets are printed with --uv.
 BOXES = {
-    "head": (16, 14, 15, "head"),
+    "head": (16, 13, 15, "head"),
     "brow": (16, 3, 3, "skin"),
     "fang": (2, 2, 6, "fang"),
     "hair_top": (17, 4, 17, "hair"),
-    "hair_side": (3, 20, 13, "hair"),
-    "hair_up": (14, 12, 4, "hair"),
-    "hair_lock": (5, 18, 4, "hair"),
+    "hair_slice": (34, 4, 2, "hair"),
+    "bone_inner": (5, 34, 5, "gold_flat"),
+    "bone_outer": (5, 33, 5, "gold_flat"),
+    "joint_elbow": (6, 6, 6, "gold_flat"),
+    "joint_tip": (5, 5, 5, "gold_flat"),
+    "feather_dark": (4, 40, 2, "fill_dark"),
+    "feather_red": (4, 40, 2, "fill_red"),
+    "feather_tip": (5, 3, 2, "fill_black"),
     "spike": (3, 8, 3, "hair"),
     "horn1": (7, 8, 7, "horn_base"),
     "horn2": (6, 9, 6, "horn"),
@@ -87,16 +95,11 @@ BOXES = {
     "horn4": (3, 8, 3, "horn"),
     "collar": (20, 5, 18, "armor"),
     "chest": (28, 18, 15, "chest"),
-    "hair_back": (28, 24, 6, "hair"),
-    "hair_low": (22, 24, 5, "hair"),
     "waist": (18, 10, 11, "armor"),
     "belt": (20, 4, 13, "rope"),
     "knot": (5, 6, 3, "gold"),
     "tasset_front": (20, 10, 2, "armor"),
     "tasset_side": (2, 10, 11, "armor"),
-    "wing_bone": (40, 3, 3, "gold"),
-    "feather": (9, 52, 1, "wing"),
-    "feather_short": (9, 32, 1, "wing"),
     "arm": (9, 14, 9, "sleeve"),
     "forearm": (8, 14, 8, "forearm"),
     "fist": (7, 6, 7, "skin"),
@@ -153,6 +156,8 @@ def face_char(kind, face, x, y, w, h):
         return "o" if (face in ("right", "back") and x % 2 == 0) else "O"
     if kind == "fang":
         return "F" if face != "bottom" and x % 2 == 0 or y == 0 else "i"
+    if kind.startswith("fill_"):
+        return {"fill_dark": "D", "fill_red": "Q", "fill_black": "Z"}[kind]
     if kind == "wing":
         # a dark red membrane fading to black at the tip; the outer long edge is a gold bone
         if x == 0 and face in ("front", "back"):
@@ -168,6 +173,9 @@ def face_char(kind, face, x, y, w, h):
         return "k" if x % 4 == 0 else "K"
     if kind == "rope":
         return "G" if (x + y) % 3 else "P"
+    if kind == "gold_flat":
+        # plain gold for the wing bones; only the outer texels of each face get the slightly darker shade
+        return "o" if x in (0, w - 1) or y in (0, h - 1) else "G"
     if kind == "gold":
         return "G" if n > 1 else "P"
     if kind == "sleeve":
@@ -203,6 +211,9 @@ def face_char(kind, face, x, y, w, h):
 def paint_box(img, name):
     w, h, d, kind = BOXES[name]
     u, v = UV[name]
+    if kind.startswith("fill_"):
+        solid(img, u, v, 2 * (w + d), h + d, face_char(kind, "front", 0, 0, 1, 1))
+        return
     for face, (x0, y0, fw, fh) in box_uv(u, v, w, h, d).items():
         for dy in range(fh):
             for dx in range(fw):
@@ -212,8 +223,8 @@ def paint_box(img, name):
 
 
 def slant_blade(img, name):
-    """Cuts the blade tip on a slant with transparent pixels (the mob texture is alpha-tested):
-    the edge side is shorter than the spine side. The top face is removed."""
+    """Cuts the blade tip (the far end, the bottom rows of the side faces) on a slant with transparent pixels (the mob
+    texture is alpha-tested): the edge side is shorter than the spine side. The end face keeps only the spine column."""
     w, h, d, _ = BOXES[name]
     u, v = UV[name]
     f = box_uv(u, v, w, h, d)
@@ -221,23 +232,22 @@ def slant_blade(img, name):
     x, y, fw, fh = f["front"]
     for col in range(fw):
         for r in range(cut(col)):
-            img[y + r][x + col] = CLEAR
+            img[y + fh - 1 - r][x + col] = CLEAR
     x, y, fw, fh = f["back"]
     for col in range(fw):
         for r in range(cut(fw - 1 - col)):
-            img[y + r][x + col] = CLEAR
+            img[y + fh - 1 - r][x + col] = CLEAR
     x, y, fw, fh = f["right"]  # the edge side face
     for col in range(fw):
         for r in range(3):
-            img[y + r][x + col] = CLEAR
-    x, y, fw, fh = f["top"]
-    for col in range(fw):
+            img[y + fh - 1 - r][x + col] = CLEAR
+    x, y, fw, fh = f["bottom"]  # the end face: only the spine column is still closed
+    for col in range(fw - 1):
         for r in range(fh):
             img[y + r][x + col] = CLEAR
 
 
 HEAD_FRONT = [
-    "RRRRRRRRRRRRRRRR",
     "RRRRRRRRRRRRRRRR",
     "RRRRRRRRRRRRRRRR",
     "RKKKRRRRRRRRKKKR",
@@ -257,11 +267,11 @@ HEAD_FRONT = [
 def paint_head(img):
     paint_box(img, "head")
     u, v = UV["head"]
-    f = box_uv(u, v, 16, 14, 15)["front"]
+    f = box_uv(u, v, 16, 13, 15)["front"]
     paint(img, f[0], f[1], HEAD_FRONT)
     # ears on the sides
     for face in ("right", "left"):
-        x, y, _, _ = box_uv(u, v, 16, 14, 15)[face]
+        x, y, _, _ = box_uv(u, v, 16, 13, 15)[face]
         paint(img, x + 5, y + 4, ["rr", "rr", "rr"])
 
 
@@ -312,20 +322,20 @@ def build_skin():
 def build_eyes():
     img = [[CLEAR] * TEX for _ in range(TEXH)]
     u, v = UV["head"]
-    fx, fy, _, _ = box_uv(u, v, 16, 14, 15)["front"]
+    fx, fy, _, _ = box_uv(u, v, 16, 13, 15)["front"]
     # the two slanted eyes of HEAD_FRONT (the dark K rows 2-5 are the brows; the eyes sit in the B sockets)
     left = ((2, 6), (3, 6), (3, 7), (4, 7), (5, 7), (5, 8), (6, 8))
     for dx, dy in left:
-        put(img, fx + dx, fy + dy, "E")
-        put(img, fx + 15 - dx, fy + dy, "E")
+        put(img, fx + dx, fy + dy - 1, "E")
+        put(img, fx + 15 - dx, fy + dy - 1, "E")
     # a faint glowing edge on the sharp side of each blade (front first column, back last column)
     bu, bv = UV["blade"]
     bf = box_uv(bu, bv, 4, 28, 2)
     x, y, w, h = bf["front"]
-    for dy in range(3, h):
+    for dy in range(0, h - 3):
         put(img, x, y + dy, "N")
     x, y, w, h = bf["back"]
-    for dy in range(3, h):
+    for dy in range(0, h - 3):
         put(img, x + w - 1, y + dy, "N")
     return img
 
