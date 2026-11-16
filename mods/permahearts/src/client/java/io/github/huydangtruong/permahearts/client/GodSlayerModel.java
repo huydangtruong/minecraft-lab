@@ -199,9 +199,11 @@ public class GodSlayerModel extends EntityModel<GodSlayerRenderState> {
 			PartDefinition fore = arm.addOrReplaceChild("forearm", box("forearm", -4, 0, -4, 8, 14, 8),
 				PartPose.offsetAndRotation(0, 11, 0, 0, 0, side * -FOREARM_UP));
 			PartDefinition fist = fore.addOrReplaceChild("fist", box("fist", -3.5f, -1, -3.5f, 7, 6, 7), PartPose.offset(0, 13, 0));
-			PartDefinition katana = fist.addOrReplaceChild("katana", box("handle", -1.5f, -5, -1.5f, 3, 12, 3), PartPose.offset(0, 2, 0));
+			PartDefinition katana = fist.addOrReplaceChild("katana", box("handle", -1.5f, -5, -1.5f, 3, 12, 3),
+				// turned about its own axis so that the cutting edge faces forward and outward, the spine back and inward (D105)
+				PartPose.offsetAndRotation(0, 2, 0, 0, side < 0 ? Mth.PI : 0, 0));
 			katana.addOrReplaceChild("guard", box("guard", -4, 7, -2.5f, 8, 2, 5), PartPose.ZERO);
-			// one straight blade, no taper; the tip is cut on a slant in the texture (edge side shorter)
+			// one straight blade, no taper; the tip (far end) is cut on a slant in the texture (edge side shorter)
 			katana.addOrReplaceChild("blade", box("blade", -2, 9, -1, 4, 28, 2), PartPose.ZERO);
 		}
 

@@ -81,10 +81,10 @@ BOXES = {
     "fang": (2, 2, 6, "fang"),
     "hair_top": (17, 4, 17, "hair"),
     "hair_slice": (32, 4, 2, "hair"),
-    "bone_inner": (5, 34, 5, "gold"),
-    "bone_outer": (5, 33, 5, "gold"),
-    "joint_elbow": (6, 6, 6, "gold"),
-    "joint_tip": (5, 5, 5, "gold"),
+    "bone_inner": (5, 34, 5, "gold_flat"),
+    "bone_outer": (5, 33, 5, "gold_flat"),
+    "joint_elbow": (6, 6, 6, "gold_flat"),
+    "joint_tip": (5, 5, 5, "gold_flat"),
     "feather_dark": (4, 40, 2, "fill_dark"),
     "feather_red": (4, 40, 2, "fill_red"),
     "feather_tip": (5, 3, 2, "fill_black"),
@@ -173,6 +173,9 @@ def face_char(kind, face, x, y, w, h):
         return "k" if x % 4 == 0 else "K"
     if kind == "rope":
         return "G" if (x + y) % 3 else "P"
+    if kind == "gold_flat":
+        # plain gold for the wing bones; only the outer texels of each face get the slightly darker shade
+        return "o" if x in (0, w - 1) or y in (0, h - 1) else "G"
     if kind == "gold":
         return "G" if n > 1 else "P"
     if kind == "sleeve":
