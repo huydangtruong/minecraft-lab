@@ -328,7 +328,7 @@ public class PermaHeartsGameTest {
 		double entity = p.getAttributeValue(Attributes.ENTITY_INTERACTION_RANGE);
 		drink(p, ElixirStat.SWIFTNESS);
 		drink(p, ElixirStat.REACH);
-		near(context, speed * 1.10, p.getAttributeValue(Attributes.MOVEMENT_SPEED), "movement speed");
+		near(context, speed * 1.05, p.getAttributeValue(Attributes.MOVEMENT_SPEED), "movement speed");
 		near(context, block + 0.5, p.getAttributeValue(Attributes.BLOCK_INTERACTION_RANGE), "block range");
 		near(context, entity + 0.5, p.getAttributeValue(Attributes.ENTITY_INTERACTION_RANGE), "entity range");
 		context.succeed();

@@ -7,7 +7,7 @@ import java.util.Optional;
 public enum ElixirStat {
 	STRENGTH("strength", 2.0, false), // D70: was 1.0 (D67), 0.5 before
 	FURY("fury", 0.10, true),
-	SWIFTNESS("swiftness", 0.10, true), // D67: was 0.05
+	SWIFTNESS("swiftness", 0.05, true), // D103: back to 0.05 (D67 had 0.10)
 	IRON_SKIN("iron_skin", 1.0, false),
 	REACH("reach", 0.5, false),
 	MINING("mining", 0.20, true), // D67: was 0.10
