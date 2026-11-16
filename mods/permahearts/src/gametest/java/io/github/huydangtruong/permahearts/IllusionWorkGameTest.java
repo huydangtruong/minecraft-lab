@@ -169,6 +169,28 @@ public class IllusionWorkGameTest {
 		});
 	}
 
+	/** P-044: a ripe field the clone cannot reach (on a pillar, nearer than the free crop) must not keep it standing still. */
+	@GameTest(maxTicks = 900)
+	public void farmSkipsAnUnreachableFieldAndHarvestsTheRest(GameTestHelper c) {
+		ServerPlayer p = owner(c, new ItemStack(Items.IRON_HOE));
+		Container chest = chest(c, 2, 1, 5);
+		for (int x = 6; x <= 7; x++) {
+			for (int z = 1; z <= 4; z++) {
+				for (int y = 0; y <= 4; y++) {
+					c.setBlock(x, y, z, Blocks.STONE);
+				}
+				c.setBlock(x, 5, z, Blocks.FARMLAND);
+				c.setBlock(x, 6, z, Blocks.WHEAT.defaultBlockState().setValue(CropBlock.AGE, 7));
+			}
+		}
+		ripeWheat(c, 0, 0);
+		Illusion a = castOne(c, p);
+		c.succeedWhen(() -> {
+			c.assertTrue(count(chest, s -> s.is(Items.WHEAT)) >= 1, "the reachable wheat reached the chest, was " + count(chest, s -> s.is(Items.WHEAT)) + " free=" + c.getBlockState(new BlockPos(0, 1, 0)) + " pillar=" + c.getBlockState(new BlockPos(6, 6, 2)) + dbg(a));
+			FlightBladeGameTest.drop(c, p);
+		});
+	}
+
 	@GameTest(maxTicks = 1200)
 	public void chopBreaksANaturalTreeAndLeavesABuiltWall(GameTestHelper c) {
 		ServerPlayer p = owner(c, new ItemStack(Items.IRON_AXE));

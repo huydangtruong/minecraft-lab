@@ -43,7 +43,12 @@ public final class WorkGoal extends Goal {
 	private int nextScan;
 	private Object goKey;
 	private int goSince;
+	private double goBest;
+	private int goBestAt;
+	/** Ticks without getting at least half a block closer before a target counts as unreachable. */
+	private static final int NO_PROGRESS = 60;
 	private final Map<Object, Integer> skipped = new HashMap<>();
+	private final List<int[]> areas = new java.util.ArrayList<>();
 
 	public WorkGoal(Illusion a) {
 		this.a = a;
@@ -142,7 +147,25 @@ public final class WorkGoal extends Goal {
 
 	public boolean isSkipped(Object key) {
 		Integer until = skipped.get(key);
-		return until != null && until > a.tickCount;
+		if (until != null && until > a.tickCount) {
+			return true;
+		}
+		if (key instanceof BlockPos p) {
+			for (int i = areas.size() - 1; i >= 0; i--) {
+				int[] ar = areas.get(i); // x, y, z, radius, until
+				if (ar[4] <= a.tickCount) {
+					areas.remove(i);
+				} else if (Math.abs(p.getX() - ar[0]) <= ar[3] && Math.abs(p.getY() - ar[1]) <= ar[3] && Math.abs(p.getZ() - ar[2]) <= ar[3]) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/** Skips every block position within {@code radius} of {@code p} for a while (a whole unreachable field, not one crop at a time). */
+	public void skipAround(BlockPos p, int radius, int ticks) {
+		areas.add(new int[] {p.getX(), p.getY(), p.getZ(), radius, a.tickCount + ticks});
 	}
 
 	/**
@@ -157,10 +180,17 @@ public final class WorkGoal extends Goal {
 		if (!key.equals(goKey)) {
 			goKey = key;
 			goSince = a.tickCount;
-		} else if (a.tickCount - goSince > 300) {
+			goBest = Double.MAX_VALUE;
+			goBestAt = a.tickCount;
+		} else if (a.tickCount - goSince > 300 || a.tickCount - goBestAt > NO_PROGRESS) {
 			skip(key, 600);
 			goKey = null;
 			return false;
+		}
+		double dist = a.position().distanceTo(p);
+		if (dist < goBest - 0.5) { // a partial path ends short of the target and the clone then stands still: no progress for 3 s skips it
+			goBest = dist;
+			goBestAt = a.tickCount;
 		}
 		if (!a.onGround() && !a.isInWater()) {
 			return false; // no path can start in the air, and onGround is still false on the first ticks after the spawn: wait, never skip the target for it

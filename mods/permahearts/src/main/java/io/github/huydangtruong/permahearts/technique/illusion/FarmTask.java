@@ -37,6 +37,9 @@ final class FarmTask implements WorkTask {
 	public boolean tick(WorkGoal g, ServerLevel sl) {
 		Illusion a = g.illusion();
 		if (target != null && (g.isSkipped(target) || !stillValid(g, sl, a))) {
+			if (g.isSkipped(target) && mode != Mode.FETCH) { // an unreachable crop: its neighbours (the same field) are not worth a try each
+				g.skipAround(target, 4, 600);
+			}
 			target = null;
 		}
 		if (target == null) {
@@ -70,7 +73,7 @@ final class FarmTask implements WorkTask {
 		BlockPos bestPlant = null;
 		double bt = Double.MAX_VALUE;
 		boolean emptySoil = false;
-		for (BlockPos p : WorkTask.cells(g, sl, 3, 3)) {
+		for (BlockPos p : WorkTask.cells(g, sl, 3, 6)) {
 			double d = p.distSqr(a.blockPosition());
 			if (d < bd && ripe(sl.getBlockState(p)) && !g.isSkipped(p)) {
 				bd = d;
