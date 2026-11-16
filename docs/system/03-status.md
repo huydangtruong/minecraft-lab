@@ -26,14 +26,14 @@ A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [w
 | 0.23.0 contains | P-037: God Slayer look round 4 (D106): thinner, narrower, lower head; slimmer horns; fixed mane in two pieces (upper on the head, lower on the chest, 10° back, past the belt); head turn clamped to 15° yaw / 10° pitch; arms more forward, longer upper arm. Countdown (D107): no heartbeat, drum every second for 60 s, thin pale red edge without square bands |
 | 0.24.0 contains | P-038: simple 50/50 reward roll (D108), Heart Elixir from gold boxes up, God Slayer kill gives HeartXP, Enlightenment +24. P-039: Illusion gives the whole feed stack, work radius +4 per 5 levels (D109); boss level reward 50 + 50 × damagers split by damage (D110). P-040: God Slayer skill director + Fireball Lv 2, Katana throw Lv 3, Flame breath Lv 4, Eye beam Lv 5 (D111). 30 random lines each for win / loss / scorn (D113). Not playtested by hand |
 | 0.24.1 contains | Technique list grouped: attack, control/defense, movement, allies (D114) |
-| On `main`, not released | Nothing |
+| On `main`, not released | P-041 effect icons with time left (Undying Jutsu, Spirit Phase, Cloud Travel, Aqua Marine) and purple Death Match sky (D115, D116); P-042 Notes panel (D117); Shadow Walk renamed Spirit Phase (D118). Server and client game tests green; not seen by Huy |
 
 Release steps: [workflow/release.md](../workflow/release.md). Release **only when Huy says so**.
 
 ## In flight
 
 - **0.24.0 / 0.24.1 released.** Waiting for Huy to play it.
-- **In dev:** P-041 (effect icons with time left, purple Death Match sky; branch `feat/P-041-hud-sky`), P-042 (Notes panel; branch `feat/P-042-notes`).
+- **P-041, P-042 merged on main, not released.** Release as 0.25.0 when Huy says so.
 - **Next:** BL-024/D112 (God Slayer arrives 2–5 days after the 4th Crimson Master leaves; Master pauses until the fight ends). P-040 leftovers: Katana → teleport behind → Flame breath chain, `/boss skill` command, a real blade model and guardian-style beam. Then the rest of D97's skills (minions, blind, arena, self-destruct).
 - **BL-014** (player technique fire burns the God Slayer) is next in line with P-033.
 
