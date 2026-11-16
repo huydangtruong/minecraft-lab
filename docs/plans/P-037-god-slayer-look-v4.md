@@ -1,6 +1,6 @@
 # P-037 — God Slayer look, round 4 (BL-015)
 
-> **Tóm tắt cho Huy (VN, ≤ 3 dòng):** Đầu mỏng, hẹp và thấp hơn; sừng thon hơn; tóc cố định ngả ra sau 10°, dài quá thắt lưng; tay đưa ra trước thêm, khuỷu tay thấp xuống (D106). Đếm ngược: bỏ tiếng chồng ở 10 giây cuối, viền đỏ nhỏ và nhạt, không vệt (D107).
+> **Tóm tắt cho Huy (VN, ≤ 3 dòng):** Đầu mỏng, hẹp và thấp hơn; sừng thon hơn; tóc cố định ngả ra sau 10°, dài quá thắt lưng; tay đưa ra trước thêm, khuỷu tay thấp xuống (D106). Đếm ngược: bỏ tiếng tim, trống mỗi giây suốt 60 giây, viền đỏ nhỏ và nhạt, không vệt (D107).
 
 - **Status:** ready
 - **Mod / decision:** `permahearts`, D106 · **Branch:** `feat/P-037-look-v4` · **Depends on:** P-036 (released 0.22.0)
@@ -24,7 +24,7 @@
 - **Elbow lower:** today the upper arm (`arm`, 14 long) is short so the folded forearm meets it in the middle of the bicep. Make the upper arm about **4–5 px longer** and move the forearm pivot down with it, so the elbow sits clearly at the bottom end of the bicep. Keep the katanas standing straight up in the rest pose and the slash animation working.
 
 ## 4. Countdown sound and red edge (BL-016, D107)
-- **Heartbeat doubled in the last 10 s:** `GodSlayerHunt.tickWarning` plays `NOTE_BLOCK_BASEDRUM` every second when `secs <= 10`, on top of the heartbeat. Remove that drum. Keep the heartbeat exactly as it is (it speeds up as now). Check that two heartbeats never overlap at the fastest interval (9 ticks); if `WARDEN_HEARTBEAT` is longer than that, raise the minimum interval so they don't.
+- **Sound (Huy's choice):** today the heartbeat plays all 60 s and `NOTE_BLOCK_BASEDRUM` is added every second in the last 10 s, so it sounds doubled. **Remove the heartbeat sound entirely.** Play the **drum once per second for the whole 60 s** (same sound, volume and pitch as now). Drop `heartbeatInterval` if nothing else uses it; the red edge pulse, if kept, follows the drum (once per second).
 - **Red edge** (`client/GodSlayerWarningHud`): today it grows from 6% to 28% of the screen side and from faint to strong red, and it is drawn as stacked rectangles that leave visible square bands.
   - Thickness **fixed at the start size** (6% of the shorter side), never growing.
   - **Less red:** cap the opacity well below today's end value (about 0.35 at most); it may still fade in and pulse with the heartbeat.
