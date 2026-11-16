@@ -1,6 +1,6 @@
 # P-037 — God Slayer look, round 4 (BL-015)
 
-> **Tóm tắt cho Huy (VN, ≤ 3 dòng):** Đầu mỏng, hẹp và thấp hơn; sừng thon hơn; tóc cố định ngả ra sau 10°, dài quá thắt lưng; tay đưa ra trước thêm, khuỷu tay thấp xuống (D106).
+> **Tóm tắt cho Huy (VN, ≤ 3 dòng):** Đầu mỏng, hẹp và thấp hơn; sừng thon hơn; tóc cố định ngả ra sau 10°, dài quá thắt lưng; tay đưa ra trước thêm, khuỷu tay thấp xuống (D106). Đếm ngược: bỏ tiếng chồng ở 10 giây cuối, viền đỏ nhỏ và nhạt, không vệt (D107).
 
 - **Status:** ready
 - **Mod / decision:** `permahearts`, D106 · **Branch:** `feat/P-037-look-v4` · **Depends on:** P-036 (released 0.22.0)
@@ -22,6 +22,15 @@
 ## 3. Arms
 - **Forward a little more:** `ARM_FORWARD` 0.9 → about 1.05 rad. Both arms, katanas follow.
 - **Elbow lower:** today the upper arm (`arm`, 14 long) is short so the folded forearm meets it in the middle of the bicep. Make the upper arm about **4–5 px longer** and move the forearm pivot down with it, so the elbow sits clearly at the bottom end of the bicep. Keep the katanas standing straight up in the rest pose and the slash animation working.
+
+## 4. Countdown sound and red edge (BL-016, D107)
+- **Heartbeat doubled in the last 10 s:** `GodSlayerHunt.tickWarning` plays `NOTE_BLOCK_BASEDRUM` every second when `secs <= 10`, on top of the heartbeat. Remove that drum. Keep the heartbeat exactly as it is (it speeds up as now). Check that two heartbeats never overlap at the fastest interval (9 ticks); if `WARDEN_HEARTBEAT` is longer than that, raise the minimum interval so they don't.
+- **Red edge** (`client/GodSlayerWarningHud`): today it grows from 6% to 28% of the screen side and from faint to strong red, and it is drawn as stacked rectangles that leave visible square bands.
+  - Thickness **fixed at the start size** (6% of the shorter side), never growing.
+  - **Less red:** cap the opacity well below today's end value (about 0.35 at most); it may still fade in and pulse with the heartbeat.
+  - **Smooth, no square bands:** a gradient that fades to fully transparent at its inner edge, with no rectangles or seams visible, and corners without dark squares (draw 1 px per layer, or use a vignette texture).
+  - Keep `GodSlayerRules.edgeStrength` or its replacement pure and JUnit-tested.
+- Screenshot `countdown-start` and `countdown-end` (about 2 s left) with `GodSlayerCountdownClientTest`.
 
 ## Tests and screenshots
 Same shots as P-036: `front`, true `side` (90°), `back`, `face`, `katana`, `flying-back`, `flying-side`. Add **`back-turned`**: the head turned to its max yaw, seen from behind and the side, to show the mane does not clip. Look at every shot yourself after the last change. Copy the final PNGs into an empty folder `/private/tmp/claude-501/-Users-truongdanghuy-Coding-Minecraft-Lab/27b354fc-b3c2-4308-a712-0331ea32eee9/scratchpad/p037/`. Every Minecraft you open is muted.
