@@ -318,12 +318,12 @@ public class IllusionWorkGameTest {
 		Cow two = c.spawn(EntityTypes.COW, new Vec3(5.5, 1, 7.5)); // inside x/z 0..7: row 8 is the barrier wall
 		Illusion a = castOne(c, p);
 		c.assertTrue(a.job() == IllusionJob.BREED, "wheat sets the BREED job");
-		c.assertTrue(p.getMainHandItem().getCount() == 32 && a.carry().count(s -> s.is(Items.WHEAT)) == 32, "64 wheat is split 32 for the owner and 32 for the clone");
+		c.assertTrue(p.getMainHandItem().getCount() == 0 && a.carry().count(s -> s.is(Items.WHEAT)) == 64, "D109: all 64 wheat goes to the clone");
 		boolean[] checked = {false};
 		c.succeedWhen(() -> {
 			if (!checked[0]) {
 				c.assertTrue(one.isInLove() && two.isInLove(), "both cows in love" + dbg(a) + " c1=" + one.isInLove() + " c2=" + two.isInLove() + " carry=" + a.carry().count(x -> true));
-				c.assertTrue(count(chest, s -> s.is(Items.WHEAT)) == 0 && a.carry().count(s -> s.is(Items.WHEAT)) == 32, "the 2 chest wheat were used first, the clone still has its 32");
+				c.assertTrue(count(chest, s -> s.is(Items.WHEAT)) == 0 && a.carry().count(s -> s.is(Items.WHEAT)) == 64, "the 2 chest wheat were used first, the clone still has its 64");
 				checked[0] = true;
 			}
 			List<Cow> cows = c.getLevel().getEntitiesOfClass(Cow.class, arena(c), Cow::isBaby);

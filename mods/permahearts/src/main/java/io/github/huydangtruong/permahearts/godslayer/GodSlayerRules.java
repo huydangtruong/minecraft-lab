@@ -177,4 +177,29 @@ public final class GodSlayerRules {
 	public static int secondsLeft(long ticksLeft) {
 		return (int) Math.max(0, (ticksLeft + 19) / 20);
 	}
+
+	/** D110: total levels for a kill = 50 + 50 per player who dealt damage. */
+	public static int totalKillLevels(int damagers) {
+		return 50 + 50 * damagers;
+	}
+
+	/** D110: each player's share of the total, by damage share. Players with no damage get 0. */
+	public static java.util.Map<java.util.UUID, Integer> splitKillLevels(java.util.Map<java.util.UUID, Float> damage) {
+		java.util.Map<java.util.UUID, Integer> out = new java.util.LinkedHashMap<>();
+		double all = 0;
+		int n = 0;
+		for (float f : damage.values()) {
+			if (f > 0) {
+				all += f;
+				n++;
+			}
+		}
+		int total = totalKillLevels(n);
+		for (java.util.Map.Entry<java.util.UUID, Float> e : damage.entrySet()) {
+			if (e.getValue() > 0 && all > 0) {
+				out.put(e.getKey(), (int) Math.round(total * e.getValue() / all));
+			}
+		}
+		return out;
+	}
 }
