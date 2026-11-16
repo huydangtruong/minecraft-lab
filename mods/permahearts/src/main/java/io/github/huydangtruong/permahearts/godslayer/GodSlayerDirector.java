@@ -19,7 +19,7 @@ public final class GodSlayerDirector {
 	}
 
 	/** Skills that are finished and wired in. A skill not listed here is never unlocked. */
-	private static final List<Kind> IMPLEMENTED = List.of(Kind.FIREBALL);
+	private static final List<Kind> IMPLEMENTED = List.of(Kind.FIREBALL, Kind.KATANA_THROW);
 
 	public static List<Kind> unlocked(int level) {
 		List<Kind> out = new ArrayList<>();
