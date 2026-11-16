@@ -93,7 +93,7 @@ make_minecraft 1
 ESS="$(sum_of "$PROFILE_DIR/mods/Essential-1.5.2-26.3.jar")"
 API="$(sum_of "$PROFILE_DIR/mods/fabric-api-0.166.2+26.3.jar")"
 touch "$T/running"   # also exercises the "Minecraft is running" prompt (needs the extra Enter)
-run_installer "$T/releases.json" $'1\n1\n\n1\n0\n0'   # mod, version, Enter (running), back to versions, back to mods, exit
+run_installer "$T/releases.json" $'1\n1\n\n'   # mod, version, Enter (running); the installer exits by itself after the changelog (D124)
 rm -f "$T/running"
 [ -n "$SCREENS" ] && printf '%s\n' "$OUT" > "$T/case1.out"
 check "exit code 0" test "$RC" -eq 0
@@ -107,22 +107,37 @@ check "0.4.0 is not offered" bash -c '! grep -q "0.4.0" <<<"$1"' _ "$VMENU"
 check "warned that Minecraft is running" grep -q 'Minecraft seems to be running' <<<"$OUT"
 check "success line printed" grep -q '^SUCCESS! Immortal Cultivation 0.8.0 is installed.$' <<<"$OUT"
 check "profile hint printed" grep -q '^Start Minecraft with the "26.3 Fabric Essential" profile.$' <<<"$OUT"
-check "asks back-or-exit right after the result" bash -c 'grep -A3 "^Start Minecraft with" <<<"$1" | grep -q "1) Back to the version list"' _ "$OUT"
-check "version list shows 0.8.0 (Installed) after going back" grep -q '^  1) 0.8.0  (Installed)$' <<<"$OUT"
+check "changelog header printed" grep -q "^What's new in Immortal Cultivation 0.8.0:$" <<<"$OUT"
+check "changelog body printed (second line of the notes)" grep -q '^line two$' <<<"$OUT"
+check "nothing is printed after the changelog" bash -c '[ "$(sed -n "/^line two\$/,\$p" <<<"$1" | wc -l | tr -d " ")" -eq 1 ]' _ "$OUT"
+check "no back-or-exit menu after a good install" bash -c '! grep -q "Back to the version list" <<<"$1"' _ "$OUT"
 check "new jar present" test -f "$PROFILE_DIR/mods/immortal-cultivation-0.8.0.jar"
 check "old permahearts-0.7.1.jar removed" test ! -e "$PROFILE_DIR/mods/permahearts-0.7.1.jar"
 check "Essential untouched" test "$(sum_of "$PROFILE_DIR/mods/Essential-1.5.2-26.3.jar")" = "$ESS"
 check "Fabric API untouched" test "$(sum_of "$PROFILE_DIR/mods/fabric-api-0.166.2+26.3.jar")" = "$API"
 check "mods folder has exactly 3 jars" test "$(mods | wc -l | tr -d ' ')" -eq 3
-check "menu is plain once up to date" bash -c 'sed -n "/^SUCCESS!/,\$p" <<<"$1" | grep -q "^  1) Immortal Cultivation\$"' _ "$OUT"
+
+# the same profile again: the menu is plain and the version list shows 0.8.0 as installed
+run_installer "$T/releases.json" $'1\n0\n0'
+check "version list shows 0.8.0 (Installed)" grep -q '^  1) 0.8.0  (Installed)$' <<<"$OUT"
+check "menu is plain once up to date" grep -q '^  1) Immortal Cultivation$' <<<"$OUT"
 
 # ---- case 1b: exit right after installing
 echo "Case 1b: exit after installing"
 make_minecraft 1
-run_installer "$T/releases.json" $'1\n1\n0'
+run_installer "$T/releases.json" $'1\n1'
 check "exit code 0" test "$RC" -eq 0
 check "no menu printed after the result" bash -c '! sed -n "/^SUCCESS!/,\$p" <<<"$1" | grep -q "^Minecraft Lab mods"' _ "$OUT"
 check "new jar present" test -f "$PROFILE_DIR/mods/immortal-cultivation-0.8.0.jar"
+
+# ---- case 1c: a release without notes
+echo "Case 1c: empty release notes"
+make_minecraft 1
+sed -E 's/"body":".*","reactions"/"body":"","reactions"/' "$T/releases.json" > "$T/releases-empty.json"
+run_installer "$T/releases-empty.json" $'1\n1'
+check "exit code 0" test "$RC" -eq 0
+check "changelog header printed" grep -q "^What's new in Immortal Cultivation 0.8.0:$" <<<"$OUT"
+check "says (no notes)" grep -q '^(no notes)$' <<<"$OUT"
 
 # ---- case 2: wrong sha256
 echo "Case 2: wrong checksum"

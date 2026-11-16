@@ -149,6 +149,7 @@ function Get-Releases {
                 Pre       = [bool]$r.prerelease
                 Published = (ConvertTo-Utc $r.published_at)
                 Assets    = @($r.assets)
+                Notes     = [string]$r.body
             }
         }
     }
@@ -310,6 +311,11 @@ function Install-Release($release) {
         Write-Host ('SUCCESS! {0} {1} is installed.' -f $release.Title, $release.Version) -ForegroundColor Green
         Write-Host ('Mods folder: {0}' -f $script:ModsDir)
         Write-Host ('Start Minecraft with the "{0}" profile.' -f $script:ProfileName)
+        Write-Host ''
+        Write-Host ("What's new in {0} {1}:" -f $release.Title, $release.Version)
+        $notes = ([string]$release.Notes).Replace("`r", '').Trim()
+        if ($notes -eq '') { $notes = '(no notes)' }
+        Write-Host $notes
         return $true
     } catch {
         Write-Host ('ERROR: ' + $_.Exception.Message) -ForegroundColor Red
@@ -338,7 +344,13 @@ function Show-VersionsMenu([string]$modId, [string]$title) {
         if (Test-Choice $a 0 $versions.Count) {
             if ([int]$a -eq 0) { return }
             $ok = Install-Release $versions[[int]$a - 1]
-            if (-not $ok) { $script:Failed = $true }
+            if ($ok) {
+                # A good install ends the session (D124). The window closes on exit when started by double-click, so wait for Enter.
+                Write-Host ''
+                Read-Host 'Press Enter to close' | Out-Null
+                exit 0
+            }
+            $script:Failed = $true
             Update-Installed
             # Do not jump straight back into a menu: let the player read the result first.
             Write-Host ''
