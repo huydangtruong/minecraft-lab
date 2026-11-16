@@ -11,6 +11,7 @@
 
 - **No gap** between the head and the body: today there is an empty space between them. The head (and the neck if any) must sit on the chest/collar so no sky shows through from any side.
 - **Head smaller** (Huy, updated): compared with 0.21.0, width (sides) **95%**; height: cut about **10% of the part above the eyes** only (forehead/top); from the eyes down stays. Keep the eyes, brow, tusks readable (D101); horns move with the head.
+- **Horns** (Huy): about **10% longer** than in 0.21.0, pointing **more out to the sides**, with **less curve** (flatter arc). They must not hide the face.
 
 ## 2. Katana (both blades)
 
