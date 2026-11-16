@@ -16,6 +16,9 @@ Slot 1 has a hoe → farming job (D73/D84/D85). When a clone has no seeds and th
 ## 4. Quantum Leap cooldown (D121)
 `TechniqueRules.cooldownSeconds`: TELEPORT = 40 − (level − 1) (Lv 20 = 21 s). The stats line on the detail page shows the level's value. JUnit.
 
+## 5. Summons attack the Death Match opponent (bug, added)
+In a Death Match the owner's Warrior Angels do not attack the opponent player. Warrior Angel, Illusion clones and Violet Guardian golems must all target the owner's Death Match opponent (only that player, only during the match; outside a match they never attack players). Server game test for each.
+
 ## Verify
 `./gradlew :permahearts:build` green (JDK 25; known flaky game tests may fail once: rerun) and `./gradlew :permahearts:runClientGameTest` green (muted).
 
