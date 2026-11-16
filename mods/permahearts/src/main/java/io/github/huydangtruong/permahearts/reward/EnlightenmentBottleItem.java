@@ -12,7 +12,7 @@ import net.minecraft.world.level.Level;
 
 /** Bottle of Enlightenment (D89): drinking it (32 ticks, like a potion) gives {@link #LEVELS} experience levels. */
 public class EnlightenmentBottleItem extends Item {
-	public static final int LEVELS = 16;
+	public static final int LEVELS = 24;
 
 	public EnlightenmentBottleItem(Properties properties) {
 		super(properties);
