@@ -344,9 +344,9 @@ public final class TechniqueRules {
 		return linear(level, 30, 50);
 	}
 
-	/** Work area radius in blocks around the cast point (D73): 8 at level 1 up to 16 at 20. */
+	/** Work area radius in blocks around the cast point (D73): 8 at level 1, +4 every 5 levels, 24 at 20 (D109). */
 	public static double illusionWorkRadius(int level) {
-		return linear(level, 8, 16);
+		return 8 + 4 * (Math.max(1, Math.min(20, level)) / 5);
 	}
 
 	/** Ticks between two work actions (D73): 20 at level 1 down to 8 at 20. A block still takes its break time on top. */

@@ -174,7 +174,9 @@ class TechniqueRulesTest {
 		assertEquals(30, TechniqueRules.illusionSeconds(1), 1e-9);
 		assertEquals(50, TechniqueRules.illusionSeconds(20), 1e-9);
 		assertEquals(8, TechniqueRules.illusionWorkRadius(1), 1e-9);
-		assertEquals(16, TechniqueRules.illusionWorkRadius(20), 1e-9);
+		assertEquals(8, TechniqueRules.illusionWorkRadius(4), 1e-9);
+		assertEquals(12, TechniqueRules.illusionWorkRadius(5), 1e-9);
+		assertEquals(24, TechniqueRules.illusionWorkRadius(20), 1e-9);
 		assertEquals(20, TechniqueRules.illusionWorkTicks(1));
 		assertEquals(8, TechniqueRules.illusionWorkTicks(20));
 		assertTrue(TechniqueRules.illusionWorkTicks(10) < 20 && TechniqueRules.illusionWorkTicks(10) > 8);
@@ -190,7 +192,7 @@ class TechniqueRulesTest {
 		assertEquals("3", TechniqueRules.stats(Technique.ILLUSION, 20).get(0).value());
 		assertEquals("50 s", TechniqueRules.stats(Technique.ILLUSION, 20).get(3).value());
 		assertEquals("Work area", TechniqueRules.stats(Technique.ILLUSION, 20).get(4).label());
-		assertEquals("16 blocks", TechniqueRules.stats(Technique.ILLUSION, 20).get(4).value());
+		assertEquals("24 blocks", TechniqueRules.stats(Technique.ILLUSION, 20).get(4).value());
 	}
 
 	@Test
