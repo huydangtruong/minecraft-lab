@@ -35,6 +35,7 @@ public class GodSlayerRenderer extends MobRenderer<GodSlayer, GodSlayerRenderSta
 	public void extractRenderState(GodSlayer entity, GodSlayerRenderState state, float partialTick) {
 		super.extractRenderState(entity, state, partialTick);
 		state.swing = entity.getSwingAnimation(partialTick);
+		state.flying = entity.isFlyingMode();
 	}
 
 	@Override

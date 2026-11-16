@@ -9,8 +9,10 @@ import net.minecraft.client.CameraType;
 import net.minecraft.world.entity.EntitySpawnReason;
 
 /**
- * P-032/P-034: the God Slayer seen from the front and from the side, in a real client (screenshots 90-... and 91-...). The boss stands in front of the
- * player, who looks at it in third person front view. Run with ./gradlew :permahearts:runClientGameTest.
+ * P-032/P-034/P-035: the God Slayer in a real client. The camera is behind the player (third person) 4 blocks west of
+ * it and looks east. The boss yaw picks the view: 90 = faces the camera (front), 0 = faces south (a real side view),
+ * -90 = faces away (back). Screenshots 90-front, 91-side, 92-back, 93-face closeup, 94-flying hover, 95-flying forward.
+ * Run with ./gradlew :permahearts:runClientGameTest.
  */
 public class GodSlayerClientTest implements FabricClientGameTest {
 	@Override
@@ -22,25 +24,71 @@ public class GodSlayerClientTest implements FabricClientGameTest {
 			server.runCommand("gamemode survival @a");
 			server.runCommand("fill -24 99 -24 24 99 24 stone");
 			server.runCommand("fill -24 100 -24 24 118 24 air");
-			server.runCommand("tp @a 0.5 100 0.5 -90 4");
+			server.runCommand("effect give @a minecraft:invisibility 999 0 true");
+			server.runCommand("tp @a 0.5 100 0.5 -90 -12");
 			context.waitTicks(20);
+			GodSlayer[] box = new GodSlayer[1];
 			server.runOnServer(s -> {
 				GodSlayer b = GodSlayer.TYPE.create(s.overworld(), EntitySpawnReason.MOB_SUMMONED);
 				b.setBossLevel(1);
-				// ahead of the player (who looks east) and a little to the side, turned to face the camera behind the player
-				b.snapTo(7, 100, 4.5, 109f, 0f);
-				turn(b, 109f);
+				b.snapTo(3.0, 100, 0.5, 90f, 0f);
+				turn(b, 90f);
 				b.setNoAi(true);
 				s.overworld().addFreshEntity(b);
+				box[0] = b;
 			});
 			context.waitTicks(10);
 			context.runOnClient(mc -> mc.options.setCameraType(CameraType.THIRD_PERSON_BACK));
 			context.waitTicks(20);
 			context.takeScreenshot("90-god-slayer-front");
-			// the same boss seen from the side (it faces south, the camera is on the west)
-			server.runOnServer(s -> s.overworld().getEntities(GodSlayer.TYPE, e -> true).forEach(b -> turn(b, 19f)));
+			server.runOnServer(s -> turn(box[0], 0f));
 			context.waitTicks(10);
 			context.takeScreenshot("91-god-slayer-side");
+			server.runOnServer(s -> turn(box[0], -90f));
+			context.waitTicks(25);
+			context.takeScreenshot("92-god-slayer-back");
+
+			// face close-up: first person, the boss 3 blocks ahead facing the player, the player looks at its head
+			context.runOnClient(mc -> mc.options.setCameraType(CameraType.FIRST_PERSON));
+			server.runCommand("tp @a 0.5 100 0.5 -90 -38");
+			server.runOnServer(s -> {
+				box[0].snapTo(4.0, 100, 0.5, 90f, 0f);
+				turn(box[0], 90f);
+			});
+			context.waitTicks(15);
+			context.takeScreenshot("93-god-slayer-face");
+
+			// flying, hovering: wings out, body upright
+			server.runCommand("tp @a 0.5 100 0.5 -90 -22");
+			context.runOnClient(mc -> mc.options.setCameraType(CameraType.THIRD_PERSON_BACK));
+			server.runOnServer(s -> {
+				box[0].snapTo(3.0, 100.5, 0.5, 90f, 0f);
+				turn(box[0], 90f);
+				box[0].setFlyingMode(true);
+			});
+			context.waitTicks(15);
+			context.takeScreenshot("94-god-slayer-flying-front");
+			server.runOnServer(s -> turn(box[0], 0f));
+			context.waitTicks(10);
+			context.takeScreenshot("95-god-slayer-flying-side");
+
+			server.runOnServer(s -> turn(box[0], -90f));
+			context.waitTicks(25);
+			context.takeScreenshot("97-god-slayer-flying-back");
+
+			// flying forward (south): moved 0.4 blocks per tick so the model leans; the shot is taken while it moves
+			server.runCommand("tp @a 0.5 100 0.5 -90 -8");
+			server.runOnServer(s -> {
+				box[0].snapTo(3.0, 100.0, -5.0, 0f, 0f);
+				turn(box[0], 0f);
+			});
+			context.waitTicks(5);
+			for (int i = 0; i < 14; i++) {
+				final int step = i;
+				server.runOnServer(s -> box[0].snapTo(3.0, 100.0, -5.0 + 0.35 * (step + 1), 0f, 0f));
+				context.waitTick();
+			}
+			context.takeScreenshot("96-god-slayer-flying-forward");
 			context.runOnClient(mc -> mc.options.setCameraType(CameraType.FIRST_PERSON));
 		}
 	}

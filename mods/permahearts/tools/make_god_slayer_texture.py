@@ -69,16 +69,16 @@ def box_uv(u, v, w, h, d):
 
 
 TEX = 128   # sheet width
-TEXH = 256  # sheet height
+TEXH = 320  # sheet height
 
 # name: (w, h, d, kind). The same sizes are used by GodSlayerModel.java; the packed texture offsets are printed with --uv.
 BOXES = {
     "head": (16, 14, 15, "head"),
     "brow": (16, 3, 3, "skin"),
-    "fang": (3, 6, 2, "fang"),
+    "fang": (2, 2, 6, "fang"),
     "hair_top": (17, 4, 17, "hair"),
     "hair_side": (3, 20, 13, "hair"),
-    "hair_up": (20, 17, 5, "hair"),
+    "hair_up": (14, 12, 4, "hair"),
     "hair_lock": (5, 18, 4, "hair"),
     "spike": (3, 8, 3, "hair"),
     "horn1": (7, 8, 7, "horn_base"),
@@ -87,21 +87,22 @@ BOXES = {
     "horn4": (3, 8, 3, "horn"),
     "collar": (20, 5, 18, "armor"),
     "chest": (28, 18, 15, "chest"),
-    "hair_back": (24, 28, 5, "hair"),
+    "hair_back": (28, 24, 6, "hair"),
+    "hair_low": (22, 24, 5, "hair"),
     "waist": (18, 10, 11, "armor"),
     "belt": (20, 4, 13, "rope"),
     "knot": (5, 6, 3, "gold"),
     "tasset_front": (20, 10, 2, "armor"),
     "tasset_side": (2, 10, 11, "armor"),
-    "pauldron_top": (16, 4, 16, "armor"),
-    "pauldron_low": (14, 3, 14, "armor"),
+    "wing_bone": (40, 3, 3, "gold"),
+    "feather": (9, 52, 1, "wing"),
+    "feather_short": (9, 32, 1, "wing"),
     "arm": (9, 14, 9, "sleeve"),
     "forearm": (8, 14, 8, "forearm"),
     "fist": (7, 6, 7, "skin"),
     "handle": (3, 12, 3, "grip"),
     "guard": (8, 2, 5, "gold"),
-    "blade": (4, 22, 2, "steel"),
-    "blade_tip": (3, 5, 2, "steel"),
+    "blade": (4, 28, 2, "steel"),
     "thigh": (11, 12, 11, "hakama"),
     "shin": (9, 11, 9, "hakama"),
     "foot": (9, 3, 12, "skin"),
@@ -138,8 +139,10 @@ def face_char(kind, face, x, y, w, h):
         if face == "bottom" or y == h - 1 and face not in ("top",):
             return "r"
         return "r" if n == 0 else ("L" if n == 1 and face == "top" else "R")
+    if kind == "head":
+        return "r" if n < 2 or face == "bottom" else "R"
     if kind == "hair":
-        if (x + y // 5) % 5 == 0 and n < 6:
+        if x % 4 == 0 and n < 8:
             return "w"
         return "w" if n == 0 else "W"
     if kind == "horn_base":
@@ -149,7 +152,14 @@ def face_char(kind, face, x, y, w, h):
             return "o"
         return "o" if (face in ("right", "back") and x % 2 == 0) else "O"
     if kind == "fang":
-        return "F"
+        return "F" if face != "bottom" and x % 2 == 0 or y == 0 else "i"
+    if kind == "wing":
+        # a dark red membrane fading to black at the tip; the outer long edge is a gold bone
+        if x == 0 and face in ("front", "back"):
+            return "G"
+        if face in ("front", "back"):
+            return "K" if (y > h * 0.7 and x % 3 == 1) or y % 9 == 8 else ("B" if y % 2 == 0 and x > 1 else "r")
+        return "B"
     if kind == "armor":
         if face == "top" or face == "bottom":
             return "K"
@@ -173,12 +183,13 @@ def face_char(kind, face, x, y, w, h):
     if kind == "grip":
         return "P" if (x + y) % 3 else "K"
     if kind == "steel":
+        # one straight blade, the sharp edge on the model -x side (front column 0, back last column, the "right" face)
         if face == "front":
             if x == 0:
                 return "H"
             return "S" if x < w - 1 else "s"
         if face == "back":
-            return "s" if x == 0 else "S"
+            return "H" if x == w - 1 else ("s" if x == 0 else "S")
         return "H"
     if kind == "hakama":
         if face == "top":
@@ -196,23 +207,50 @@ def paint_box(img, name):
         for dy in range(fh):
             for dx in range(fw):
                 put(img, x0 + dx, y0 + dy, face_char(kind, face, dx, dy, fw, fh))
+    if kind == "steel":
+        slant_blade(img, name)
+
+
+def slant_blade(img, name):
+    """Cuts the blade tip on a slant with transparent pixels (the mob texture is alpha-tested):
+    the edge side is shorter than the spine side. The top face is removed."""
+    w, h, d, _ = BOXES[name]
+    u, v = UV[name]
+    f = box_uv(u, v, w, h, d)
+    cut = lambda i: max(0, 3 - i)  # i = distance from the edge side: 3, 2, 1, 0 rows
+    x, y, fw, fh = f["front"]
+    for col in range(fw):
+        for r in range(cut(col)):
+            img[y + r][x + col] = CLEAR
+    x, y, fw, fh = f["back"]
+    for col in range(fw):
+        for r in range(cut(fw - 1 - col)):
+            img[y + r][x + col] = CLEAR
+    x, y, fw, fh = f["right"]  # the edge side face
+    for col in range(fw):
+        for r in range(3):
+            img[y + r][x + col] = CLEAR
+    x, y, fw, fh = f["top"]
+    for col in range(fw):
+        for r in range(fh):
+            img[y + r][x + col] = CLEAR
 
 
 HEAD_FRONT = [
     "RRRRRRRRRRRRRRRR",
     "RRRRRRRRRRRRRRRR",
-    "RKKRRRRRRRRRRKKR",
-    "RRKKKRRRRRRKKKRR",
-    "RRBBKKRRRRKKBBRR",
-    "RRBBBKRRRRKBBBRR",
-    "RRRBBRRrrRRBBRRR",
-    "RRRRRRrBBrRRRRRR",
-    "RRRRRRrBBrRRRRRR",
-    "RRRKKKKKKKKKKRRR",
-    "RRRKWKKKKKKWKRRR",
-    "RRRKKWKBBKWKKRRR",
+    "RRRRRRRRRRRRRRRR",
+    "RKKKRRRRRRRRKKKR",
+    "RRKKKKRRRRKKKKRR",
     "RRRRKKKKKKKKRRRR",
-    "RrRRRRRRRRRRRRrR",
+    "RRBBRRRrrRRRBBRR",
+    "RRRBBBRrrRBBBRRR",
+    "RRRRRBBRrrBBRRRR",
+    "RRRRRRrBBrRRRRRR",
+    "RRRRRRRRRRRRRRRR",
+    "RRRRKKKKKKKKRRRR",
+    "RRRKWBBBBBBWKRRR",
+    "RRRRRrrRRrrRRRRR",
 ]
 
 
@@ -276,15 +314,19 @@ def build_eyes():
     u, v = UV["head"]
     fx, fy, _, _ = box_uv(u, v, 16, 14, 15)["front"]
     # the two slanted eyes of HEAD_FRONT (the dark K rows 2-5 are the brows; the eyes sit in the B sockets)
-    for dx, dy in ((2, 4), (3, 4), (3, 5), (4, 5), (13, 4), (12, 4), (12, 5), (11, 5)):
+    left = ((2, 6), (3, 6), (3, 7), (4, 7), (5, 7), (5, 8), (6, 8))
+    for dx, dy in left:
         put(img, fx + dx, fy + dy, "E")
-    # a faint glowing edge on both sides of each blade (front face first column, drawn dim)
+        put(img, fx + 15 - dx, fy + dy, "E")
+    # a faint glowing edge on the sharp side of each blade (front first column, back last column)
     bu, bv = UV["blade"]
-    bf = box_uv(bu, bv, 4, 26, 2)
-    for face in ("front", "back"):
-        x, y, w, h = bf[face]
-        for dy in range(h):
-            put(img, x, y + dy, "N")
+    bf = box_uv(bu, bv, 4, 28, 2)
+    x, y, w, h = bf["front"]
+    for dy in range(3, h):
+        put(img, x, y + dy, "N")
+    x, y, w, h = bf["back"]
+    for dy in range(3, h):
+        put(img, x + w - 1, y + dy, "N")
     return img
 
 

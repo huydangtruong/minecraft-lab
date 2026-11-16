@@ -13,6 +13,9 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
@@ -58,6 +61,9 @@ public final class GodSlayer extends PathfinderMob {
 		EntityType.Builder.<GodSlayer>of(GodSlayer::new, MobCategory.MISC).sized(1.6f, 4.8f).eyeHeight(4.3f)
 			.clientTrackingRange(10).updateInterval(1).fireImmune().noSave().noLootTable().build(KEY));
 
+	/** True while the boss is in the flying mode: the client shows the wings and the forward lean (D101). */
+	private static final EntityDataAccessor<Boolean> FLYING = SynchedEntityData.defineId(GodSlayer.class, EntityDataSerializers.BOOLEAN);
+
 	private int bossLevel = 1;
 	private UUID targetId;
 	private List<GodSlayerSkill> skills;
@@ -77,6 +83,22 @@ public final class GodSlayer extends PathfinderMob {
 		xpReward = 0;
 		setPersistenceRequired();
 		skills = GodSlayerSkills.forLevel(1);
+	}
+
+	@Override
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(FLYING, false);
+	}
+
+	/** Synced: is the boss in the flying mode (also true on the client). */
+	public boolean isFlyingMode() {
+		return entityData.get(FLYING);
+	}
+
+	/** Forces the flying state; for tests with no AI. */
+	public void setFlyingMode(boolean flying) {
+		entityData.set(FLYING, flying);
 	}
 
 	/** Registers the attributes. Called once from PermaHearts. */
@@ -241,6 +263,7 @@ public final class GodSlayer extends PathfinderMob {
 		if (t == null) {
 			mode = Mode.GROUND;
 			setNoGravity(false);
+			setFlyingMode(false);
 			active = null;
 			return;
 		}
@@ -258,6 +281,7 @@ public final class GodSlayer extends PathfinderMob {
 		boolean inWater = isInWater() && getFluidHeight(FluidTags.WATER) >= 1.0;
 		mode = GodSlayerRules.chooseMode(inWater, heightAboveGround(t), t.getY() - getY(), noProgress, mode);
 		setNoGravity(mode != Mode.GROUND);
+		setFlyingMode(mode == Mode.AIR);
 		move(level, t, dist, reach);
 		trackStuck(reach);
 		if (tickCount % 4 == 0 && !reach && (horizontalCollision || noProgress >= 20)) {
