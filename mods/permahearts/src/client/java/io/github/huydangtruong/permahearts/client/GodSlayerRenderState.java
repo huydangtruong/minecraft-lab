@@ -9,4 +9,6 @@ import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 public class GodSlayerRenderState extends LivingEntityRenderState {
 	public float swing;
 	public boolean flying;
+	/** Frozen in the forward-flight pose: full lean without moving (D104). */
+	public boolean forwardLean;
 }

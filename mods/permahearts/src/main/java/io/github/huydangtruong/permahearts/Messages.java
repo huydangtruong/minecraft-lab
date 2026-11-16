@@ -367,6 +367,25 @@ public final class Messages {
 			"God Slayer is coming for %s. It arrives in 60 seconds.", name).withStyle(net.minecraft.ChatFormatting.RED);
 	}
 
+	public static Component godSlayerFrozen(int pose) {
+		String key = switch (pose) {
+			case 1 -> "stand";
+			case 2 -> "fly";
+			case 3 -> "fly_forward";
+			default -> "off";
+		};
+		return Component.translatableWithFallback("permahearts.god_slayer.frozen." + key, switch (pose) {
+			case 1 -> "God Slayer frozen: standing";
+			case 2 -> "God Slayer frozen: hovering";
+			case 3 -> "God Slayer frozen: flying forward";
+			default -> "God Slayer unfrozen";
+		});
+	}
+
+	public static Component godSlayerNoFrozen() {
+		return Component.translatableWithFallback("permahearts.god_slayer.no_frozen", "No frozen God Slayer to release");
+	}
+
 	public static Component godSlayerCountdown(int seconds) {
 		return Component.translatableWithFallback("permahearts.god_slayer.countdown", "God Slayer arrives in %s...", seconds).withStyle(net.minecraft.ChatFormatting.RED, net.minecraft.ChatFormatting.BOLD);
 	}

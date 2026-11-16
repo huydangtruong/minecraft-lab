@@ -273,5 +273,7 @@ Mở Cultivation, tab Techniques.
 7. `/boss level 3` đặt cấp (1 đến 10), `/boss level` xem cấp. Người không phải OP gõ `/boss` không được.
 8. Tự xuất hiện: từ ngày 100, mỗi lần Crimson Master đến lần thứ 4, 8, 12. Có người từ 30 tim thì săn người đó, không ai đủ thì tin chat "Weaklings. Come back when your hearts can bear my blade.".
 9. Tắt game giữa lúc săn: mở lại không còn boss, không còn đồng hồ.
-10. Kiểm bằng máy: `GodSlayerRulesTest`, `GodSlayerGameTest`, `GodSlayerClientTest` (ảnh `90-god-slayer-front`).
+10. Kiểm bằng máy: `GodSlayerRulesTest`, `GodSlayerGameTest`, `GodSlayerClientTest` (ảnh `90-god-slayer-front`), `GodSlayerCountdownClientTest` (ảnh `98-god-slayer-countdown`).
+11. P-035: chạy một đoạn ngắn, boss chạy đuổi chứ không dịch chuyển ngay (D100). Đếm ngược đỏ mỗi giây, tim đập nhanh dần, viền đỏ màn hình đậm dần (D102). Thông báo Crimson Master màu cam, thanh vàng. Thần Tốc +5% mỗi bình (D103).
+12. Ngắm ngoại hình (D104): là OP, gõ `/boss freeze stand`, rồi `fly`, `fly_forward` (nghiêng 45 độ, cánh dang), cuối cùng `off`. Chưa có boss thì nó hiện cách 6 ô trước mặt, đứng yên, không đánh; `/boss giveup` hoặc `off` xoá nó.
 10. Heaven Blast choáng (P-034): vây vài Husk, dùng Hất tung. Chúng bị đẩy ra rồi đứng đơ khoảng 1 giây ở Lv 1 (lâu hơn ở level cao, tới 2,9 s), có hạt sao quay trên đầu, không đi, không đánh; hết giờ thì lại đuổi bạn. Bảng chiêu có dòng "Stun". Dùng lên boss: chỉ choáng chừng 0,1 giây.

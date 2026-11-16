@@ -127,6 +127,42 @@ public class GodSlayerGameTest {
 	}
 
 	/** D100: a target 25 blocks away on open ground is chased on foot, never teleported to. */
+	@GameTest(maxTicks = 400)
+	public void frozenBossStandsStillThenActsAgain(GameTestHelper c) {
+		FlightBladeGameTest.enable(c);
+		ServerPlayer p = strong(c);
+		GodSlayer b = boss(c, 5.5, 1, 5.5, 1);
+		Vec3 pv = c.absoluteVec(new Vec3(5.5, 1, 8.0));
+		p.teleportTo(c.getLevel(), pv.x, pv.y, pv.z, java.util.Set.of(), 0f, 0f, false);
+		b.setHuntTarget(p.getUUID());
+		b.setFreezePose(GodSlayer.FREEZE_STAND); // what /boss freeze stand does (D104)
+		float[] hp = {0};
+		Vec3[] at = {Vec3.ZERO};
+		float[] yaw = {0};
+		c.startSequence()
+			.thenIdle(5)
+			.thenExecute(() -> {
+				hp[0] = p.getHealth();
+				at[0] = b.position();
+				yaw[0] = b.getYRot();
+			})
+			.thenIdle(60) // 3 seconds
+			.thenExecute(() -> {
+				c.assertTrue(b.isFrozen() && b.freezePose() == GodSlayer.FREEZE_STAND, "still frozen");
+				c.assertTrue(p.getHealth() == hp[0], "no attack while frozen, health " + hp[0] + " -> " + p.getHealth());
+				double moved = Math.hypot(b.getX() - at[0].x, b.getZ() - at[0].z);
+				c.assertTrue(moved < 0.05, "no movement while frozen, moved " + moved);
+				c.assertTrue(Math.abs(b.getYRot() - yaw[0]) < 0.5f, "keeps its facing");
+				b.setFreezePose(GodSlayer.FREEZE_NONE);
+			})
+			.thenWaitUntil(() -> c.assertTrue(p.getHealth() < hp[0] || b.distanceTo(p) < 3.0, "acts again after freeze off"))
+			.thenExecute(() -> {
+				b.discard();
+				FlightBladeGameTest.drop(c, p);
+			})
+			.thenSucceed();
+	}
+
 	@GameTest(maxTicks = 200)
 	public void runsAfterANearTargetInsteadOfTeleporting(GameTestHelper c) {
 		FlightBladeGameTest.enable(c);

@@ -36,6 +36,7 @@ public class GodSlayerRenderer extends MobRenderer<GodSlayer, GodSlayerRenderSta
 		super.extractRenderState(entity, state, partialTick);
 		state.swing = entity.getSwingAnimation(partialTick);
 		state.flying = entity.isFlyingMode();
+		state.forwardLean = entity.freezePose() == GodSlayer.FREEZE_FLY_FORWARD;
 	}
 
 	@Override

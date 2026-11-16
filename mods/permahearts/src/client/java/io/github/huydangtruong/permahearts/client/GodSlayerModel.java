@@ -231,7 +231,7 @@ public class GodSlayerModel extends EntityModel<GodSlayerRenderState> {
 		rightWing.visible = state.flying;
 		leftWing.visible = state.flying;
 		if (state.flying) {
-			float lean = MAX_LEAN * Mth.clamp(speed, 0f, 1f);
+			float lean = MAX_LEAN * (state.forwardLean ? 1f : Mth.clamp(speed, 0f, 1f));
 			body.xRot = lean;
 			head.xRot -= lean * 0.7f;
 			rightLeg.xRot += lean * 0.7f;

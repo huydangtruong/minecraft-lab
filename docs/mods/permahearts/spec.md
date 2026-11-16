@@ -123,7 +123,10 @@ Boss Oni "God Slayer" săn người chơi. Đợt này làm lõi: chạy, chém 
   - Hết giờ hoặc hết người: boss trêu rồi biến mất trong khói, cấp giữ nguyên.
   - Boss không được lưu: tắt game giữa lúc săn thì mở lại là hết săn.
 - **Kích hoạt**: mỗi lần Crimson Master đến thì đếm một lượt. Từ ngày 100, lượt thứ 4, 8, 12: có người từ 30 tim thì săn một người trong số đó, không có thì tin chat "Weaklings...".
-- **Lệnh (OP)**: `/boss summon [người]`, `/boss giveup`, `/boss level [1..10]`.
+- **Dịch chuyển** (P-035, D100): chạy đuổi là chính; chỉ dịch chuyển khi người bị săn cách xa hơn 64 ô, khác chiều không gian, hoặc boss kẹt 8 giây ngoài tầm đánh (`GodSlayerRules.shouldTeleport`).
+- **Ngoại hình** (P-035, D101): nanh to, mắt dữ, mặt to, tay đưa trước, katana thẳng mũi xéo, tóc dài, cánh dơi chỉ khi bay, nghiêng tới 45 độ theo tốc độ (trạng thái `FLYING` đồng bộ).
+- **Cảnh báo** (P-035, D102): chữ đỏ, đếm ngược mỗi giây 60 giây, tim đập nhanh dần (`heartbeatInterval`), viền đỏ màn hình đậm dần (`edgeStrength`, gói `GodSlayerNet.Warning` + `GodSlayerWarningHud`). Crimson Master chữ cam, thanh vàng.
+- **Lệnh (OP)**: `/boss summon [người]`, `/boss giveup`, `/boss level [1..10]`, `/boss freeze stand|fly|fly_forward|off` (P-035, D104: đóng băng để ngắm; đồng hồ săn dừng; chưa có boss thì tạo một con cách người gõ 6 ô, ngoài cuộc săn).
 - Dữ liệu: `GodSlayerSavedData` (cấp, số lượt, pha, hạn giờ, UUID boss, người bị săn, danh sách đã chết).
 
 ## Heaven Blast choáng (P-034, D99)

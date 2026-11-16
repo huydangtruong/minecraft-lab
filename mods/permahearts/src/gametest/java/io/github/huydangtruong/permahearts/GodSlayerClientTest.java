@@ -11,7 +11,7 @@ import net.minecraft.world.entity.EntitySpawnReason;
 /**
  * P-032/P-034/P-035: the God Slayer in a real client. The camera is behind the player (third person) 4 blocks west of
  * it and looks east. The boss yaw picks the view: 90 = faces the camera (front), 0 = faces south (a real side view),
- * -90 = faces away (back). Screenshots 90-front, 91-side, 92-back, 93-face closeup, 94-flying hover, 95-flying forward.
+ * -90 = faces away (back). Screenshots 90-front, 91-side, 92-back, 93-face closeup, 94/95/97 flying hover, 96 flying forward (frozen pose).
  * Run with ./gradlew :permahearts:runClientGameTest.
  */
 public class GodSlayerClientTest implements FabricClientGameTest {
@@ -76,18 +76,14 @@ public class GodSlayerClientTest implements FabricClientGameTest {
 			context.waitTicks(25);
 			context.takeScreenshot("97-god-slayer-flying-back");
 
-			// flying forward (south): moved 0.4 blocks per tick so the model leans; the shot is taken while it moves
+			// flying forward, frozen with /boss freeze fly_forward: the 45 degree lean without moving (D104)
 			server.runCommand("tp @a 0.5 100 0.5 -90 -8");
 			server.runOnServer(s -> {
-				box[0].snapTo(3.0, 100.0, -5.0, 0f, 0f);
+				box[0].snapTo(3.0, 100.0, -1.0, 0f, 0f);
 				turn(box[0], 0f);
+				box[0].setFreezePose(GodSlayer.FREEZE_FLY_FORWARD);
 			});
-			context.waitTicks(5);
-			for (int i = 0; i < 14; i++) {
-				final int step = i;
-				server.runOnServer(s -> box[0].snapTo(3.0, 100.0, -5.0 + 0.35 * (step + 1), 0f, 0f));
-				context.waitTick();
-			}
+			context.waitTicks(15);
 			context.takeScreenshot("96-god-slayer-flying-forward");
 			context.runOnClient(mc -> mc.options.setCameraType(CameraType.FIRST_PERSON));
 		}

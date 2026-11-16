@@ -64,6 +64,13 @@ public final class GodSlayer extends PathfinderMob {
 	/** True while the boss is in the flying mode: the client shows the wings and the forward lean (D101). */
 	private static final EntityDataAccessor<Boolean> FLYING = SynchedEntityData.defineId(GodSlayer.class, EntityDataSerializers.BOOLEAN);
 
+	/** Freeze pose for /boss freeze (D104): 0 = not frozen, 1 stand, 2 fly (hover), 3 fly with the forward lean. Synced to the client. */
+	private static final EntityDataAccessor<Integer> FREEZE = SynchedEntityData.defineId(GodSlayer.class, EntityDataSerializers.INT);
+	public static final int FREEZE_NONE = 0;
+	public static final int FREEZE_STAND = 1;
+	public static final int FREEZE_FLY = 2;
+	public static final int FREEZE_FLY_FORWARD = 3;
+
 	private int bossLevel = 1;
 	private UUID targetId;
 	private List<GodSlayerSkill> skills;
@@ -89,6 +96,31 @@ public final class GodSlayer extends PathfinderMob {
 	protected void defineSynchedData(SynchedEntityData.Builder builder) {
 		super.defineSynchedData(builder);
 		builder.define(FLYING, false);
+		builder.define(FREEZE, FREEZE_NONE);
+	}
+
+	/** Synced freeze pose (0 = not frozen). */
+	public int freezePose() {
+		return entityData.get(FREEZE);
+	}
+
+	public boolean isFrozen() {
+		return freezePose() != FREEZE_NONE;
+	}
+
+	/** Freezes the boss in a pose (it stops moving, fighting, teleporting and turning), or releases it with 0. */
+	public void setFreezePose(int pose) {
+		entityData.set(FREEZE, pose);
+		if (pose == FREEZE_NONE) {
+			setNoGravity(false);
+			setFlyingMode(false);
+			return;
+		}
+		active = null;
+		getNavigation().stop();
+		setDeltaMovement(Vec3.ZERO);
+		setNoGravity(pose != FREEZE_STAND);
+		setFlyingMode(pose != FREEZE_STAND);
 	}
 
 	/** Synced: is the boss in the flying mode (also true on the client). */
@@ -260,6 +292,13 @@ public final class GodSlayer extends PathfinderMob {
 	@Override
 	protected void customServerAiStep(ServerLevel level) {
 		super.customServerAiStep(level);
+		if (isFrozen()) {
+			// D104: standing still in the chosen pose, keeping the facing it had
+			getNavigation().stop();
+			Vec3 v = getDeltaMovement();
+			setDeltaMovement(0, freezePose() == FREEZE_STAND ? Math.min(0, v.y) : 0, 0);
+			return;
+		}
 		ServerPlayer t = target();
 		if (t == null) {
 			mode = Mode.GROUND;

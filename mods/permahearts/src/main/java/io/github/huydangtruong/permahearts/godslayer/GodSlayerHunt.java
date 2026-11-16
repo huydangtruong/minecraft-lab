@@ -16,6 +16,7 @@ import java.util.random.RandomGenerator;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
@@ -256,6 +257,11 @@ public final class GodSlayerHunt {
 		if (boss.isDeadOrDying()) {
 			return; // onDeath settles it
 		}
+		if (boss.isFrozen()) {
+			d.huntEndTick++; // /boss freeze pauses the hunt timer (D104)
+			d.setDirty();
+			return;
+		}
 		if (now(server) >= d.huntEndTick) {
 			won(server, d, boss);
 			return;
@@ -448,7 +454,7 @@ public final class GodSlayerHunt {
 	public static boolean giveUp(MinecraftServer server) {
 		GodSlayerSavedData d = data(server);
 		if (d.phase == Phase.IDLE) {
-			return false;
+			return removeFrozenStray(server);
 		}
 		endQuiet(server, d);
 		server.getPlayerList().broadcastSystemMessage(Messages.godSlayerGaveUp(), false);
@@ -481,6 +487,75 @@ public final class GodSlayerHunt {
 			}
 		}
 		return null;
+	}
+
+	/** Any God Slayer in any dimension (the hunt boss first), or null. */
+	public static GodSlayer anyBoss(MinecraftServer server) {
+		GodSlayer hunt = currentBoss(server);
+		if (hunt != null) {
+			return hunt;
+		}
+		for (ServerLevel level : server.getAllLevels()) {
+			for (Entity e : level.getAllEntities()) {
+				if (e instanceof GodSlayer g && g.isAlive()) {
+					return g;
+				}
+			}
+		}
+		return null;
+	}
+
+	/** Removes God Slayers made by /boss freeze outside a hunt. True if there was one. */
+	private static boolean removeFrozenStray(MinecraftServer server) {
+		boolean any = false;
+		for (ServerLevel level : server.getAllLevels()) {
+			for (Entity e : level.getAllEntities()) {
+				if (e instanceof GodSlayer g && g.isAlive() && g.isFrozen()) {
+					g.discard();
+					any = true;
+				}
+			}
+		}
+		return any;
+	}
+
+	/** /boss freeze: freezes the boss (spawning one 6 blocks in front of the player outside any hunt if none exists). */
+	public static GodSlayer freeze(CommandSourceStack source, int pose) {
+		MinecraftServer server = source.getServer();
+		GodSlayer boss = anyBoss(server);
+		ServerPlayer player = source.getEntity() instanceof ServerPlayer p ? p : null;
+		if (pose == GodSlayer.FREEZE_NONE) {
+			if (boss == null || !boss.isFrozen()) {
+				return null;
+			}
+			boolean stray = !boss.getUUID().toString().equals(data(server).bossUuid);
+			boss.setFreezePose(GodSlayer.FREEZE_NONE);
+			if (stray) {
+				boss.discard(); // made by /boss freeze outside a hunt: it goes away
+			}
+			return boss;
+		}
+		if (boss == null) {
+			if (player == null) {
+				return null;
+			}
+			ServerLevel level = player.level();
+			boss = GodSlayer.TYPE.create(level, EntitySpawnReason.MOB_SUMMONED);
+			if (boss == null) {
+				return null;
+			}
+			Vec3 look = Vec3.directionFromRotation(0, player.getYRot());
+			double x = player.getX() + look.x * 6;
+			double z = player.getZ() + look.z * 6;
+			boss.setBossLevel(data(server).level);
+			boss.snapTo(x, player.getY(), z, 0f, 0f);
+			boss.faceTarget(player);
+			level.addFreshEntity(boss);
+		} else if (!boss.isFrozen() && player != null && player.level() == boss.level()) {
+			boss.faceTarget(player); // faces the player who froze it, once
+		}
+		boss.setFreezePose(pose);
+		return boss;
 	}
 
 	/** The boss of the running hunt, or null. */
