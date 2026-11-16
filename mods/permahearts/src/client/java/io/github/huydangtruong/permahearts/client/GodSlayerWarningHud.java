@@ -11,7 +11,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.resources.Identifier;
 
-/** Red screen edge while the God Slayer warning runs: grows toward 0, gone when it ends (P-035, D102). */
+/** Red screen edge while the God Slayer warning runs: fixed thickness, pulses once per second with the drum, gone when it ends (P-035, D102). */
 public final class GodSlayerWarningHud implements HudElement {
 	private static long endTick = -1; // client game time when the warning ends; -1 = no warning
 
@@ -44,20 +44,20 @@ public final class GodSlayerWarningHud implements HudElement {
 		}
 		int w = g.guiWidth();
 		int h = g.guiHeight();
-		// a pulse that quickens with the heartbeat
-		double beat = GodSlayerRules.heartbeatInterval(GodSlayerRules.secondsLeft(left));
-		float pulse = 0.85f + 0.15f * (float) Math.sin((mc.level.getGameTime() + t.getGameTimeDeltaPartialTick(false)) * (2 * Math.PI / beat));
-		int maxThick = (int) (Math.min(w, h) * (0.06 + 0.22 * s));
-		int layers = Math.min(60, Math.max(1, maxThick));
-		for (int i = 0; i < layers; i++) {
-			int inset = (int) (maxThick * (i / (double) layers));
-			float a = s * pulse * 0.85f * (1f - i / (float) layers);
-			int color = ((int) (Math.min(1f, a) * 255) << 24) | 0xC00000;
-			int thick = Math.max(1, maxThick / layers);
-			g.fill(inset, inset, w - inset, inset + thick, color);
-			g.fill(inset, h - inset - thick, w - inset, h - inset, color);
-			g.fill(inset, inset + thick, inset + thick, h - inset - thick, color);
-			g.fill(w - inset - thick, inset + thick, w - inset, h - inset - thick, color);
+		// pulses once per second, in time with the drum
+		float pulse = GodSlayerRules.edgePulse(left);
+		int maxThick = Math.max(1, (int) (Math.min(w, h) * GodSlayerRules.EDGE_THICKNESS));
+		// 1 px rings, each a little more transparent than the one outside it: a smooth gradient, no bands
+		for (int i = 0; i < maxThick; i++) {
+			float a = GodSlayerRules.edgeLayerAlpha(s, pulse, i, maxThick);
+			int color = ((int) (a * 255) << 24) | 0xC00000;
+			if ((color >>> 24) == 0) {
+				continue;
+			}
+			g.fill(i, i, w - i, i + 1, color);
+			g.fill(i, h - i - 1, w - i, h - i, color);
+			g.fill(i, i + 1, i + 1, h - i - 1, color);
+			g.fill(w - i - 1, i + 1, w - i, h - i - 1, color);
 		}
 	}
 }

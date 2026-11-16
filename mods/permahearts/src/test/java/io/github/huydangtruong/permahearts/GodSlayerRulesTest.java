@@ -110,13 +110,22 @@ class GodSlayerRulesTest {
 	}
 
 	@Test
-	void warningHeartbeatAndEdge() {
-		assertEquals(24, GodSlayerRules.heartbeatInterval(60));
-		assertEquals(9, GodSlayerRules.heartbeatInterval(0));
-		assertTrue(GodSlayerRules.heartbeatInterval(10) < GodSlayerRules.heartbeatInterval(40));
+	void warningPulseAndEdge() {
+		assertEquals(1f, GodSlayerRules.edgePulse(100), 1e-6);
+		assertTrue(GodSlayerRules.edgePulse(90) < 1f && GodSlayerRules.edgePulse(90) >= 0.85f);
+		assertEquals(GodSlayerRules.edgePulse(100), GodSlayerRules.edgePulse(40), 1e-6);
 		assertEquals(0f, GodSlayerRules.edgeStrength(0), 1e-6);
 		assertTrue(GodSlayerRules.edgeStrength(1200) < GodSlayerRules.edgeStrength(600));
 		assertTrue(GodSlayerRules.edgeStrength(600) < GodSlayerRules.edgeStrength(20));
 		assertTrue(GodSlayerRules.edgeStrength(1) <= 1f);
+		// the edge fades smoothly from the rim to nothing and is never more opaque than 0.35
+		float prev = Float.MAX_VALUE;
+		for (int i = 0; i < 16; i++) {
+			float a = GodSlayerRules.edgeLayerAlpha(1f, 1f, i, 16);
+			assertTrue(a <= GodSlayerRules.EDGE_MAX_ALPHA && a < prev);
+			prev = a;
+		}
+		assertEquals(GodSlayerRules.EDGE_MAX_ALPHA, GodSlayerRules.edgeLayerAlpha(1f, 1f, 0, 16), 1e-6);
+		assertEquals(0f, GodSlayerRules.edgeLayerAlpha(1f, 1f, 16, 16), 1e-6);
 	}
 }

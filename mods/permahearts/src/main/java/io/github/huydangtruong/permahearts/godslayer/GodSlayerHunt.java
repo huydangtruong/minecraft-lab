@@ -50,7 +50,6 @@ public final class GodSlayerHunt {
 	private static ServerBossEvent bar;
 	private static int missingChecks;
 	private static int lastCountdown = -1;
-	private static long lastBeat = 0;
 
 	private GodSlayerHunt() {}
 
@@ -147,7 +146,6 @@ public final class GodSlayerHunt {
 		d.killed = new ArrayList<>();
 		d.setDirty();
 		lastCountdown = -1;
-		lastBeat = 0;
 		missingChecks = 0;
 		server.getPlayerList().broadcastSystemMessage(Messages.godSlayerWarningChat(name(target)), false);
 		for (ServerPlayer p : server.getPlayerList().getPlayers()) {
@@ -224,21 +222,11 @@ public final class GodSlayerHunt {
 			return;
 		}
 		int secs = GodSlayerRules.secondsLeft(left);
-		// heartbeat for the whole warning, faster toward the end (D102)
-		long t = now(server);
-		if (t - lastBeat >= GodSlayerRules.heartbeatInterval(secs)) {
-			lastBeat = t;
-			float pitch = 0.9f + 0.5f * (1f - secs / 60f);
-			for (ServerPlayer p : server.getPlayerList().getPlayers()) {
-				p.level().playSound(null, p.blockPosition(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.HOSTILE, 2f, pitch);
-			}
-		}
 		if (secs != lastCountdown) {
 			lastCountdown = secs;
 			for (ServerPlayer p : server.getPlayerList().getPlayers()) {
-				if (secs <= 10) {
-					p.level().playSound(null, p.blockPosition(), SoundEvents.NOTE_BLOCK_BASEDRUM.value(), SoundSource.HOSTILE, 2f, 0.7f);
-				}
+				// a drum tick once per second for the whole countdown (P-037)
+				p.level().playSound(null, p.blockPosition(), SoundEvents.NOTE_BLOCK_BASEDRUM.value(), SoundSource.HOSTILE, 2f, 0.7f);
 				p.sendOverlayMessage(Messages.godSlayerCountdown(secs)); // red number for the whole 60 s
 				ServerPlayNetworking.send(p, new GodSlayerNet.Warning((int) left)); // client interpolates the edge
 			}
