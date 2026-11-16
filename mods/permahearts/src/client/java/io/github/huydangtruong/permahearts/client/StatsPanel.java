@@ -8,7 +8,7 @@ import io.github.huydangtruong.permahearts.stats.StatMath;
 import io.github.huydangtruong.permahearts.stats.StatsSync;
 import java.util.Map;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
 import net.fabricmc.fabric.api.client.screen.v1.Screens;
 import net.minecraft.client.Minecraft;
@@ -16,6 +16,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
@@ -41,6 +42,8 @@ public final class StatsPanel {
 	private static final int TAB_OUT = 32;
 	private static final int TAB_W = 35;
 	private static final int TAB_H = 27;
+	/** Stats and Techniques have an edge tab; Notes does not. */
+	private static final int TAB_COUNT = 2;
 	private static final int LINE = 10; // D41: one more row (Food regen) must fit
 
 	private static final int TEXT = 0xFF404040;
@@ -59,7 +62,9 @@ public final class StatsPanel {
 	/** Panel tabs, top to bottom. */
 	public enum Tab {
 		STATS("Stats"),
-		TECHNIQUES("Techniques");
+		TECHNIQUES("Techniques"),
+		/** P-042 (D117): opened by its own button, no tab on the edge. */
+		NOTES("Notes");
 
 		final String label;
 
@@ -72,10 +77,12 @@ public final class StatsPanel {
 	private static boolean open;
 	private static Tab tab = Tab.STATS;
 	private static StatsButton button;
+	private static NotesButton notesButton;
 
 	private StatsPanel() {}
 
 	public static void register() {
+		NotesTab.register();
 		ScreenEvents.AFTER_INIT.register((mc, screen, w, h) -> {
 			if (!(screen instanceof InventoryScreen inv)) {
 				return;
@@ -86,10 +93,15 @@ public final class StatsPanel {
 			StatsButton b = new StatsButton(inv);
 			button = b;
 			Screens.getWidgets(inv).add(b);
-			TabButton[] tabs = new TabButton[Tab.values().length];
-			for (Tab t : Tab.values()) {
-				tabs[t.ordinal()] = new TabButton(t);
-				Screens.getWidgets(inv).add(tabs[t.ordinal()]);
+			NotesButton nb = new NotesButton(inv);
+			notesButton = nb;
+			Screens.getWidgets(inv).add(nb);
+			EditBox noteBox = NotesTab.newBox();
+			Screens.getWidgets(inv).add(noteBox);
+			TabButton[] tabs = new TabButton[TAB_COUNT];
+			for (int i = 0; i < TAB_COUNT; i++) {
+				tabs[i] = new TabButton(Tab.values()[i]);
+				Screens.getWidgets(inv).add(tabs[i]);
 			}
 			layout(inv);
 			ScreenEvents.afterBackground(inv).register((s, g, mx, my, delta) -> {
@@ -97,26 +109,45 @@ public final class StatsPanel {
 					open = false; // the recipe book button was pressed: it moved the inventory already
 				}
 				b.setPosition(left(inv) + 126, inv.height / 2 - 22);
+				nb.setPosition(left(inv) + 148, inv.height / 2 - 22);
 				int top = ((ContainerScreenAccess) inv).permahearts$topPos();
 				for (TabButton t : tabs) {
 					t.visible = open;
 					t.setPosition(panelX(inv) - TAB_OUT + 2, top + 3 + t.tab.ordinal() * TAB_H);
 				}
+				NotesTab.placeBox(panelX(inv), top, W, H, open && tab == Tab.NOTES);
 				if (open) {
 					draw(inv, g, mx, my);
 				}
 			});
+			ScreenKeyboardEvents.allowKeyPress(inv).register((scr, ev) -> {
+				if (!NotesTab.boxFocused() || ev.key() == 256) {
+					return true;
+				}
+				if (ev.key() == 257 || ev.key() == 335) {
+					NotesTab.send();
+				} else {
+					noteBox.keyPressed(ev); // typing keys like E must not close the inventory
+				}
+				return false;
+			});
 			ScreenMouseEvents.allowMouseClick(inv).register((scr, ev) -> {
-				if (!open || tab != Tab.TECHNIQUES || !contains(inv, ev.x(), ev.y())) {
+				if (!open || tab == Tab.STATS || !contains(inv, ev.x(), ev.y())) {
 					return true;
 				}
 				int x0 = panelX(inv);
 				int y0 = ((ContainerScreenAccess) inv).permahearts$topPos();
+				if (tab == Tab.NOTES) {
+					return !(ev.x() >= x0 && NotesTab.click(x0, y0, W, H, ev.x(), ev.y(), ev.button()));
+				}
 				return !TechniquesTab.click(x0, y0, W, H, ev.x(), ev.y(), ev.button());
 			});
 			ScreenMouseEvents.allowMouseScroll(inv).register((scr, mx, my, sx, sy) -> {
-				if (!open || tab != Tab.TECHNIQUES || !contains(inv, mx, my)) {
+				if (!open || tab == Tab.STATS || !contains(inv, mx, my)) {
 					return true;
+				}
+				if (tab == Tab.NOTES) {
+					return !NotesTab.scroll(panelX(inv), ((ContainerScreenAccess) inv).permahearts$topPos(), W, H, mx, my, sy);
 				}
 				return !TechniquesTab.scroll(panelX(inv), ((ContainerScreenAccess) inv).permahearts$topPos(), W, H, mx, my, sy);
 			});
@@ -163,7 +194,27 @@ public final class StatsPanel {
 		if (!open && rb.isVisible()) {
 			rb.toggleVisibility();
 		}
+		if (open && tab == Tab.NOTES) {
+			tab = Tab.STATS; // the Cultivation button leaves the Notes page instead of closing
+			return;
+		}
 		open = !open;
+		layout(inv);
+	}
+
+	/** The Notes button (P-042): opens the panel on the Notes page, or closes it when already there. */
+	private static void toggleNotes(InventoryScreen inv) {
+		RecipeBookComponent<?> rb = recipeBook(inv);
+		if (open && tab == Tab.NOTES) {
+			open = false;
+		} else {
+			if (!open && rb.isVisible()) {
+				rb.toggleVisibility();
+			}
+			open = true;
+			tab = Tab.NOTES;
+			NotesTab.opened();
+		}
 		layout(inv);
 	}
 
@@ -190,7 +241,7 @@ public final class StatsPanel {
 		}
 		int x0 = panelX(inv);
 		int y0 = ((ContainerScreenAccess) inv).permahearts$topPos();
-		boolean onTabs = x >= x0 - TAB_OUT && x < x0 && y >= y0 + 3 && y < y0 + 3 + Tab.values().length * TAB_H;
+		boolean onTabs = x >= x0 - TAB_OUT && x < x0 && y >= y0 + 3 && y < y0 + 3 + TAB_COUNT * TAB_H;
 		return onTabs || x >= x0 && x < x0 + W && y >= y0 && y < y0 + H;
 	}
 
@@ -218,6 +269,10 @@ public final class StatsPanel {
 		g.text(font, Component.literal(tab.label).withStyle(ChatFormatting.BOLD), tx, y0 + 7, TEXT, false);
 		if (tab == Tab.TECHNIQUES) {
 			TechniquesTab.draw(g, font, x0, y0, W, H, mx, my);
+			return;
+		}
+		if (tab == Tab.NOTES) {
+			NotesTab.draw(g, font, x0, y0, W, H, mx, my);
 			return;
 		}
 		var player = Minecraft.getInstance().player;
@@ -280,6 +335,22 @@ public final class StatsPanel {
 		@Override
 		protected void extractContents(GuiGraphicsExtractor g, int mouseX, int mouseY, float delta) {
 			g.blitSprite(RenderPipelines.GUI_TEXTURED, isHoveredOrFocused() ? BUTTON_HOVER : BUTTON, getX(), getY(), 20, 18);
+		}
+	}
+
+	/** Third button next to Cultivation (P-042): opens the Notes page. A tablet with a book and quill. */
+	private static final class NotesButton extends Button {
+		private static final ItemStack QUILL = new ItemStack(Items.WRITABLE_BOOK);
+
+		NotesButton(InventoryScreen inv) {
+			super(0, 0, 20, 18, Component.literal("Notes"), b -> toggleNotes(inv), DEFAULT_NARRATION);
+			setTooltip(Tooltip.create(Component.literal("Notes")));
+		}
+
+		@Override
+		protected void extractContents(GuiGraphicsExtractor g, int mouseX, int mouseY, float delta) {
+			g.blitSprite(RenderPipelines.GUI_TEXTURED, isHoveredOrFocused() ? BUTTON_HOVER : BUTTON, getX(), getY(), 20, 18);
+			g.fakeItem(QUILL, getX() + 2, getY() + 1);
 		}
 	}
 

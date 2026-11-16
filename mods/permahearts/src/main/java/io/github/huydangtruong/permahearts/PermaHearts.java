@@ -79,6 +79,7 @@ public class PermaHearts implements ModInitializer {
 		HeartsAttachment.WANDERER.identifier();
 		io.github.huydangtruong.permahearts.technique.TechniqueAttachment.TECHNIQUES.identifier();
 		io.github.huydangtruong.permahearts.technique.TechniqueNet.register();
+		io.github.huydangtruong.permahearts.notes.NotesNet.register(); // P-042: Notes panel
 		io.github.huydangtruong.permahearts.technique.TechniqueSelection.init();
 		HeartsAttachment.DM_PROTECTED.identifier();
 		ElixirItems.init();
