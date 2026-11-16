@@ -122,7 +122,7 @@ public final class Illusion extends PathfinderMob implements OwnedSummon {
 		ItemStack held = owner.getInventory().getItem(0);
 		IllusionJob job = IllusionJob.fromItemId(BuiltInRegistries.ITEM.getKey(held.getItem()).toString());
 		BlockPos center = owner.blockPosition();
-		int foodShare = job == IllusionJob.BREED ? held.getCount() / (count + 1) : 0;
+		int feedTotal = job == IllusionJob.BREED ? held.getCount() : 0;
 		// count + 1 spots on a ring 2-3 blocks away, evenly spread from a random start; the owner takes one at random.
 		BlockPos origin = owner.blockPosition();
 		List<Vec3> spots = new ArrayList<>();
@@ -161,7 +161,8 @@ public final class Illusion extends PathfinderMob implements OwnedSummon {
 				lock.set(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
 				c.setItemSlot(EquipmentSlot.MAINHAND, lock);
 			}
-			if (foodShare > 0) { // breeding food is never free: the owner's stack is split with the clones
+			int foodShare = count > 0 ? feedTotal / count + (i < feedTotal % count ? 1 : 0) : 0;
+			if (foodShare > 0) { // D109: the whole stack is split evenly between the clones
 				c.carry.add(held.split(foodShare));
 			}
 			c.copyGear(owner);
