@@ -32,6 +32,8 @@ Release steps: [workflow/release.md](../workflow/release.md). Release **only whe
 
 - **Next: P-033** God Slayer skills Lv 2 to 10 through `GodSlayerSkills` (D97). No plan yet.
 - **P-037 released in 0.23.0.** Waiting for Huy to look at it in game.
+- **P-038 in dev, stopped:** plan `docs/plans/P-038-reward-boxes-and-heart-elixir.md`, branch `feat/P-038-rewards` (dev on `feat/P-038-dev` in worktree `.claude/worktrees/agent-ad97bd6ad9f63ee6a`). The Sonnet dev hit the weekly limit (resets 8pm Asia/Saigon). Resume that dev, do not start over.
+- **Next after P-038:** BL-021/D109 (Illusion feed and range), BL-022/D110 (boss level reward split), BL-023 (4 boss skills, waiting for Huy: from Lv 1 or by level).
 - **BL-014** (player technique fire burns the God Slayer) is next in line with P-033.
 
 - **Windows installer bug** (reported by Huy's friend): picking a profile other than "26.3 Fabric Essential" says SUCCESS, but that profile's mods folder still has the old jar. Reading `minecraft-lab.ps1` (`Find-Profiles` / `Select-Profile`) found nothing yet. Waiting for the friend's `Mods folder:` line and that profile's Game directory.
