@@ -23,14 +23,14 @@ A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [w
 | 0.20.0 contains | God Slayer 5 blocks tall, new stance model (D98); Heaven Blast stuns mobs 1 s + 0.1 s per level (D99) (P-034). Not playtested by hand |
 | 0.21.0 contains | P-035: God Slayer chases instead of teleporting early (D100), look fixes with wings and 45° lean (D101), orange Crimson Master notice, red 60 s countdown with heartbeat and red edge (D102), Swiftness +5% (D103), `/boss freeze stand\|fly\|fly_forward\|off` (D104). Not playtested by hand |
 | 0.22.0 contains | P-036: God Slayer look round 3 (D105): head attached, 95% wide, shorter above the eyes (13 rows, about 7%, integer boxes); longer, wider, flatter horns; katana edge forward with the tip slant; one white trapezoid hair piece; two-bone ^ ^ wings with 11 feathers per side from the approved mockup. Not playtested by hand |
-| On `main`, not released | Nothing |
+| On `main`, not released | P-037: God Slayer look round 4 (D106): thinner, narrower, lower head; slimmer horns; fixed mane in two pieces (upper on the head, lower on the chest, 10° back, past the belt); head turn clamped to 15° yaw / 10° pitch; arms more forward, longer upper arm. Countdown (D107): no heartbeat, drum every second for 60 s, thin pale red edge without square bands |
 
 Release steps: [workflow/release.md](../workflow/release.md). Release **only when Huy says so**.
 
 ## In flight
 
 - **Next: P-033** God Slayer skills Lv 2 to 10 through `GodSlayerSkills` (D97). No plan yet.
-- **P-036 released in 0.22.0.** Waiting for Huy to look at the boss in game. Weak spots in the screenshots: the hair from behind reads as a near-rectangular slab (26 → 33 wide), and the katana close-up camera angle is poor.
+- **P-037 merged on main, not released.** Waiting for Huy to say release. P-036 is in 0.22.0.
 - **BL-014** (player technique fire burns the God Slayer) is next in line with P-033.
 
 - **Windows installer bug** (reported by Huy's friend): picking a profile other than "26.3 Fabric Essential" says SUCCESS, but that profile's mods folder still has the old jar. Reading `minecraft-lab.ps1` (`Find-Profiles` / `Select-Profile`) found nothing yet. Waiting for the friend's `Mods folder:` line and that profile's Game directory.
