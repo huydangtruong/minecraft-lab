@@ -15,7 +15,9 @@
 		"MouseScrollMixin",
 		"ChargeFovMixin",
 		"AquaWaterVisionMixin",
-		"AquaLightmapMixin"
+		"AquaLightmapMixin",
+		"DeathMatchSkyMixin",
+		"DeathMatchFogMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
