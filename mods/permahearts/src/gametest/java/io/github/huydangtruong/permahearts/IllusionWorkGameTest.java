@@ -169,6 +169,26 @@ public class IllusionWorkGameTest {
 		});
 	}
 
+	/** D123: wheat one stage short of ripe (6) and beetroot at 2 are harvested with the ripe drops (wheat, not only seeds). */
+	@GameTest(maxTicks = 900)
+	public void farmHarvestsTheLastTwoStagesWithRipeDrops(GameTestHelper c) {
+		ServerPlayer p = owner(c, new ItemStack(Items.IRON_HOE));
+		Container chest = chest(c, 2, 1, 5);
+		c.setBlock(6, 0, 2, Blocks.FARMLAND);
+		c.setBlock(6, 1, 2, Blocks.WHEAT.defaultBlockState().setValue(CropBlock.AGE, 6));
+		c.setBlock(6, 0, 3, Blocks.FARMLAND);
+		c.setBlock(6, 1, 3, Blocks.BEETROOTS.defaultBlockState().setValue(net.minecraft.world.level.block.BeetrootBlock.AGE, 2));
+		c.setBlock(7, 0, 2, Blocks.FARMLAND);
+		c.setBlock(7, 1, 2, Blocks.WHEAT.defaultBlockState().setValue(CropBlock.AGE, 5)); // too young: stays
+		Illusion a = castOne(c, p);
+		c.succeedWhen(() -> {
+			c.assertTrue(count(chest, s -> s.is(Items.WHEAT)) >= 1, "wheat from the stage-6 crop" + dbg(a));
+			c.assertTrue(count(chest, s -> s.is(Items.BEETROOT)) >= 1, "beetroot from the stage-2 crop" + dbg(a));
+			c.assertTrue(c.getBlockState(new BlockPos(7, 1, 2)).getValue(CropBlock.AGE) >= 5, "the young crop is left alone");
+			FlightBladeGameTest.drop(c, p);
+		});
+	}
+
 	/** P-044: a ripe field the clone cannot reach (on a pillar, nearer than the free crop) must not keep it standing still. */
 	@GameTest(maxTicks = 900)
 	public void farmSkipsAnUnreachableFieldAndHarvestsTheRest(GameTestHelper c) {
