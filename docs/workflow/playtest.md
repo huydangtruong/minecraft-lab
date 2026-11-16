@@ -97,16 +97,16 @@ Chưa có phím hay thanh chiêu (phần B), nên thử bằng lệnh op `/techn
 
 Kiểm bằng máy: `./gradlew :permahearts:build` (game test cho từng chiêu) và `./gradlew :permahearts:runClientGameTest` (ảnh `20-fire-field` đến `26-phase-inside-wall-third-person` trong `mods/permahearts/build/run/clientGameTest/screenshots/`).
 
-## Chiêu thức: thanh chiêu, phím R, dùng chiêu (P-011 phần B)
+## Chiêu thức: thanh chiêu Z X C V, dùng chiêu (P-011 phần B, đổi ở P-045 / D125)
 
 Cần công tắc thế giới BẬT, chế độ Survival (Creative/Spectator không hiện thanh chiêu và không dùng được chiêu, giống thanh HeartXP). Chuẩn bị: `/technique set @s fire 10`, `/technique set @s ice 5`, `/technique set @s healing 3`, `/technique emeralds @s 832` (mở 3 ô), rồi gắn chiêu vào ô ở tab Techniques (chưa gắn thì thanh chỉ có ô ✕).
 
-**Lưu ý phím R**: Essential cũng dùng R cho bảng emote. Hãy đổi một trong hai: Options > Controls > Key Binds > mục "Immortal Cultivation" > "Technique mode (toggle)", hoặc đổi phím emote trong Essential. (Bản cũ đặt nhầm mặc định là mũi tên lên; nếu máy bạn còn lưu phím cũ thì gán lại R.)
+**Lưu ý phím**: 4 phím chọn ô chiêu mặc định **Z, X, C, V** (Options > Controls > Key Binds > mục "Immortal Cultivation" > "Technique slot 1..4"). Trùng phím với mod khác (Essential) hoặc phím Lưu/Tải thanh đồ của Creative (X/C) thì tự đổi.
 
-1. **Thanh chiêu bên phải (chỉ để xem)**: góc dưới phải, cách mép 8 px: nhãn phẳng ghi tên phím (ví dụ `R`), rồi mỗi chiêu đã gắn một ô (hình chiêu + số giây hồi khi đang hồi). Không có khung chọn ở đây.
-2. **Bấm R = bật/tắt chế độ chiêu**: các chiêu đã gắn chèn vào **đầu thanh đồ** (ô nền tối, viền vàng nhạt), đồ của bạn dịch sang phải (N ô cuối thanh đồ tạm ẩn). Ô đang chọn giữ nguyên số khi bật/tắt (ô 1 = kiếm → bấm R → ô 1 = chiêu 1 → bấm R → ô 1 = kiếm). Cuộn chuột / bấm phím 1-9 chọn trên thanh đã dịch: ô chiêu thì khung chọn **màu vàng**, ô đồ thì khung trắng như thường (đồ ở ô thứ N+1 là món số 1 trong túi). Đồ trong túi không bị di chuyển. Chiêu đang chọn hiện tên và cấp phía trên thanh bên phải; tay chính hiện vật tiêu điểm + hạt như trước. Chế độ tự tắt khi chết, tắt công tắc, hoặc không còn ô nào gắn chiêu.
-3. (Bảng tròn khi giữ R đã bỏ.)
-4. **Chuột trái khi đã chọn chiêu**: ném ngay với sức đầy (Lửa/Băng) hoặc dùng luôn (Hồi máu, Xuyên tường, Hất tung, Hiến Tế). Đánh/đào/đặt block bằng đồ cầm tay bị chặn khi đang chọn chiêu; muốn đánh bình thường thì cuộn / bấm 1-9 sang ô đồ, hoặc bấm R tắt chế độ chiêu.
+1. **Thanh chiêu bên phải**: góc dưới phải, cách mép 8 px: mỗi chiêu đã gắn một ô (hình chiêu + số giây hồi khi đang hồi), góc trên trái ô ghi tên phím của ô đó (đổi phím thì nhãn đổi theo). Ô đang chọn có **khung vàng**.
+2. **Bấm Z/X/C/V = chọn ô chiêu đó** (ô trống hoặc chiêu Lv 0 thì không làm gì; bấm lại khi đang chọn thì vẫn chọn). Thanh đồ vẫn là thanh thường, nhưng khi đang chọn chiêu thì **không có khung chọn**; ô đồ thật không đổi. **Cuộn chuột** đi một vòng: ô đồ 1 → 9 → các ô chiêu có chiêu → ô đồ 1 (cuộn ngược thì ngược lại); không có chiêu nào thì cuộn như thường. **Bấm 1-9** về ô đồ ngay. Mở màn hình khác, chết, tắt công tắc, hoặc gỡ chiêu khỏi ô đang chọn thì về thanh đồ. Chiêu đang chọn hiện tên và cấp phía trên thanh bên phải; tay chính hiện vật tiêu điểm + hạt như trước.
+3. (Không còn bảng tròn, không còn phím R.)
+4. **Chuột trái khi đã chọn chiêu**: ném ngay với sức đầy (Lửa/Băng) hoặc dùng luôn (Hồi máu, Xuyên tường, Hất tung, Hiến Tế). Đánh/đào/đặt block bằng đồ cầm tay bị chặn khi đang chọn chiêu; muốn đánh bình thường thì cuộn / bấm 1-9 về ô đồ.
 5. **Chuột phải giữ** với Lửa/Băng: màn hình **zoom dần như kéo cung**, thanh nạp hiện **giữa màn hình, ngay trên hàng máu/giáp**, đầy sau 1 giây (chuyển vàng). **Thả** để ném: nạp nửa thì bay gần hơn. Cầu lửa/băng nổ ở chỗ nó dừng dù rơi xuống đất, nước hay hết thời gian bay (lỗi cầu lửa nạp đầy rơi không nổ đã sửa). Với các chiêu dùng ngay thì bấm chuột phải là dùng.
 6. **Hồi chiêu**: ngay sau khi dùng, ô chiêu bị phủ xám, thu nhỏ từ trên xuống, ghi số giây còn lại (Lửa 16 s, Băng 24 s, Hồi máu 60 s, Xuyên tường 90 s, Hất tung 20 s, Hiến Tế 45 s). Dùng khi đang hồi: dòng chữ "On cooldown: N s" hiện giữa/dưới màn hình, không ném, không tốn gì. Chiêu đang hồi vẫn chọn được.
 7. **Tự bỏ chọn**: chọn một ô rồi vào tab Techniques gỡ chiêu khỏi ô đó, hoặc chết, hoặc tắt công tắc thế giới: thanh tự về ✕ và vật tiêu điểm biến mất.

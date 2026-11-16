@@ -118,7 +118,7 @@ public final class Illusion extends PathfinderMob implements OwnedSummon {
 		long end = sl.getGameTime() + Math.round(TechniqueRules.illusionSeconds(level) * 20);
 		IllusionTargets.open(owner.getUUID());
 		// D73/D85: the job is locked at the cast from the item in the owner's FIRST hotbar slot (inventory index 0): techniques are
-		// cast in technique mode, where the main hand is no real choice. An empty slot means FIGHT. The item is only read.
+		// cast with a technique selected, where the main hand is no real choice. An empty slot means FIGHT. The item is only read.
 		ItemStack held = owner.getInventory().getItem(0);
 		IllusionJob job = IllusionJob.fromItemId(BuiltInRegistries.ITEM.getKey(held.getItem()).toString());
 		BlockPos center = owner.blockPosition();

@@ -32,7 +32,7 @@ public class TeleportClientTest implements FabricClientGameTest {
 					.withEmeralds(TechniqueRules.MAX_EMERALDS).withSlot(0, Technique.TELEPORT)));
 			context.runOnClient(mc -> mc.options.setCameraType(CameraType.FIRST_PERSON));
 			context.waitTicks(40);
-			context.getInput().pressKey(ClientSkills.KEY);
+			context.getInput().pressKey(ClientSkills.KEYS[0]);
 			context.waitTicks(15);
 			check(context.computeOnClient(mc -> ClientSkills.focusOf(mc.player) == Technique.TELEPORT), "the focus is in hand");
 			context.takeScreenshot("60-teleport-focus-in-hand");

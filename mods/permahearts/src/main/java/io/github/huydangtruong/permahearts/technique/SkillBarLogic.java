@@ -1,6 +1,6 @@
 package io.github.huydangtruong.permahearts.technique;
 
-/** Pure maths of the skill bar: technique-mode hotbar mapping, charge, cooldown overlay. No Minecraft imports. */
+/** Pure maths of the skill bar: scroll ring, slot keys, charge, cooldown overlay. No Minecraft imports. */
 public final class SkillBarLogic {
 
 	private SkillBarLogic() {}
@@ -16,7 +16,7 @@ public final class SkillBarLogic {
 		return Math.max(0f, Math.min(1f, heldTicks / (20f * fullSeconds)));
 	}
 
-	/** Slot numbers (0..3) of the filled slots, in slot order. These become the first N hotbar cells in technique mode. */
+	/** Slot numbers (0..3) of the filled slots, in slot order. They form the skill bar and the technique part of the scroll ring. */
 	public static int[] filledSlots(boolean[] filled) {
 		int n = 0;
 		for (boolean f : filled) {
@@ -34,19 +34,39 @@ public final class SkillBarLogic {
 		return out;
 	}
 
-	/** Technique mode: slot of the technique shown in a hotbar cell, or -1 when the cell shows an item. */
-	public static int techniqueAtCell(int cell, int[] slots) {
-		return cell >= 0 && cell < slots.length ? slots[cell] : -1;
+	/** Number of hotbar slots; the scroll ring continues with the filled technique slots after them (D125). */
+	public static final int HOTBAR = 9;
+
+	/**
+	 * Scroll ring (D125): positions 0..8 are the hotbar slots, 9.. are the filled technique slots in slot order, then it wraps
+	 * to 0. delta +1 = next (wheel down), -1 = previous. Without filled techniques it is the plain 9-slot hotbar ring.
+	 */
+	public static int scrollRing(int position, int delta, int filledCount) {
+		int size = HOTBAR + Math.max(0, filledCount);
+		return Math.floorMod(position + Integer.signum(delta), size);
 	}
 
-	/** Technique mode: real item slot shown in a hotbar cell (cell - N), or -1 when the cell shows a technique. */
-	public static int itemSlotAtCell(int cell, int techniqueCount) {
-		return cell >= techniqueCount ? cell - techniqueCount : -1;
+	/** Ring position of a selection: the hotbar slot, or 9 + index of the technique slot among the filled slots. */
+	public static int ringPosition(int hotbarSlot, int techniqueSlot, int[] filledSlots) {
+		if (techniqueSlot >= 0) {
+			for (int i = 0; i < filledSlots.length; i++) {
+				if (filledSlots[i] == techniqueSlot) {
+					return HOTBAR + i;
+				}
+			}
+		}
+		return hotbarSlot;
 	}
 
-	/** Cell after scrolling (delta +1 = down/right) in a hotbar of 9 cells, wrapping. */
-	public static int scrollCell(int cell, int delta) {
-		return Math.floorMod(cell + (int) Math.signum(delta), 9);
+	/** Technique slot at a ring position, or -1 when the position is a hotbar slot. */
+	public static int techniqueAtRing(int position, int[] filledSlots) {
+		int i = position - HOTBAR;
+		return i >= 0 && i < filledSlots.length ? filledSlots[i] : -1;
+	}
+
+	/** Technique slot a slot key selects (key index 0..3 = Z X C V): the slot itself when it holds a usable technique, else -1. */
+	public static int slotForKey(int keyIndex, boolean[] usable) {
+		return keyIndex >= 0 && keyIndex < usable.length && usable[keyIndex] ? keyIndex : -1;
 	}
 
 	/** Share of the technique's cooldown still to run (1 right after the cast, 0 when ready). */

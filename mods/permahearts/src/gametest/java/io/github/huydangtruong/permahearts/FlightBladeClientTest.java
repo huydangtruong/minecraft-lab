@@ -14,7 +14,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.monster.zombie.Husk;
 
 /**
- * P-014: Life Steal Blade and Flight in a real client. R = technique mode, cell 0 = blade, cell 1 = flight. Screenshots
+ * P-014: Life Steal Blade and Flight in a real client. Z = blade, X = flight. Screenshots
  * 50-... to 54-... . Run with ./gradlew :permahearts:runClientGameTest.
  */
 public class FlightBladeClientTest implements FabricClientGameTest {
@@ -42,8 +42,8 @@ public class FlightBladeClientTest implements FabricClientGameTest {
 			server.runOnServer(s -> s.getPlayerList().getPlayers().get(0).setHealth(8f));
 			context.waitTicks(10);
 
-			// blade: R, cell 0 = the blade; the crosshair is on the husk; left click hits
-			context.getInput().pressKey(ClientSkills.KEY);
+			// blade: slot key Z = the blade; the crosshair is on the husk; left click hits
+			context.getInput().pressKey(ClientSkills.KEYS[0]);
 			context.waitTicks(15);
 			check(context.computeOnClient(mc -> ClientSkills.focusOf(mc.player) == Technique.BLADE), "the blade is in hand");
 			context.takeScreenshot("50-blade-in-hand");
@@ -71,11 +71,10 @@ public class FlightBladeClientTest implements FabricClientGameTest {
 			check(server.computeOnServer(FlightBladeClientTest::huskHealth) == husk1b, "right click does nothing with the blade");
 			server.runCommand("kill @e[type=husk]");
 
-			// flight: cell 1, right click casts at once
-			context.getInput().pressKey(o -> o.keyHotbarSlots[1]);
+			// flight: slot key X, right click casts at once
+			context.getInput().pressKey(ClientSkills.KEYS[1]);
 			context.waitTicks(5);
-			check(context.computeOnClient(mc -> ClientSkills.selected()) == 1, "flight cell selected: mode " + context.computeOnClient(mc -> ClientSkills.mode())
-				+ " cell " + context.computeOnClient(mc -> ClientSkills.cell()) + " sel " + context.computeOnClient(mc -> ClientSkills.selected()));
+			check(context.computeOnClient(mc -> ClientSkills.selected()) == 1, "flight slot selected, sel " + context.computeOnClient(mc -> ClientSkills.selected()));
 			context.getInput().holdMouse(RIGHT);
 			context.waitTicks(5);
 			context.getInput().releaseMouse(RIGHT);

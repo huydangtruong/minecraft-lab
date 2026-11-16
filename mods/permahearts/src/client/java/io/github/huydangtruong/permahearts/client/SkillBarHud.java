@@ -11,13 +11,15 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 
 /**
- * Display-only skill bar at the bottom-right: a flat label with the bound key, then one cell per filled slot with its
- * cooldown (P-012b). Also draws the charge power bar at the screen centre, above the health / armour rows.
+ * Skill bar at the bottom-right (D125): one cell per usable slot with its own key label, cooldown and the gold selection
+ * frame (P-045). Also draws the charge power bar at the screen centre, above the health / armour rows.
  */
 public class SkillBarHud implements HudElement {
 	private static final int MARGIN = 8; // same distance from the edges as the HeartXP bar
 	private static final int BOX = 22;
 	private static final int GAP = 2;
+	private static final net.minecraft.resources.Identifier SELECTION = net.minecraft.resources.Identifier.withDefaultNamespace("hud/hotbar_selection");
+	private static final int GOLD = 0xFFFFD040;
 
 	@Override
 	public void extractRenderState(GuiGraphicsExtractor g, DeltaTracker t) {
@@ -27,20 +29,21 @@ public class SkillBarHud implements HudElement {
 		}
 		TechniqueData d = ClientSkills.data(mc.player);
 		long now = mc.level.getGameTime();
-		int[] slots = ClientSkills.modeSlots(mc);
-		Component key = ClientSkills.KEY.getTranslatedKeyMessage();
-		int labelW = Math.max(14, mc.font.width(key) + 6);
-		int total = labelW + GAP + slots.length * BOX + Math.max(0, slots.length - 1) * GAP;
+		int[] slots = ClientSkills.usableSlots(mc);
+		int total = slots.length * BOX + Math.max(0, slots.length - 1) * GAP;
 		int left = g.guiWidth() - MARGIN - total;
 		int top = g.guiHeight() - MARGIN - BOX;
-		// flat label with the bound key, no box
-		g.text(mc.font, key, left + (labelW - mc.font.width(key)) / 2, top + BOX / 2 - 4, 0xFFE0E0E0, true);
 		for (int i = 0; i < slots.length; i++) {
 			Technique tech = d.inSlot(slots[i]);
-			int x = left + labelW + GAP + i * (BOX + GAP);
+			int x = left + i * (BOX + GAP);
 			g.fill(x, top, x + BOX, top + BOX, 0x90000000);
 			g.outline(x, top, BOX, BOX, 0xFF505050);
 			g.blitSprite(RenderPipelines.GUI_TEXTURED, TechniquesTab.icon(tech), x + 3, top + 3, 16, 16);
+			if (slots[i] == ClientSkills.selected()) { // D49: gold selection frame
+				g.blitSprite(RenderPipelines.GUI_TEXTURED, SELECTION, x - 1, top - 1, 24, 23, GOLD);
+			}
+			// flat label with this slot's own key (follows rebinding), top-left corner of the cell
+			g.text(mc.font, ClientSkills.KEYS[slots[i]].getTranslatedKeyMessage(), x + 3, top + 3, 0xFFE0E0E0, true);
 			long cd = d.cooldownLeft(tech, now);
 			if (cd > 0) {
 				int h = Math.round((BOX - 2) * SkillBarLogic.cooldownFraction(cd, io.github.huydangtruong.permahearts.technique.TechniqueRules.cooldownTicks(tech, Math.max(1, d.level(tech)))));

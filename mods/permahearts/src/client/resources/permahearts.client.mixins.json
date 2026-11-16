@@ -13,6 +13,7 @@
 		"ScreenEffectPhaseMixin",
 		"PhaseFogMixin",
 		"MouseScrollMixin",
+		"HotbarSelectionMixin",
 		"ChargeFovMixin",
 		"AquaWaterVisionMixin",
 		"AquaLightmapMixin",
