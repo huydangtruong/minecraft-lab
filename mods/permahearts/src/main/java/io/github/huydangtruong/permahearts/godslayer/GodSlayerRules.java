@@ -140,10 +140,28 @@ public final class GodSlayerRules {
 		return hearts >= MIN_HEARTS;
 	}
 
-	/** Ticks between two heartbeats during the warning: 24 at the start (60 s left), 9 at the end. */
-	public static int heartbeatInterval(int secondsLeft) {
-		double f = Math.max(0, Math.min(1, secondsLeft / 60.0));
-		return (int) Math.round(9 + 15 * f);
+	/** Pulse of the red edge, 0.85..1: peaks on the tick the drum plays (ticksLeft a multiple of 20), fades until the next one. */
+	public static float edgePulse(long ticksLeft) {
+		int age = (int) Math.floorMod(20 - Math.floorMod(ticksLeft, 20L), 20L);
+		float k = 1f - age / 20f;
+		return 0.85f + 0.15f * k * k;
+	}
+
+	/** Thickness of the red screen edge as a share of the shorter screen side: fixed, it does not grow (P-037). */
+	public static final float EDGE_THICKNESS = 0.06f;
+	/** The red edge is never more opaque than this at its outer rim. */
+	public static final float EDGE_MAX_ALPHA = 0.35f;
+
+	/**
+	 * Opacity, 0..EDGE_MAX_ALPHA, of the 1 px ring number i of n (0 = outermost) of the red edge: fades smoothly to fully
+	 * transparent at the inner side. strength = edgeStrength, pulse = about 0.85..1.
+	 */
+	public static float edgeLayerAlpha(float strength, float pulse, int i, int n) {
+		if (n <= 0 || i < 0 || i >= n) {
+			return 0f;
+		}
+		float k = 1f - i / (float) n;
+		return Math.min(EDGE_MAX_ALPHA, Math.max(0f, strength) * Math.max(0f, pulse) * EDGE_MAX_ALPHA * k * k);
 	}
 
 	/** Strength of the red screen edge, 0..1: nothing at the start of the warning, full when it ends. */
