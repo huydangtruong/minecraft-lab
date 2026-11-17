@@ -1,0 +1,15 @@
+{
+	"schemaVersion": 1,
+	"id": "immortal-cultivation-test",
+	"version": "1.0.0",
+	"name": "ImmortalCultivation tests",
+	"environment": "*",
+	"entrypoints": {
+		"fabric-client-gametest": ["io.github.huydangtruong.immortalcultivation.QuestScreenClientTest", "io.github.huydangtruong.immortalcultivation.RewardBoxClientTest", "io.github.huydangtruong.immortalcultivation.TechniqueClientTest", "io.github.huydangtruong.immortalcultivation.SkillBarClientTest", "io.github.huydangtruong.immortalcultivation.FlightBladeClientTest", "io.github.huydangtruong.immortalcultivation.TeleportClientTest", "io.github.huydangtruong.immortalcultivation.GolemClientTest", "io.github.huydangtruong.immortalcultivation.AngelClientTest", "io.github.huydangtruong.immortalcultivation.AquaClientTest", "io.github.huydangtruong.immortalcultivation.IllusionClientTest", "io.github.huydangtruong.immortalcultivation.WarpClientTest", "io.github.huydangtruong.immortalcultivation.ThunderClientTest", "io.github.huydangtruong.immortalcultivation.LabelsClientTest", "io.github.huydangtruong.immortalcultivation.GodSlayerClientTest", "io.github.huydangtruong.immortalcultivation.GodSlayerCountdownClientTest", "io.github.huydangtruong.immortalcultivation.NotesClientTest"],
+		"fabric-gametest": ["io.github.huydangtruong.immortalcultivation.ImmortalCultivationGameTest", "io.github.huydangtruong.immortalcultivation.WandererGameTest", "io.github.huydangtruong.immortalcultivation.RewardBoxGameTest", "io.github.huydangtruong.immortalcultivation.TechniqueGameTest", "io.github.huydangtruong.immortalcultivation.TechniqueEffectsGameTest", "io.github.huydangtruong.immortalcultivation.FlightBladeGameTest", "io.github.huydangtruong.immortalcultivation.ThousandMileStepGameTest", "io.github.huydangtruong.immortalcultivation.GolemGameTest", "io.github.huydangtruong.immortalcultivation.AngelGameTest", "io.github.huydangtruong.immortalcultivation.AquaGameTest", "io.github.huydangtruong.immortalcultivation.IllusionGameTest", "io.github.huydangtruong.immortalcultivation.IllusionWorkGameTest", "io.github.huydangtruong.immortalcultivation.WarpGameTest", "io.github.huydangtruong.immortalcultivation.ThunderGameTest", "io.github.huydangtruong.immortalcultivation.GodSlayerGameTest", "io.github.huydangtruong.immortalcultivation.NotesGameTest"]
+	},
+	"mixins": ["immortal-cultivation-test.mixins.json"],
+	"depends": {
+		"immortal-cultivation": "*"
+	}
+}

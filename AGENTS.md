@@ -25,15 +25,16 @@ Huy writes in Vietnamese and wants short, plain answers. Owner-facing text (READ
 JDK 25 is required (`/usr/libexec/java_home -v 25`; installed at `~/Library/Java/JavaVirtualMachines/temurin-25.jdk`). The scripts and `export JAVA_HOME=$(/usr/libexec/java_home -v 25)` handle it.
 
 ```sh
-./gradlew :permahearts:build         # compile + JUnit + server game tests (jar in mods/permahearts/build/libs/)
-./gradlew :permahearts:test          # JUnit only
-./gradlew :permahearts:runClient     # dev Minecraft with the mod, in mods/permahearts/run/ (own saves)
+./gradlew :immortal-cultivation:build         # compile + JUnit + server game tests (jar in mods/immortal-cultivation/build/libs/)
+./gradlew :immortal-cultivation:test          # JUnit only
+./gradlew :immortal-cultivation:runClient     # dev Minecraft with the mod, in mods/immortal-cultivation/run/ (own saves)
 scripts/install.sh [mod-id]          # build + install into the Essential profile
 scripts/package.sh                   # zip for a friend
 ```
 
 ## Rules
 
+- **Two names (D132).** Mod id = `immortal-cultivation` (Fabric id, Gradle project, jar, release tag). Data namespace = `permahearts` (every `Identifier`, `assets/permahearts`, `data/permahearts`, lang keys, key bindings, game rule ids, codec fields; constant `ImmortalCultivation.NAMESPACE`). Never change the namespace: saves and options depend on it.
 - **Minecraft 26.3 is not obfuscated**: use Mojang names directly (no Yarn, no mappings). Look names up with `javap` on `~/Library/Application Support/minecraft/versions/26.3/26.3.jar` (see 00-environment.md). Never guess an API name from older versions; check it and add what you learn to 02-findings.md.
 - Keep rules in pure Java classes (no Minecraft imports) so JUnit can test them; Minecraft glue stays thin.
 - Never touch Huy's real saves or other mods in the profile. `install.sh` replaces only jars of the mods it builds (and installs Fabric API if missing). Test with `runClient` / game tests.

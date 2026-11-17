@@ -6,7 +6,7 @@ Các mod Fabric cho Minecraft Java **26.3** (Fabric Loader 0.20.1) do Huy làm �
 
 | Mod | Làm gì | Bản mới nhất |
 |---|---|---|
-| **Immortal Cultivation** (id `permahearts`, [luật chơi](docs/mods/permahearts/spec.md)) | Tu tiên: chết mất 1 tim vĩnh viễn, giết quái được HeartXP để lấy lại tim, linh dược, Lữ Khách áo đỏ giao nhiệm vụ | [Releases](https://github.com/huydangtruong/minecraft-lab/releases) |
+| **Immortal Cultivation** (id `immortal-cultivation`, dữ liệu `permahearts`, [luật chơi](docs/mods/immortal-cultivation/spec.md)) | Tu tiên: chết mất 1 tim vĩnh viễn, giết quái được HeartXP để lấy lại tim, linh dược, Lữ Khách áo đỏ giao nhiệm vụ | [Releases](https://github.com/huydangtruong/minecraft-lab/releases) |
 
 Tên cũ là PermaHearts. Từ 0.8.0 mod đổi tên hiển thị, nhưng save cũ vẫn chạy bình thường (id bên trong không đổi).
 
@@ -44,10 +44,10 @@ Không dùng được script? Vào [Releases](https://github.com/huydangtruong/m
 Cần JDK 25 (xem [docs/system/00-environment.md](docs/system/00-environment.md)).
 
 ```sh
-./gradlew :permahearts:build         # build + test, jar ở mods/permahearts/build/libs/
-./gradlew :permahearts:runClient     # chạy Minecraft thử riêng, không đụng save thật
+./gradlew :immortal-cultivation:build         # build + test, jar ở mods/immortal-cultivation/build/libs/
+./gradlew :immortal-cultivation:runClient     # chạy Minecraft thử riêng, không đụng save thật
 scripts/install.sh                   # build + cài vào profile "26.3 Fabric Essential" của Huy
-scripts/release.sh permahearts [--pre]   # đăng một GitHub Release (xem docs/workflow/release.md)
+scripts/release.sh immortal-cultivation [--pre]   # đăng một GitHub Release (xem docs/workflow/release.md)
 scripts/test-installer.sh            # thử script cài trên dữ liệu giả, không mạng
 scripts/package.sh                   # zip gửi bạn (cách cũ, dự phòng)
 ```

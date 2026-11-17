@@ -1,0 +1,26 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "io.github.huydangtruong.immortalcultivation.client.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"client": [
+		"ContainerScreenAccess",
+		"RecipeBookScreenAccess",
+		"RecipeBookScreenMixin",
+		"MinecraftInputMixin",
+		"FirstPersonFocusMixin",
+		"AvatarFocusMixin",
+		"ScreenEffectPhaseMixin",
+		"PhaseFogMixin",
+		"MouseScrollMixin",
+		"HotbarSelectionMixin",
+		"ChargeFovMixin",
+		"AquaWaterVisionMixin",
+		"AquaLightmapMixin",
+		"DeathMatchSkyMixin",
+		"DeathMatchFogMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

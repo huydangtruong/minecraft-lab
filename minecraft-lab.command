@@ -90,6 +90,15 @@ fetch_releases() {
 	fi
 }
 
+# Old name -> current mod id (D132). Releases up to 0.28.0 are tagged permahearts-v<ver> and their jars have the
+# fabric id permahearts; both mean the same mod as immortal-cultivation.
+canon_mod() {
+	case "$1" in
+		permahearts) printf 'immortal-cultivation' ;;
+		*) printf '%s' "$1" ;;
+	esac
+}
+
 # Fills RT_* arrays, newest published first. One entry per non-draft release with a tag like <mod>-v<version>.
 parse_releases() {
 	local n=0 tag draft pub pre name mod ver
@@ -99,7 +108,7 @@ parse_releases() {
 		pub="$(jget "$n.published_at" "$RJSON")"
 		pre="$(jget "$n.prerelease" "$RJSON")"
 		name="$(jget "$n.name" "$RJSON")"
-		mod="${tag%-v*}"
+		mod="$(canon_mod "${tag%-v*}")"
 		ver="${tag##*-v}"
 		if [ "$draft" != "true" ] && [ "$mod" != "$tag" ] && [ -n "$mod" ] && [ -n "$ver" ]; then
 			printf '%s\037%s\037%s\037%s\037%s\037%s\037%s\n' "$pub" "$n" "$mod" "$ver" "$pre" "$name" "$tag" >> "$TMP/rel.unsorted"
@@ -209,6 +218,7 @@ scan_installed() {
 	for j in "$MODS_DIR"/*.jar; do
 		[ -f "$j" ] || continue
 		id="$(jar_field "$j" id)" || continue
+		id="$(canon_mod "$id")"
 		ver="$(jar_field "$j" version)" || ver="?"
 		INST_ID[${#INST_ID[@]}]="$id"
 		INST_VER[${#INST_VER[@]}]="$ver"
@@ -229,7 +239,7 @@ remove_mod_jars() {
 	local j
 	for j in "$1"/*.jar; do
 		[ -f "$j" ] || continue
-		if [ "$(jar_field "$j" id)" = "$2" ]; then
+		if [ "$(canon_mod "$(jar_field "$j" id)")" = "$(canon_mod "$2")" ]; then
 			rm -f "$j" && echo "  removed $(basename "$j")"
 		fi
 	done

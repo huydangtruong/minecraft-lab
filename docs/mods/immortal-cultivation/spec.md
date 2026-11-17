@@ -1,0 +1,136 @@
+# Immortal Cultivation (id `immortal-cultivation`, dữ liệu `permahearts`, tên cũ PermaHearts) — luật chơi (0.2.0, tên mới từ 0.8.0)
+
+- Mỗi người chơi bắt đầu **10 tim** (20 máu).
+- **Chết**: −1 tim tối đa vĩnh viễn, sàn **1 tim** (D1). Chết ở 1 tim: không mất thêm, báo "đã ở mức thấp nhất". Hồi sinh với máu đầy theo mức mới. HeartXP và thống kê giữ nguyên.
+- **HeartXP** (D8): giết mob hostile (`Enemy`: zombie, skeleton, creeper, slime, ghast, phantom, piglin, enderman, Wither, Warden, Ender Dragon…) được HeartXP = **máu tối đa của mob đó**, làm tròn, tối thiểu 1. Ví dụ: Zombie/Skeleton/Creeper +20, Spider +16, Enderman +40, Ravager +100, Ender Dragon +200, Wither +300, Warden +500. Người được tính là người nhận kill credit của vanilla (đánh, bắn, sói, đẩy rơi trong 5 giây). Mob không hostile không tính.
+- **Đủ 500 HeartXP** = +1 tim tối đa, phần dư chuyển sang thanh mới (một lần giết hơn 500 có thể cho nhiều tim). Trần **300 tim** (D37; trước là 100, D36; 50, D7): khi đạt trần, HeartXP về 0 và không tích nữa, báo "đã tối đa". Cộng tim: +2 máu hiện tại mỗi tim, âm thanh level-up, tin trong chat.
+- Mỗi lần giết: overlay "+20 HeartXP".
+- **Thanh HeartXP** (D9): góc dưới bên trái (cách mép trái và mép dưới 8px), chữ "HeartXP 320/500" (ở trần: "HeartXP MAX") trên một thanh đỏ. Ẩn khi Creative/Spectator và khi tắt HUD (F1). Chỉ thấy khi client cũng cài mod.
+- Dữ liệu lưu theo người chơi trong save của world (Essential: save của máy host), đồng bộ xuống client của chính người đó.
+- Lệnh: `/hearts` (tim, HeartXP, tổng kill, số lần chết); `/hearts set <targets> <1..50>` và `/hearts xp <targets> <0..499>` cần quyền gamemaster.
+- `/testmode full` (chỉ OP): lưu trạng thái hiện tại, rồi cho đủ bộ netherite phù phép tối đa, 50 tim, mỗi linh dược như đã uống 10 lần. `/testmode reset` trả về đúng như trước (D92).
+- Mọi chữ của mod (giao diện, tên item, tin nhắn) chỉ có **tiếng Anh** (D16). Tên đồ/quái của game gốc vẫn theo ngôn ngữ game.
+- Host và bạn phải cài **cùng phiên bản** mod.
+
+## Bật/tắt theo world (0.3.0, D10)
+
+- Game rule `permahearts:enabled`, **mặc định tắt**. Tạo world: **More → Game Rules → PermaHearts** (nhóm Player) → bật. Trong game: `/gamerule permahearts:enabled true` hoặc `false` (cần quyền lệnh).
+- Khi tắt: chết không mất tim, giết mob không có HeartXP, máu tối đa về 10 tim, thanh HeartXP ẩn. Dữ liệu tim/HeartXP vẫn lưu; bật lại là trở về như cũ. Đổi trạng thái thì mọi người đang online nhận tin báo.
+- `/hearts` vẫn chạy khi tắt và nhắc cách bật.
+
+## Công tắc ImmortalCultivation (0.4.0, D11)
+
+- Game rule `permahearts:immortal_cultivation` (tên hiện trong Game Rules: **ImmortalCultivation**), mặc định tắt, thay `permahearts:enabled`. Một công tắc cho tất cả: tim, HeartXP, linh dược, Lữ Khách.
+- World đã bật bằng lệnh cũ: chạy lại `/gamerule permahearts:immortal_cultivation true`. Dữ liệu tim không mất.
+
+## Linh dược (0.4.0, D15)
+
+| Item | Tên VN | Mỗi bình | Thuộc tính |
+|---|---|---|---|
+| `permahearts:elixir_strength` | Elixir of Strength | +2 sát thương (D70) | `ATTACK_DAMAGE` cộng |
+| `permahearts:elixir_fury` | Elixir of Fury | +10% tốc đánh | `ATTACK_SPEED` ×base |
+| `permahearts:elixir_swiftness` | Elixir of Swiftness | +5% tốc chạy (D103; D67 từng là +10%) | `MOVEMENT_SPEED` ×base |
+| `permahearts:elixir_iron_skin` | Elixir of Iron Skin | +1 giáp | `ARMOR` cộng |
+| `permahearts:elixir_reach` | Elixir of Reach | +0.5 tầm với | `BLOCK_INTERACTION_RANGE` + `ENTITY_INTERACTION_RANGE` cộng |
+| `permahearts:elixir_mining` | Elixir of Mining | +20% tốc đào (D67) | `BLOCK_BREAK_SPEED` ×base |
+| `permahearts:elixir_vitality` | Elixir of Vitality | +25% "healing from food": mỗi lần ăn hồi **ngay** thêm máu = điểm no của món × 25% mỗi bình (bít tết 8 điểm: 1 bình +1 tim, 4 bình +4 tim). D30 | mixin `FoodProperties#onConsume` (không phải attribute) |
+
+- Uống như bình thuốc (trả lại chai rỗng), có hiệu ứng lấp lánh, xếp chồng 16. Không trần, lưu theo người chơi, chết không mất.
+- Công tắc tắt: uống không được (báo cách bật), chỉ số đã có không tác dụng nhưng vẫn lưu.
+- `/hearts` có thêm dòng chỉ số linh dược. Thử: `/give @s permahearts:elixir_strength 4`.
+
+## Lữ Khách và nhiệm vụ (0.5.0–0.6.0, D12–D14)
+
+- Đúng **5 ngày Minecraft** (D87, trước là 4 ở D32): chọn một người chơi ở Overworld, lấy điểm cách ~450–550 block (D27) hướng ngẫu nhiên, báo mọi người "Một Lữ Khách đang chờ ở X, Z". NPC hiện khi có người trong ~96 block. Trên mặt nước: đặt bè gỗ 3×3.
+- NPC: Wandering Trader đứng yên, bất tử, không biến mất, tên "Lữ Khách". Bấm vào: màn hình nhiệm vụ (không phải bảng trao đổi).
+- Màn hình: lời giới thiệu + **Nhận** → danh sách 2–4 dòng. Mọi người thấy cùng tiến độ.
+  - **Thu thập**: "Tìm 64 Sắt" + ô bỏ đồ; bỏ vào là trừ đồ, cộng tiến độ, dư trả lại. Số lượng (D18): 64 sắt / than / redstone / lapis / cà rốt / khoai tây / lúa mì / gỗ sồi · 48 vàng / thịt cừu / thịt bò / thịt lợn / xương / tơ / da · 32 thuốc súng / ngọc ender · 16 kim cương / ngọc lục bảo.
+  - **Giết**: "Giết 16 Zombie" + số đếm; ai giết cũng tính. 16 zombie / skeleton / nhện / creeper / enderman / drowned · 6 phù thủy · 8 Blaze / Wither Skeleton / Phantom (D88). Một lần tới không có 2 dòng cùng một con (kể cả dòng giết và dòng hạ thủ lĩnh). Tỉ lệ loại dòng (D88): thu thập 27, giết 27, khám phá 15, Blood Moon 15, hạ thủ lĩnh 16 (Death Match 12 thêm vào khi có 2+ người).
+  - **Trăng máu** (0.6.0): ngẫu nhiên 1 trong 6 loại (D29): đêm **Zombie**, **Piglin Brute** (không biến thành zombie piglin), **Creeper**, **Skeleton**, **Spider** hoặc **Zombie Horseman** (zombie cầm giáo sắt cưỡi ngựa zombie, như bản gốc; một kỵ sĩ tính là 1 con trong giới hạn 30; dòng này không đi cùng dòng giết zombie hay trùm zombie). Nút Bắt đầu → trời thành đêm, mỗi 10 giây **3 con** loại đó quanh mỗi người chơi **trong vùng 96×96 quanh Crimson Master** (tối đa 30 con sống, D33), không ngủ được; trong lúc Trăng máu: người trong vùng không ra được, người ngoài vùng (vd. hồi sinh ở xa) không vào được; tới gần mép (8 block) thấy bụi đỏ đánh dấu mép; Creative/Spectator được miễn; người bấm sống tới sáng là xong, chết thì dòng quay về chưa làm.
+  - **Thám hiểm** (0.6.0): "Đặt chân tới một Làng/Đền sa mạc/…".
+  - **Hạ thủ lĩnh** (0.6.0): nút Triệu hồi → trùm to gấp đôi, 200 máu (D72), 4 đệ tử, cạnh NPC. Trùm: Zombie, Skeleton, Evoker (đệ tử là Pillager cầm nỏ, D34), Blaze, Vindicator Chieftain, Ghast (D35: bay lơ lửng ngoài trời, đệ tử là 4 Phantom, không rời xa quá 24 block quanh NPC và không cao quá 16 block trên đầu người chơi, bắn nhanh hơn 20%, cầu lửa vẫn phá block).
+- Dòng xong → ô thưởng có 1 linh dược ngẫu nhiên; ai lấy trước được. Xong hết + lấy hết thưởng → NPC chào và đi, đếm lại 5 ngày (D87).
+- Lệnh: `/quest` (NPC ở đâu, còn bao lâu, tiến độ), `/quest giveup` (ai cũng dùng được, như nút Give up: Master rời đi, lần sau 5 ngày; D28, D87). Admin: `/quest summon` (gọi NPC ngay cạnh mình với nhiệm vụ mới), `/quest skip` (NPC xuất hiện ngay ở ~500 block), `/quest complete <dòng>`, `/quest reset`.
+
+## 0.7.1 (P-008, D19, D20)
+
+- **Give up**: nút chữ đỏ ở cuối danh sách nhiệm vụ (cả trước và sau Nhận). Bấm 2 lần trong 3 giây: dừng sự kiện, xóa quái/trùm/đệ tử, Lữ Khách đi, thưởng chưa lấy mất. Ai cũng bấm được.
+- **Lữ Khách không bị quái nhắm** (bất tử vĩnh viễn nên quái bỏ qua).
+- Trùm và quái Trăng máu **xuất hiện ngang tầm** người chơi / Lữ Khách (kể cả trong hang), tìm chỗ đứng quanh Y đó chứ không lấy mặt đất.
+- Trùm bị mất (rơi, unload) thì nút quay về **Summon**; summon lại được, bản cũ nếu trở lại sẽ bị xóa.
+- **Ở 2 ngày Minecraft** (D32) kể từ lúc báo tọa độ; màn hình có dòng đếm ngược "Leaves in"; chat báo trước ~2 phút thực; không rời khi Trăng máu hoặc trùm đang chạy. Rời đi (hết giờ, Give up, xong hết) thì 5 ngày sau mới có Lữ Khách mới; chuyến đầu tiên của world cũng 5 ngày (D87).
+- Thủ lĩnh và đệ tử không bị mặt trời thiêu (mũ không vỡ).
+- `/quest` in thêm thời gian còn lại.
+
+- Tên hiển thị của Lữ Khách: **Crimson Master** (D21).
+
+## Bảng chỉ số (0.8.2, D31)
+
+- Nút bình linh dược cạnh nút sách công thức trong túi đồ Survival (không có trong túi đồ Creative). Bấm: bảng bên trái, túi đồ dời phải; mở sách công thức thì bảng đóng và ngược lại; game nhớ bảng đang mở cho tới khi tắt game.
+- Hai cột: tên chỉ số, rồi giá trị canh trái `tổng (gốc +đồ +tu luyện)` (gốc xám, đồ xanh dương, tu luyện cam); chữ Stats in đậm; Hearts tính bằng tim; Speed và Mining tính % so với gốc. "Đồ" là mọi thứ không phải của mod (đồ, hiệu ứng thuốc, mod khác); "tu luyện" là linh dược + tim thêm (HeartXP/chết).
+- Food heal: +25% mỗi bình Vitality (D30).
+- Cuối bảng: Spawn — `bed/anchor` (điểm hồi sinh riêng, có thể đã mất nếu giường bị phá) hoặc `world spawn`, thế giới, X Y Z.
+- Server tính và gửi mỗi giây (attachment `permahearts:stats`, chỉ gửi cho chính người đó). Server không có mod: bảng báo "Needs the mod on the server".
+- Ảnh: `docs/screens/stats-button.png`, `docs/screens/stats-panel.png` (từ client test).
+
+## Thanh tim nhiều lớp (D36)
+
+- Tới 20 tim: thanh vanilla. Trên 20 tim: luôn 2 hàng; tim 21–40 vẽ đè từ tim đầu tiên của hàng 1 bằng màu cam, 41–60 hồng, 61–80 tím, 81–100 xanh dương. Mất máu thì tim lớp trên cùng mất trước.
+- D37: 101–200 san hô, đào, hồng phấn, oải hương, bạc hà; 201–300 hoa anh đào, thiên hà, lửa xanh lá, lửa linh hồn, huyết nham (D38). Sửa hình: `mods/immortal-cultivation/tools/make_heart_sprites.py` rồi chạy lại. Ảnh: `docs/screens/hearts-150-300-strip.png`.
+- Độc/wither/đóng băng: mọi tim theo màu vanilla của hiệu ứng. Tim vàng: các hàng phía trên. Giáp: ngay trên 2 hàng tim.
+- Ảnh: `docs/screens/hearts-57-full.png`, `hearts-57-hurt.png`, `hearts-100-full.png`.
+
+## Bảng tu luyện (D39)
+
+- Nút bo góc cạnh nút sách công thức ("Cultivation"): phiến đá nâu với Cánh hồn đỏ cam (D40). Tab Stats có biểu tượng Nether Star. Bảng trái có 2 tab kiểu sách công thức: **Stats** (D31) và **Techniques** (trống, chờ mô tả chiêu thức).
+- Ảnh: `docs/screens/stats-button.png`, `stats-panel.png`, `techniques-tab.png`.
+
+## Vitality (D30, D41)
+
+- Mỗi bình: +20% máu hồi ngay khi ăn (theo điểm no của món) và +20% hồi máu tự nhiên khi no (hồi nhờ bão hoà và hồi khi ≥18 điểm đói). 4 bình = +80%. Không tốn thêm đói.
+- Bảng Stats: "Food heal" và "Food regen".
+
+## Death Match (0.9.0, P-010, D25)
+
+- Loại nhiệm vụ mới của Crimson Master. Chỉ có trong danh sách khi lúc tạo nhiệm vụ có **từ 2 người online**; tối đa 1 dòng Death Match mỗi nhiệm vụ.
+- Nút **Start**: số người phải gục = nửa số người online lúc bấm, làm tròn lên (2 → 1, 3 → 2, 4 → 2, 5 → 3). Dưới 2 người online hoặc PvP tắt: nút xám, rê chuột vào thấy lý do ("Needs at least 2 players online" / "PvP is off on this server").
+- Mỗi **người khác nhau** bị **người chơi khác** giết trong lúc trận chạy tính 1 (chết nhiều lần vẫn tính 1; mọi chiều không gian). Đủ số thì dòng xong, nhận thưởng như các dòng khác.
+- Chết do người chơi giết trong trận: **không mất tim, không rơi đồ, giữ XP**, kể cả cái chết kết thúc trận và lần chết thứ hai của người đã tính. Chết vì quái, ngã... vẫn như thường và không tính. Hết trận (xong, Give up, Crimson Master đi, `/quest reset`) thì chết bình thường trở lại.
+- Trận không giữ Crimson Master ở lại (khác Trăng máu / trùm). Người thoát game không làm trận dừng.
+- Kỹ thuật: cờ `permahearts:dm_protected` trên người chơi được đặt lúc ALLOW_DEATH; mixin `PlayerMixin` bỏ qua `Player#dropEquipment` và `Player#getBaseExperienceReward`; đồ và XP chép sang người mới ở COPY_FROM; tim giữ nguyên ở AFTER_RESPAWN.
+
+
+## Hộp thưởng nhiệm vụ (D76, D89, D90, P-027, P-030)
+
+- Mỗi dòng nhiệm vụ trả một hộp thưởng (thay linh dược). **Loại hộp được bốc lúc nhận thưởng, không hiện trước** (D90): ô thưởng ở màn hình nhiệm vụ chỉ hiện hộp xám có dấu "?" (`permahearts:mystery_box`, tên "Random Reward Box", không nhận được). Tỉ lệ: dòng thường (thu thập, giết, khám phá, Death Match) bạc 40 / vàng 30 / kim cương 20 / ngọc lục bảo 10; hạ thủ lĩnh và Blood Moon bạc 20 / vàng 30 / kim cương 30 / ngọc lục bảo 20. Không lưu gì thêm trong save nhiệm vụ.
+- Bốn hộp: `silver_reward_box` (3 thẻ, chọn 1), `gold_reward_box` (4 thẻ, chọn 1), `diamond_reward_box` (5 thẻ, chọn 1), `emerald_reward_box` (**6 thẻ, chọn 2**, màu xanh lá, độ hiếm EPIC).
+- Mỗi thẻ: 50% một bình linh dược ngẫu nhiên (x1), 50% một món đồ. Món đồ: sắt 64, vàng 64, kim cương 16, ngọc lục bảo 16, redstone 64, lapis 64, ngọc ender 32, thuốc súng 32 (số lượng lấy từ bảng thu thập của QuestGenerator), không trùng nhau. Thẻ đồ có 20% là thẻ đặc biệt: vàng = 4 táo vàng phép hoặc 32 ngọc lục bảo; kim cương = thêm 1 thỏi netherite; bạc không có.
+- **Hộp ngọc lục bảo**: thẻ đồ có **25%** là đặc biệt: 1 Totem of Undying, 1 Bottle of Enlightenment, sách Mending, sách Sharpness V, sách Protection V (hai sách khác phép thì được ra cùng hộp). Chọn đủ 2 thẻ khác nhau rồi bấm Claim: nhận cả hai, hộp biến mất. Đóng màn hình khi mới chọn 1 thẻ thì **không lấy gì**, hộp còn nguyên (lựa chọn chưa lưu).
+- **Bottle of Enlightenment** (`permahearts:enlightenment_bottle`): xếp chồng 16, độ hiếm RARE, có ánh sáng. Uống (chuột phải, 32 tick như bình thuốc) được **+16 level kinh nghiệm**, tiêu 1 bình (không tiêu trong Creative). Không chế được, chỉ ra từ hộp ngọc lục bảo (có trong tab Creative "Food & Drinks" để thử).
+- Thẻ ra lúc mở lần đầu và lưu trong component `permahearts:reward_box` (thẻ sách lưu thêm `enchant` và `level`, save cũ không có hai trường này vẫn đọc được); đóng rồi mở lại vẫn các thẻ cũ. Chọn thẻ, bấm Claim: máy chủ kiểm lại, đưa đồ (đầy túi thì rơi dưới chân), trừ 1 hộp, phát tiếng lên cấp. Close giữ hộp.
+- Nhiệm vụ lưu cũ có phần thưởng linh dược vẫn cho hộp (bốc ngẫu nhiên lúc nhận).
+
+## God Slayer (P-032, D96, D97)
+
+Boss Oni "God Slayer" săn người chơi. Đợt này làm lõi: chạy, chém Lv 1, săn theo lượt, thưởng. Chiêu mạnh hơn theo cấp thêm ở P-033.
+
+- **Cơ thể** (P-034, D98): cao 5 ô ở mọi cấp (hộp va chạm 1,6 x 4,8), da đỏ, tóc trắng dài, sừng cong lớn, giáp vai đen, đai lưng, răng nanh, tư thế dạng chân hai tay mở, hai katana lớn dựng đứng là một phần mô hình (chân đung đưa khi chạy, tay phải giơ rồi chém xuống). Thanh máu đỏ chia 10 phần "God Slayer — Lv N", làm tối màn hình, hiện trong 96 ô cùng chiều không gian.
+- **Cấp**: 1 đến 10, lưu theo world. Máu 500 ở Lv 1, thêm 100 mỗi cấp. Chém 30 sát thương ở Lv 1, mạnh dần theo cấp; cấp cao chỉ mạnh hơn, không to hơn.
+- **Di chuyển**: đất (tốc độ 0,4, tầm nhìn 128, bước lên 1,5 ô), trên không (bay, không xuyên tường), trong nước (gấp 3 lần cá heo). Tự chọn theo chỗ người bị săn đứng. Đập khối cản đường như Wither theo `mobGriefing`; tắt thì dịch chuyển (khi kẹt, cách xa hơn 48 ô, hoặc khác chiều không gian thì theo sang).
+- **Chống ăn gian**: chỉ người chơi, đạn của người chơi hoặc quái triệu hồi của người chơi gây sát thương, mỗi nhát tối đa 40. Miễn lửa, không dắt, không cưỡi, không bị đẩy lùi, piston không đẩy được. Frostbite và Repulse còn 10%, Heaven Blast chỉ choáng 10% thời gian. Tự hồi 2% máu mỗi giây khi không ai đánh được nó. Không biến mất, không rơi đồ.
+- **Cuộc săn**: nghỉ, cảnh báo 60 giây (chữ lớn, tin chat, tiếng trống, đếm ngược 10 giây cuối), săn tối đa 10 phút. Người bị săn chết thì boss chuyển sang người khác.
+  - Hạ được boss: +100 level kinh nghiệm, 5 hộp thưởng, cấp boss +1 (tối đa 10).
+  - Hết giờ hoặc hết người: boss trêu rồi biến mất trong khói, cấp giữ nguyên.
+  - Boss không được lưu: tắt game giữa lúc săn thì mở lại là hết săn.
+- **Kích hoạt**: mỗi lần Crimson Master đến thì đếm một lượt. Từ ngày 100, lượt thứ 4, 8, 12: có người từ 30 tim thì săn một người trong số đó, không có thì tin chat "Weaklings...".
+- **Dịch chuyển** (P-035, D100): chạy đuổi là chính; chỉ dịch chuyển khi người bị săn cách xa hơn 64 ô, khác chiều không gian, hoặc boss kẹt 8 giây ngoài tầm đánh (`GodSlayerRules.shouldTeleport`).
+- **Ngoại hình** (P-035, D101): nanh to, mắt dữ, mặt to, tay đưa trước, katana thẳng mũi xéo, tóc dài, cánh dơi chỉ khi bay, nghiêng tới 45 độ theo tốc độ (trạng thái `FLYING` đồng bộ).
+- **Ngoại hình v3** (P-036, D105): đầu liền thân, hẹp lại còn 95% bề ngang và thấp bớt phần trán (từ mắt trở xuống giữ nguyên), sừng dài hơn 10%, chĩa ra hai bên và cong ít hơn, katana lưỡi sắc quay ra trước và ra ngoài, mũi vát ở đầu lưỡi, tóc một mảnh trắng hình thang che sau đầu, cánh hai khúc xương vàng trơn (hình ^ ^) với 11 lông rời mỗi bên theo mẫu đã duyệt.
+- **Ngoại hình v4** (P-037, D106): đầu mỏng hơn (sau gáy -20%, trước mặt -10%), hẹp thêm 10%, thấp hơn (bớt nửa trán và nửa tóc đỉnh), sừng thon hơn (~10% thể tích), tóc cố định (không đung đưa) ngả ra sau 10 độ và dài quá thắt lưng, tay đưa trước thêm, bắp tay dài thêm 5 để khuỷu nằm ở cuối bắp. Đếm ngược 60 giây: một tiếng trống mỗi giây (hết tiếng tim), viền đỏ mảnh cố định 6%, nhạt (tối đa 0,35), chuyển mờ dần mượt, nhấp nháy mỗi giây theo tiếng trống.
+- **Cảnh báo** (P-035, D102): chữ đỏ, đếm ngược mỗi giây 60 giây, tim đập nhanh dần (`heartbeatInterval`), viền đỏ màn hình đậm dần (`edgeStrength`, gói `GodSlayerNet.Warning` + `GodSlayerWarningHud`). Crimson Master chữ cam, thanh vàng.
+- **Lệnh (OP)**: `/boss summon [người]`, `/boss giveup`, `/boss level [1..10]`, `/boss freeze stand|fly|fly_forward|off` (P-035, D104: đóng băng để ngắm; đồng hồ săn dừng; chưa có boss thì tạo một con cách người gõ 6 ô, ngoài cuộc săn).
+- Dữ liệu: `GodSlayerSavedData` (cấp, số lượt, pha, hạn giờ, UUID boss, người bị săn, danh sách đã chết).
+
+## Heaven Blast choáng (P-034, D99)
+
+Heaven Blast choáng mọi sinh vật không phải người chơi bị đẩy: `1,0 + 0,1 x (level - 1)` giây (1,0 s ở Lv 1, 2,9 s ở Lv 20). Bị choáng thì không đi, không nhảy, không đánh (hiệu ứng "Stunned", mixin vào `Mob`); vẫn rơi và bị đẩy theo vật lý. Dòng chỉ số "Stun" trong bảng chiêu. Người chơi không bao giờ bị choáng. Hạt sao quay vòng trên đầu lúc choáng.
