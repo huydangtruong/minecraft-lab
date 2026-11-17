@@ -16,8 +16,20 @@
 
 - **Một phiên chat cho một đợt việc**: phát hành xong thì mở phiên mới. Phiên càng dài, mỗi bước càng tốn (mô hình đọc lại toàn bộ lịch sử ở mỗi lần gọi công cụ).
 - **Gom yêu cầu**: nhiều chỉnh sửa nhỏ gửi chung một lần → một brief, một dev, một lần test.
-- **Manager (Opus) mỏng**: viết brief ngắn, giao **một** dev Sonnet làm trọn (số liệu, code, test, chạy toàn bộ test **một lần**, merge vào nhánh tính năng); manager chỉ đọc báo cáo rồi merge vào `main`. Không chạy lại client test khi dev đã báo xanh; không tự mò javap.
+- **Manager (Opus) mỏng**: viết brief ngắn, giao **một** dev Sonnet làm trọn (số liệu, code, test, chạy test **một lần** theo mức ở mục "Test theo phạm vi thay đổi", merge vào nhánh tính năng); manager chỉ đọc báo cáo rồi merge vào `main`. Không chạy lại client test khi dev đã báo xanh; không tự mò javap.
 - Chỉnh số nhỏ (đổi một con số): không cần plan riêng, một dòng quyết định là đủ.
+
+## Test theo phạm vi thay đổi (Huy, 2026-11-17)
+
+Xác định phạm vi thay đổi trước, rồi chỉ chạy mức test tương ứng. Không chạy lại cả bộ cho một thay đổi nhỏ.
+
+| Mức | Ví dụ | Chạy |
+|---|---|---|
+| **Nhỏ** | đổi một con số (hồi chiêu, thời gian tác dụng, sát thương), đổi chữ, dời vị trí HUD, 1–2 file | Biên dịch + JUnit: `./gradlew :<mod>:test` (hoặc `--tests <Class>` của phần đó). Thay đổi giao diện thì chạy client test **một lần** để có ảnh. Test hỏng ở mảng không liên quan (Boss, Crimson Master…) thì ghi lại, không chạy lại |
+| **Vừa** | một tính năng trong một mảng (một chiêu, một loại nhiệm vụ) | `./gradlew :<mod>:build` (JUnit + server game test). Chỉ chạy client test khi có sửa code client |
+| **Lớn** | nhiều file, nhiều mảng, đổi tên, đổi luồng chung (thanh chiêu, lưu dữ liệu, bộ cài) | Đủ hết: `build` + `runClientGameTest` (+ `scripts/test-installer.sh` nếu đụng bộ cài) |
+
+Phát hành: `scripts/release.sh` tự chạy `build`. Manager ghi mức test đã chạy trong báo cáo.
 
 ## Minecraft lúc test phải tắt tiếng (Huy, 2026-11-15)
 
