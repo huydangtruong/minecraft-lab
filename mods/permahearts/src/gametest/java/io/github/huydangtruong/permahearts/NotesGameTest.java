@@ -51,4 +51,15 @@ public class NotesGameTest {
 		}
 		c.succeed();
 	}
+
+	/** P-050 (D131): the shared add broadcasts a line (not checked here); neither kind throws and both still work. */
+	@GameTest
+	public void sharedAndPrivateAddStillWork(GameTestHelper c) {
+		ServerPlayer a = c.makeMockServerPlayerInLevel();
+		if (NotesNet.apply(a, NotesNet.ADD, true, "shared one", 0) != null || NotesNet.apply(a, NotesNet.ADD, false, "private one", 0) != null) {
+			c.fail("add refused");
+			return;
+		}
+		c.succeed();
+	}
 }

@@ -7,6 +7,24 @@ import java.util.function.Predicate;
 public final class QuestLogic {
 	private QuestLogic() {}
 
+	/** P-050 (D131): experience levels every online player gets when the Crimson Master leaves. */
+	public static final int LEVELS_PER_QUEST = 8;
+
+	public static int farewellLevels(int completed) {
+		return completed <= 0 ? 0 : completed * LEVELS_PER_QUEST;
+	}
+
+	/** Lines of the quest that are done (claimed or not). */
+	public static int completedLines(Quest q) {
+		int n = 0;
+		for (QuestLine l : q.lines()) {
+			if (l.done()) {
+				n++;
+			}
+		}
+		return n;
+	}
+
 	public record DepositResult(Quest quest, int taken) {}
 
 	public record KillResult(Quest quest, int line) {}

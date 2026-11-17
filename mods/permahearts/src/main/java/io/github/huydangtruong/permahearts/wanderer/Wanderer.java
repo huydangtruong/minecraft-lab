@@ -322,11 +322,13 @@ public final class Wanderer {
 		if (npc != null) {
 			npc.discard();
 		}
+		int completed = QuestLogic.completedLines(d.quest().get());
 		REWARDS.remove(d.quest().get().id());
 		save(server, d.withPhase(Phase.WAITING).withNpc(Optional.empty()).withQuest(Optional.empty())
 			.withLeaveAt(-1L).withWarned(false)
 			.withNextDay(currentDay(server) + QuestGenerator.daysUntilReturn(RNG)));
 		server.getPlayerList().broadcastSystemMessage(Messages.farewell(), false);
+		giftLevels(server, completed);
 	}
 
 	// ---- leaving: give up and the end of the 2-day stay ----
@@ -353,6 +355,7 @@ public final class Wanderer {
 	 */
 	public static void leave(MinecraftServer server, Component message) {
 		WandererData d = data(server);
+		int completed = d.quest().map(QuestLogic::completedLines).orElse(0);
 		Entity npc = npc(server);
 		if (npc != null) {
 			npc.discard();
@@ -365,6 +368,19 @@ public final class Wanderer {
 			.withBloodMoon(Optional.empty()).withBoss(Optional.empty()).withDeathMatch(Optional.empty()).withLeaveAt(-1L).withWarned(false)
 			.withNextDay(currentDay(server) + QuestGenerator.daysUntilReturn(RNG)));
 		server.getPlayerList().broadcastSystemMessage(message, false);
+		giftLevels(server, completed);
+	}
+
+	/** P-050 (D131): every online player gets 8 levels per completed quest, with one chat line under the farewell. */
+	private static void giftLevels(MinecraftServer server, int completed) {
+		int levels = QuestLogic.farewellLevels(completed);
+		if (levels <= 0) {
+			return;
+		}
+		for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+			p.giveExperienceLevels(levels);
+		}
+		server.getPlayerList().broadcastSystemMessage(Messages.farewellLevels(levels, completed), false);
 	}
 
 	/** A player joins during a visit: repeat where the Crimson Master is (the bar follows on the next pass). */
