@@ -61,6 +61,14 @@ function ConvertTo-Utc($value) {
     return [datetime]::Parse([string]$value, [Globalization.CultureInfo]::InvariantCulture, [Globalization.DateTimeStyles]::AdjustToUniversal)
 }
 
+# Old name -> current mod id (D132). Releases up to 0.28.0 are tagged permahearts-v<ver> and their jars have the
+# fabric id permahearts; both mean the same mod as immortal-cultivation.
+$script:ModAlias = @{ 'permahearts' = 'immortal-cultivation' }
+function Get-CanonMod([string]$id) {
+    if ($script:ModAlias.ContainsKey($id)) { return [string]$script:ModAlias[$id] }
+    return $id
+}
+
 # Reads id and version from fabric.mod.json inside a jar. Returns $null if it is not a Fabric mod.
 function Get-JarInfo([string]$path) {
     $zip = $null
@@ -71,7 +79,7 @@ function Get-JarInfo([string]$path) {
         $reader = New-Object System.IO.StreamReader($entry.Open())
         try { $text = $reader.ReadToEnd() } finally { $reader.Dispose() }
         $json = $text | ConvertFrom-Json
-        return New-Object psobject -Property @{ Id = [string]$json.id; Version = [string]$json.version }
+        return New-Object psobject -Property @{ Id = (Get-CanonMod ([string]$json.id)); Version = [string]$json.version }
     } catch {
         return $null
     } finally {
@@ -92,7 +100,7 @@ function Update-Installed {
 
 function Get-InstalledVersion([string]$modId) {
     foreach ($i in $script:Installed) {
-        if ($i.Id -eq $modId) { return $i.Version }
+        if ($i.Id -eq (Get-CanonMod $modId)) { return $i.Version }
     }
     return ''
 }
@@ -101,7 +109,7 @@ function Get-InstalledVersion([string]$modId) {
 function Remove-ModJars([string]$modId) {
     foreach ($f in Get-ChildItem -LiteralPath $script:ModsDir -Filter '*.jar' -File) {
         $info = Get-JarInfo $f.FullName
-        if ($null -ne $info -and $info.Id -eq $modId) {
+        if ($null -ne $info -and $info.Id -eq (Get-CanonMod $modId)) {
             Remove-Item -LiteralPath $f.FullName -Force
             Write-Host ('  removed ' + $f.Name)
         }
@@ -141,9 +149,9 @@ function Get-Releases {
         if ($r.tag_name -match '^(.+)-v(\d.*)$') {
             $title = [string]$r.name
             if ($title.EndsWith(' ' + $Matches[2])) { $title = $title.Substring(0, $title.Length - $Matches[2].Length - 1) }
-            if ($title -eq '') { $title = $Matches[1] }
+            if ($title -eq '') { $title = (Get-CanonMod $Matches[1]) }
             $list += New-Object psobject -Property @{
-                Mod       = $Matches[1]
+                Mod       = (Get-CanonMod $Matches[1])
                 Version   = $Matches[2]
                 Title     = $title
                 Pre       = [bool]$r.prerelease
@@ -278,7 +286,8 @@ function Install-Release($release) {
         $got = (Get-FileHash -Algorithm SHA256 -LiteralPath $jarFile).Hash.ToLower()
         if ($got -ne $want) {
             Remove-Item -LiteralPath $jarFile -Force
-            Write-Host ('ERROR: sha256 mismatch for {0}' -f $jarName) -ForegroundColor Red
+            Write-Host ('ERROR: sha256 mismatch for {0}' -f $jarName)
+ -ForegroundColor Red
             Write-Host ('  expected {0}' -f $want)
             Write-Host ('  got      {0}' -f $got)
             Write-Host 'The download is damaged or was changed. Nothing was installed and your mods folder is untouched.'
@@ -296,7 +305,8 @@ function Install-Release($release) {
             $wantSha1 = (Get-Text "$fabUrl.sha1").Trim().ToLower()
             $gotSha1 = (Get-FileHash -Algorithm SHA1 -LiteralPath $fabFile).Hash.ToLower()
             if ($wantSha1 -eq '' -or $gotSha1 -ne $wantSha1) {
-                Write-Host 'ERROR: sha1 mismatch for Fabric API. Nothing was installed.' -ForegroundColor Red
+                Write-Host 'ERROR: sha1 mismatch for Fabric API. Nothing was installed.'
+ -ForegroundColor Red
                 return $false
             }
             Copy-Item -LiteralPath $fabFile -Destination (Join-Path $script:ModsDir $fabJar) -Force
@@ -318,7 +328,8 @@ function Install-Release($release) {
         Write-Host $notes
         return $true
     } catch {
-        Write-Host ('ERROR: ' + $_.Exception.Message) -ForegroundColor Red
+        Write-Host ('ERROR: ' + $_.Exception.Message)
+ -ForegroundColor Red
         return $false
     } finally {
         Remove-Item -LiteralPath $work -Recurse -Force -ErrorAction SilentlyContinue

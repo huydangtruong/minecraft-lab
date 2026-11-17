@@ -4,7 +4,7 @@
 
 ```sh
 export JAVA_HOME=$(/usr/libexec/java_home -v 25)
-./gradlew :permahearts:runClient
+./gradlew :immortal-cultivation:runClient
 ```
 
 Tạo world Survival mới (Creative bật cheat nếu cần lệnh). Kịch bản PermaHearts:
@@ -37,10 +37,10 @@ Không cần chơi: một bài test mở Minecraft thật trong world tạm, m�
 
 ```sh
 export JAVA_HOME=$(/usr/libexec/java_home -v 25)
-./gradlew :permahearts:runClientGameTest
+./gradlew :immortal-cultivation:runClientGameTest
 ```
 
-Một cửa sổ Minecraft sẽ hiện ~30 giây rồi tự đóng. Ảnh nằm ở `mods/permahearts/build/run/clientGameTest/screenshots/`. `./gradlew :permahearts:build` không chạy bài này.
+Một cửa sổ Minecraft sẽ hiện ~30 giây rồi tự đóng. Ảnh nằm ở `mods/immortal-cultivation/build/run/clientGameTest/screenshots/`. `./gradlew :immortal-cultivation:build` không chạy bài này.
 
 ## 0.7.1: Give up, trùm trong hang, đếm ngược
 
@@ -95,7 +95,7 @@ Chưa có phím hay thanh chiêu (phần B), nên thử bằng lệnh op `/techn
 7. **PvP tắt vẫn trúng**: 2 người, `/gamerule pvp false`. Người A `/technique cast repulse 5` sát người B: B vẫn mất máu và bị hất, dù đánh tay thì không mất (chiêu cố ý đi vòng luật PvP, D44). Hệ quả: người chết vì chiêu thì không ai được tính công và thông báo chết không nêu tên người ra chiêu.
 8. Tắt công tắc (`/gamerule permahearts:immortal_cultivation false`): `/technique cast ...` báo lỗi, không có gì xảy ra.
 
-Kiểm bằng máy: `./gradlew :permahearts:build` (game test cho từng chiêu) và `./gradlew :permahearts:runClientGameTest` (ảnh `20-fire-field` đến `26-phase-inside-wall-third-person` trong `mods/permahearts/build/run/clientGameTest/screenshots/`).
+Kiểm bằng máy: `./gradlew :immortal-cultivation:build` (game test cho từng chiêu) và `./gradlew :immortal-cultivation:runClientGameTest` (ảnh `20-fire-field` đến `26-phase-inside-wall-third-person` trong `mods/immortal-cultivation/build/run/clientGameTest/screenshots/`).
 
 ## Chiêu thức: thanh chiêu Z X C V, dùng chiêu (P-011 phần B, đổi ở P-045 / D125)
 
@@ -112,7 +112,7 @@ Cần công tắc thế giới BẬT, chế độ Survival (Creative/Spectator k
 7. **Tự bỏ chọn**: chọn một ô rồi vào tab Techniques gỡ chiêu khỏi ô đó, hoặc chết, hoặc tắt công tắc thế giới: thanh tự về ✕ và vật tiêu điểm biến mất.
 8. **Chơi chung** (Essential): người kia chọn chiêu thì bạn thấy họ cầm vật tiêu điểm và hạt ở tay; họ đổi/bỏ chọn thì mất.
 
-Kiểm bằng máy: `./gradlew :permahearts:build` (game test cast/cooldown/chọn) và `./gradlew :permahearts:runClientGameTest` (ảnh `30-skill-bar-cross` đến `46-focus-third-person` trong `mods/permahearts/build/run/clientGameTest/screenshots/`).
+Kiểm bằng máy: `./gradlew :immortal-cultivation:build` (game test cast/cooldown/chọn) và `./gradlew :immortal-cultivation:runClientGameTest` (ảnh `30-skill-bar-cross` đến `46-focus-third-person` trong `mods/immortal-cultivation/build/run/clientGameTest/screenshots/`).
 
 ## Chiêu Bay và Huyết Kiếm (P-014, D52)
 
@@ -126,7 +126,7 @@ Chuẩn bị (Survival, công tắc BẬT): `/technique set @s flight 10`, `/tec
 6. **Hồi chiêu 12 giây**: mỗi cú đánh trúng khiến ô Huyết Kiếm hồi 12 giây (hiện ở thanh chiêu bên phải như chiêu khác). Đang hồi mà bấm chuột trái: hiện "On cooldown: N s", không đánh. Vung hụt (không nhắm trúng gì) không tốn hồi chiêu. Chuột phải với kiếm: không làm gì. Đào/đập block bằng kiếm: không làm gì.
 7. Đánh người chơi khác bằng Huyết Kiếm khi PvP tắt: vẫn trúng (đi qua `TechniqueDamage`, D44).
 
-Kiểm bằng máy: `./gradlew :permahearts:build` (game test `FlightBladeGameTest`: bay, hết giờ, chết, Creative, sát thương, hút máu, linh dược, tầm đánh) và `./gradlew :permahearts:runClientGameTest` (ảnh `50-blade-in-hand`, `51-blade-hit`, `52-blade-cooldown`, `53-flight-hud-timer`, `54-flight-third-person`, và `46-focus-flight`, `47-focus-blade`).
+Kiểm bằng máy: `./gradlew :immortal-cultivation:build` (game test `FlightBladeGameTest`: bay, hết giờ, chết, Creative, sát thương, hút máu, linh dược, tầm đánh) và `./gradlew :immortal-cultivation:runClientGameTest` (ảnh `50-blade-in-hand`, `51-blade-hit`, `52-blade-cooldown`, `53-flight-hud-timer`, `54-flight-third-person`, và `46-focus-flight`, `47-focus-blade`).
 ## P-013 Tầm nhìn Xuyên tường (D51)
 
 Survival, công tắc BẬT, `/technique set @s phase 1`. Đứng cạnh một vách đá lớn (có hang phía trong), dùng Xuyên tường rồi đi vào trong đá.
@@ -134,7 +134,7 @@ Survival, công tắc BẬT, `/technique set @s phase 1`. Đứng cạnh một v
 2. `/technique set @s phase 20` rồi dùng lại: tầm nhìn xa tới 48 block (sương mờ từ khoảng 29 block), thấy hang và quặng ở xa hơn nhiều.
 3. Ra khỏi đá (đứng ngoài trời hoặc trong hang) khi còn đang xuyên tường: sương mù trở lại bình thường như vanilla. Hết thời gian Xuyên tường cũng vậy.
 
-Kiểm bằng máy: `./gradlew :permahearts:runClientGameTest` (ảnh `27-phase-xray-cave` cấp 1 và `28-phase-xray-level-20`; test kiểm khoảng cách kết thúc sương 8 và 48).
+Kiểm bằng máy: `./gradlew :immortal-cultivation:runClientGameTest` (ảnh `27-phase-xray-cave` cấp 1 và `28-phase-xray-level-20`; test kiểm khoảng cách kết thúc sương 8 và 48).
 
 ## Lửa đốt gỗ (D55)
 
@@ -151,7 +151,7 @@ Survival, công tắc BẬT, `/technique set @s teleport 1` (hoặc học trong 
 5. Nhìn ra đại dương xa: đáp trên mặt nước. Nhìn về phía hồ dung nham lớn / vực không đáy (Nether, End): thông báo "No safe place to land", không dịch chuyển, **không** vào hồi chiêu.
 6. Ở Nether chiêu không đưa lên nóc bedrock (tìm khoảng trống gần độ cao hiện tại).
 
-Kiểm bằng máy: `./gradlew :permahearts:build` (game test `ThousandMileStepGameTest`: 150 block, sàn 20%, tường, dung nham bị từ chối) và `runClientGameTest` (ảnh `60-teleport-focus-in-hand`, `61-teleport-charging`, `62-teleport-after`).
+Kiểm bằng máy: `./gradlew :immortal-cultivation:build` (game test `ThousandMileStepGameTest`: 150 block, sàn 20%, tường, dung nham bị từ chối) và `runClientGameTest` (ảnh `60-teleport-focus-in-hand`, `61-teleport-charging`, `62-teleport-after`).
 
 ## P-020: Huyết Kiếm nâng cấp và Violet Guardian
 
@@ -159,7 +159,7 @@ Kiểm bằng máy: `./gradlew :permahearts:build` (game test `ThousandMileStepG
 2. **Violet Guardian** (chiêu thứ 10, `/technique set @s golem 20`): bấm một lần, triệu hồi Iron Golem **màu tím** cạnh bạn. Số lượng: 1 (cấp 1-9), 2 (10-14), 3 (15-19), 4 (cấp 20). Máu và sát thương bằng 0.5x golem thường ở cấp 1, 2x ở cấp 20.
 3. Golem đi theo bạn như chó, tự đánh quái quanh bạn và quái đánh bạn; **không** đánh người chơi, bạn đánh chúng thì không gây sát thương. Xa hơn khoảng 16 block thì dịch chuyển về cạnh bạn.
 4. Tồn tại **90 giây** rồi biến mất kèm hạt khói; bạn chết/thoát game hoặc dùng lại chiêu thì biến mất ngay (dùng lại thì thay bằng bộ mới). Hồi chiêu **180 giây**.
-5. Kiểm bằng máy: `./gradlew :permahearts:build` (`GolemGameTest`) và `runClientGameTest` (ảnh `70-blade-hit-knockback`, `71-guardians-first-person`, `72-guardians-third-person`, `73-guardians-fight`).
+5. Kiểm bằng máy: `./gradlew :immortal-cultivation:build` (`GolemGameTest`) và `runClientGameTest` (ảnh `70-blade-hit-knockback`, `71-guardians-first-person`, `72-guardians-third-person`, `73-guardians-fight`).
 
 ## P-021: Warrior Angel và tính kill cho chủ (D62, D63)
 
@@ -168,7 +168,7 @@ Kiểm bằng máy: `./gradlew :permahearts:build` (game test `ThousandMileStepG
 2. Thiên thần bay xuyên tường, đi theo bạn (trong khoảng 6 block), tự lao vào đánh quái quanh bạn hoặc quái đánh bạn / bạn đánh. **Không** đánh người chơi và bạn; bạn đánh thì không gây sát thương. Khi lao vào có tư thế tấn công (mắt sáng).
 3. Máu: bằng Vex ở cấp 1, gấp đôi ở cấp 20; sát thương: nửa Vex ở cấp 1, gấp đôi ở cấp 20. Tồn tại **60 giây** rồi biến mất kèm hạt vàng; bạn chết/thoát game hoặc dùng lại chiêu thì biến mất (dùng lại thì thay bộ mới). Hồi chiêu **120 giây**. Không rơi đồ, không cho XP.
 4. **Tính kill**: để Violet Guardian hoặc Warrior Angel giết một con quái địch: tiến độ HeartXP / 100 quái tăng và nhiệm vụ giết của Crimson Master (nếu đang làm) cũng tăng, giống sói đã thuần.
-5. Kiểm bằng máy: `./gradlew :permahearts:build` (`AngelGameTest`) và `runClientGameTest` (ảnh `80-angels-third-person`).
+5. Kiểm bằng máy: `./gradlew :immortal-cultivation:build` (`AngelGameTest`) và `runClientGameTest` (ảnh `80-angels-third-person`).
 
 ## P-022: Aqua Marine (D64)
 
@@ -178,7 +178,7 @@ Kiểm bằng máy: `./gradlew :permahearts:build` (game test `ThousandMileStepG
 3b. **Tầm nhìn (P-023, D69)**: dưới nước lúc chiêu chạy, nhìn **rõ ngay** (không mờ dần 30 s) và **sáng** như Night Vision, kể cả ban đêm; lên bờ hoặc hết giờ thì về bình thường (trên bờ không sáng).
 4. **Đào**: đào đá dưới nước, cấp 1 như có Aqua Affinity (đội mũ), cấp 20 nhanh gấp đôi. Hết giờ thì chậm lại như thường. Chưa chạm đất (bơi lơ lửng) vẫn bị phạt như vanilla.
 5. Hạt bong bóng nhẹ quanh người; cầm linh khí thì có bong bóng và nước bắn ở tay. Chết hoặc thoát game thì chiêu tắt ngay.
-6. Kiểm bằng máy: `./gradlew :permahearts:build` (`AquaGameTest`: đo tốc độ bơi cấp 1 = cá heo, cấp 20 = 1,2 sprint / 1,0 thường, đo cả giữa nước và sát đáy) và `runClientGameTest` (ảnh `90-aqua-underwater-first-person`, `91-aqua-underwater-third-person`, `92-aqua-night-view-without-buff`, `93-aqua-night-view-with-buff`).
+6. Kiểm bằng máy: `./gradlew :immortal-cultivation:build` (`AquaGameTest`: đo tốc độ bơi cấp 1 = cá heo, cấp 20 = 1,2 sprint / 1,0 thường, đo cả giữa nước và sát đáy) và `runClientGameTest` (ảnh `90-aqua-underwater-first-person`, `91-aqua-underwater-third-person`, `92-aqua-night-view-without-buff`, `93-aqua-night-view-with-buff`).
 
 
 ## P-024: Illusion (D71)
@@ -189,7 +189,7 @@ Kiểm bằng máy: `./gradlew :permahearts:build` (game test `ThousandMileStepG
 4. **Mục tiêu**: bản sao đánh quái địch quanh bạn, **kể cả creeper**. Khi tắt PvP: ai đánh bạn, hoặc người bạn đánh, trở thành mục tiêu và bản sao gây sát thương cho họ (dù PvP tắt). Bạn và bản sao khác không bị bản sao đánh; bạn đánh bản sao thì không gây sát thương.
 5. **Kill**: quái chết do bản sao giết thì tính cho bạn (HeartXP, nhiệm vụ giết). Người chơi bị bản sao giết **không** tính là kill của Death Match.
 6. Hết giờ, bạn chết/thoát game hoặc dùng lại chiêu thì bản sao biến mất kèm khói. Không rơi đồ, không cho XP.
-7. Kiểm bằng máy: `./gradlew :permahearts:build` (`IllusionGameTest`, `TechniqueRulesTest.illusionNumbers`) và `runClientGameTest` (ảnh `81-illusion-third-person`).
+7. Kiểm bằng máy: `./gradlew :immortal-cultivation:build` (`IllusionGameTest`, `TechniqueRulesTest.illusionNumbers`) và `runClientGameTest` (ảnh `81-illusion-third-person`).
 
 ## P-025: Illusion làm việc (D73)
 
@@ -203,7 +203,7 @@ Kiểm bằng máy: `./gradlew :permahearts:build` (game test `ThousandMileStepG
 6. **Lúa mì / cà rốt / hạt (breed)**: cầm đồ ăn, chia đều giữa bạn và các bản sao. Bản sao đút bò/cừu/lợn trưởng thành, hai con cùng loài một lúc. Thức ăn trong rương dùng trước. Con non ra đời không cho XP.
 7. **Đánh nhau**: quái đánh bạn thì bản sao đánh trả rồi quay lại làm việc. Quái thù địch (zombie, skeleton...) giờ chọn ngẫu nhiên giữa bạn và các bản sao (sửa lỗi "quái không để ý bản sao").
 8. Bản sao biến mất (hết giờ, chết) thì thả đồ đang mang.
-9. Kiểm bằng máy: `./gradlew :permahearts:build` (`IllusionWorkGameTest`, `TechniqueRulesTest`).
+9. Kiểm bằng máy: `./gradlew :immortal-cultivation:build` (`IllusionWorkGameTest`, `TechniqueRulesTest`).
 
 ## P-026: Quantum Leap (đổi tên) và Cosmic Warping (D74, D75)
 
@@ -220,7 +220,7 @@ Kiểm bằng máy: `./gradlew :permahearts:build` (game test `ThousandMileStepG
 7. Màu bên trong cổng lấy từ UUID người đặt (hai người chơi khác nhau thường khác màu, không bao giờ tím).
 8. Thoát game vào lại: cổng và danh sách vẫn còn.
 
-Kiểm bằng máy: `./gradlew :permahearts:build` (JUnit `WarpRulesTest`, game test `WarpGameTest`: đặt 2 cổng + từ chối cổng thứ 3, không phá được, xoá, dịch chuyển + hồi chiêu, tới người chơi khác, tên) và `runClientGameTest` (`WarpClientTest`: ảnh `90-warp-menu`, `91-warp-portal`).
+Kiểm bằng máy: `./gradlew :immortal-cultivation:build` (JUnit `WarpRulesTest`, game test `WarpGameTest`: đặt 2 cổng + từ chối cổng thứ 3, không phá được, xoá, dịch chuyển + hồi chiêu, tới người chơi khác, tên) và `runClientGameTest` (`WarpClientTest`: ảnh `90-warp-menu`, `91-warp-portal`).
 
 ## P-027, P-030: Hộp thưởng (D76, D89, D90)
 
@@ -234,7 +234,7 @@ Mỗi dòng nhiệm vụ trả một **hộp thưởng**, loại hộp **bốc n
 6. **Hộp ngọc lục bảo** (xanh lá, 6 thẻ): dòng chữ trên cùng ghi "Pick 2 rewards", chọn 1 thẻ thì ghi "1 left". Thẻ đồ có 25% là đặc biệt: Totem of Undying, Bottle of Enlightenment, sách Mending, Sharpness V, Protection V (thẻ sách ghi tên phép, vd "Sharpness V"). Chọn 2 thẻ khác nhau, Claim: nhận cả hai. Đóng khi mới chọn 1 thẻ: không lấy gì, hộp còn nguyên.
 7. **Bottle of Enlightenment**: `/give @s permahearts:enlightenment_bottle`, cầm uống (giữ chuột phải ~1,6 giây): +16 level, tiêu 1 bình.
 8. Lữ Khách giờ tới sau **5 ngày** (lần đầu và sau mỗi lần rời đi). Nhiệm vụ mới có thêm thịt lợn (48), giết Blaze / Wither Skeleton / Phantom (8 con), phù thủy còn 6 con; không có 2 dòng cùng một con.
-9. Kiểm bằng máy: `./gradlew :permahearts:build` (`RewardBoxTest`, `RewardBoxGameTest`, `QuestLogicTest`) và `runClientGameTest` (ảnh `90-reward-box-*`, `92-quest-box-rewards`, `93-reward-box-diamond-*`, `101-emerald-box`, `102-emerald-box-picked`, `103-emerald-box-two-picked`).
+9. Kiểm bằng máy: `./gradlew :immortal-cultivation:build` (`RewardBoxTest`, `RewardBoxGameTest`, `QuestLogicTest`) và `runClientGameTest` (ảnh `90-reward-box-*`, `92-quest-box-rewards`, `93-reward-box-diamond-*`, `101-emerald-box`, `102-emerald-box-picked`, `103-emerald-box-two-picked`).
 
 ## P-028: bảng chiêu thức mới (D83)
 

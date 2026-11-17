@@ -43,12 +43,21 @@ jar_mod_id() {
 		| sed 's/.*:[[:space:]]*"\(.*\)"/\1/'
 }
 
-# Delete jars in <dir> whose fabric.mod.json id equals <mod_id>; other jars are never touched.
+# Old name -> current mod id (D132): jars up to 0.28.0 have the fabric id permahearts.
+canon_mod() {
+	case "$1" in
+		permahearts) printf 'immortal-cultivation' ;;
+		*) printf '%s' "$1" ;;
+	esac
+}
+
+# Delete jars in <dir> whose fabric.mod.json id equals <mod_id> (or its old alias); other jars are never touched.
 remove_mod_jars() {
-	local dir="$1" id="$2" j
+	local dir="$1" id j
+	id="$(canon_mod "$2")"
 	for j in "$dir"/*.jar; do
 		[ -f "$j" ] || continue
-		if [ "$(jar_mod_id "$j")" = "$id" ]; then rm -f "$j"; fi
+		if [ "$(canon_mod "$(jar_mod_id "$j")")" = "$id" ]; then rm -f "$j"; fi
 	done
 }
 

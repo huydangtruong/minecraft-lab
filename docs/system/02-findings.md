@@ -25,7 +25,7 @@ Tên và chữ ký dưới đây lấy từ `javap` jar 26.3 và mã Fabric API 
 
 ## Build (2026-11-11)
 
-- `./gradlew :permahearts:build` xanh trên JDK 25.0.5: JUnit (`SmokeTest`) + 2 game test; lần đầu ~2 phút (tải Minecraft + thư viện), sau đó ~6 giây.
+- `./gradlew :immortal-cultivation:build` xanh trên JDK 25.0.5: JUnit (`SmokeTest`) + 2 game test; lần đầu ~2 phút (tải Minecraft + thư viện), sau đó ~6 giây.
 - `scripts/install.sh` chép `fabric-api-0.166.2+26.3.jar` và `permahearts-0.1.0.jar` vào mods/ của profile Essential; `Essential-1.5.2-26.3.jar` không đổi.
 - Chưa kiểm: nạp mod trong Minecraft Launcher thật (cần Huy khởi động lại game; tìm dòng `PermaHearts loaded` trong `logs/latest.log` của profile).
 
@@ -124,7 +124,7 @@ Tên và chữ ký dưới đây lấy từ `javap` jar 26.3 và mã Fabric API 
 
 - **JSON on macOS: `plutil` is enough** (no JXA fallback needed). `plutil -extract <keypath> raw -o - <file|->` works on GitHub-shaped release JSON: array index in the key path (`0.assets.1.browser_download_url`), `null` values elsewhere in the document are fine, unicode escapes and `\n` in `body` are fine. Limits: `raw` fails on a value that is `null` or an object/array (treated as "missing"), there is no array-length call (loop until the key path fails), and `-extract . raw` is invalid. `plutil -extract profiles xml1 -o - file` lists the dict keys of `launcher_profiles.json` as `\t<key>..</key>` lines (one tab = direct child); keys containing `.` cannot be used in a key path and are skipped. Not yet run against the live GitHub API (no release existed when written); fixture mimics its shape.
 - bash 3.2: `read -u 3` with `exec 3<file` works; `sort -r` + a `\037` field separator avoids IFS whitespace collapsing empty fields; `printf '%-*s'` works.
-- `jar` id lookup: `unzip -p <jar> fabric.mod.json | plutil -extract id raw -o - -`; `scripts/common.sh` `remove_mod_jars` uses grep on the same file (so `install.sh` deletes old `permahearts-*.jar` and `immortal-cultivation-*.jar` alike, by id).
+- `jar` id lookup: `unzip -p <jar> fabric.mod.json | plutil -extract id raw -o - -`; `scripts/common.sh` `remove_mod_jars` uses grep on the same file (so `install.sh` deletes old `permahearts-*.jar` and `immortal-cultivation-*.jar` alike, by id; since P-052 the old id `permahearts` is an alias of `immortal-cultivation` in `common.sh`, `minecraft-lab.command` and `minecraft-lab.ps1`).
 - **Windows PowerShell 5.1 (written, NOT run: no pwsh here)**: `Invoke-WebRequest` needs `-UseBasicParsing` and `$ProgressPreference='SilentlyContinue'` (progress bar makes downloads very slow); `ConvertFrom-Json` returns ISO dates as strings (7+ returns DateTime), so dates are parsed explicitly; a single-element JSON array is unrolled, hence `@(...)`; `file://` is not supported by `Invoke-WebRequest`, the script copies those (test only); keep the file ASCII-only because the `irm | iex` and file paths decode differently.
 - Release asset names come from `release.json` (`jar` field) and are matched against the release's `assets[].name`; the installer rejects a jar name with `/`, `\` or `..`.
 - Launcher profile keys can contain dots: the Essential installer names its profile `Essential-installer-2026-11-11T15:39:43.477440Z`. `plutil -extract profiles.<key>…` cannot address such keys, so `minecraft-lab.command` converts the `profiles` dict once with `plutil -extract profiles xml1` and walks the XML with awk. Found by running the installer read-only against Huy's real `launcher_profiles.json` (P-009 review).

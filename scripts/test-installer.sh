@@ -139,6 +139,30 @@ check "exit code 0" test "$RC" -eq 0
 check "changelog header printed" grep -q "^What's new in Immortal Cultivation 0.8.0:$" <<<"$OUT"
 check "says (no notes)" grep -q '^(no notes)$' <<<"$OUT"
 
+# ---- case 1d: renamed mod (D132): releases tagged permahearts-v... and immortal-cultivation-v... are one mod,
+# an installed jar with the old id permahearts counts as installed and is replaced by the new jar
+echo "Case 1d: old and new tag prefix, old jar id"
+make_minecraft 1
+mkdir -p "$T/assets/0.9.0"
+make_jar "$T/assets/0.9.0/immortal-cultivation-0.9.0.jar" immortal-cultivation 0.9.0 "build 0.9.0"
+SHA9="$(shasum -a 256 "$T/assets/0.9.0/immortal-cultivation-0.9.0.jar" | cut -d' ' -f1)"
+printf '{"minecraft":"26.3","fabric_loader":"0.20.1","mod_id":"immortal-cultivation","mod_name":"Immortal Cultivation","version":"0.9.0","fabric_api":"0.166.2+26.3","jar":"immortal-cultivation-0.9.0.jar","sha256":"%s"}\n' "$SHA9" > "$T/assets/0.9.0/release.json"
+{
+	printf '[\n{"url":"https://api.github.com/x","tag_name":"immortal-cultivation-v0.9.0","name":"Immortal Cultivation 0.9.0","draft":false,"prerelease":false,"created_at":"2026-11-09T10:00:00Z","published_at":"2026-11-09T10:00:00Z","author":{"login":"huydangtruong"},"body":"renamed","reactions":null,"assets":[{"name":"immortal-cultivation-0.9.0.jar","label":null,"browser_download_url":"file://%s/0.9.0/immortal-cultivation-0.9.0.jar"},{"name":"release.json","label":null,"browser_download_url":"file://%s/0.9.0/release.json"}]},\n' "$T/assets" "$T/assets"
+	tail -n +2 "$T/releases.json"
+} > "$T/releases-mixed.json"
+run_installer "$T/releases-mixed.json" $'0'
+check "mods menu lists one Immortal Cultivation entry" test "$(grep -c '^  [0-9]) Immortal' <<<"$OUT" | tr -d ' ')" -eq 1
+check "old-id jar counts as installed (New version)" grep -q '^  1) Immortal Cultivation   New version$' <<<"$OUT"
+run_installer "$T/releases-mixed.json" $'1\n0\n0'
+check "versions list mixes both prefixes (0.9.0 first)" grep -q '^  1) 0.9.0$' <<<"$OUT"
+check "old 0.7.1 (id permahearts) is marked (Installed)" grep -q '^  4) 0.7.1  (Installed)$' <<<"$OUT"
+run_installer "$T/releases-mixed.json" $'1\n1'
+check "exit code 0" test "$RC" -eq 0
+check "new jar present" test -f "$PROFILE_DIR/mods/immortal-cultivation-0.9.0.jar"
+check "old id-permahearts jar removed" test ! -e "$PROFILE_DIR/mods/permahearts-0.7.1.jar"
+check "mods folder has exactly 3 jars" test "$(mods | wc -l | tr -d ' ')" -eq 3
+
 # ---- case 2: wrong sha256
 echo "Case 2: wrong checksum"
 make_minecraft 1

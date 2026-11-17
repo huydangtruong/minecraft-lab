@@ -1,0 +1,24 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "io.github.huydangtruong.immortalcultivation.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"mixins": [
+		"AnimalBreedXpMixin",
+		"EntityCollisionContextMixin",
+		"EntityInWallMixin",
+		"FoodDataMixin",
+		"FoodPropertiesMixin",
+		"GhastMixin",
+		"GhastShootFireballGoalMixin",
+		"LivingEntityXpMixin",
+		"MobStunMixin",
+		"NearestAttackableDecoyMixin",
+		"PlayerMixin",
+		"PlayerPhaseMixin",
+		"ServerPlayerHurtMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

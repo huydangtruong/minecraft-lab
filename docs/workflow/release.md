@@ -5,15 +5,15 @@ Mỗi bản mod là một GitHub Release trên `huydangtruong/minecraft-lab`. B�
 ## Các bước
 
 1. Dev xong plan, manager review, merge vào `main`, và `main` đã push lên `origin` (`git status` sạch).
-2. Chạy thử không tạo gì: `scripts/release.sh permahearts --dry-run` (in lệnh `gh release create`, ghi `build/release/permahearts/release.json`).
-3. Phát hành: `scripts/release.sh permahearts` (bản chính) hoặc `scripts/release.sh permahearts --pre` (bản sửa nhỏ/thử nghiệm). Ghi chú riêng: `--notes "..."`.
+2. Chạy thử không tạo gì: `scripts/release.sh immortal-cultivation --dry-run` (in lệnh `gh release create`, ghi `build/release/immortal-cultivation/release.json`).
+3. Phát hành: `scripts/release.sh immortal-cultivation` (bản chính) hoặc `scripts/release.sh immortal-cultivation --pre` (bản sửa nhỏ/thử nghiệm). Ghi chú riêng: `--notes "..."`.
 4. Script in link release. Mở link kiểm tra có đủ 2 file: jar và `release.json`.
 
 ## Script làm gì
 
 - Từ chối nếu không ở `main`, cây làm việc bẩn, `HEAD` khác `origin/main`, hoặc tag đã có.
 - Chạy `./gradlew :<id>:build` (test phải xanh), tính sha256 của jar, ghi `release.json`.
-- Tạo release tag `<id>-v<bản>` (ví dụ `permahearts-v0.8.0`), tiêu đề `<tên> <bản>`, bằng token tài khoản `huydangtruong` (`gh auth token -u huydangtruong`); không đổi tài khoản gh đang active.
+- Tạo release tag `<id>-v<bản>` (ví dụ `immortal-cultivation-v0.29.0`), tiêu đề `<tên> <bản>`, bằng token tài khoản `huydangtruong` (`gh auth token -u huydangtruong`); không đổi tài khoản gh đang active.
 
 ## Ghi chú cho bản 0.8.0
 
