@@ -49,17 +49,21 @@ public class SkillBarHud implements HudElement {
 					x + BOX / 2, top + BOX / 2 - 4, 0xFFFFFFFF);
 			}
 		}
+		// time-left lines, right side, stacked upwards above the technique name: Flight, Aqua, Spirit Walk (D129)
+		int lineY = top - 24;
 		long flight = io.github.huydangtruong.permahearts.technique.Flight.remaining(
 			mc.player.getAttached(io.github.huydangtruong.permahearts.technique.Flight.END), now);
-		if (flight > 0) { // remaining flight time, right side, above the technique name
-			Component fl = Component.literal("Flight " + SkillBarLogic.secondsLeft(flight) + " s");
-			g.text(mc.font, fl, g.guiWidth() - MARGIN - mc.font.width(fl), top - 24, flight < 100 ? 0xFFFF8080 : 0xFFDFF4FF, true);
+		if (flight > 0) {
+			lineY = timeLine(g, mc, "Flight", flight, 0xFFDFF4FF, lineY);
 		}
 		long aqua = io.github.huydangtruong.permahearts.technique.AquaMarine.remaining(
 			mc.player.getAttached(io.github.huydangtruong.permahearts.technique.AquaMarine.END), now);
-		if (aqua > 0) { // remaining Aqua Marine time, above the flight line
-			Component aq = Component.literal("Aqua " + SkillBarLogic.secondsLeft(aqua) + " s");
-			g.text(mc.font, aq, g.guiWidth() - MARGIN - mc.font.width(aq), top - (flight > 0 ? 36 : 24), aqua < 100 ? 0xFFFF8080 : 0xFF9FF0E8, true);
+		if (aqua > 0) {
+			lineY = timeLine(g, mc, "Aqua", aqua, 0xFF9FF0E8, lineY);
+		}
+		net.minecraft.world.effect.MobEffectInstance walk = mc.player.getEffect(io.github.huydangtruong.permahearts.technique.TechniqueTimers.SHADOW);
+		if (walk != null && walk.getDuration() > 0) { // the server mirrors the Spirit Walk end tick into this effect (D115)
+			lineY = timeLine(g, mc, "Spirit Walk", walk.getDuration(), 0xFFC8A8FF, lineY);
 		}
 		Technique sel = ClientSkills.selectedTechnique(mc);
 		if (sel != null) {
@@ -75,5 +79,12 @@ public class SkillBarHud implements HudElement {
 			g.fill(bx + 1, by + 1, bx + 1 + Math.round((w - 2) * c), by + 4, c >= 1f ? 0xFFFFD040 : 0xFF40C0FF);
 			g.outline(bx, by, w, 5, 0xFF202020);
 		}
+	}
+
+	/** One right-aligned "Name N s" line (red under 5 s); returns the y of the next line up. */
+	private static int timeLine(GuiGraphicsExtractor g, Minecraft mc, String name, long ticksLeft, int color, int y) {
+		Component c = Component.literal(name + " " + SkillBarLogic.secondsLeft(ticksLeft) + " s");
+		g.text(mc.font, c, g.guiWidth() - MARGIN - mc.font.width(c), y, ticksLeft < 100 ? 0xFFFF8080 : color, true);
+		return y - 12;
 	}
 }
