@@ -2,7 +2,7 @@
 
 > Tóm tắt cho Huy: file này ghi việc đang làm dở và bước tiếp theo, để một phiên Claude mới đọc là làm tiếp được.
 > Manager cập nhật file này cuối mỗi đợt việc (merge, phát hành, quyết định mới).
-> Snapshot: 2026-11-17, after release 0.27.0.
+> Snapshot: 2026-11-17, after release 0.27.0 + P-045..P-051 on main (not released).
 
 A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [workflow/team.md](../workflow/team.md) → the plan of the work in flight. Do not read the whole repo.
 
@@ -29,7 +29,7 @@ A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [w
 | 0.25.0 contains | P-041 effect icons with time left (Undying Jutsu, Spirit Phase, Cloud Travel, Aqua Marine) and purple Death Match sky (D115, D116); P-042 Notes panel (D117); Shadow Walk renamed Spirit Phase (D118). Not playtested by hand |
 | 0.26.0 contains | P-043: boss Ghast survives reflected fireballs (D119), Notes fixes (no extra Cultivating tabs; wrap, author color, X button, 32 chars, side tabs — D122), clones fetch seeds from chests (D120), Quantum Leap cooldown 40 s −1 s/level (D121), summons attack the Death Match opponent. Server + client game tests green. Flaky: `farmTakesSeedsFromTheChestAndPlantsEmptyFarmland` (rerun) |
 | 0.27.0 contains | P-044: clones skip unreachable crops after 3 s (whole field 30 s), farm height ±6, harvest the last two stages with ripe drops (D123); installer prints the release notes after a good install and exits, Windows waits for Enter (D124; ps1 not run, no pwsh). |
-| On `main`, not released | Nothing |
+| On `main`, not released | P-045 Z X C V skill keys, one scroll ring (D125); /testmode full gives carrots, emeralds, 200 levels (D126); skill bar in the bottom-right corner with dark cells and small black key labels (D127, D128, D130; P-046/P-051); Spirit Walk rename, sight 16 → 64, time-left line (P-048, P-049, D129); P-050 shared-note chat line and Crimson Master farewell levels, completed quests × 8 (D131). Server + client game tests green. Not playtested by hand. Unused trial branch: `feat/P-047-skill-bar-under-hotbar` |
 
 Release steps: [workflow/release.md](../workflow/release.md). Release **only when Huy says so**.
 
