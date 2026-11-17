@@ -99,7 +99,14 @@ public class SkillBarClientTest implements FabricClientGameTest {
 			context.getInput().pressMouse(LEFT);
 			context.waitTicks(10);
 			check(onCooldown(server, Technique.ICE), "left click should cast Frost Orb and start its cooldown");
+			// P-046 layout check: 4 slots, one selected, one on cooldown
+			server.runOnServer(s -> TechniqueAttachment.set(s.getPlayerList().getPlayers().get(0),
+				TechniqueAttachment.get(s.getPlayerList().getPlayers().get(0)).withEmeralds(64 + 128 + 256 + 512).withLevel(Technique.FLIGHT, 5, 10).withSlot(3, Technique.FLIGHT)));
+			context.waitTicks(5);
 			context.takeScreenshot("34-frost-cast-cooldown");
+			server.runOnServer(s -> TechniqueAttachment.set(s.getPlayerList().getPlayers().get(0),
+				TechniqueAttachment.get(s.getPlayerList().getPlayers().get(0)).withSlot(3, null)));
+			context.waitTicks(3);
 			context.getInput().pressMouse(LEFT);
 			context.waitTicks(3);
 			context.takeScreenshot("35-on-cooldown-message");
