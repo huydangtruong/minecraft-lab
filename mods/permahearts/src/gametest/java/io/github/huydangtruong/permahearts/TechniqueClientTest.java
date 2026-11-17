@@ -117,7 +117,7 @@ public class TechniqueClientTest implements FabricClientGameTest {
 		server.runCommand("fill 9 100 -1 12 101 1 air");
 		server.runCommand("setblock 11 100 0 gold_block");
 		server.runCommand("setblock 11 101 0 glowstone");
-		// A second cave 18+ blocks ahead: fogged out at level 1 (8 blocks), visible at level 20 (48 blocks).
+		// A second cave 18+ blocks ahead: fogged out at level 1 (16 blocks), visible at level 20 (64 blocks), D129.
 		server.runCommand("fill 15 98 -6 40 106 6 stone");
 		server.runCommand("fill 20 100 -1 23 101 1 air");
 		server.runCommand("setblock 22 100 0 gold_block");
@@ -125,11 +125,11 @@ public class TechniqueClientTest implements FabricClientGameTest {
 		server.runCommand("tp @a 3.5 100 0 -90 0");
 		context.waitTicks(20);
 		context.takeScreenshot("27-phase-xray-cave");
-		assertFogEnd(context, 8f);
+		assertFogEnd(context, io.github.huydangtruong.permahearts.technique.TechniqueRules.phaseSightRange(1));
 		cast(server, Technique.PHASE, 20);
 		context.waitTicks(10);
 		context.takeScreenshot("28-phase-xray-level-20");
-		assertFogEnd(context, 48f);
+		assertFogEnd(context, io.github.huydangtruong.permahearts.technique.TechniqueRules.phaseSightRange(20));
 		cast(server, Technique.PHASE, 1);
 		context.waitTicks(5);
 		context.runOnClient(mc -> mc.options.setCameraType(CameraType.THIRD_PERSON_BACK));
