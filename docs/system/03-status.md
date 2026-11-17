@@ -10,7 +10,7 @@ A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [w
 
 | What | Where |
 |---|---|
-| Last release | `permahearts-v0.28.0` (renamed on GitHub to `immortal-cultivation-v0.28.0` by the manager after P-052) (GitHub Releases on `huydangtruong/minecraft-lab`), `mod_version=0.28.0` |
+| Last release | `immortal-cultivation-v0.28.0` (GitHub Releases on `huydangtruong/minecraft-lab`), `mod_version=0.28.0`. All old tags `permahearts-v*` were renamed to `immortal-cultivation-v*` on 2026-11-17 (D132); the installers still accept both prefixes |
 | 0.12.0 contains | Warrior Angel (P-021, D62, D63), Aqua Marine (P-022, P-023, D64, D69), chieftain XP x10 and damage x2 (D65, D66), stronger Strength/Swiftness/Mining elixirs (D67), gold quest 64 (D68) |
 | 0.13.0 contains | Illusion technique (P-024, D71); D72 numbers (Warrior Angel, Cloud Travel, Undying Jutsu, Heaven Blast, Fireball, Frozen Breath); chieftain health 200 and the leader-bonus fix; Strength +2 (D70); "Death Match (PvP)" line |
 | 0.14.0 contains | Illusion work modes and hostile mobs targeting the clones (P-025, D73); Quantum Leap rename (turquoise) and Cosmic Warping portals (P-026, D74, D75); quest reward boxes (P-027, D76); technique slots cost 64, 128, 256, 512 emeralds (D77); clones plant bare farmland and pick up wool near the sheep. Not playtested by hand |
@@ -30,13 +30,13 @@ A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [w
 | 0.26.0 contains | P-043: boss Ghast survives reflected fireballs (D119), Notes fixes (no extra Cultivating tabs; wrap, author color, X button, 32 chars, side tabs — D122), clones fetch seeds from chests (D120), Quantum Leap cooldown 40 s −1 s/level (D121), summons attack the Death Match opponent. Server + client game tests green. Flaky: `farmTakesSeedsFromTheChestAndPlantsEmptyFarmland` (rerun) |
 | 0.27.0 contains | P-044: clones skip unreachable crops after 3 s (whole field 30 s), farm height ±6, harvest the last two stages with ripe drops (D123); installer prints the release notes after a good install and exits, Windows waits for Enter (D124; ps1 not run, no pwsh). |
 | 0.28.0 contains | P-045 Z X C V skill keys, one scroll ring (D125); /testmode full gives carrots, emeralds, 200 levels (D126); skill bar in the bottom-right corner with dark cells and small black key labels (D127, D128, D130; P-046/P-051); Spirit Walk rename, sight 16 → 64, time-left line (P-048, P-049, D129); P-050 shared-note chat line and Crimson Master farewell levels, completed quests × 8 (D131). Server + client game tests green. Not playtested by hand. Unused trial branch: `feat/P-047-skill-bar-under-hotbar` |
-| On `main`, not released | Nothing |
+| On `main`, not released | P-052 rename to immortal-cultivation, data namespace `permahearts` kept (D132); skill bar 4 px from the right and bottom edges (D133). The first jar with id `immortal-cultivation` is not released yet: the installers remove the old id-`permahearts` jar when installing it. Not playtested by hand |
 
 Release steps: [workflow/release.md](../workflow/release.md). Release **only when Huy says so**.
 
 ## In flight
 
-- **P-052 (rename to immortal-cultivation, D132)**: dev branch `feat/P-052-dev`; mod id, folder, Gradle project, Java packages (`io.github.huydangtruong.immortalcultivation`), classes (`ImmortalCultivation`, `ImmortalCultivationClient`, `ImmortalCultivationGameTest`), mixin configs, release tag prefix and scripts renamed. The data namespace stays `permahearts` (`ImmortalCultivation.NAMESPACE`, never change). Installers alias `permahearts` to `immortal-cultivation` for old jars and old tags. Not yet merged or released.
+- **P-052 merged into main** (D132): mod id, folder `mods/immortal-cultivation`, Gradle `:immortal-cultivation`, package `io.github.huydangtruong.immortalcultivation`, release tags renamed. Data namespace stays `permahearts` (`ImmortalCultivation.NAMESPACE`, never change). Huy's dev run folder (saves) moved to `mods/immortal-cultivation/run`. Flaky seen once: `SkillBarClientTest` "the focus item should be phase", FlightBlade "the husk bleeds"
 
 - **0.24.0 / 0.24.1 released.** Waiting for Huy to play it.
 - **0.25.0 released** (P-041, P-042, D118). Waiting for Huy to play it.
