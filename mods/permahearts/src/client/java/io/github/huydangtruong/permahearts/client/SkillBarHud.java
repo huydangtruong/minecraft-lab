@@ -15,7 +15,7 @@ import net.minecraft.network.chat.Component;
  * tiny black key label in its top-left corner (D127), cooldown and the gold selection frame. Also draws the charge power bar.
  */
 public class SkillBarHud implements HudElement {
-	private static final int MARGIN = 8; // same distance from the edges as the HeartXP bar
+	private static final int MARGIN = 4; // D133: 4 px from the right and bottom edges
 	private static final int BOX = 22;
 	private static final float LABEL_SCALE = 0.6f;
 	private static final int GAP = 2;
