@@ -46,6 +46,7 @@ public class TestModeGameTest {
 		p.getInventory().setItem(0, new ItemStack(Items.APPLE, 7));
 		p.setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(Items.SHIELD));
 		HealthApplier.apply(p, true);
+		p.setExperienceLevels(7);
 		int size = p.getInventory().getContainerSize();
 		ItemStack[] before = new ItemStack[size];
 		for (int i = 0; i < size; i++) {
@@ -81,7 +82,12 @@ public class TestModeGameTest {
 			c.assertTrue(cd.level(s) == want, s.id() + " level " + cd.level(s) + ", want " + want);
 		}
 
+		c.assertTrue(count(p, Items.GOLDEN_CARROT) == 2 * TestModeRules.GOLDEN_CARROTS, "128 golden carrots per full, had " + count(p, Items.GOLDEN_CARROT));
+		c.assertTrue(count(p, Items.EMERALD) == 2 * TestModeRules.EMERALDS, "256 emeralds per full, had " + count(p, Items.EMERALD));
+		c.assertTrue(p.experienceLevel == 7 + TestModeRules.XP_LEVELS * 2, "XP levels after two fulls, was " + p.experienceLevel);
+
 		run(c, admin, "testmode reset");
+		c.assertTrue(p.experienceLevel == 7, "XP level restored, was " + p.experienceLevel);
 		for (int i = 0; i < size; i++) {
 			c.assertTrue(same(before[i], p.getInventory().getItem(i)), "slot " + i + " restored: " + before[i] + " vs " + p.getInventory().getItem(i));
 		}
@@ -106,5 +112,16 @@ public class TestModeGameTest {
 		}
 		c.assertTrue(rejected, "a non-op must not run /testmode");
 		c.succeed();
+	}
+
+	private static int count(ServerPlayer p, net.minecraft.world.item.Item item) {
+		int n = 0;
+		for (int i = 0; i < p.getInventory().getContainerSize(); i++) {
+			ItemStack s = p.getInventory().getItem(i);
+			if (s.is(item)) {
+				n += s.getCount();
+			}
+		}
+		return n;
 	}
 }

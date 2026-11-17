@@ -43,7 +43,7 @@ public class GolemClientTest implements FabricClientGameTest {
 			context.waitTicks(10);
 
 			// blade: the hit bleeds and throws the husk back
-			context.getInput().pressKey(ClientSkills.KEY);
+			context.getInput().pressKey(ClientSkills.KEYS[0]);
 			context.waitTicks(15);
 			check(context.computeOnClient(mc -> ClientSkills.focusOf(mc.player) == Technique.BLADE), "the blade is in hand");
 			context.getInput().pressMouse(LEFT);
@@ -55,8 +55,8 @@ public class GolemClientTest implements FabricClientGameTest {
 			check(dx > 2.2 + 2.0 && dx < 2.2 + 6.0, "a level 10 hit throws it about 4 blocks, x = " + dx);
 			server.runCommand("kill @e[type=husk]");
 
-			// guardian: cell 1, right click casts at once; three guardians at level 15
-			context.getInput().pressKey(o -> o.keyHotbarSlots[1]);
+			// guardian: slot key X (slot 2), right click casts at once; three guardians at level 15
+			context.getInput().pressKey(ClientSkills.KEYS[1]);
 			context.waitTicks(5);
 			context.getInput().holdMouse(RIGHT);
 			context.waitTicks(5);

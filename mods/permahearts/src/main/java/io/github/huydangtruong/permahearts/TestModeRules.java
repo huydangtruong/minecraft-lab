@@ -6,6 +6,9 @@ import java.util.List;
 public final class TestModeRules {
 	public static final int HEARTS = 50;
 	public static final int ELIXIRS_EACH = 10;
+	public static final int GOLDEN_CARROTS = 128;
+	public static final int XP_LEVELS = 200;
+	public static final int EMERALDS = 256;
 
 	/** One enchantment by its vanilla path ("protection", "fire_aspect"...) and level. */
 	public record Ench(String id, int level) {}

@@ -36,14 +36,11 @@ abstract class MinecraftInputMixin {
 		}
 	}
 
-	/** Technique mode: a number key picks a hotbar cell, not a real item slot. */
+	/** D125: a number key goes back to that hotbar slot and clears the technique selection. */
 	@Redirect(method = "handleKeybinds", at = @At(value = "INVOKE",
 		target = "Lnet/minecraft/world/entity/player/Inventory;setSelectedSlot(I)V"))
-	private void permahearts$numberKeyCell(Inventory inventory, int slot) {
-		if (ClientSkills.mode()) {
-			ClientSkills.setCell(slot);
-		} else {
-			inventory.setSelectedSlot(slot);
-		}
+	private void permahearts$numberKeyBackToHotbar(Inventory inventory, int slot) {
+		ClientSkills.backToHotbar();
+		inventory.setSelectedSlot(slot);
 	}
 }
