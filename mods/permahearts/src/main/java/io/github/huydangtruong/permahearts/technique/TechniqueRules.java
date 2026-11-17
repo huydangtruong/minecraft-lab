@@ -207,10 +207,10 @@ public final class TechniqueRules {
 		return scaled(10, 0.5, level);
 	}
 
-	/** How far a phasing player sees through blocks (D51): 8 blocks at level 1 up to 48 at level 20, whole blocks. */
+	/** How far a phasing player sees through blocks (D51, D129): 16 blocks at level 1 up to 48 at level 20, whole blocks. */
 	public static int phaseSightRange(int level) {
 		int l = Math.max(1, Math.min(MAX_LEVEL, level));
-		return (int) Math.round(8 + 40.0 * (l - 1) / (MAX_LEVEL - 1));
+		return (int) Math.round(16 + 32.0 * (l - 1) / (MAX_LEVEL - 1));
 	}
 
 	/** Distance where the in-rock fog of Phase Walk starts: 60% of the sight range. */

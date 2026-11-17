@@ -82,9 +82,9 @@ class TechniqueRulesTest {
 		assertArrayEquals(new double[] {0.80, 0.50, 0.30}, at(TechniqueRules::sacrificeCost), 1e-9);
 		assertArrayEquals(new double[] {8, 12.5, 17.5}, at(TechniqueRules::sacrificeSeconds), 1e-9);
 		assertEquals(45, Technique.SACRIFICE.cooldownSeconds());
-		assertEquals(8, TechniqueRules.phaseSightRange(1));
-		assertEquals(10, TechniqueRules.phaseSightRange(2));
-		assertEquals(27, TechniqueRules.phaseSightRange(10));
+		assertEquals(16, TechniqueRules.phaseSightRange(1));
+		assertEquals(18, TechniqueRules.phaseSightRange(2));
+		assertEquals(31, TechniqueRules.phaseSightRange(10));
 		assertEquals(48, TechniqueRules.phaseSightRange(20));
 		assertArrayEquals(new double[] {15, 15 + 25.0 * 9 / 19, 40}, at(TechniqueRules::flightSeconds), 1e-9);
 		assertArrayEquals(new double[] {-0.20, -0.20 + 1.2 * 9 / 19, 1.0}, at(TechniqueRules::flightSpeedBonus), 1e-9);
