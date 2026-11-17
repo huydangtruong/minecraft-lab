@@ -37,7 +37,7 @@ public class SkillBarHud implements HudElement {
 		for (int i = 0; i < slots.length; i++) {
 			Technique tech = d.inSlot(slots[i]);
 			int x = left + i * (BOX + GAP);
-			g.fill(x, top, x + BOX, top + BOX, 0x90000000);
+			g.fill(x, top, x + BOX, top + BOX, 0xD0000000); // dark cell like the P-047 trial
 			g.outline(x, top, BOX, BOX, 0xFF505050);
 			g.blitSprite(RenderPipelines.GUI_TEXTURED, TechniquesTab.icon(tech), x + 2, top + 2, 16, 16);
 			if (slots[i] == ClientSkills.selected()) { // D49: gold selection frame
