@@ -994,4 +994,63 @@ public class WandererGameTest {
 			endMatchTest(s);
 		}
 	}
+
+	// ---- P-050 (D131): farewell levels ----
+
+	private static ServerPlayer onlinePlayer(GameTestHelper context) {
+		ServerPlayer p = testPlayer(context);
+		return p;
+	}
+
+	private static void offline(ServerPlayer p) {
+	}
+
+	@GameTest(maxTicks = 40)
+	public void farewellLevelsOnLeaveAndGiveUp(GameTestHelper context) {
+		MinecraftServer s = context.getLevel().getServer();
+		ServerPlayer p = onlinePlayer(context);
+		try {
+			enable(context, true);
+			Wanderer.startQuestForTest(context.getLevel(), context.absolutePos(new BlockPos(1, 1, 1)), eventQuest(
+				new QuestLine(QuestType.KILL, "minecraft:zombie", 2, 2, "fury", false),
+				new QuestLine(QuestType.KILL, "minecraft:zombie", 2, 2, "fury", true),
+				new QuestLine(QuestType.KILL, "minecraft:zombie", 2, 0, "fury", false)));
+			int before = p.experienceLevel;
+			Wanderer.leave(s, net.minecraft.network.chat.Component.literal("time up"));
+			context.assertTrue(p.experienceLevel == before + 16, "2 done lines give 16 levels, got " + (p.experienceLevel - before));
+			Wanderer.startQuestForTest(context.getLevel(), context.absolutePos(new BlockPos(1, 1, 1)), eventQuest(
+				new QuestLine(QuestType.KILL, "minecraft:zombie", 2, 2, "fury", false),
+				new QuestLine(QuestType.KILL, "minecraft:zombie", 2, 0, "fury", false)));
+			context.assertTrue(Wanderer.giveUp(s, p), "give up");
+			context.assertTrue(p.experienceLevel == before + 24, "give up gives 8 more, got " + (p.experienceLevel - before));
+			context.succeed();
+		} finally {
+			offline(p);
+			Wanderer.reset(s);
+		}
+	}
+
+	@GameTest(maxTicks = 40)
+	public void farewellLevelsAfterAllClaimedAndNoneWithoutQuest(GameTestHelper context) {
+		MinecraftServer s = context.getLevel().getServer();
+		ServerPlayer p = onlinePlayer(context);
+		try {
+			enable(context, true);
+			Wanderer.startQuestForTest(context.getLevel(), context.absolutePos(new BlockPos(1, 1, 1)), eventQuest(
+				new QuestLine(QuestType.KILL, "minecraft:zombie", 2, 2, "fury", true),
+				new QuestLine(QuestType.KILL, "minecraft:zombie", 2, 2, "fury", true),
+				new QuestLine(QuestType.KILL, "minecraft:zombie", 2, 2, "fury", true)));
+			int before = p.experienceLevel;
+			Wanderer.farewellIfFinished(s);
+			context.assertTrue(p.experienceLevel == before + 24, "3 lines give 24 levels, got " + (p.experienceLevel - before));
+			Wanderer.reset(s);
+			int mid = p.experienceLevel;
+			Wanderer.leave(s, net.minecraft.network.chat.Component.literal("no quest"));
+			context.assertTrue(p.experienceLevel == mid, "no quest, no levels");
+			context.succeed();
+		} finally {
+			offline(p);
+			Wanderer.reset(s);
+		}
+	}
 }

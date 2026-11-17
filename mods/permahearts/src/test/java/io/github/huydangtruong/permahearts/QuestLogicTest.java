@@ -253,4 +253,19 @@ class QuestLogicTest {
 		}
 		assertTrue(blazeKill && blazeBoss, "both blaze lines are generated (just never together)");
 	}
+
+	@Test
+	void farewellLevels() {
+		assertEquals(0, QuestLogic.farewellLevels(0));
+		assertEquals(8, QuestLogic.farewellLevels(1));
+		assertEquals(24, QuestLogic.farewellLevels(3));
+		assertEquals(0, QuestLogic.farewellLevels(-2));
+	}
+
+	@Test
+	void completedLinesCountsDoneEvenIfUnclaimed() {
+		Quest q = QuestLogic.complete(quest(true), 0);
+		assertEquals(1, QuestLogic.completedLines(q));
+		assertEquals(0, QuestLogic.completedLines(quest(true)));
+	}
 }
