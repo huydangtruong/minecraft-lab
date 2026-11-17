@@ -13,10 +13,15 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 
-/** /testmode full | reset (D92): a full enchanted netherite kit, 50 hearts and 10 of every elixir, with a one-step way back. Ops only. */
+/**
+ * /testmode full | reset (D92): a full enchanted netherite kit, 50 hearts, 10 of every elixir, 128 golden carrots, 256 emeralds
+ * and 200 XP levels (D126), with a one-step way back. Ops only.
+ */
 public final class TestModeCommand {
 	private TestModeCommand() {}
 
@@ -46,7 +51,8 @@ public final class TestModeCommand {
 			for (int i = 0; i < p.getInventory().getContainerSize(); i++) {
 				items.add(p.getInventory().getItem(i).copy());
 			}
-			HeartsAttachment.setTestSnapshot(p, new TestSnapshot(HeartsAttachment.get(p), HeartsAttachment.getCultivation(p), items));
+			HeartsAttachment.setTestSnapshot(p, new TestSnapshot(HeartsAttachment.get(p), HeartsAttachment.getCultivation(p), items,
+				p.experienceLevel, p.experienceProgress, p.totalExperience));
 		}
 		EquipmentSlot[] armor = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
 		int armorIndex = 0;
@@ -64,6 +70,9 @@ public final class TestModeCommand {
 				give(p, stack);
 			}
 		}
+		giveStacks(p, Items.GOLDEN_CARROT, TestModeRules.GOLDEN_CARROTS);
+		giveStacks(p, Items.EMERALD, TestModeRules.EMERALDS);
+		p.giveExperienceLevels(TestModeRules.XP_LEVELS);
 		HeartsAttachment.set(p, HeartRules.withHearts(HeartsAttachment.get(p), TestModeRules.HEARTS));
 		CultivationData c = HeartsAttachment.getCultivation(p);
 		for (ElixirStat s : ElixirStat.values()) {
@@ -84,9 +93,22 @@ public final class TestModeCommand {
 		}
 		HeartsAttachment.set(p, s.hearts());
 		HeartsAttachment.setCultivation(p, s.cultivation());
+		if (s.xpLevel() >= 0) {
+			p.experienceProgress = s.xpProgress();
+			p.totalExperience = s.xpTotal();
+			p.setExperienceLevels(s.xpLevel()); // also makes the server resend the XP bar
+		}
 		HeartsAttachment.setTestSnapshot(p, null);
 		HealthApplier.apply(p, true);
 		return true;
+	}
+
+	/** Gives count of an item in full stacks. */
+	private static void giveStacks(ServerPlayer p, Item item, int count) {
+		ItemStack proto = new ItemStack(item);
+		for (int left = count; left > 0; left -= proto.getMaxStackSize()) {
+			give(p, new ItemStack(item, Math.min(left, proto.getMaxStackSize())));
+		}
 	}
 
 	private static void give(ServerPlayer p, ItemStack stack) {

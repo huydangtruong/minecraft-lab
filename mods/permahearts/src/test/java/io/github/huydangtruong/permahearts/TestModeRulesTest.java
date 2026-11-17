@@ -25,5 +25,8 @@ class TestModeRulesTest {
 	void targets() {
 		assertEquals(50, TestModeRules.HEARTS);
 		assertEquals(10, TestModeRules.ELIXIRS_EACH);
+		assertEquals(128, TestModeRules.GOLDEN_CARROTS);
+		assertEquals(256, TestModeRules.EMERALDS);
+		assertEquals(200, TestModeRules.XP_LEVELS);
 	}
 }
