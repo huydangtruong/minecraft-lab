@@ -71,4 +71,24 @@ class SkillBarLogicTest {
 		assertEquals(1, SkillBarLogic.secondsLeft(1));
 		assertEquals(0, SkillBarLogic.secondsLeft(0));
 	}
+
+	@Test
+	void slideEasingAndStep() {
+		assertEquals(0f, SkillBarLogic.slideOffset(0f));
+		assertEquals(1f, SkillBarLogic.slideOffset(1f));
+		assertEquals(0.875f, SkillBarLogic.slideOffset(0.5f), 1e-6f);
+		assertEquals(1f, SkillBarLogic.slideOffset(2f));
+		assertEquals(0f, SkillBarLogic.slideOffset(-1f));
+		assertEquals(1f, SkillBarLogic.slideStep(0f, true, 150), 1e-6f);
+		assertEquals(0.5f, SkillBarLogic.slideStep(0f, true, 75), 1e-6f);
+		assertEquals(0.25f, SkillBarLogic.slideStep(0.5f, false, 37), 0.01f); // reversing mid-slide continues from 0.5
+		assertEquals(0f, SkillBarLogic.slideStep(0.1f, false, 1000));
+		assertEquals(0.3f, SkillBarLogic.slideStep(0.3f, true, 0));
+	}
+
+	@Test
+	void barTopLoweredAndRaised() {
+		assertEquals(188f, SkillBarLogic.barTop(200, 0f));
+		assertEquals(179f, SkillBarLogic.barTop(200, 1f));
+	}
 }

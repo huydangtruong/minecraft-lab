@@ -287,3 +287,10 @@ Tên và chữ ký dưới đây lấy từ `javap` jar 26.3 và mã Fabric API 
 - Scroll: `MouseHandler#onScroll` ends with `inv.setSelectedSlot(ScrollWheelHandler.getNextScrollWheelSelection(double wheel, int current, int size))` (vanilla: new = current - signum(wheel), wrapped). One `@Redirect` on `ScrollWheelHandler;getNextScrollWheelSelection(DII)I` is enough to run a bigger ring; return the unchanged inventory slot to leave it alone.
 - Hotbar selection frame: `Hud#extractItemHotbar(GuiGraphicsExtractor, DeltaTracker)` calls `blitSprite(RenderPipeline, Identifier, IIII)` for the bar, the selection (`hud/hotbar_selection`) and the offhand; `@Redirect` that call and skip the one whose sprite path is `hud/hotbar_selection` (`HotbarSelectionMixin`). `RenderPipeline` is in `com.mojang.renderpearl.api.pipeline` in 26.3.
 - Number keys: `Minecraft#handleKeybinds` calls `Inventory#setSelectedSlot(I)`; our redirect also clears the technique selection.
+
+## HUD raise and skill bar under the hotbar (P-047, D128)
+
+- `GuiGraphicsExtractor.pose()` is a `org.joml.Matrix3x2fStack`: `pushMatrix()`, `translate(0, -8)`, `popMatrix()` around `vanilla.extractRenderState(g, delta)` moves a whole vanilla HUD element.
+- `HudElementRegistry.replaceElement(id, vanilla -> element)` can be called again for an id already replaced (the function gets the current element), so `RaisedHud` wraps the heart/armour replacements of `LayeredHeartsHud`.
+- Ids raised (`VanillaHudElements`): HOTBAR, ARMOR_BAR, HEALTH_BAR, FOOD_BAR, AIR_BAR, MOUNT_HEALTH, INFO_BAR, EXPERIENCE_LEVEL, INFO_BAR_FOREGROUND, HELD_ITEM_TOOLTIP, OVERLAY_MESSAGE. Chat, boss bars, titles, scoreboard stay.
+- `net.minecraft.util.Util.getMillis()` gives real time for the frame-time driven slide.

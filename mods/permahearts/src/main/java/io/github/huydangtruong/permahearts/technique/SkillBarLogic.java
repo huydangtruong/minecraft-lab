@@ -81,4 +81,27 @@ public final class SkillBarLogic {
 	public static int secondsLeft(long ticksLeft) {
 		return (int) ((Math.max(0, ticksLeft) + 19) / 20);
 	}
+
+	/** Length of the skill bar slide between its lowered and raised position (D128). */
+	public static final int SLIDE_MILLIS = 150;
+
+	/** Ease-out (cubic) of a slide progress 0..1: fast at first, slow at the end. */
+	public static float slideOffset(float progress) {
+		float p = Math.max(0f, Math.min(1f, progress));
+		float q = 1f - p;
+		return 1f - q * q * q;
+	}
+
+	/** Slide progress (0 = lowered, 1 = raised) after dtMillis towards the target. A reversal continues from the current value. */
+	public static float slideStep(float progress, boolean raised, long dtMillis) {
+		float step = Math.max(0L, dtMillis) / (float) SLIDE_MILLIS;
+		return raised ? Math.min(1f, progress + step) : Math.max(0f, progress - step);
+	}
+
+	/** Top y of the skill bar cells: 4 px above the hotbar's bottom edge when lowered, fully visible when raised. */
+	public static float barTop(int guiHeight, float progress) {
+		float lowered = guiHeight - 12;
+		float raised = guiHeight - 21;
+		return lowered + (raised - lowered) * slideOffset(progress);
+	}
 }

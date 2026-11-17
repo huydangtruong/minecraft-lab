@@ -104,6 +104,18 @@ public class SkillBarClientTest implements FabricClientGameTest {
 			context.waitTicks(3);
 			context.takeScreenshot("35-on-cooldown-message");
 
+			// P-047 (D128): four techniques slotted; raised (Frost Orb selected, on cooldown), then lowered under the hotbar
+			server.runOnServer(srv -> TechniqueAttachment.set(srv.getPlayerList().getPlayers().get(0),
+				TechniqueAttachment.get(srv.getPlayerList().getPlayers().get(0)).withLevel(Technique.REPULSE, 4, 10).withEmeralds(2000).withSlot(3, Technique.REPULSE)));
+			context.waitTicks(30);
+			check(context.computeOnClient(mc -> ClientSkills.usableSlots(mc).length) == 4, "four techniques should be usable");
+			context.takeScreenshot("47-skillbar-raised-cooldown");
+			context.getInput().pressKey(o -> o.keyHotbarSlots[0]);
+			context.waitTicks(30);
+			context.takeScreenshot("48-skillbar-lowered");
+			context.getInput().pressKey(ClientSkills.KEYS[1]); // back to the Frost Orb for the steps below
+			context.waitTicks(5);
+
 			// Flame Burst: Z, hold right click to charge (zoom + power bar), release to throw
 			server.runCommand("summon husk 9 100 0 {NoAI:1b}");
 			context.getInput().pressKey(ClientSkills.KEYS[0]);

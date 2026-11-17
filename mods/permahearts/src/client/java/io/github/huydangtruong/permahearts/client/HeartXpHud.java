@@ -27,7 +27,7 @@ public class HeartXpHud implements HudElement {
 			return;
 		}
 		HeartsData d = p.getAttachedOrElse(HeartsAttachment.HEARTS, HeartsData.DEFAULT);
-		int barY = g.guiHeight() - MARGIN - H;
+		int barY = g.guiHeight() - MARGIN - H - RaisedHud.RAISE;
 		int labelY = barY - 10;
 		Component label = HeartRules.maxHearts(d) >= HeartRules.MAX ? Messages.hudMax() : Messages.hudLabel(d.heartXp());
 		g.text(mc.font, label, X, labelY, 0xFFFF5555, true);
