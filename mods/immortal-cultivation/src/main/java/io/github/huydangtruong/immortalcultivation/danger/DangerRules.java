@@ -10,7 +10,7 @@ public final class DangerRules {
 	public static final int MAX_LEVEL = 30;
 	/** Ticks between a Crimson Master leaving and the level going up: 1/5 of a day (4 minutes). */
 	public static final long GROWTH_DELAY_TICKS = 4800L;
-	public static final int MIN_ELITE_LEVEL = 10;
+	public static final int MIN_ELITE_LEVEL = 20;
 	public static final int GEAR_START_LEVEL = 21;
 
 	private DangerRules() {}
@@ -135,16 +135,13 @@ public final class DangerRules {
 
 	// ---- Elites ----
 
-	/** 0 below level 10; 2% at 10, 10% at 20, 15% at 30 (linear in each part). */
+	/** D139: 0 below level 20; 5% at 20 rising linearly to 15% at 30. */
 	public static double eliteChance(int level) {
 		int l = clamp(level);
 		if (l < MIN_ELITE_LEVEL) {
 			return 0;
 		}
-		if (l <= 20) {
-			return 0.02 + 0.08 * (l - 10) / 10.0;
-		}
-		return 0.10 + 0.05 * (l - 20) / 10.0;
+		return 0.05 + 0.10 * (l - 20) / 10.0;
 	}
 
 	public static int maxAffixes(int level) {
@@ -152,7 +149,7 @@ public final class DangerRules {
 		if (l < MIN_ELITE_LEVEL) {
 			return 0;
 		}
-		return l < 20 ? 1 : l < 30 ? 2 : 3;
+		return l < 25 ? 1 : l < 30 ? 2 : 3;
 	}
 
 	public enum Affix {
@@ -174,7 +171,7 @@ public final class DangerRules {
 		}
 	}
 
-	/** Rolls 1..maxAffixes distinct affixes. Empty below level 10. */
+	/** Rolls 1..maxAffixes distinct affixes. Empty below level 20. */
 	public static List<Affix> rollAffixes(int level, RandomGenerator rng) {
 		int max = maxAffixes(level);
 		if (max == 0) {
@@ -210,11 +207,11 @@ public final class DangerRules {
 			case 4 -> "Pillagers appear";
 			case 6 -> "Vindicators appear, rain spawns";
 			case 8 -> "day spawns";
-			case 10 -> "elites appear, Blazes and Wither Skeletons appear";
+			case 10 -> "Blazes and Wither Skeletons appear";
 			case 12 -> "Evokers appear";
 			case 14 -> "Piglin Brutes appear";
 			case 16 -> "Ravagers appear";
-			case 20 -> "day as busy as night";
+			case 20 -> "elites appear, day as busy as night";
 			case 21 -> "more armor";
 			case 30 -> "netherite armor";
 			default -> "";

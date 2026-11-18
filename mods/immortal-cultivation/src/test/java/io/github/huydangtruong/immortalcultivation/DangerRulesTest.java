@@ -109,19 +109,19 @@ class DangerRulesTest {
 
 	@Test
 	void eliteChanceCurve() {
-		assertEquals(0, DangerRules.eliteChance(9), EPS);
-		assertEquals(0.02, DangerRules.eliteChance(10), EPS);
-		assertEquals(0.10, DangerRules.eliteChance(20), EPS);
+		assertEquals(0, DangerRules.eliteChance(10), EPS);
+		assertEquals(0, DangerRules.eliteChance(19), EPS);
+		assertEquals(0.05, DangerRules.eliteChance(20), EPS);
+		assertEquals(0.10, DangerRules.eliteChance(25), EPS);
 		assertEquals(0.15, DangerRules.eliteChance(30), EPS);
-		assertTrue(DangerRules.eliteChance(15) > 0.02 && DangerRules.eliteChance(15) < 0.10);
 	}
 
 	@Test
 	void affixCount() {
-		assertEquals(0, DangerRules.maxAffixes(9));
-		assertEquals(1, DangerRules.maxAffixes(10));
-		assertEquals(1, DangerRules.maxAffixes(19));
-		assertEquals(2, DangerRules.maxAffixes(20));
+		assertEquals(0, DangerRules.maxAffixes(19));
+		assertEquals(1, DangerRules.maxAffixes(20));
+		assertEquals(1, DangerRules.maxAffixes(24));
+		assertEquals(2, DangerRules.maxAffixes(25));
 		assertEquals(2, DangerRules.maxAffixes(29));
 		assertEquals(3, DangerRules.maxAffixes(30));
 		Random rng = new Random(3);
@@ -131,10 +131,10 @@ class DangerRulesTest {
 			assertTrue(a.size() >= 1 && a.size() <= 3);
 			assertEquals(a.size(), new HashSet<>(a).size(), "distinct");
 			most = Math.max(most, a.size());
-			assertEquals(1, DangerRules.rollAffixes(10, rng).size());
+			assertEquals(1, DangerRules.rollAffixes(20, rng).size());
 		}
 		assertEquals(3, most);
-		assertTrue(DangerRules.rollAffixes(5, rng).isEmpty());
+		assertTrue(DangerRules.rollAffixes(19, rng).isEmpty());
 		assertEquals(Affix.SWIFT, Affix.byName("swift"));
 	}
 
@@ -143,7 +143,8 @@ class DangerRulesTest {
 		assertEquals("Danger level 1", DangerRules.notice(1).title());
 		assertEquals("+10% mobs, +8% strength", DangerRules.notice(1).subtitle());
 		assertEquals("+80% mobs, +60% strength, day spawns", DangerRules.notice(8).subtitle());
-		assertEquals("+100% mobs, +75% strength, elites appear, Blazes and Wither Skeletons appear", DangerRules.notice(10).subtitle());
+		assertEquals("+100% mobs, +75% strength, Blazes and Wither Skeletons appear", DangerRules.notice(10).subtitle());
+		assertEquals("+200% mobs, +150% strength, elites appear, day as busy as night", DangerRules.notice(20).subtitle());
 		assertEquals("+220% mobs, +165% strength, more armor", DangerRules.notice(21).subtitle());
 		assertEquals("+300% mobs, +300% strength, netherite armor", DangerRules.notice(30).subtitle());
 	}
