@@ -358,9 +358,11 @@ public final class Wanderer {
 		WandererData d = data(server);
 		int completed = d.quest().map(QuestLogic::completedLines).orElse(0);
 		Entity npc = npc(server);
+		BlockPos spot = npc != null ? npc.blockPosition() : null;
 		if (npc != null) {
 			npc.discard();
 		}
+		d.quest().ifPresent(q -> leaveUnclaimed(server, q, spot, d));
 		d.quest().ifPresent(q -> REWARDS.remove(q.id()));
 		BloodMoon.onReset(server);
 		QuestBoss.onReset(server);
@@ -371,6 +373,36 @@ public final class Wanderer {
 		server.getPlayerList().broadcastSystemMessage(message, false);
 		giftLevels(server, completed);
 		io.github.huydangtruong.immortalcultivation.danger.Danger.onWandererLeft(server); // P-054: +1 danger level in 4800 ticks
+	}
+
+	/**
+	 * D147: done lines nobody claimed are not lost. Their boxes are rolled now (D90) and put in a chest on the ground where
+	 * the Crimson Master stood (or at the visit spot if the NPC is not loaded), and everyone is told where.
+	 */
+	static BlockPos leaveUnclaimed(MinecraftServer server, Quest q, BlockPos npcPos, WandererData d) {
+		java.util.List<ItemStack> boxes = new java.util.ArrayList<>();
+		for (QuestLine l : q.lines()) {
+			if (l.done() && !l.claimed()) {
+				boxes.add(RewardBoxes.stack(RewardTier.roll(l.type(), RNG)));
+			}
+		}
+		if (boxes.isEmpty()) {
+			return null;
+		}
+		ServerLevel level = server.overworld();
+		BlockPos pos = npcPos != null ? npcPos
+			: level.getHeightmapPos(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos(d.x(), d.y(), d.z()));
+		for (int i = 0; i < 16 && !level.getBlockState(pos).canBeReplaced(); i++) {
+			pos = pos.above(); // never replace a real block
+		}
+		level.setBlockAndUpdate(pos, net.minecraft.world.level.block.Blocks.CHEST.defaultBlockState());
+		if (level.getBlockEntity(pos) instanceof net.minecraft.world.Container chest) {
+			for (int i = 0; i < boxes.size() && i < chest.getContainerSize(); i++) {
+				chest.setItem(i, boxes.get(i));
+			}
+		}
+		server.getPlayerList().broadcastSystemMessage(Messages.unclaimedChest(boxes.size(), pos.getX(), pos.getY(), pos.getZ()), false);
+		return pos;
 	}
 
 	/** P-050 (D131): every online player gets 8 levels per completed quest, with one chat line under the farewell. */

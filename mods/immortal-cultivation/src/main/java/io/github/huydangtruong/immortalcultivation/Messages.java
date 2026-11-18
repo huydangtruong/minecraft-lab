@@ -161,6 +161,11 @@ public final class Messages {
 		return Component.translatableWithFallback("permahearts.wanderer.farewell", "The Crimson Master thanks you and moves on");
 	}
 
+	public static Component unclaimedChest(int boxes, int x, int y, int z) {
+		return Component.translatableWithFallback("permahearts.wanderer.unclaimed_chest",
+			"The Crimson Master left %s unclaimed reward box(es) in a chest at %s %s %s", boxes, x, y, z).withStyle(net.minecraft.ChatFormatting.GOLD);
+	}
+
 	public static Component farewellLevels(int levels, int quests) {
 		return Component.translatableWithFallback(quests == 1 ? "permahearts.wanderer.farewell_levels_one" : "permahearts.wanderer.farewell_levels",
 			quests == 1 ? "Everyone receives %s levels for 1 completed quest" : "Everyone receives %s levels for %s completed quests", levels, quests);
