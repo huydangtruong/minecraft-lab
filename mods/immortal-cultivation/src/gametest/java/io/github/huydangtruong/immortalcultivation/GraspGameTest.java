@@ -108,6 +108,24 @@ public class GraspGameTest {
 		});
 	}
 
+	/** Huy's bug: grasped undead burned in the sun (D134 says they never do). A plain zombie next to it must burn. */
+	@GameTest(maxTicks = 100)
+	public void aGraspedZombieDoesNotBurnInTheSun(GameTestHelper c) {
+		ServerPlayer p = grasper(c, 10);
+		c.getLevel().getServer().getCommands().performPrefixedCommand(c.getLevel().getServer().createCommandSourceStack(), "time set noon");
+		Zombie mine = c.spawn(EntityTypes.ZOMBIE, new Vec3(6.5, 1, 5.5));
+		mine.setNoAi(true);
+		Grasp.tame(p, mine, 10);
+		Zombie wild = c.spawn(EntityTypes.ZOMBIE, new Vec3(6.5, 1, 2.5));
+		wild.setNoAi(true);
+		c.runAfterDelay(60, () -> {
+			c.assertTrue(wild.isOnFire() || !wild.isAlive(), "control: a plain zombie burns at noon");
+			c.assertTrue(!mine.isOnFire(), "the grasped zombie does not burn");
+			cleanUp(c, p);
+			c.succeed();
+		});
+	}
+
 	/** Huy's bug: a working clone walked to its owner's grasped skeleton instead of farming. Allies must skip it. */
 	@GameTest(maxTicks = 60)
 	public void theOwnersSummonsTreatAGraspedMobAsAnAlly(GameTestHelper c) {
