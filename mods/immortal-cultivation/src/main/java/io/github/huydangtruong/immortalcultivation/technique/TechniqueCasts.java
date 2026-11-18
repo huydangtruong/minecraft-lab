@@ -59,6 +59,7 @@ public final class TechniqueCasts {
 		Flight.init();
 		AquaMarine.init();
 		io.github.huydangtruong.immortalcultivation.technique.warp.Warp.init();
+		io.github.huydangtruong.immortalcultivation.technique.grasp.Grasp.init();
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity instanceof ServerPlayer p) {
 				Flight.end(p);
@@ -111,6 +112,9 @@ public final class TechniqueCasts {
 			case ILLUSION -> {
 				Illusion.summon(caster, lvl);
 				caster.level().playSound(null, caster.blockPosition(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.8f, 1.7f);
+			}
+			case GRASP -> {
+				return false; // Soul Grasp is a held tether, started by the grasp package (not cast)
 			}
 			case ANGEL -> {
 				WarriorAngel.summon(caster, lvl);

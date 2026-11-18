@@ -91,11 +91,11 @@ public final class ClientSkills {
 	}
 
 	public static boolean charging() {
-		return charging;
+		return charging || ClientGrasp.tethering();
 	}
 
 	public static float chargeFraction() {
-		return currentCharge();
+		return ClientGrasp.tethering() ? ClientGrasp.fraction() : currentCharge();
 	}
 
 	private static float currentCharge() {
@@ -189,6 +189,8 @@ public final class ClientSkills {
 		if (mc.gui.screen() == null && intercepting(mc)) {
 			if (selectedTechnique(mc) == Technique.BLADE) {
 				bladeClick(mc);
+			} else if (selectedTechnique(mc) == Technique.GRASP) {
+				ClientGrasp.openList(); // D134: left click opens the list of grasped mobs
 			} else if (selectedTechnique(mc) == Technique.WARP) {
 				ClientPlayNetworking.send(new io.github.huydangtruong.immortalcultivation.technique.warp.Warp.Request(io.github.huydangtruong.immortalcultivation.technique.warp.Warp.OPEN, "")); // D75: left click opens the warp menu
 			} else {
@@ -228,6 +230,7 @@ public final class ClientSkills {
 		}
 
 		FocusParticles.tick(mc);
+		ClientGrasp.tick(mc, selectedTechnique(mc) == Technique.GRASP);
 		boolean inGame = mc.gui.screen() == null && available(mc);
 		tickKey(mc, inGame);
 		tickUse(mc, inGame);
@@ -255,6 +258,14 @@ public final class ClientSkills {
 	private static void tickUse(Minecraft mc, boolean inGame) {
 		Technique t = inGame ? selectedTechnique(mc) : null;
 		boolean down = mc.options.keyUse.isDown();
+		if (t != Technique.GRASP) {
+			ClientGrasp.cancelIfRunning();
+		} else {
+			ClientGrasp.tickUse(mc, down, useWasDown);
+			charging = false;
+			useWasDown = down;
+			return;
+		}
 		if (t == null || t == Technique.BLADE) { // right click does nothing with the blade
 			charging = false;
 			useWasDown = down;

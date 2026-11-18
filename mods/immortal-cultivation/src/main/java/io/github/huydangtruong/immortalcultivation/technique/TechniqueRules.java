@@ -594,6 +594,11 @@ public final class TechniqueRules {
 				new Stat("Sprint swim", num(aquaTargetSpeed(level, true) * 20) + " blocks/s"),
 				new Stat("Underwater mining", "\u00d7" + num(aquaMiningSpeed(level)) + " aqua affinity"),
 				new Stat("Cooldown", t.cooldownSeconds() + " s"));
+			case GRASP -> List.of(
+				new Stat("Catches up to", GraspRules.hearts(GraspRules.maxTameHealth(level)) + " hearts"),
+				new Stat("Bonus", "+" + num(GraspRules.bonusHealth(level) / 2.0) + " hearts"),
+				new Stat("Mobs", String.valueOf(GraspRules.maxMobs(level))),
+				new Stat("Cooldown", GraspRules.COOLDOWN_SECONDS + " s"));
 			case WARP -> List.of(
 				new Stat("Portals", String.valueOf(warpMaxPortals(level))),
 				new Stat("Cooldown", warpCooldownSeconds(level) + " s"));
