@@ -3,7 +3,7 @@
 > **Tóm tắt cho Huy (VN, ≤ 3 dòng):** chiêu thứ 16 Soul Grasp (D134). Giữ chuột phải nối sợi sáng tới mob để thu phục; chuột trái mở danh sách mob với các nút Follow / Đứng yên / Canh gác / Gọi về / Từ bỏ. Lv 1 bắt 1 con tối đa 10 tim, Lv 20 bắt 11 con tối đa 57,5 tim.
 
 - **Status:** ready
-- **Mod / decision:** `immortal-cultivation`, D134, D135 (also D60, D75, D79, D114) · **Branch:** `feat/P-053-soul-grasp` · **Depends on:** none
+- **Mod / decision:** `immortal-cultivation`, D134, D135, D136 (also D60, D75, D79, D114) · **Branch:** `feat/P-053-soul-grasp` · **Depends on:** none
 
 ## Goal
 Add technique `GRASP("grasp", "Soul Grasp", 120, …)`: a held right click tethers a looked-at mob and tames it when the charge completes. A left click opens a list screen to manage the tamed mobs.
@@ -55,7 +55,12 @@ Level `L` in 1..20:
 Each row shows:
 - the mob's icon (spawn-egg item or a small entity render);
 - its name in yellow;
-- a heart icon with the **number of hearts**. Hover tooltip: "Health 14 / 25 (bonus +5)";
+- **under the name, one stats line** (D136), each item with its icon **before** the number:
+  - heart icon + hearts (`ceil(hp / 2)`), hover tooltip "Health 14 / 25 (bonus +5)";
+  - armor icon (vanilla armor sprite) + the mob's `ARMOR` attribute value, gear included;
+  - sword icon + the mob's `ATTACK_DAMAGE` value, held weapon included. A mob that only shoots (skeleton, ghast…) shows its melee value; that is fine.
+
+  The gear tooltip (D135) shows on hover over the armor and sword numbers;
 - distance and dimension, or a dim "far away" if not loaded;
 - the current mode, highlighted.
 
