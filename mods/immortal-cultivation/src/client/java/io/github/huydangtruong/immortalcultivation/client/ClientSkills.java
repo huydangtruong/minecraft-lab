@@ -202,6 +202,8 @@ public final class ClientSkills {
 				ClientPlayNetworking.send(new io.github.huydangtruong.immortalcultivation.technique.warp.Warp.Request(io.github.huydangtruong.immortalcultivation.technique.warp.Warp.OPEN, "")); // D75: left click opens the warp menu
 			} else if (selectedTechnique(mc) == Technique.SEISM) {
 				cast(mc, selected, 0f); // D142: left click is always the boulder (a full charge would start the Wave)
+			} else if (selectedTechnique(mc) == Technique.CRYSTAL) {
+				cast(mc, selected, 0f); // D143: left click cages what you aim at (right click sends 1 = cage around you)
 			} else {
 				cast(mc, selected, 1f);
 			}

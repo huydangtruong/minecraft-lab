@@ -617,6 +617,12 @@ public final class TechniqueRules {
 					new Stat("Impact", SeismRules.impactHearts(level) + " hearts to hostile mobs"),
 					new Stat("Wave", "unlocks at Lv " + SeismRules.WAVE_MIN_LEVEL),
 					new Stat("Cooldown", t.cooldownSeconds() + " s"));
+			case CRYSTAL -> List.of(
+				new Stat("Cage lasts", num(CrystalRules.cageSeconds(level)) + " s"),
+				new Stat("Hostile mobs can't attack", num(CrystalRules.disarmSeconds(level)) + " s"),
+				new Stat("Crystal hardness", num(CrystalRules.crystalHardness(level)) + " (glass is 0.3)"),
+				new Stat("Blast resistance", num(CrystalRules.crystalBlast(level))),
+				new Stat("Cooldown", t.cooldownSeconds() + " s"));
 			case SACRIFICE -> List.of(
 				new Stat("Costs", pct(sacrificeCost(level)) + " of current health"),
 				new Stat("Invulnerable", num(sacrificeSeconds(level)) + " s"),

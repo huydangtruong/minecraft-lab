@@ -70,7 +70,6 @@ public class SeismClientTest implements FabricClientGameTest {
 			context.runOnClient(mc -> mc.options.setCameraType(CameraType.FIRST_PERSON));
 
 			// the Techniques tab with Seism in the list
-			server.runCommand("gamemode creative @a");
 			context.waitTicks(5);
 			context.setScreen(() -> new net.minecraft.client.gui.screens.inventory.InventoryScreen(
 				net.minecraft.client.Minecraft.getInstance().player));

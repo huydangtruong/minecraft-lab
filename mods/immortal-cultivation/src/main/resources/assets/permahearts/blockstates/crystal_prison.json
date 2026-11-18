@@ -1,0 +1,5 @@
+{
+  "multipart": [
+    { "apply": { "model": "permahearts:block/crystal_prison" } }
+  ]
+}

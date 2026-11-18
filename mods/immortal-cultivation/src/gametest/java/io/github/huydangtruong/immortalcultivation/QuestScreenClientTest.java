@@ -221,6 +221,7 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 		// learn ice, Heaven Blast and healing with the command, then assign with real clicks
 		server.runCommand("technique set @p ice 4");
 		server.runCommand("technique set @p healing 1");
+		server.runCommand("technique set @p thunder 1"); // P-056: Heaven Blast moved below the fold, Thunder Strike is the visible row now
 		server.runCommand("technique set @p repulse 1"); // D114: Heaven Blast is a visible row (healing is below the fold)
 		server.runCommand("technique set @p sacrifice 20");
 		context.waitTicks(5);
@@ -258,8 +259,8 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 		check(techniqueData(server).inSlot(1) == fire, "picking fire then clicking an outlined slot should slot it");
 		// slot first, then the row name 
 		clickGui(context, hotspots(context).get(HS_SLOT + 1), LEFT);
-		clickGui(context, hotspots(context).get(HS_ROW + io.github.huydangtruong.immortalcultivation.technique.Technique.REPULSE.ordinal()), LEFT);
-		check(techniqueData(server).inSlot(1) == t.getEnumConstants()[io.github.huydangtruong.immortalcultivation.technique.Technique.REPULSE.ordinal()], "slot 2 then the Heaven Blast row should slot it");
+		clickGui(context, hotspots(context).get(HS_ROW + io.github.huydangtruong.immortalcultivation.technique.Technique.THUNDER.ordinal()), LEFT); // P-056: a row that stays in view now that the list has 19 techniques
+		check(techniqueData(server).inSlot(1) == t.getEnumConstants()[io.github.huydangtruong.immortalcultivation.technique.Technique.THUNDER.ordinal()], "slot 2 then the Thunder Strike row should slot it");
 		// Cancel drops a picked technique: the next slot click selects the slot instead of assigning
 		clickGui(context, hotspots(context).get(HS_ROW), LEFT);
 		clickGui(context, hotspots(context).get(HS_EMERALD), LEFT);
