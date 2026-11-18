@@ -134,3 +134,26 @@ Boss Oni "God Slayer" săn người chơi. Đợt này làm lõi: chạy, chém 
 ## Heaven Blast choáng (P-034, D99)
 
 Heaven Blast choáng mọi sinh vật không phải người chơi bị đẩy: `1,0 + 0,1 x (level - 1)` giây (1,0 s ở Lv 1, 2,9 s ở Lv 20). Bị choáng thì không đi, không nhảy, không đánh (hiệu ứng "Stunned", mixin vào `Mob`); vẫn rơi và bị đẩy theo vật lý. Dòng chỉ số "Stun" trong bảng chiêu. Người chơi không bao giờ bị choáng. Hạt sao quay vòng trên đầu lúc choáng.
+
+## Sát Khí (Danger level) và mob Elite (P-054, D137, D138, D139)
+
+Thế giới có **Danger level 0–30**, bắt đầu từ 0. Mỗi lần Crimson Master rời đi, khoảng 4 phút (4800 tick) sau level +1 (tối đa 30, không giảm). Mỗi lần tăng: chữ cam "Danger level X" giữa màn hình, dòng nhỏ bên dưới, một dòng chat và tiếng kèn. Màn hình chỉ số có dòng "Danger level X".
+
+| Level | Số mob (chỉ Overworld) | Sức mạnh (máu + sát thương, mọi thế giới) | Mở thêm |
+|---|---|---|---|
+| 1 | +10% | +8% | |
+| 4 | +40% | +30% | Pillager |
+| 6 | +60% | +45% | Vindicator, mob ra khi mưa |
+| 8 | +80% | +60% | mob ra ban ngày (15%) |
+| 10 | +100% | +75% | Blaze, Wither Skeleton (chỗ tối) |
+| 12 / 14 / 16 | +120% / +140% / +160% | +90% / +105% / +120% | Evoker / Piglin Brute / Ravager |
+| 20 | +200% | +150% | ban ngày nhiều như ban đêm, Elite xuất hiện |
+| 21 | +220% | +165% | mob mặc thêm giáp |
+| 25 | +300% (dừng) | +225% | |
+| 30 | +300% | +300% | mọi mob mặc giáp có ít nhất 1 món netherite |
+
+- Mob ra ban ngày không cháy nắng. Ánh sáng từ đuốc vẫn chặn mob như vanilla. Peaceful: tắt hết.
+- Trần số mob: gamerule `permahearts:danger_spawn_ceiling` (mặc định 4 lần vanilla). Gamerule `permahearts:danger_level` bật / tắt Sát Khí.
+- Không áp cho boss, thủ lĩnh, God Slayer, mob đã thu phục, đồng minh triệu hồi, bản sao ảo ảnh.
+- **Elite** (từ level 20): 5% ở level 20 → 15% ở level 30. Máu gấp đôi, tên cam kèm phẩm chất, hạt cam. Số phẩm chất: 1 (level 20–24), tới 2 (25–29), tới 3 (30). Phẩm chất: Swift (chạy nhanh +40%), Ironhide (nhận ít hơn 40% sát thương), Regenerating (hồi 1% máu mỗi giây), Blazing (đánh trúng đốt 4 giây, miễn lửa), Venomous (đánh trúng gây độc 5 giây; xác sống miễn độc). 50% rơi 1–3 emerald. Soul Grasp thu phục được và giữ phẩm chất.
+- Lệnh (op): `/danger info`, `/danger set <0..30>`, `/danger elite <phẩm chất...>` (thả một zombie elite trước mặt để thử).

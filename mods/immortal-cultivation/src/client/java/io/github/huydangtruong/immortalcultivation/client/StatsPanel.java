@@ -308,6 +308,10 @@ public final class StatsPanel {
 		String at = "X " + s.x() + "  Y " + s.y() + "  Z " + s.z();
 		int ax = vx + font.width(at) <= right ? vx : tx + font.width("Spawn") + 6; // long coordinates start earlier
 		drawLeft(g, font, ax, y, new String[] {at}, new int[] {TOTAL});
+		y += LINE;
+		g.text(font, "Danger level", tx, y, TEXT, false); // P-054: world danger level (D137)
+		drawLeft(g, font, tx + font.width("Danger level") + 6, y, new String[] {String.valueOf(stats.danger())},
+			new int[] {stats.danger() > 0 ? 0xFFFFAA00 : BASE});
 	}
 
 	private static int labelWidth(Font font) {

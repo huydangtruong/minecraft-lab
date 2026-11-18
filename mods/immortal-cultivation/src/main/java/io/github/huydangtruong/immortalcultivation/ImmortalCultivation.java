@@ -94,6 +94,8 @@ public class ImmortalCultivation implements ModInitializer {
 		io.github.huydangtruong.immortalcultivation.godslayer.GodSlayer.init(); // P-032: God Slayer boss
 		io.github.huydangtruong.immortalcultivation.godslayer.GodSlayerHunt.register();
 		io.github.huydangtruong.immortalcultivation.stats.StatsSync.register();
+		io.github.huydangtruong.immortalcultivation.danger.Danger.init(); // P-054: danger level
+		io.github.huydangtruong.immortalcultivation.danger.DangerMobs.init();
 		GameRuleEvents.changeCallback(ENABLED).register((Boolean value, MinecraftServer server) -> {
 			for (ServerPlayer p : server.getPlayerList().getPlayers()) {
 				HeartsAttachment.setActive(p, value);
@@ -107,6 +109,7 @@ public class ImmortalCultivation implements ModInitializer {
 			QuestCommand.register(d);
 			io.github.huydangtruong.immortalcultivation.godslayer.BossCommand.register(d);
 			io.github.huydangtruong.immortalcultivation.technique.TechniqueCommand.register(d);
+			io.github.huydangtruong.immortalcultivation.danger.DangerCommand.register(d);
 		});
 		// Right-click on the Wanderer opens the quest screen instead of the trade screen (SUCCESS also blocks vanilla).
 		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {

@@ -329,6 +329,7 @@ public final class Wanderer {
 			.withNextDay(currentDay(server) + QuestGenerator.daysUntilReturn(RNG)));
 		server.getPlayerList().broadcastSystemMessage(Messages.farewell(), false);
 		giftLevels(server, completed);
+		io.github.huydangtruong.immortalcultivation.danger.Danger.onWandererLeft(server); // P-054: +1 danger level in 4800 ticks
 	}
 
 	// ---- leaving: give up and the end of the 2-day stay ----
@@ -369,6 +370,7 @@ public final class Wanderer {
 			.withNextDay(currentDay(server) + QuestGenerator.daysUntilReturn(RNG)));
 		server.getPlayerList().broadcastSystemMessage(message, false);
 		giftLevels(server, completed);
+		io.github.huydangtruong.immortalcultivation.danger.Danger.onWandererLeft(server); // P-054: +1 danger level in 4800 ticks
 	}
 
 	/** P-050 (D131): every online player gets 8 levels per completed quest, with one chat line under the farewell. */

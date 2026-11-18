@@ -5,6 +5,12 @@
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
 		"AnimalBreedXpMixin",
+		"DangerMonsterMixin",
+		"DangerSunBurnMixin",
+		"EliteHurtMixin",
+		"MobCountsCapMixin",
+		"NaturalSpawnerMixin",
+		"SpawnStateCapMixin",
 		"BrainGraspMixin",
 		"EntityCollisionContextMixin",
 		"EntityInWallMixin",
