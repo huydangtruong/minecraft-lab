@@ -39,6 +39,7 @@ final class DefendOwnerGoal<T extends Mob & OwnedSummon> extends TargetGoal {
 
 	private boolean valid(LivingEntity e, Player o) {
 		return e != null && e.isAlive() && (!(e instanceof Player) || OwnedSummon.isMatchOpponent(g, e)) && !(e instanceof OwnedSummon) && !e.isSpectator()
+			&& !io.github.huydangtruong.immortalcultivation.technique.grasp.Grasp.isGraspedBy(e, o.getUUID())
 			&& e.distanceToSqr(g) < 40 * 40 && e.distanceToSqr(o) < 32 * 32;
 	}
 
