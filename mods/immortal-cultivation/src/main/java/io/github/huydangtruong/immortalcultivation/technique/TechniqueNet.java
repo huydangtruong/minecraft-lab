@@ -99,9 +99,6 @@ public final class TechniqueNet {
 		if (!p.isAlive() || p.isSpectator()) {
 			return "You cannot cast now";
 		}
-		if (CrystalDisarm.disarmed(p)) {
-			return "You are disarmed";
-		}
 		TechniqueData d = TechniqueAttachment.get(p);
 		if (slot < 0 || slot >= d.slotsOpen()) {
 			return "That slot is locked";

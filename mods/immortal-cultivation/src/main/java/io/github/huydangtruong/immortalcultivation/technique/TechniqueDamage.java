@@ -29,6 +29,18 @@ final class TechniqueDamage {
 	static boolean hurt(ServerLevel level, LivingEntity target, ServerPlayer caster, Entity direct, ResourceKey<DamageType> type, float amount) {
 		var holder = level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(type);
 		Entity cause = target instanceof Player ? null : caster;
-		return target.hurtServer(level, new DamageSource(holder, direct, cause), amount);
+		depth++;
+		try {
+			return target.hurtServer(level, new DamageSource(holder, direct, cause), amount);
+		} finally {
+			depth--;
+		}
+	}
+
+	private static int depth; // > 0 while a technique deals damage (server thread only)
+
+	/** True while TechniqueDamage.hurt runs: a Crystal Prison disarm never blocks technique damage (D146). */
+	static boolean active() {
+		return depth > 0;
 	}
 }
