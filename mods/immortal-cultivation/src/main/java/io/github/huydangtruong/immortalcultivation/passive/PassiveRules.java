@@ -71,8 +71,8 @@ public final class PassiveRules {
 			case 2 -> "Offhand";
 			case 3 -> "Helmet";
 			case 4 -> "Boots";
-			case 5 -> "Chestplate";
-			case 6 -> "Leggings";
+			case 5 -> "Chest";
+			case 6 -> "Legs";
 			case 7 -> "Hotbar";
 			case 8 -> "Row 1";
 			case 9 -> "Row 2";

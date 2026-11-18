@@ -39,8 +39,8 @@ public final class PassivesTab {
 	private static final int XP_GREEN = 0xFF80FF20;
 	private static final int BAR_BACK = 0xFF373737;
 
-	/** Gem drawn pixel by pixel (12 x 9): O outline, W white glint, L light, M mid, D dark face. */
-	private static final String[] GEM = {
+	/** Gems drawn pixel by pixel, one shape each (D148): O outline, W white glint, L light, M mid, D dark face. */
+	private static final String[] DIAMOND = { // brilliant cut
 		"  OOOOOOOO  ",
 		" OWLLMMMDDO ",
 		"OWLLLMMMDDDO",
@@ -51,6 +51,72 @@ public final class PassivesTab {
 		"    OMDO    ",
 		"     OO     ",
 	};
+	private static final String[] SAPPHIRE = { // cushion / oval
+		"   OOOOOO   ",
+		"  OWWLLLMO  ",
+		" OWLLLLMMMO ",
+		"OWLLLMMMMMDO",
+		"OLLLMMMMMMDO",
+		"OLLMMMMMMDDO",
+		"OLMMMMMMMDDO",
+		"OLMMMMMMDDDO",
+		" OMMMMMDDDO ",
+		"  OMMDDDDO  ",
+		"   OOOOOO   ",
+	};
+	private static final String[] AMETHYST = { // tall pointed crystal
+		"   OO   ",
+		"  OWLO  ",
+		" OWLLMO ",
+		"OWLLMMDO",
+		"OLLLMMDO",
+		"OLLMMMDO",
+		"OLLMMDDO",
+		"OLLMMDDO",
+		"OLLMMDDO",
+		"OLMMMDDO",
+		"OLMMDDDO",
+		" OMMDDO ",
+		"  OMDO  ",
+		"   OO   ",
+	};
+	private static final String[] AMBER = { // drop
+		"    OO    ",
+		"   OLLO   ",
+		"   OLMO   ",
+		"  OWLMMO  ",
+		"  OLLMMO  ",
+		" OWLLMMDO ",
+		" OLLLMMDO ",
+		"OWLLMMMDDO",
+		"OLLLMMMDDO",
+		"OLLMMMDDDO",
+		" OLMMMDDO ",
+		"  OMMDDO  ",
+		"   OOOO   ",
+	};
+	private static final String[] TOPAZ = { // step-cut rectangle
+		"  OOOOOOOO  ",
+		" OWLLLLLLMO ",
+		"OWLLLLLLLMDO",
+		"OLLMMMMMMLDO",
+		"OLLMWLLLMLDO",
+		"OLLMLLLLMLDO",
+		"OLLMMMMMMLDO",
+		"OLMMMMMMMMDO",
+		" OMDDDDDDDO ",
+		"  OOOOOOOO  ",
+	};
+
+	private static String[] shape(Passive p) {
+		return switch (p) {
+			case COOLDOWN -> SAPPHIRE;
+			case VISION -> AMETHYST;
+			case HUNGER -> AMBER;
+			case XP -> TOPAZ;
+			case INVENTORY -> DIAMOND;
+		};
+	}
 
 	/** {light, mid, dark, outline} per passive (D148 colours). */
 	private static int[] colors(Passive p) {
@@ -103,11 +169,11 @@ public final class PassivesTab {
 	}
 
 	private static int[] gemRect(int tx, int rowY) {
-		return new int[] {tx + 2, rowY + 4, 16, 16};
+		return new int[] {tx + 1, rowY + 4, 16, 16};
 	}
 
 	private static int[] plusRect(int right, int rowY) {
-		return new int[] {right - 3 - PLUS, rowY + (ROW_H - PLUS) / 2, PLUS, PLUS};
+		return new int[] {right - 2 - PLUS, rowY + (ROW_H - PLUS) / 2, PLUS, PLUS};
 	}
 
 	private static int[] backRect(int tx, int y0) {
@@ -135,11 +201,14 @@ public final class PassivesTab {
 		}
 	}
 
-	/** The gem, 12 x 9 pixels centred in a 16 x 16 box; grey when off. */
+	/** The passive's own gem, centred in a 16 x 16 box; grey when off. */
 	static void gem(GuiGraphicsExtractor g, Passive p, int x, int y, boolean grey) {
 		int[] c = colors(p);
-		for (int row = 0; row < GEM.length; row++) {
-			String line = GEM[row];
+		String[] mask = shape(p);
+		int ox = x + (16 - mask[0].length()) / 2;
+		int oy = y + (16 - mask.length) / 2;
+		for (int row = 0; row < mask.length; row++) {
+			String line = mask[row];
 			for (int col = 0; col < line.length(); col++) {
 				int color = switch (line.charAt(col)) {
 					case 'O' -> c[3];
@@ -150,8 +219,8 @@ public final class PassivesTab {
 					default -> 0;
 				};
 				if (color != 0) {
-					int px = x + 2 + col;
-					int py = y + 4 + row;
+					int px = ox + col;
+					int py = oy + row;
 					g.fill(px, py, px + 1, py + 1, grey ? grey(color) : color);
 				}
 			}
@@ -196,12 +265,12 @@ public final class PassivesTab {
 				g.outline(gem[0] - 1, gem[1] - 1, gem[2] + 2, gem[3] + 2, GOLD);
 			}
 			String title = PassiveRules.title(p, level);
-			int maxW = plus[0] - 3 - (tx + 22);
+			int maxW = plus[0] - 1 - (tx + 20);
 			if (font.width(title) > maxW) {
 				title = font.plainSubstrByWidth(title, maxW - font.width("..")) + "..";
 			}
-			g.text(font, title, tx + 22, y + 4, level > 0 ? TOTAL : BASE, false);
-			segments(g, tx + 22, y + 16, level);
+			g.text(font, title, tx + 20, y + 4, level > 0 ? TOTAL : BASE, false);
+			segments(g, tx + 20, y + 16, level);
 			boolean up = level < PassiveRules.MAX_LEVEL && xp >= PassiveRules.COST_LEVELS;
 			String sprite = !up ? "widget/button_disabled" : hoverPlus ? "widget/button_highlighted" : "widget/button";
 			g.blitSprite(RenderPipelines.GUI_TEXTURED, Identifier.withDefaultNamespace(sprite), plus[0], plus[1], PLUS, PLUS);
@@ -236,10 +305,11 @@ public final class PassivesTab {
 		}
 		y += 4;
 		// the 10 levels in two columns, the current one highlighted
-		int colW = (right - tx) / 2;
+		int col2 = 92; // the left column holds the longest values ("+Main hand")
 		for (int l = 1; l <= PassiveRules.MAX_LEVEL; l++) {
 			int col = (l - 1) / 5;
-			int x = tx + col * colW;
+			int x = tx + col * col2;
+			int colW = col == 0 ? col2 : right - tx - col2;
 			int ly = y + (l - 1) % 5 * LINE;
 			boolean cur = l == level;
 			if (cur) {
@@ -248,7 +318,7 @@ public final class PassivesTab {
 			int color = cur ? TOTAL : l < level ? TEXT : BASE;
 			String lv = "Lv " + l;
 			g.text(font, cur ? Component.literal(lv).withStyle(ChatFormatting.BOLD) : Component.literal(lv), x + 1, ly, color, false);
-			g.text(font, PassiveRules.tableValue(p, l), x + 31, ly, color, false);
+			g.text(font, PassiveRules.tableValue(p, l), x + (col == 0 ? 30 : 36), ly, color, false);
 		}
 	}
 
