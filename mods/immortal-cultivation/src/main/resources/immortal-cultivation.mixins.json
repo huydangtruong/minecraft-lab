@@ -16,6 +16,7 @@
 		"CrystalExplosionMixin",
 		"DisplayAccess",
 		"EndermanCageMixin",
+		"ExperienceOrbMixin",
 		"EntityCollisionContextMixin",
 		"EntityInWallMixin",
 		"FoodDataMixin",

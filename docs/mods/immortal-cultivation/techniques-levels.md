@@ -78,3 +78,20 @@ Sinh từ `technique/TechniqueRules.java`: sửa số liệu ở đó rồi tạ
 | 20 | 115 | +43 | 11 |
 
 Công thức: máu tối đa bắt được = 20 + 5 × (Lv − 1); máu cộng = 5 + 2 × (Lv − 1); số sinh vật = 1 + Lv / 2 (làm tròn xuống). Boss, người chơi, Crimson Master, bản sao Illusion, sinh vật triệu hồi và sinh vật đã có chủ thì không bắt được.
+
+## Nội tại (tab Passives, D148)
+
+Mỗi nội tại 10 cấp, mỗi cấp 5 cấp XP. Không reset.
+
+| Cấp | Reduce cooldown | Increase vision | Hunger sustain (đùi gà) | XP gain bonus | Inventory protect (thêm) |
+|---|---|---|---|---|---|
+| 1 | 3% | 20% | 2,5 | 3% | Tay chính |
+| 2 | 4,5% | 31,1% | 3 | 6% | Tay phụ |
+| 3 | 6% | 42,2% | 3,5 | 9% | Mũ |
+| 4 | 7,5% | 53,3% | 4 | 12% | Giày |
+| 5 | 9% | 64,4% | 4,5 | 15% | Áo |
+| 6 | 10,5% | 75,6% | 5 | 18% | Quần |
+| 7 | 12% | 86,7% | 5,5 | 21% | 9 ô hotbar |
+| 8 | 13,5% | 97,8% | 6 | 24% | Hàng túi 1 |
+| 9 | 15% | 108,9% | 6,5 | 27% | Hàng túi 2 |
+| 10 | 16,5% | 120% | 7 | 30% | Hàng túi 3 |

@@ -284,7 +284,7 @@ public final class TechniqueCasts {
 			return "On cooldown: " + (d.cooldownLeft(Technique.BLADE, now) + 19) / 20 + " s";
 		}
 		bladeHit(p, target, d.level(Technique.BLADE));
-		TechniqueAttachment.set(p, TechniqueAttachment.get(p).withCooldown(Technique.BLADE, now + Technique.BLADE.cooldownTicks()));
+		TechniqueAttachment.set(p, TechniqueAttachment.get(p).withCooldown(Technique.BLADE, now + io.github.huydangtruong.immortalcultivation.passive.Passives.cooldown(p, Technique.BLADE.cooldownTicks())));
 		return null;
 	}
 

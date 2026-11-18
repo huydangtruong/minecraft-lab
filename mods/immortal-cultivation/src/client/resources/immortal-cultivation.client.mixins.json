@@ -18,6 +18,8 @@
 		"SeismShakeMixin",
 		"AquaWaterVisionMixin",
 		"AquaLightmapMixin",
+		"PassiveVisionMixin",
+		"PassiveWaterVisionMixin",
 		"DeathMatchSkyMixin",
 		"DeathMatchFogMixin"
 	],

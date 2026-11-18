@@ -25,6 +25,20 @@ public abstract class PlayerMixin {
 		}
 	}
 
+	/** D148 Inventory protect: the protected slots skip the vanilla drop and stay on the dead player for COPY_FROM. */
+	@com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation(method = "dropEquipment",
+		at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Inventory;dropAll()V"))
+	private void permahearts$protectSlots(net.minecraft.world.entity.player.Inventory inv,
+		com.llamalad7.mixinextras.injector.wrapoperation.Operation<Void> original) {
+		if ((Object) this instanceof ServerPlayer sp) {
+			var kept = io.github.huydangtruong.immortalcultivation.passive.Passives.takeProtected(sp);
+			original.call(inv);
+			io.github.huydangtruong.immortalcultivation.passive.Passives.putBack(sp, kept);
+		} else {
+			original.call(inv);
+		}
+	}
+
 	/** The XP orbs of a dead player come from this value (0 under keepInventory). */
 	@Inject(method = "getBaseExperienceReward", at = @At("HEAD"), cancellable = true)
 	private void permahearts$keepXp(ServerLevel level, CallbackInfoReturnable<Integer> cir) {

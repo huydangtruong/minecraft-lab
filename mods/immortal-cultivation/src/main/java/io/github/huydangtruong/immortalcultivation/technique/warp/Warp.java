@@ -310,7 +310,7 @@ public final class Warp {
 		effects(from, start);
 		effects(target, spot);
 		int level = TechniqueAttachment.get(p).level(Technique.WARP);
-		long until = now(p.level().getServer()) + TechniqueRules.cooldownTicks(Technique.WARP, Mth.clamp(level, 1, TechniqueRules.MAX_LEVEL));
+		long until = now(p.level().getServer()) + io.github.huydangtruong.immortalcultivation.passive.Passives.cooldown(p, TechniqueRules.cooldownTicks(Technique.WARP, Mth.clamp(level, 1, TechniqueRules.MAX_LEVEL)));
 		TechniqueAttachment.set(p, TechniqueAttachment.get(p).withCooldown(Technique.WARP, until));
 		return null;
 	}

@@ -412,7 +412,7 @@ public final class Grasp {
 		}
 		tame(p, m, lvl);
 		long now = p.level().getServer().overworld().getGameTime();
-		TechniqueAttachment.set(p, TechniqueAttachment.get(p).withCooldown(Technique.GRASP, now + GraspRules.COOLDOWN_SECONDS * 20L));
+		TechniqueAttachment.set(p, TechniqueAttachment.get(p).withCooldown(Technique.GRASP, now + io.github.huydangtruong.immortalcultivation.passive.Passives.cooldown(p, GraspRules.COOLDOWN_SECONDS * 20L)));
 	}
 
 	// ---- tame ----
