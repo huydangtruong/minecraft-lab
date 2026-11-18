@@ -7,6 +7,7 @@ public enum Technique {
 	// D114: grouped — attack, control/defense, movement, allies
 	FIRE("fire", "Fireball", 16, true), // names: D56
 	THUNDER("thunder", "Thunder Strike", 26, false), // D86: aim, 1 s warning, then lightning and a creeper-sized blast
+	SEISM("seism", "Seism", 28, true), // D142: tap = boulder where you aim, hold 1 s (Lv 3+) = three quake waves around you
 	BLADE("blade", "Life Steal Blade", 12, false),
 	ICE("ice", "Frozen Breath", 18, true), // D80: was 24 s
 	REPULSE("repulse", "Heaven Blast", 20, false),

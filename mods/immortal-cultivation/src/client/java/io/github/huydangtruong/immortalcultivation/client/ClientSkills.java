@@ -1,6 +1,7 @@
 package io.github.huydangtruong.immortalcultivation.client;
 
 import io.github.huydangtruong.immortalcultivation.HeartsAttachment;
+import io.github.huydangtruong.immortalcultivation.technique.SeismRules;
 import io.github.huydangtruong.immortalcultivation.technique.SkillBarLogic;
 import io.github.huydangtruong.immortalcultivation.technique.Technique;
 import io.github.huydangtruong.immortalcultivation.technique.TechniqueAttachment;
@@ -91,7 +92,13 @@ public final class ClientSkills {
 	}
 
 	public static boolean charging() {
-		return charging || ClientGrasp.tethering();
+		return (charging && !seismLocked(Minecraft.getInstance())) || ClientGrasp.tethering();
+	}
+
+	/** D142: below Lv 3 Seism has no Wave, so no charge bar or zoom is shown while right click is held. */
+	private static boolean seismLocked(Minecraft mc) {
+		Technique t = selectedTechnique(mc);
+		return t == Technique.SEISM && data(mc.player).level(t) < SeismRules.WAVE_MIN_LEVEL;
 	}
 
 	public static float chargeFraction() {
@@ -193,6 +200,8 @@ public final class ClientSkills {
 				ClientGrasp.openList(); // D134: left click opens the list of grasped mobs
 			} else if (selectedTechnique(mc) == Technique.WARP) {
 				ClientPlayNetworking.send(new io.github.huydangtruong.immortalcultivation.technique.warp.Warp.Request(io.github.huydangtruong.immortalcultivation.technique.warp.Warp.OPEN, "")); // D75: left click opens the warp menu
+			} else if (selectedTechnique(mc) == Technique.SEISM) {
+				cast(mc, selected, 0f); // D142: left click is always the boulder (a full charge would start the Wave)
 			} else {
 				cast(mc, selected, 1f);
 			}
@@ -292,6 +301,9 @@ public final class ClientSkills {
 			if (t == Technique.WARP && !TechniqueRules.warpPlaceReady(c)) {
 				mc.player.sendOverlayMessage(Component.literal(TechniqueNet.WARP_HOLD_HINT)); // D79: let go too early, no portal
 			} else {
+				if (t == Technique.SEISM && c >= 1f && data(mc.player).level(t) < SeismRules.WAVE_MIN_LEVEL) {
+					mc.player.sendOverlayMessage(Component.literal(SeismRules.WAVE_LOCKED_HINT));
+				}
 				cast(mc, selected, c);
 			}
 		}

@@ -263,10 +263,14 @@ public final class Grasp {
 	}
 
 	/** The facts of GraspRules about an entity. */
-	public static GraspRules.Facts facts(Entity e) {
-		boolean boss = e instanceof GodSlayer || e instanceof net.minecraft.world.entity.boss.wither.WitherBoss
+	public static boolean isBoss(Entity e) {
+		return e instanceof GodSlayer || e instanceof net.minecraft.world.entity.boss.wither.WitherBoss
 			|| e instanceof net.minecraft.world.entity.boss.enderdragon.EnderDragon || e instanceof net.minecraft.world.entity.monster.warden.Warden
 			|| e.entityTags().contains(QuestBoss.TAG) || e.entityTags().contains(QuestBoss.MINION_TAG);
+	}
+
+	public static GraspRules.Facts facts(Entity e) {
+		boolean boss = isBoss(e);
 		boolean owned = e.hasAttached(GraspedMob.ATTACHMENT)
 			|| e instanceof OwnableEntity o && o.getOwnerReference() != null;
 		return new GraspRules.Facts(e instanceof Player, boss, WandererNpc.isWanderer(e), e instanceof OwnedSummon, e instanceof Illusion,
