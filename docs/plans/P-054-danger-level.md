@@ -2,7 +2,7 @@
 
 > **Tóm tắt cho Huy (VN, ≤ 3 dòng):** thế giới có Sát Khí 0–30, tăng 1 sau mỗi lần Crimson Master rời đi. Mob đông hơn, mạnh hơn, ra cả ban ngày, mặc đồ tốt dần (Lv 30 có netherite). Từ Lv 10 có mob Elite với 5 phẩm chất. Mỗi lần tăng có chữ cam giữa màn hình (D137, D138).
 
-- **Status:** in-dev
+- **Status:** merged
 - **Mod / decision:** `immortal-cultivation`, D137, D138, D139 · **Branch:** `feat/P-054-danger-level` · **Depends on:** none (P-053 is on main)
 
 ## Goal
