@@ -42,8 +42,8 @@ public final class StatsPanel {
 	private static final int TAB_OUT = 32;
 	private static final int TAB_W = 35;
 	private static final int TAB_H = 27;
-	/** Stats and Techniques have an edge tab; Notes does not. */
-	private static final int TAB_COUNT = 2;
+	/** Stats, Techniques and Passives have an edge tab; Notes does not. */
+	private static final int TAB_COUNT = 3;
 	private static final int LINE = 10; // D41: one more row (Food regen) must fit
 
 	private static final int TEXT = 0xFF404040;
@@ -63,6 +63,8 @@ public final class StatsPanel {
 	public enum Tab {
 		STATS("Stats"),
 		TECHNIQUES("Techniques"),
+		/** P-057 (D148): five passives bought with XP levels. */
+		PASSIVES("Passives"),
 		/** P-042 (D117): opened by its own button, no tab on the edge. */
 		NOTES("Notes");
 
@@ -140,6 +142,9 @@ public final class StatsPanel {
 				if (tab == Tab.NOTES) {
 					return !NotesTab.click(x0, y0, W, H, ev.x(), ev.y(), ev.button());
 				}
+				if (tab == Tab.PASSIVES) {
+					return !PassivesTab.click(x0, y0, W, H, ev.x(), ev.y(), ev.button());
+				}
 				return !TechniquesTab.click(x0, y0, W, H, ev.x(), ev.y(), ev.button());
 			});
 			ScreenMouseEvents.allowMouseScroll(inv).register((scr, mx, my, sx, sy) -> {
@@ -148,6 +153,9 @@ public final class StatsPanel {
 				}
 				if (tab == Tab.NOTES) {
 					return !NotesTab.scroll(panelX(inv), ((ContainerScreenAccess) inv).permahearts$topPos(), W, H, mx, my, sy);
+				}
+				if (tab == Tab.PASSIVES) {
+					return true; // five rows fit: nothing scrolls
 				}
 				return !TechniquesTab.scroll(panelX(inv), ((ContainerScreenAccess) inv).permahearts$topPos(), W, H, mx, my, sy);
 			});
@@ -170,6 +178,15 @@ public final class StatsPanel {
 			return java.util.List.of();
 		}
 		return TechniquesTab.hotspots(panelX(inv), ((ContainerScreenAccess) inv).permahearts$topPos(), W, H);
+	}
+
+	/** GUI centres of the Passives tab's clickable things (tests): see PassivesTab.hotspots. Empty when the panel is closed. */
+	public static java.util.List<int[]> passiveHotspots() {
+		var screen = Minecraft.getInstance().gui.screen();
+		if (!open || !(screen instanceof InventoryScreen inv)) {
+			return java.util.List.of();
+		}
+		return PassivesTab.hotspots(panelX(inv), ((ContainerScreenAccess) inv).permahearts$topPos(), W, H);
 	}
 
 	/** GUI position of the button (tests). */
@@ -271,6 +288,10 @@ public final class StatsPanel {
 			TechniquesTab.draw(g, font, x0, y0, W, H, mx, my);
 			return;
 		}
+		if (tab == Tab.PASSIVES) {
+			PassivesTab.draw(g, font, x0, y0, W, H, mx, my);
+			return;
+		}
 		if (tab == Tab.NOTES) {
 			NotesTab.draw(g, font, x0, y0, W, H, mx, my);
 			return;
@@ -362,6 +383,7 @@ public final class StatsPanel {
 	private static final class TabButton extends Button {
 		private static final ItemStack STAR = new ItemStack(Items.NETHER_STAR); // Stats tab (D40)
 		private static final ItemStack BOOK = new ItemStack(Items.ENCHANTED_BOOK); // Techniques tab
+		private static final ItemStack GEM = new ItemStack(Items.AMETHYST_SHARD); // Passives tab (D148)
 		private final Tab tab;
 
 		TabButton(Tab t) {
@@ -377,7 +399,7 @@ public final class StatsPanel {
 			int x = getX() - (selected ? 2 : 0);
 			g.blitSprite(RenderPipelines.GUI_TEXTURED,
 				Identifier.withDefaultNamespace(selected ? "recipe_book/tab_selected" : "recipe_book/tab"), x, getY(), TAB_W, TAB_H);
-			g.fakeItem(tab == Tab.STATS ? STAR : BOOK, x + 9, getY() + 5);
+			g.fakeItem(tab == Tab.STATS ? STAR : tab == Tab.PASSIVES ? GEM : BOOK, x + 9, getY() + 5);
 		}
 	}
 }

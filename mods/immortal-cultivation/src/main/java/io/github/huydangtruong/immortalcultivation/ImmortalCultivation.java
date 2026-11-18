@@ -81,7 +81,9 @@ public class ImmortalCultivation implements ModInitializer {
 		HeartsAttachment.CULTIVATION.identifier();
 		HeartsAttachment.WANDERER.identifier();
 		io.github.huydangtruong.immortalcultivation.technique.TechniqueAttachment.TECHNIQUES.identifier();
+		io.github.huydangtruong.immortalcultivation.passive.PassiveAttachment.PASSIVES.identifier();
 		io.github.huydangtruong.immortalcultivation.technique.TechniqueNet.register();
+		io.github.huydangtruong.immortalcultivation.passive.PassiveNet.register(); // P-057: Passives tab
 		io.github.huydangtruong.immortalcultivation.notes.NotesNet.register(); // P-042: Notes panel
 		io.github.huydangtruong.immortalcultivation.technique.TechniqueSelection.init();
 		HeartsAttachment.DM_PROTECTED.identifier();
@@ -175,6 +177,8 @@ public class ImmortalCultivation implements ModInitializer {
 				p.totalExperience = old.totalExperience;
 				p.experienceProgress = old.experienceProgress;
 				p.setScore(old.getScore());
+			} else if (!alive && !p.level().getGameRules().get(net.minecraft.world.level.gamerules.GameRules.KEEP_INVENTORY)) {
+				io.github.huydangtruong.immortalcultivation.passive.Passives.restore(old, p); // D148 Inventory protect
 			}
 		});
 		ServerPlayerEvents.JOIN.register(p -> {
