@@ -43,6 +43,7 @@ public final class StatsSync {
 		ROW.apply(ByteBufCodecs.list()), PlayerStats::rows,
 		ByteBufCodecs.VAR_INT, PlayerStats::vitality,
 		SPAWN, PlayerStats::spawn,
+		ByteBufCodecs.VAR_INT, PlayerStats::danger,
 		PlayerStats::new);
 
 	/** Not saved: rebuilt every second. Synced to its own player only. */
@@ -96,7 +97,8 @@ public final class StatsSync {
 		}
 		int vitality = ImmortalCultivation.enabled(p.level().getServer())
 			? HeartsAttachment.getCultivation(p).level(ElixirStat.VITALITY) : 0;
-		return new PlayerStats(List.copyOf(rows), vitality, spawn(p));
+		return new PlayerStats(List.copyOf(rows), vitality, spawn(p),
+			io.github.huydangtruong.immortalcultivation.danger.Danger.level(p.level().getServer()));
 	}
 
 	private static PlayerStats.Spawn spawn(ServerPlayer p) {
