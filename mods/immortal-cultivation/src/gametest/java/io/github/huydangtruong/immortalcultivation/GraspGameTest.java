@@ -107,4 +107,18 @@ public class GraspGameTest {
 			c.succeed();
 		});
 	}
+
+	/** Huy's bug: a working clone walked to its owner's grasped skeleton instead of farming. Allies must skip it. */
+	@GameTest(maxTicks = 60)
+	public void theOwnersSummonsTreatAGraspedMobAsAnAlly(GameTestHelper c) {
+		ServerPlayer p = grasper(c, 10);
+		Zombie z = c.spawn(EntityTypes.ZOMBIE, new Vec3(6.5, 1, 5.5));
+		z.setNoAi(true);
+		Grasp.tame(p, z, 10);
+		c.assertTrue(Grasp.isGraspedBy(z, p.getUUID()), "grasped by its owner");
+		c.assertTrue(!Grasp.isGraspedBy(z, java.util.UUID.randomUUID()), "not grasped by someone else");
+		c.assertTrue(!io.github.huydangtruong.immortalcultivation.technique.IllusionTargets.eligibleForTest(p, z), "the owner's clones do not fight it");
+		cleanUp(c, p);
+		c.succeed();
+	}
 }

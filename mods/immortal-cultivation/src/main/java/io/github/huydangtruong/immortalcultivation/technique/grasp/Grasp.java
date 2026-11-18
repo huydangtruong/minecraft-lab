@@ -235,6 +235,12 @@ public final class Grasp {
 		return e.hasAttached(GraspedMob.ATTACHMENT);
 	}
 
+	/** True when the entity is a mob grasped by this player: their clones, guardians and angels leave it alone. */
+	public static boolean isGraspedBy(Entity e, UUID owner) {
+		GraspedMob g = e.getAttached(GraspedMob.ATTACHMENT);
+		return g != null && g.owner().equals(owner);
+	}
+
 	/** True when the attacker must not target the target (checked from Mob#canAttack). */
 	public static boolean blocksAttack(Mob attacker, LivingEntity target) {
 		GraspedMob mine = attacker.getAttached(GraspedMob.ATTACHMENT);

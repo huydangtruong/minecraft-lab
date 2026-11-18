@@ -93,13 +93,16 @@ public final class IllusionTargets {
 		}
 	}
 
-	/** True when the owner's clones may fight this entity: never the owner, their clones, guardians, angels or tamed animals. */
+	/** True when the owner's clones may fight this entity: never the owner, their clones, guardians, angels, tamed animals or Soul Grasp mobs. */
 	static boolean eligible(Player owner, Entity e) {
 		if (!(e instanceof LivingEntity le) || !le.isAlive() || le.isSpectator() || e == owner) {
 			return false;
 		}
 		if (e instanceof OwnedSummon s && owner.getUUID().equals(s.owner())) {
 			return false;
+		}
+		if (io.github.huydangtruong.immortalcultivation.technique.grasp.Grasp.isGraspedBy(e, owner.getUUID())) {
+			return false; // the owner's Soul Grasp mobs are allies
 		}
 		return !(e instanceof TamableAnimal t && t.isOwnedBy(owner));
 	}
@@ -121,6 +124,11 @@ public final class IllusionTargets {
 			}
 		}
 		return out;
+	}
+
+	/** For tests: {@link #eligible}. */
+	public static boolean eligibleForTest(Player owner, Entity e) {
+		return eligible(owner, e);
 	}
 
 	/** For tests: the ids on the list. */
