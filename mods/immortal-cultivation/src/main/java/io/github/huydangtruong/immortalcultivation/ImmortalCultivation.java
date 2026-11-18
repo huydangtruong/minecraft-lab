@@ -231,7 +231,34 @@ public class ImmortalCultivation implements ModInitializer {
 				onHostileKill(sp, HeartRules.xpFor(entity.getMaxHealth()));
 			}
 		});
+		net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents.AFTER.register((level, player, pos, state, be) -> {
+			if (player instanceof ServerPlayer sp && ripeCrop(state)) {
+				onCropHarvest(sp, 1);
+			}
+		});
 		LOGGER.info("ImmortalCultivation loaded");
+	}
+
+	/** D140: vanilla experience (not HeartXP) for crops (player break, Illusion harvest), given straight to the player. Nothing when the mod is off or the player is Creative/Spectator. */
+	public static void onCropHarvest(ServerPlayer sp, int crops) {
+		if (crops > 0 && enabled(sp.level().getServer()) && !sp.isCreative() && !sp.isSpectator()) {
+			sp.giveExperiencePoints(HeartRules.CROP_XP * crops);
+		}
+	}
+
+	/** D140: true when the state is a crop (CropBlock, nether wart, cocoa) in its last two growth stages. */
+	public static boolean ripeCrop(net.minecraft.world.level.block.state.BlockState st) {
+		var b = st.getBlock();
+		if (b instanceof net.minecraft.world.level.block.CropBlock c) {
+			return HeartRules.cropGivesXp(c.getAge(st), c.getMaxAge());
+		}
+		if (b instanceof net.minecraft.world.level.block.NetherWartBlock) {
+			return HeartRules.cropGivesXp(st.getValue(net.minecraft.world.level.block.NetherWartBlock.AGE), net.minecraft.world.level.block.NetherWartBlock.MAX_AGE);
+		}
+		if (b instanceof net.minecraft.world.level.block.CocoaBlock) {
+			return HeartRules.cropGivesXp(st.getValue(net.minecraft.world.level.block.CocoaBlock.AGE), net.minecraft.world.level.block.CocoaBlock.MAX_AGE);
+		}
+		return false;
 	}
 
 	static void onHostileKill(ServerPlayer sp, int xp) {

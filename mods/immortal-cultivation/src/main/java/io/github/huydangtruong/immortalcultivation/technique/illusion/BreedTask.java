@@ -16,7 +16,7 @@ import net.minecraft.world.item.ItemStack;
 /**
  * BREED: feeds adult cows, sheep or pigs that can breed, two of the same kind at a time, so the vanilla love mode (and its
  * 5-minute cooldown) does the rest. Food is never free: it comes from the chest first, then from the clone's own share.
- * The baby gives no XP (see {@link IllusionBreeding}).
+ * The birth XP goes straight to the owner, no orb (D140, see {@link IllusionBreeding}).
  */
 final class BreedTask implements WorkTask {
 	private static final double REACH = 3.5;
@@ -60,7 +60,7 @@ final class BreedTask implements WorkTask {
 		}
 		if (!eaten.isEmpty()) {
 			target.setInLove(null);
-			IllusionBreeding.mark(target);
+			IllusionBreeding.mark(target, a.owner());
 			sl.broadcastEntityEvent(target, (byte) 18); // love hearts, as when a player feeds it
 		}
 		a.swingForAttack(InteractionHand.MAIN_HAND);

@@ -32,6 +32,14 @@ public final class HeartRules {
 		return new DeathResult(new HeartsData(d.bonusHearts(), d.heartXp(), d.totalHostileKills(), deaths), DeathOutcome.AT_FLOOR);
 	}
 
+	/** D140: vanilla experience points for one crop broken or harvested in its last two growth stages (1/5 of a zombie's 5). Not HeartXP. */
+	public static final int CROP_XP = 1;
+
+	/** D140: true when a crop is in its last two growth stages (age at least maxAge - 1). */
+	public static boolean cropGivesXp(int age, int maxAge) {
+		return maxAge > 0 && age >= maxAge - 1;
+	}
+
 	public static KillResult onHostileKill(HeartsData d, int xp) {
 		int kills = d.totalHostileKills() + 1;
 		int hearts = maxHearts(d);
