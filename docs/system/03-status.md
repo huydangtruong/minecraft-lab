@@ -33,7 +33,7 @@ A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [w
 | 0.29.0 contains | P-052 rename to immortal-cultivation, data namespace `permahearts` kept (D132); skill bar 4 px from the right and bottom edges (D133). First jar with id `immortal-cultivation`: the installers remove the old id-`permahearts` jar. Installed on Huy's profile 2026-11-17; a copy of MegaHeart loaded and saved with identical mod data. Server game tests green; flaky `farmTakesSeedsFromTheChestAndPlantsEmptyFarmland` failed 1 of 4 runs (clone dead at tick 1202) |
 | 0.30.0 contains | P-053 Soul Grasp, 16th technique: tame mobs with a gold tether, list screen with hearts/armor/damage icons, Follow/Stay/Guard/Call/Release, villagers and passive mobs fight, owner-given gear (D134–D136). P-054 Danger level 0–30 after each Crimson Master visit, more and stronger mobs, day spawns, armor from 21, elites from 20 with 5 affixes (D137–D139, D141). P-055 1 vanilla XP per ripe crop, Illusion harvest/breed XP to the owner (D140). Server game tests green (186). Not playtested by hand |
 | 0.31.0 contains | P-056 Seism (17th technique: Impact boulder, Wave from Lv 3) and Crystal Prison (18th: crystal cage, disarm) (D142–D146); fixes: clones/guardians/angels ignore the owner's grasped mobs, grasped mobs do not burn in the sun. Server game tests green (201). Not playtested by hand |
-| On `main`, not released | Nothing |
+| On `main`, not released | Fix: unclaimed reward boxes go into a chest on the ground when the Crimson Master leaves (D147) |
 
 Release steps: [workflow/release.md](../workflow/release.md). Release **only when Huy says so**.
 
