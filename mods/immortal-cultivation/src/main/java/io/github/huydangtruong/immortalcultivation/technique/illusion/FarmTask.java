@@ -21,7 +21,7 @@ import net.minecraft.world.phys.Vec3;
 /**
  * FARM: harvests ripe crops, replants at once, then plants the seeds it carries (or takes from a chest nearby, D120) on farmland that already exists and is empty.
  * It never makes new farmland (D84): no planting of dirt or grass. When all farmland is planted and nothing is ripe it has no work,
- * so the WorkGoal delivers what it carries (chest, or dropped on the ground). The crops are broken like a player would (normal drops); the work counts as the clone's, so no XP and no tool wear.
+ * so the WorkGoal delivers what it carries (chest, or dropped on the ground). The crops are broken like a player would (normal drops); the work counts as the clone's, so no vanilla XP and no tool wear; the owner gets 1 vanilla XP per ripe crop (D140).
  */
 final class FarmTask implements WorkTask {
 	private static final double REACH = 4.0;
@@ -202,6 +202,9 @@ final class FarmTask implements WorkTask {
 			}
 		}
 		sl.destroyBlock(pos, false, a, 512);
+		if (a.ownerPlayer() instanceof net.minecraft.server.level.ServerPlayer owner) { // D140: the owner gets the crop XP (offline: nothing)
+			io.github.huydangtruong.immortalcultivation.ImmortalCultivation.onCropHarvest(owner, 1);
+		}
 		if (haveSeed) {
 			sl.setBlock(pos, crop.defaultBlockState(), 3);
 		}

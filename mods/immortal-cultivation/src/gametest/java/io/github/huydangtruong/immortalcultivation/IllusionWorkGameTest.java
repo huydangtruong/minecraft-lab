@@ -82,7 +82,7 @@ public class IllusionWorkGameTest {
 	}
 
 	@GameTest(maxTicks = 1200)
-	public void farmHarvestsReplantsAndFillsTheChestWithoutXp(GameTestHelper c) {
+	public void farmHarvestsReplantsFillsTheChestAndGivesTheOwnerOneXpPerCrop(GameTestHelper c) {
 		ServerPlayer p = owner(c, new ItemStack(Items.IRON_HOE));
 		Container chest = chest(c, 2, 1, 5);
 		ripeWheat(c, 6, 2); // everything inside x/z 0..7: row 8 is the barrier wall
@@ -92,9 +92,10 @@ public class IllusionWorkGameTest {
 		Illusion a = castOne(c, p);
 		c.assertTrue(a.job() == IllusionJob.FARM && a.getMainHandItem().is(Items.IRON_HOE), "the hoe sets the FARM job");
 		c.succeedWhen(() -> {
+			c.assertTrue(p.totalExperience >= 3 * HeartRules.CROP_XP && HeartsAttachment.get(p).heartXp() == 0, "D140: the owner got 1 vanilla XP per harvested crop and no HeartXP, was " + p.totalExperience);
 			c.assertTrue(count(chest, s -> s.is(Items.WHEAT)) >= 3, "wheat in the chest, was " + count(chest, s -> s.is(Items.WHEAT)) + dbg(a));
 			c.assertTrue(replanted(c, 6, 2) && replanted(c, 7, 2) && replanted(c, 6, 3), "the three crops are replanted" + dbg(a));
-			c.assertTrue(p.totalExperience == xp && c.getLevel().getEntitiesOfClass(ExperienceOrb.class, arena(c)).isEmpty(), "no XP from farming");
+			c.assertTrue(c.getLevel().getEntitiesOfClass(ExperienceOrb.class, arena(c)).isEmpty(), "no XP orb from farming");
 			FlightBladeGameTest.drop(c, p);
 		});
 	}
@@ -371,12 +372,13 @@ public class IllusionWorkGameTest {
 	}
 
 	@GameTest(maxTicks = 1500)
-	public void breedSplitsTheOwnersFoodUsesTheChestFirstAndGivesNoXp(GameTestHelper c) {
+	public void breedSplitsTheOwnersFoodUsesTheChestFirstAndGivesTheBirthXpToTheOwnerNoOrb(GameTestHelper c) {
 		ServerPlayer p = owner(c, new ItemStack(Items.WHEAT, 64));
 		Container chest = chest(c, 2, 1, 5);
 		chest.setItem(0, new ItemStack(Items.WHEAT, 2));
 		Cow one = c.spawn(EntityTypes.COW, new Vec3(7.5, 1, 7.5));
 		Cow two = c.spawn(EntityTypes.COW, new Vec3(5.5, 1, 7.5)); // inside x/z 0..7: row 8 is the barrier wall
+		int xpBefore = p.totalExperience;
 		Illusion a = castOne(c, p);
 		c.assertTrue(a.job() == IllusionJob.BREED, "wheat sets the BREED job");
 		c.assertTrue(p.getMainHandItem().getCount() == 0 && a.carry().count(s -> s.is(Items.WHEAT)) == 64, "D109: all 64 wheat goes to the clone");
@@ -390,6 +392,7 @@ public class IllusionWorkGameTest {
 			List<Cow> cows = c.getLevel().getEntitiesOfClass(Cow.class, arena(c), Cow::isBaby);
 			c.assertTrue(!cows.isEmpty(), "a baby cow was born");
 			c.assertTrue(c.getLevel().getEntitiesOfClass(ExperienceOrb.class, arena(c)).isEmpty(), "no breeding XP orb");
+			c.assertTrue(p.totalExperience > xpBefore, "D140: the birth XP went straight to the owner");
 			FlightBladeGameTest.drop(c, p);
 		});
 	}

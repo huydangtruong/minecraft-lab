@@ -1,6 +1,8 @@
 package io.github.huydangtruong.immortalcultivation;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.github.huydangtruong.immortalcultivation.HeartRules.DeathOutcome;
 import io.github.huydangtruong.immortalcultivation.HeartRules.KillOutcome;
@@ -117,4 +119,17 @@ class HeartRulesTest {
 		assertEquals(11, HeartRules.maxHearts(HeartRules.addHeart(at(10, 0))));
 		assertEquals(300, HeartRules.maxHearts(HeartRules.addHeart(at(300, 0))));
 	}
+
+	@Test
+	void cropXpOnlyInLastTwoStages() {
+		assertEquals(1, HeartRules.CROP_XP);
+		assertFalse(HeartRules.cropGivesXp(5, 7));
+		assertTrue(HeartRules.cropGivesXp(6, 7));
+		assertTrue(HeartRules.cropGivesXp(7, 7));
+		assertFalse(HeartRules.cropGivesXp(0, 3)); // nether wart
+		assertTrue(HeartRules.cropGivesXp(2, 3));
+		assertFalse(HeartRules.cropGivesXp(0, 2)); // cocoa
+		assertTrue(HeartRules.cropGivesXp(1, 2));
+	}
+
 }
