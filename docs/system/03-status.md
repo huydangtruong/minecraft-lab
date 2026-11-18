@@ -2,7 +2,7 @@
 
 > Tóm tắt cho Huy: file này ghi việc đang làm dở và bước tiếp theo, để một phiên Claude mới đọc là làm tiếp được.
 > Manager cập nhật file này cuối mỗi đợt việc (merge, phát hành, quyết định mới).
-> Snapshot: 2026-11-18, P-053 planned.
+> Snapshot: 2026-11-18, P-053 merged into main.
 
 A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [workflow/team.md](../workflow/team.md) → the plan of the work in flight. Do not read the whole repo.
 
@@ -31,13 +31,13 @@ A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [w
 | 0.27.0 contains | P-044: clones skip unreachable crops after 3 s (whole field 30 s), farm height ±6, harvest the last two stages with ripe drops (D123); installer prints the release notes after a good install and exits, Windows waits for Enter (D124; ps1 not run, no pwsh). |
 | 0.28.0 contains | P-045 Z X C V skill keys, one scroll ring (D125); /testmode full gives carrots, emeralds, 200 levels (D126); skill bar in the bottom-right corner with dark cells and small black key labels (D127, D128, D130; P-046/P-051); Spirit Walk rename, sight 16 → 64, time-left line (P-048, P-049, D129); P-050 shared-note chat line and Crimson Master farewell levels, completed quests × 8 (D131). Server + client game tests green. Not playtested by hand. Unused trial branch: `feat/P-047-skill-bar-under-hotbar` |
 | 0.29.0 contains | P-052 rename to immortal-cultivation, data namespace `permahearts` kept (D132); skill bar 4 px from the right and bottom edges (D133). First jar with id `immortal-cultivation`: the installers remove the old id-`permahearts` jar. Installed on Huy's profile 2026-11-17; a copy of MegaHeart loaded and saved with identical mod data. Server game tests green; flaky `farmTakesSeedsFromTheChestAndPlantsEmptyFarmland` failed 1 of 4 runs (clone dead at tick 1202) |
-| On `main`, not released | Nothing |
+| On `main`, not released | P-053 Soul Grasp (D134–D136) |
 
 Release steps: [workflow/release.md](../workflow/release.md). Release **only when Huy says so**.
 
 ## In flight
 
-- **P-053 Soul Grasp** (D134): plan ready at [plans/P-053-soul-grasp.md](../plans/P-053-soul-grasp.md), dev started 2026-11-18 on `feat/P-053-dev` (worktree under .claude/worktrees), merges into `feat/P-053-soul-grasp`. Dev done: rules, tether, tame, goals, gear, list screen, sprites, game tests; waiting for review and Huy's playtest. Records live in `GraspData` (SavedData), not a player attachment (offline owners work).
+- **P-053 Soul Grasp merged into main** (D134–D136), not released, not playtested by hand. Gaps vs. D134: no open-hand render around the mob (particles only), no mob icon in the list rows; game tests do not cover Guard mode, gear pickup, brain mobs (villager, piglin…) or Death Match. Records in `GraspData` (SavedData). Next idea in discussion: world danger tiers, day spawns, elite mobs.
 
 - **P-052 merged into main** (D132): mod id, folder `mods/immortal-cultivation`, Gradle `:immortal-cultivation`, package `io.github.huydangtruong.immortalcultivation`, release tags renamed. Data namespace stays `permahearts` (`ImmortalCultivation.NAMESPACE`, never change). Huy's dev run folder (saves) moved to `mods/immortal-cultivation/run`. Flaky seen once: `SkillBarClientTest` "the focus item should be phase", FlightBlade "the husk bleeds"
 

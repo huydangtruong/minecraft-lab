@@ -2,7 +2,7 @@
 
 > **Tóm tắt cho Huy (VN, ≤ 3 dòng):** chiêu thứ 16 Soul Grasp (D134). Giữ chuột phải nối sợi sáng tới mob để thu phục; chuột trái mở danh sách mob với các nút Follow / Đứng yên / Canh gác / Gọi về / Từ bỏ. Lv 1 bắt 1 con tối đa 10 tim, Lv 20 bắt 11 con tối đa 57,5 tim.
 
-- **Status:** in-dev
+- **Status:** merged
 - **Mod / decision:** `immortal-cultivation`, D134, D135, D136 (also D60, D75, D79, D114) · **Branch:** `feat/P-053-soul-grasp` · **Depends on:** none
 
 ## Goal
