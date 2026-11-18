@@ -3,7 +3,7 @@
 > **Tóm tắt cho Huy (VN, ≤ 3 dòng):** chiêu thứ 16 Soul Grasp (D134). Giữ chuột phải nối sợi sáng tới mob để thu phục; chuột trái mở danh sách mob với các nút Follow / Đứng yên / Canh gác / Gọi về / Từ bỏ. Lv 1 bắt 1 con tối đa 10 tim, Lv 20 bắt 11 con tối đa 57,5 tim.
 
 - **Status:** ready
-- **Mod / decision:** `immortal-cultivation`, D134 (also D60, D75, D79, D114) · **Branch:** `feat/P-053-soul-grasp` · **Depends on:** none
+- **Mod / decision:** `immortal-cultivation`, D134, D135 (also D60, D75, D79, D114) · **Branch:** `feat/P-053-soul-grasp` · **Depends on:** none
 
 ## Goal
 Add technique `GRASP("grasp", "Soul Grasp", 120, …)`: a held right click tethers a looked-at mob and tames it when the charge completes. A left click opens a list screen to manage the tamed mobs.
@@ -16,7 +16,7 @@ Level `L` in 1..20:
 - `chargeSeconds(mobMaxHp) = clamp(mobMaxHp / 20, 1, 5)` (hearts ÷ 10).
 - Limits: select range 16 blocks; break at 24 blocks; break after 20 ticks without line of sight; follow teleport at > 12 blocks; guard radius 8; release peace 60 ticks; cooldown 120 s at every level, started **only on success**.
 - `hearts(hp) = ceil(hp / 2)` for the list.
-- Eligibility, from facts the glue passes in (no Minecraft types): a refusal reason enum `OK | TOO_STRONG(levelNeeded) | FULL | NOT_TAMEABLE`. Not tameable: players, bosses (God Slayer, quest chieftain tag, Wither, Ender Dragon, Warden), Crimson Master NPC, `OwnedSummon`s, Illusion clones, mobs already owned (any `OwnableEntity` with an owner, or another player's grasped mob), villagers and wandering traders, water mobs (`WaterAnimal`, fish, Guardian, Elder Guardian), Slime and Magma Cube.
+- Eligibility, from facts the glue passes in (no Minecraft types): a refusal reason enum `OK | TOO_STRONG(levelNeeded) | FULL | NOT_TAMEABLE`. Not tameable: players, bosses (God Slayer, quest chieftain tag, Wither, Ender Dragon, Warden), Crimson Master NPC, `OwnedSummon`s, Illusion clones, mobs already owned (any `OwnableEntity` with an owner, or another player's grasped mob), wandering traders (villagers **are** tameable, D135), water mobs (`WaterAnimal`, fish, Guardian, Elder Guardian), Slime and Magma Cube.
 
 ## Behaviour
 1. **Aim:** while Soul Grasp is the selected slot, the mob under the crosshair within 16 blocks gets a faint yellow outline (client only). Invalid targets get a red outline, and pressing right click shows the reason as an overlay line (e.g. "Too strong (needs Lv 5)", "You already hold 3 mobs", "This mob cannot be tamed").
@@ -43,6 +43,13 @@ Level `L` in 1..20:
 9. **Death:** remove the mob from the owner's list (freeing the slot) and send the owner one chat line "Your Skeleton 7 died". If the owner is offline, remove it silently.
 10. **Release:** remove the attachment, the bonus modifier (clamp health), the name and persistence, and restore vanilla goals (simplest: re-run `registerGoals` or save/reload the entity, whichever is verified to work). The mob ignores the ex-owner for 60 ticks, then behaves as normal.
 11. **Player record** (in `TechniqueAttachment` or a new attachment, codec fields under the `permahearts` namespace): a list of `{ uuid, typeId, number, mode, dimension, lastPos }` plus the counters. `lastPos` and `dimension` are refreshed every second from loaded mobs.
+
+## Passive mobs, villagers and gear (D135)
+- **Attack for non-fighters:** when a villager or a passive animal (`Animal`, or any mob without an `ATTACK_DAMAGE` attribute) is grasped, give it an attack: villager **3**, passive animals **2** damage (`GraspRules`). If the attribute is missing on the type, add it through a transient attribute path that is verified on 26.3 (javap `AttributeMap` / `AttributeSupplier`), and add a melee attack goal. Their vanilla panic/flee goals must not override fighting. Remove all of this on release.
+- **Gear pickup:** a grasped mob picks up armor, weapons and shields **thrown by its owner** (`ItemEntity` thrower = owner). It equips them in the right slot, swaps for a better item and drops the old one. Never pick up other items. Picked gear drops at 100% on death. Mark each given item (a custom data flag or a list in `GraspedMob`) so release can tell it from the mob's own spawn gear.
+- **Stats work everywhere:** armor and sword modifiers apply through equipment attributes, and the attack uses `ATTACK_DAMAGE`. Mobs without an armor render layer (sheep, cow, villager…) show no armor; that is accepted. The list tooltip lists the gear.
+- **Release:** drop every owner-given item, keep the mob's own spawn gear, and set `setCanPickUpLoot(false)` for good (also for zombies that could before).
+- Tests: a grasped sheep damages a zombie for 2 and a villager for 3; a zombie picks up an iron chestplate thrown by its owner but not one thrown by another player; release drops the chestplate and the mob does not pick it up again.
 
 ## List screen (left click), `client/GraspScreen.java`, modelled on `WarpScreen`
 Each row shows:
