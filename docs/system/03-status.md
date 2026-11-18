@@ -31,7 +31,7 @@ A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [w
 | 0.27.0 contains | P-044: clones skip unreachable crops after 3 s (whole field 30 s), farm height ±6, harvest the last two stages with ripe drops (D123); installer prints the release notes after a good install and exits, Windows waits for Enter (D124; ps1 not run, no pwsh). |
 | 0.28.0 contains | P-045 Z X C V skill keys, one scroll ring (D125); /testmode full gives carrots, emeralds, 200 levels (D126); skill bar in the bottom-right corner with dark cells and small black key labels (D127, D128, D130; P-046/P-051); Spirit Walk rename, sight 16 → 64, time-left line (P-048, P-049, D129); P-050 shared-note chat line and Crimson Master farewell levels, completed quests × 8 (D131). Server + client game tests green. Not playtested by hand. Unused trial branch: `feat/P-047-skill-bar-under-hotbar` |
 | 0.29.0 contains | P-052 rename to immortal-cultivation, data namespace `permahearts` kept (D132); skill bar 4 px from the right and bottom edges (D133). First jar with id `immortal-cultivation`: the installers remove the old id-`permahearts` jar. Installed on Huy's profile 2026-11-17; a copy of MegaHeart loaded and saved with identical mod data. Server game tests green; flaky `farmTakesSeedsFromTheChestAndPlantsEmptyFarmland` failed 1 of 4 runs (clone dead at tick 1202) |
-| On `main`, not released | P-053 Soul Grasp (D134–D136), P-054 Danger level + elites (D137–D139) |
+| On `main`, not released | P-053 Soul Grasp (D134–D136), P-054 Danger level + elites (D137–D139, D141), P-055 crop XP and Illusion XP to the owner (D140) |
 
 Release steps: [workflow/release.md](../workflow/release.md). Release **only when Huy says so**.
 
