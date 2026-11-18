@@ -2,7 +2,7 @@
 
 > Tóm tắt cho Huy: file này ghi việc đang làm dở và bước tiếp theo, để một phiên Claude mới đọc là làm tiếp được.
 > Manager cập nhật file này cuối mỗi đợt việc (merge, phát hành, quyết định mới).
-> Snapshot: 2026-11-18, P-053 merged into main.
+> Snapshot: 2026-11-18, P-053 + follow-up and P-054 on main, build green (185 game tests).
 
 A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [workflow/team.md](../workflow/team.md) → the plan of the work in flight. Do not read the whole repo.
 
@@ -38,7 +38,6 @@ Release steps: [workflow/release.md](../workflow/release.md). Release **only whe
 ## In flight
 
 - **P-054 Danger level + elites merged into main** (D137–D139), not released, not playtested. Spawn mixins (cap raise, day spawns) only load-tested: no mob-count measurement at L25. Gamerules `permahearts:danger_level` (on), `permahearts:danger_spawn_ceiling` (4). Gear is armor only; Venomous does nothing to undead; pre-update mobs get the buff on first load. Day events, formation block, other affixes: BL-025..027.
-- **P-053 follow-up:** dev fixing the Soul Grasp list stats line to D136 (icons before numbers) on `feat/P-053-dev`.
 
 - **P-053 Soul Grasp merged into main** (D134–D136), not released, not playtested by hand. Gaps vs. D134: no open-hand render around the mob (particles only), no mob icon in the list rows; game tests do not cover Guard mode, gear pickup, brain mobs (villager, piglin…) or Death Match. Records in `GraspData` (SavedData). Next idea in discussion: world danger tiers, day spawns, elite mobs.
 
