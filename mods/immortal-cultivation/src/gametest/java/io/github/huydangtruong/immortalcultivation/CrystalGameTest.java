@@ -246,4 +246,20 @@ public class CrystalGameTest {
 		FlightBladeGameTest.drop(c, p);
 		c.succeed();
 	}
+
+	/** D146: a disarmed player (Death Match opponent) cannot hit with a weapon, but technique damage still lands. */
+	@GameTest(maxTicks = 40)
+	public void aDisarmedPlayerKeepsTechniquesButCannotHit(GameTestHelper c) {
+		ServerPlayer p = caster(c, 1);
+		p.addEffect(new MobEffectInstance(CrystalDisarm.EFFECT, 200, 0, false, false, false));
+		Zombie z = zombie(c, 5.5, 5.5);
+		ServerLevel level = c.getLevel();
+		float full = z.getHealth();
+		z.hurtServer(level, level.damageSources().playerAttack(p), 4);
+		c.assertTrue(z.getHealth() == full, "a melee hit by a disarmed player does nothing, health " + z.getHealth());
+		z.hurtServer(level, level.damageSources().indirectMagic(z, p), 4); // a technique orb: direct entity is not the player
+		c.assertTrue(z.getHealth() < full, "technique damage from a disarmed player still lands, health " + z.getHealth());
+		FlightBladeGameTest.drop(c, p);
+		c.succeed();
+	}
 }

@@ -54,11 +54,17 @@ public final class Crystal {
 		CrystalBlock.init();
 		CrystalDisarm.init();
 		ServerTickEvents.END_SERVER_TICK.register(Crystal::tick);
-		// A disarmed player (Death Match opponent) cannot hit or hurt anything.
+		// A disarmed player (Death Match opponent) cannot hit or shoot, but keeps their techniques (Huy, D146).
 		AttackEntityCallback.EVENT.register((player, world, hand, entity, hit) ->
 			player instanceof ServerPlayer sp && CrystalDisarm.disarmed(sp) ? InteractionResult.FAIL : InteractionResult.PASS);
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) ->
-			!(source.getEntity() instanceof ServerPlayer sp && CrystalDisarm.disarmed(sp)));
+			!(source.getEntity() instanceof ServerPlayer sp && CrystalDisarm.disarmed(sp) && !TechniqueDamage.active() && isWeaponHit(sp, source)));
+	}
+
+	/** A hit with the hand or a held weapon, or an arrow or trident: what a disarmed player may not do. */
+	private static boolean isWeaponHit(ServerPlayer p, net.minecraft.world.damagesource.DamageSource source) {
+		var direct = source.getDirectEntity();
+		return direct == p || direct instanceof net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 	}
 
 	// ---- cast ----
