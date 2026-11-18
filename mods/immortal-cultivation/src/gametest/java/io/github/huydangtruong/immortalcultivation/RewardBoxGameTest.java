@@ -74,6 +74,45 @@ public class RewardBoxGameTest {
 		}
 	}
 
+	/** D147: when the Crimson Master leaves, done but unclaimed lines become boxes in a chest where it stood. */
+	@GameTest(maxTicks = 100)
+	public void leavingPutsUnclaimedBoxesInAChest(GameTestHelper context) {
+		MinecraftServer s = context.getLevel().getServer();
+		try {
+			enable(context, true);
+			Wanderer.reset(s);
+			Quest q = new Quest(1, List.of(
+				new QuestLine(QuestType.KILL, "minecraft:zombie", 2, 0, "", false),
+				new QuestLine(QuestType.BOSS, "minecraft:evoker", 1, 0, "", false),
+				new QuestLine(QuestType.EXPLORE, "minecraft:igloo", 1, 0, "", false),
+				new QuestLine(QuestType.KILL, "minecraft:skeleton", 2, 0, "", false)), false);
+			BlockPos at = context.absolutePos(new BlockPos(2, 1, 2));
+			context.assertTrue(Wanderer.startQuestForTest(context.getLevel(), at, q) != null, "NPC should spawn");
+			Wanderer.accept(s);
+			ServerPlayer p = context.makeMockServerPlayerInLevel();
+			Wanderer.complete(s, 0);
+			Wanderer.complete(s, 1);
+			Wanderer.complete(s, 2);
+			context.assertTrue(!Wanderer.claim(s, 0, p).isEmpty(), "line 0 is claimed by hand");
+			BlockPos npc = Wanderer.npc(s).blockPosition();
+			Wanderer.leave(s, net.minecraft.network.chat.Component.literal("test leave"));
+			context.assertTrue(context.getLevel().getBlockEntity(npc) instanceof net.minecraft.world.level.block.entity.ChestBlockEntity,
+				"a chest stands where the Crimson Master was, at " + npc);
+			var chest = (net.minecraft.world.Container) context.getLevel().getBlockEntity(npc);
+			int boxes = 0;
+			for (int i = 0; i < chest.getContainerSize(); i++) {
+				if (RewardBoxes.tierOf(chest.getItem(i)).isPresent()) {
+					boxes++;
+				}
+			}
+			context.assertTrue(boxes == 2, "the 2 done but unclaimed lines are in the chest, found " + boxes);
+			context.getLevel().setBlockAndUpdate(npc, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
+			context.succeed();
+		} finally {
+			Wanderer.reset(s);
+		}
+	}
+
 	@GameTest(maxTicks = 100)
 	public void boxStacksToOneAndStartsUnrolled(GameTestHelper context) {
 		for (RewardTier t : RewardTier.values()) {
