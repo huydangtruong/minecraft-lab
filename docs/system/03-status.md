@@ -37,7 +37,7 @@ Release steps: [workflow/release.md](../workflow/release.md). Release **only whe
 
 ## In flight
 
-- **P-053 Soul Grasp** (D134): plan ready at [plans/P-053-soul-grasp.md](../plans/P-053-soul-grasp.md), dev started 2026-11-18 on `feat/P-053-dev` (worktree under .claude/worktrees), merges into `feat/P-053-soul-grasp`.
+- **P-053 Soul Grasp** (D134): plan ready at [plans/P-053-soul-grasp.md](../plans/P-053-soul-grasp.md), dev started 2026-11-18 on `feat/P-053-dev` (worktree under .claude/worktrees), merges into `feat/P-053-soul-grasp`. Dev done: rules, tether, tame, goals, gear, list screen, sprites, game tests; waiting for review and Huy's playtest. Records live in `GraspData` (SavedData), not a player attachment (offline owners work).
 
 - **P-052 merged into main** (D132): mod id, folder `mods/immortal-cultivation`, Gradle `:immortal-cultivation`, package `io.github.huydangtruong.immortalcultivation`, release tags renamed. Data namespace stays `permahearts` (`ImmortalCultivation.NAMESPACE`, never change). Huy's dev run folder (saves) moved to `mods/immortal-cultivation/run`. Flaky seen once: `SkillBarClientTest` "the focus item should be phase", FlightBlade "the husk bleeds"
 
