@@ -29,14 +29,14 @@ public class GraspClientTest implements FabricClientGameTest {
 		try (TestSingleplayerContext world = context.worldBuilder().create()) {
 			TestServerContext server = world.getServer();
 			server.runCommand("gamerule permahearts:immortal_cultivation true");
-			server.runCommand("time set day");
+			server.runCommand("time set midnight"); // night: the undead do not burn, the outline stays visible
 			server.runCommand("weather clear");
 			server.runCommand("gamemode survival @a");
 			server.runCommand("fill -24 99 -24 24 99 24 grass_block");
 			server.runCommand("fill -24 100 -24 24 118 24 air");
 			server.runCommand("tp @a 0 100 -3 0 0");
-			server.runCommand("summon zombie 0 100 4 {NoAI:1b,PersistenceRequired:1b}");
-			server.runCommand("summon skeleton 3 100 6 {NoAI:1b,PersistenceRequired:1b}");
+			server.runCommand("summon zombie 0 100 4 {NoAI:1b,PersistenceRequired:1b,Silent:1b,active_effects:[{id:'minecraft:fire_resistance',duration:100000,show_particles:0b}]}");
+			server.runCommand("summon skeleton 3 100 6 {NoAI:1b,PersistenceRequired:1b,Silent:1b,active_effects:[{id:'minecraft:fire_resistance',duration:100000,show_particles:0b}]}");
 			server.runOnServer(s -> TechniqueAttachment.set(s.getPlayerList().getPlayers().get(0),
 				TechniqueData.DEFAULT.withLevel(Technique.GRASP, 10, 10)
 					.withEmeralds(TechniqueRules.MAX_EMERALDS).withSlot(0, Technique.GRASP)));
