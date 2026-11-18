@@ -3,7 +3,7 @@
 > **Tóm tắt cho Huy (VN, ≤ 3 dòng):** thế giới có Sát Khí 0–30, tăng 1 sau mỗi lần Crimson Master rời đi. Mob đông hơn, mạnh hơn, ra cả ban ngày, mặc đồ tốt dần (Lv 30 có netherite). Từ Lv 10 có mob Elite với 5 phẩm chất. Mỗi lần tăng có chữ cam giữa màn hình (D137, D138).
 
 - **Status:** in-dev
-- **Mod / decision:** `immortal-cultivation`, D137, D138 · **Branch:** `feat/P-054-danger-level` · **Depends on:** none (P-053 is on main)
+- **Mod / decision:** `immortal-cultivation`, D137, D138, D139 · **Branch:** `feat/P-054-danger-level` · **Depends on:** none (P-053 is on main)
 
 ## Goal
 A world-wide danger level that grows after every Crimson Master visit and scales hostile mobs: their count, strength, daytime spawns, new types, gear, and elite affixes.
@@ -15,7 +15,7 @@ Level `L` in 0..30 (0 = vanilla).
 - `daySpawnFactor(L)`: 0 for L < 8; linear 0.15 at L 8 → 1.0 at L 20. `rainSpawns(L) = L ≥ 6`.
 - `unlockedTypes(L)`: Pillager 4, Vindicator 6, Blaze + Wither Skeleton 10 (light ≤ 7 only), Evoker 12, Piglin Brute 14 (never zombifies), Ravager 16.
 - Gear (`gearRoll(L, rng)`): none extra for L ≤ 20. From 21, per-slot chance 20% at L 21 → 70% at L 30. Material weights move from iron to diamond to netherite, and the enchant chance rises. At L 30, every armor-capable mob gets **at least one netherite piece**.
-- Elites: `eliteChance(L)`: 0 for L < 10; 2% at L 10 → 10% at L 20 → 15% at L 30 (linear in each part). `maxAffixes(L)`: 1 for 10–19, 2 for 20–29, 3 at 30 (roll 1..max, distinct).
+- Elites (D139): `eliteChance(L)`: 0 for L < 20; 5% at L 20 → 15% at L 30 (linear). `maxAffixes(L)`: 1 for 20–24, 2 for 25–29, 3 at 30 (roll 1..max, distinct). Elites get the danger strength modifiers like every other dangerous mob, then ×2 max health on top.
 - `notice(L)`: the title is "Danger level L". The subtitle gives the totals plus what this level unlocks, e.g. "+80% mobs, +60% strength, day spawns", "… , elites appear", "… , Ravagers appear", "… , more armor", "… , netherite armor". JUnit pins a few exact strings.
 
 ## Behaviour
