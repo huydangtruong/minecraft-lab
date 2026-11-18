@@ -37,6 +37,9 @@ Release steps: [workflow/release.md](../workflow/release.md). Release **only whe
 
 ## In flight
 
+- **P-054 Danger level + elites** (D137, D138): plan [plans/P-054-danger-level.md](../plans/P-054-danger-level.md), dev on `feat/P-054-dev` → `feat/P-054-danger-level`. Day events, formation block, other affixes in backlog (BL-025..027).
+- **P-053 follow-up:** dev fixing the Soul Grasp list stats line to D136 (icons before numbers) on `feat/P-053-dev`.
+
 - **P-053 Soul Grasp merged into main** (D134–D136), not released, not playtested by hand. Gaps vs. D134: no open-hand render around the mob (particles only), no mob icon in the list rows; game tests do not cover Guard mode, gear pickup, brain mobs (villager, piglin…) or Death Match. Records in `GraspData` (SavedData). Next idea in discussion: world danger tiers, day spawns, elite mobs.
 
 - **P-052 merged into main** (D132): mod id, folder `mods/immortal-cultivation`, Gradle `:immortal-cultivation`, package `io.github.huydangtruong.immortalcultivation`, release tags renamed. Data namespace stays `permahearts` (`ImmortalCultivation.NAMESPACE`, never change). Huy's dev run folder (saves) moved to `mods/immortal-cultivation/run`. Flaky seen once: `SkillBarClientTest` "the focus item should be phase", FlightBlade "the husk bleeds"
