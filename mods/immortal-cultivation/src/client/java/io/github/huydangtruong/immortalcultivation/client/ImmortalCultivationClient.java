@@ -31,6 +31,7 @@ public class ImmortalCultivationClient implements ClientModInitializer {
 		EntityRendererRegistry.register(io.github.huydangtruong.immortalcultivation.godslayer.GodSlayer.TYPE, GodSlayerRenderer::new);
 		// Cosmic Warping (P-026, D75)
 		EntityRendererRegistry.register(io.github.huydangtruong.immortalcultivation.technique.warp.WarpPortal.TYPE, WarpPortalRenderer::new);
+		ClientGrasp.register(); // Soul Grasp (P-053)
 		net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.registerGlobalReceiver(
 			io.github.huydangtruong.immortalcultivation.technique.warp.Warp.Menu.TYPE, (payload, ctx) -> {
 				var mc = ctx.client();

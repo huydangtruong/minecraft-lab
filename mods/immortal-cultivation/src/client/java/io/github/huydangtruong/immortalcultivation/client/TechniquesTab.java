@@ -98,6 +98,7 @@ public final class TechniquesTab {
 			case ILLUSION -> "Creates illusions of yourself that fight for you. Who attacks you, or whom you attack, becomes their target. The item in your first hotbar slot picks their job (an empty first slot means they fight): hoe farms, rod fishes, axe chops, shears shear, bucket milks, wheat/carrots/seeds breed. Drops go to a chest near the cast point.";
 			case THUNDER -> "Aim and click: the spot glows for 1 s, then lightning strikes and explodes like a creeper.";
 			case WARP -> "Hold right click for 1 s to open a portal where you look. Left click warps you to any of your portals, or to another player.";
+			case GRASP -> "Aim at a mob and hold right click: a tether grows, and when it is full the mob is yours. Left click opens your mobs (follow, stay, guard, call, release). Throw armor or weapons near them to equip them.";
 			case ANGEL -> "Summons warrior angels that fly through walls and fight for you.";
 		};
 	}

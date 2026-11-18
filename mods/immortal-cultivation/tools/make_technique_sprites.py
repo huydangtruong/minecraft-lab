@@ -447,6 +447,27 @@ THUNDER = [  # a grey cloud with a yellow lightning bolt coming out of it (D86),
 THUNDER_PAL = {"c": "e4e8f0", "g": "aab2c0", "d": "7c8496", "y": "ffd62a", "Y": "f0a000", "h": "fff7a8"}
 
 
+GRASP = [  # an open golden hand with a white spark in the palm (D134), original art
+    "................",
+    "...g..g..g......",
+    "...Gg.Gg.Gg.g...",
+    "...Gg.Gg.Gg.Gg..",
+    ".g.Gg.Gg.Gg.Gg..",
+    ".Gg.GgGgGgGgGg..",
+    ".GgGGGGGGGGGGg..",
+    "..GGGGGGGGGGGg..",
+    "..GGGGhhGGGGg...",
+    "..GGGGhwhGGGg...",
+    "...GGGGhhGGg....",
+    "....GGGGGGGg....",
+    ".....GGGGGg.....",
+    ".....gGGGGg.....",
+    "......gggg......",
+    "................",
+]
+GRASP_PAL = {"G": "f2c540", "g": "c48a14", "h": "fff3b0", "w": "ffffff"}
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     icons = {
@@ -465,6 +486,7 @@ def main():
         "illusion": (illusion_art(), "1c2640"),
         "warp": (procedural(warp_color), "2a0a58"),
         "thunder": (from_ascii(THUNDER, THUNDER_PAL), "2a2f3a"),
+        "grasp": (from_ascii(GRASP, GRASP_PAL), "5a3e0c"),
         "lock": (from_ascii(LOCK, LOCK_PAL), "1a1a20"),
         "check": (from_ascii(CHECK, CHECK_PAL), "0c4a14"),
         "cross": (from_ascii(CROSS, CROSS_PAL), "30303a"),
@@ -474,7 +496,7 @@ def main():
     for name, (body, edge) in icons.items():
         img = outline(body, edge)
         write_png(os.path.join(OUT, name + ".png"), img)
-        if name in ("fire", "ice", "healing", "phase", "repulse", "sacrifice", "flight", "blade", "teleport", "golem", "angel", "aqua", "illusion", "warp", "thunder"):
+        if name in ("fire", "ice", "healing", "phase", "repulse", "sacrifice", "flight", "blade", "teleport", "golem", "angel", "aqua", "illusion", "warp", "thunder", "grasp"):
             write_png(os.path.join(items, "focus_" + name + ".png"), img)
     print("wrote technique sprites to", os.path.normpath(OUT))
 
