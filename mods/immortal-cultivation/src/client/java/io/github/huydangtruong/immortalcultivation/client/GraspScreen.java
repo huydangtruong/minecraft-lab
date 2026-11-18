@@ -167,9 +167,14 @@ public class GraspScreen extends Screen {
 		g.text(font, armor, ax + 11, sy + 1, 0xFFD0D0E0, false);
 		int armorEnd = ax + 11 + font.width(armor);
 		int wx = armorEnd + 10;
-		g.item(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_SWORD), wx - 3, sy - 4);
-		g.text(font, dmg, wx + 13, sy + 1, 0xFFD0D0E0, false);
-		int dmgEnd = wx + 13 + font.width(dmg);
+		// The item renders at 16 px: scale it to 9 px so it matches the heart and armor sprites
+		g.pose().pushMatrix();
+		g.pose().translate(wx, sy);
+		g.pose().scale(9f / 16f, 9f / 16f);
+		g.item(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_SWORD), 0, 0);
+		g.pose().popMatrix();
+		g.text(font, dmg, wx + 11, sy + 1, 0xFFD0D0E0, false);
+		int dmgEnd = wx + 11 + font.width(dmg);
 		if (inList(mouseY) && mouseY >= sy - 2 && mouseY < sy + 11) {
 			List<Component> lines = null;
 			if (mouseX >= sx && mouseX < heartEnd) {
@@ -183,7 +188,7 @@ public class GraspScreen extends Screen {
 						lines.add(Component.literal(s));
 					}
 				}
-			} else if (mouseX >= wx - 3 && mouseX < dmgEnd) {
+			} else if (mouseX >= wx && mouseX < dmgEnd) {
 				lines = List.of(Component.literal(r.weaponGear().isEmpty() ? "Bare hands" : r.weaponGear().split("\n")[0]));
 			}
 			if (lines != null) {
