@@ -9,6 +9,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -153,27 +154,42 @@ public class GraspScreen extends Screen {
 		g.text(font, Component.literal(typeName(r)).withStyle(net.minecraft.ChatFormatting.YELLOW), x0 + 8, y + 4, 0xFFFFFF55, true);
 		String where = !r.loaded() ? "far away" : r.dist() < 0 ? r.dim() : Math.round(r.dist()) + " blocks";
 		g.text(font, where, x1 - 6 - font.width(where), y + 4, r.loaded() ? 0xFFA0A0B0 : 0xFF707080, false);
-		String hp = "❤ " + Math.round(r.hp() / 2f * 10) / 10f + " / " + Math.round(r.maxHp() / 2f * 10) / 10f
-			+ (r.bonus() > 0 ? " (+" + Math.round(r.bonus() / 2f * 10) / 10f + ")" : "");
-		String stats = hp + "   Armor " + Math.round(r.armor()) + "   Attack " + Math.round(r.damage());
-		g.text(font, stats, x0 + 8, y + 16, 0xFFD0D0E0, false);
-		boolean tipOn = over(mouseX, mouseY, x0 + 8, y + 14, font.width(stats), 11) && inList(mouseY);
-		if (tipOn && (!r.armorGear().isEmpty() || !r.weaponGear().isEmpty())) {
-			List<Component> lines = new ArrayList<>();
-			lines.add(Component.literal("Health " + Math.round(r.hp()) + " / " + Math.round(r.maxHp()) + " (bonus +" + Math.round(r.bonus()) + ")"));
-			if (!r.armorGear().isEmpty()) {
-				lines.add(Component.literal("Wears:"));
-				for (String s : r.armorGear().split("\n")) {
-					lines.add(Component.literal(" " + s));
+		// D136: [heart] N   [armor] N   [sword] N, icon before each number, details on hover
+		int sx = x0 + 8, sy = y + 15;
+		String hearts = Integer.toString((int) Math.ceil(r.hp() / 2f));
+		String armor = Integer.toString(Math.round(r.armor()));
+		String dmg = r.damage() == Math.rint(r.damage()) ? Integer.toString((int) r.damage()) : String.format(java.util.Locale.ROOT, "%.1f", r.damage());
+		g.blitSprite(RenderPipelines.GUI_TEXTURED, Identifier.withDefaultNamespace("hud/heart/full"), sx, sy, 9, 9);
+		g.text(font, hearts, sx + 11, sy + 1, 0xFFD0D0E0, false);
+		int heartEnd = sx + 11 + font.width(hearts);
+		int ax = heartEnd + 10;
+		g.blitSprite(RenderPipelines.GUI_TEXTURED, Identifier.withDefaultNamespace("hud/armor_full"), ax, sy, 9, 9);
+		g.text(font, armor, ax + 11, sy + 1, 0xFFD0D0E0, false);
+		int armorEnd = ax + 11 + font.width(armor);
+		int wx = armorEnd + 10;
+		g.item(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_SWORD), wx - 3, sy - 4);
+		g.text(font, dmg, wx + 13, sy + 1, 0xFFD0D0E0, false);
+		int dmgEnd = wx + 13 + font.width(dmg);
+		if (inList(mouseY) && mouseY >= sy - 2 && mouseY < sy + 11) {
+			List<Component> lines = null;
+			if (mouseX >= sx && mouseX < heartEnd) {
+				lines = List.of(Component.literal("Health " + Math.round(r.hp()) + " / " + Math.round(r.maxHp()) + " HP (bonus +" + Math.round(r.bonus()) + ")"));
+			} else if (mouseX >= ax && mouseX < armorEnd) {
+				lines = new ArrayList<>();
+				if (r.armorGear().isEmpty()) {
+					lines.add(Component.literal("No armor"));
+				} else {
+					for (String s : r.armorGear().split("\n")) {
+						lines.add(Component.literal(s));
+					}
 				}
+			} else if (mouseX >= wx - 3 && mouseX < dmgEnd) {
+				lines = List.of(Component.literal(r.weaponGear().isEmpty() ? "Bare hands" : r.weaponGear().split("\n")[0]));
 			}
-			if (!r.weaponGear().isEmpty()) {
-				lines.add(Component.literal("Holds:"));
-				for (String s : r.weaponGear().split("\n")) {
-					lines.add(Component.literal(" " + s));
-				}
+			if (lines != null) {
+				List<Component> shown = lines;
+				tips.add(() -> g.setComponentTooltipForNextFrame(font, shown, mouseX, mouseY));
 			}
-			tips.add(() -> g.setComponentTooltipForNextFrame(font, lines, mouseX, mouseY));
 		}
 		int by = y + BTN_Y;
 		for (int i = 0; i < MODES.length; i++) {
