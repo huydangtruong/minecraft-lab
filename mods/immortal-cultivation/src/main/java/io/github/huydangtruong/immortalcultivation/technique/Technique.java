@@ -7,11 +7,13 @@ public enum Technique {
 	// D114: grouped — attack, control/defense, movement, allies
 	FIRE("fire", "Fireball", 16, true), // names: D56
 	THUNDER("thunder", "Thunder Strike", 26, false), // D86: aim, 1 s warning, then lightning and a creeper-sized blast
+	SEISM("seism", "Seism", 28, true), // D142: tap = boulder where you aim, hold 1 s (Lv 3+) = three quake waves around you
 	BLADE("blade", "Life Steal Blade", 12, false),
 	ICE("ice", "Frozen Breath", 18, true), // D80: was 24 s
 	REPULSE("repulse", "Heaven Blast", 20, false),
 	HEALING("healing", "Healing Domain", 40, false), // D80: was Healing Light, 60 s
 	SACRIFICE("sacrifice", "Undying Jutsu", 45, false), // D47: was 30 s
+	CRYSTAL("crystal", "Crystal Prison", 48, false), // D143: left click = cage around what you aim at, right click = cage around you
 	PHASE("phase", "Spirit Walk", 60, false), // D80: was 90 s; D118: was Shadow Walk; D129: was Spirit Phase
 	FLIGHT("flight", "Cloud Travel", 80, false), // D52; D80: was 120 s
 	TELEPORT("teleport", "Quantum Leap", 40, true), // D80: was 60 s; // D58, D74 (was Thousand Mile Step): charged throw like Fireball, then the caster teleports // D52: held like a weapon; each landed hit starts the 12 s cooldown

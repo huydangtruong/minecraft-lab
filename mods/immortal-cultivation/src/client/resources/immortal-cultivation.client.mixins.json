@@ -15,6 +15,7 @@
 		"MouseScrollMixin",
 		"HotbarSelectionMixin",
 		"ChargeFovMixin",
+		"SeismShakeMixin",
 		"AquaWaterVisionMixin",
 		"AquaLightmapMixin",
 		"DeathMatchSkyMixin",

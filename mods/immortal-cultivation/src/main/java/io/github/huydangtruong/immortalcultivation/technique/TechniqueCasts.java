@@ -55,6 +55,8 @@ public final class TechniqueCasts {
 		WarriorAngel.init();
 		Illusion.init();
 		Thunder.init();
+		Seism.init();
+		Crystal.init();
 		PhaseState.ATTACHMENT.identifier();
 		Flight.init();
 		AquaMarine.init();
@@ -108,6 +110,12 @@ public final class TechniqueCasts {
 			}
 			case THUNDER -> {
 				return Thunder.cast(caster, lvl);
+			}
+			case SEISM -> {
+				return Seism.cast(caster, lvl, charge);
+			}
+			case CRYSTAL -> {
+				return Crystal.cast(caster, lvl, charge);
 			}
 			case ILLUSION -> {
 				Illusion.summon(caster, lvl);

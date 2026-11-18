@@ -468,6 +468,48 @@ GRASP = [  # an open golden hand with a white spark in the palm (D134), original
 GRASP_PAL = {"G": "f2c540", "g": "c48a14", "h": "fff3b0", "w": "ffffff"}
 
 
+SEISM = [  # a grey boulder over cracked brown ground with rock spikes (D142), original art
+    "................",
+    ".....rrrrr......",
+    "....rrrrrrrr....",
+    "...rrrhrrrrrr...",
+    "...rrhhrrrrrd...",
+    "...rrrrrrrrdd...",
+    "....rrrrrddd....",
+    ".....ddddd......",
+    "................",
+    ".s....b..b....s.",
+    ".ss..bb..bb..ss.",
+    ".ssbbbbbbbbbbss.",
+    "bbbbbBbbbBbbbbbb",
+    "BbbbBBbbBBbbbbBB",
+    "BBBBBBBBBBBBBBBB",
+    "................",
+]
+SEISM_PAL = {"r": "9aa0a8", "h": "d4d8de", "d": "5a6068", "b": "8a5a2e", "B": "5a3a1a", "s": "c8c0b0"}
+
+
+CRYSTAL = [  # a turquoise crystal cage around a small figure (D143), original art
+    "................",
+    "...cccccccccc...",
+    "..chhhccccccwc..",
+    "..chcccccccccd..",
+    "..cc..cc.cc.cd..",
+    "..cc..pp.cc.cd..",
+    "..cc.pppp.c.cd..",
+    "..cc..pp..c.cd..",
+    "..cc.p..p.c.cd..",
+    "..cc......c.cd..",
+    "..chcccccccccd..",
+    "..chhhccccccwd..",
+    "..cddddddddddd..",
+    "...dddddddddd...",
+    "................",
+    "................",
+]
+CRYSTAL_PAL = {"c": "58e6d8", "h": "d8fffa", "w": "ffffff", "d": "1f8f95", "p": "f2e6c0"}
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     icons = {
@@ -487,6 +529,8 @@ def main():
         "warp": (procedural(warp_color), "2a0a58"),
         "thunder": (from_ascii(THUNDER, THUNDER_PAL), "2a2f3a"),
         "grasp": (from_ascii(GRASP, GRASP_PAL), "5a3e0c"),
+        "seism": (from_ascii(SEISM, SEISM_PAL), "3a2a1a"),
+        "crystal": (from_ascii(CRYSTAL, CRYSTAL_PAL), "0c3a40"),
         "lock": (from_ascii(LOCK, LOCK_PAL), "1a1a20"),
         "check": (from_ascii(CHECK, CHECK_PAL), "0c4a14"),
         "cross": (from_ascii(CROSS, CROSS_PAL), "30303a"),
@@ -496,7 +540,7 @@ def main():
     for name, (body, edge) in icons.items():
         img = outline(body, edge)
         write_png(os.path.join(OUT, name + ".png"), img)
-        if name in ("fire", "ice", "healing", "phase", "repulse", "sacrifice", "flight", "blade", "teleport", "golem", "angel", "aqua", "illusion", "warp", "thunder", "grasp"):
+        if name in ("fire", "ice", "healing", "phase", "repulse", "sacrifice", "flight", "blade", "teleport", "golem", "angel", "aqua", "illusion", "warp", "thunder", "grasp", "seism", "crystal"):
             write_png(os.path.join(items, "focus_" + name + ".png"), img)
     print("wrote technique sprites to", os.path.normpath(OUT))
 

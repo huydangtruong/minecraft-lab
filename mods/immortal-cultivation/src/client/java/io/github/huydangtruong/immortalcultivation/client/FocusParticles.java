@@ -96,6 +96,19 @@ final class FocusParticles {
 					level.addParticle(ParticleTypes.END_ROD, x, y, z, 0, -0.03, 0);
 				}
 			}
+			case SEISM -> {
+				level.addParticle(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, net.minecraft.world.level.block.Blocks.STONE.defaultBlockState()),
+					x, y, z, (rnd.nextDouble() - 0.5) * 0.04, 0.01, (rnd.nextDouble() - 0.5) * 0.04);
+				if (rnd.nextInt(3) == 0) {
+					level.addParticle(ParticleTypes.SMOKE, x, y, z, 0, 0.02, 0);
+				}
+			}
+			case CRYSTAL -> {
+				level.addParticle(ParticleTypes.END_ROD, x, y, z, (rnd.nextDouble() - 0.5) * 0.03, 0.01, (rnd.nextDouble() - 0.5) * 0.03);
+				if (rnd.nextInt(3) == 0) {
+					level.addParticle(ParticleTypes.GLOW, x, y, z, 0, 0.02, 0);
+				}
+			}
 			case AQUA -> {
 				level.addParticle(ParticleTypes.BUBBLE_POP, x, y, z, 0, 0.02, 0);
 				if (rnd.nextInt(3) == 0) {

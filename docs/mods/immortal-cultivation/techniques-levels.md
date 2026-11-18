@@ -4,7 +4,7 @@ Tên trong game (D56): Lửa = Fireball, Băng = Frozen Breath, Hồi máu = Hea
 
 Sinh từ `technique/TechniqueRules.java`: sửa số liệu ở đó rồi tạo lại bảng này. Sát thương tính bằng máu (2 = 1 tim), "r" là bán kính tính bằng block.
 
-**Hồi chiêu** (không đổi theo level, D80): Lửa 16 giây · Băng 18 giây · Hồi máu 40 giây · Xuyên tường 60 giây · Hất tung 20 giây · Hiến Tế 45 giây · Bay 80 giây · Huyết Kiếm 12 giây (sau mỗi lần đánh trúng) · Quantum Leap 40 giây · Violet Guardian 120 giây · Warrior Angel 120 giây · Aqua Marine 100 giây · Illusion 110 giây · Cosmic Warping 90 giây ở Lv 1 giảm đều còn 40 giây ở Lv 20 (D81) · Thunder Strike 26 giây (D86, D95) · Soul Grasp 120 giây (chỉ tính khi bắt thành công, D134). Huyết Kiếm: sát thương = cơ bản + cộng thêm của chiêu + linh dược, hút máu bằng lượng máu trừ được.
+**Hồi chiêu** (không đổi theo level, D80): Lửa 16 giây · Băng 18 giây · Hồi máu 40 giây · Xuyên tường 60 giây · Hất tung 20 giây · Hiến Tế 45 giây · Bay 80 giây · Huyết Kiếm 12 giây (sau mỗi lần đánh trúng) · Quantum Leap 40 giây · Violet Guardian 120 giây · Warrior Angel 120 giây · Aqua Marine 100 giây · Illusion 110 giây · Cosmic Warping 90 giây ở Lv 1 giảm đều còn 40 giây ở Lv 20 (D81) · Thunder Strike 26 giây (D86, D95) · Seism 28 giây (D142, cả hai kiểu) · Crystal Prison 48 giây (D143) · Soul Grasp 120 giây (chỉ tính khi bắt thành công, D134). Huyết Kiếm: sát thương = cơ bản + cộng thêm của chiêu + linh dược, hút máu bằng lượng máu trừ được.
 
 **Choáng (D99):** Hất tung choáng mọi sinh vật bị đẩy (không phải người chơi) 1,0 giây ở Lv 1, +0,1 giây mỗi level (2,9 giây ở Lv 20): đứng yên, không đi, không đánh, không bắn. God Slayer chỉ chịu 10%.
 
@@ -36,6 +36,37 @@ Sinh từ `technique/TechniqueRules.java`: sửa số liệu ở đó rồi tạ
 | 20 | 14 | 200 | 52 block / 18 / r 5.8, 6.8 s / 5 mỗi giây, cháy dư 6.8 s | 52 block / r 5.8 / -96% / -96% | 48 | 17 s / 48 block | 6.8 / 5 / 12 / 2.9 s | 30% / 17.5 s | 40 s / 200% Creative | +14.5 |
 
 **Thunder Strike (D86):** nhắm tâm màn hình, bấm chuột trái hoặc phải (tầm 128 ô). Vùng quanh điểm đó sáng 1 giây rồi sét đánh, nổ cỡ creeper. Sát thương 14 ở Lv 1, +2 mỗi level (Lv 10: 32, Lv 20: 52), giảm còn một nửa ở rìa. Vùng phá 100% creeper ở Lv 1, +5% mỗi level (195% ở Lv 20). Hồi chiêu 26 giây (D95). Nhắm lên trời: sét đánh xuống mặt đất dưới điểm xa nhất. Heo, dân làng, creeper, mooshroom, Copper Golem trong vùng nổ biến đổi như bị sét thật. Người dùng và vật triệu hồi của mình không bị thương. Tôn trọng mobGriefing.
+
+**Seism (D142, hệ Đất):** chọn ô chiêu rồi bấm chuột phải. Hồi chiêu 28 giây cho cả hai kiểu, bắt đầu khi chiêu thật sự tung ra.
+- **Seismic Impact** (nhả chuột trước 1 giây, hoặc chuột trái): một tảng đá rơi xuống điểm ngắm (tối đa 48 ô, nhắm lên trời thì rơi xuống mặt đất dưới điểm xa nhất). Trong 0,2 giây tảng đá rơi, điểm rơi vẫn bám theo tâm màn hình. Gây `5 + Lv/2` tim (Lv 1: 5, Lv 2: 6, Lv 20: 15) cho quái thù địch (không phải boss) trong bán kính 3 ô. Không phá khối. Người chơi trong 8 ô thấy màn hình rung nhẹ.
+- **Seismic Wave** (giữ chuột phải 1 giây, từ Lv 3): ba đợt sóng gai đá ở giây 0, 1, 2 quanh chỗ bạn đứng, bán kính 3, 4, 5 ô. Mỗi đợt đánh mọi sinh vật đang đứng trên mặt đất (trừ bạn; vật triệu hồi, mob đã bắt, người chơi khác đều dính). Sát thương mỗi đợt `min(8, 2 + (Lv-3)/2)` tim (Lv 3: 2, Lv 5: 3, Lv 15 trở lên: 8). Hất lên `5 + (Lv-3)/2` ô (Lv 19-20: 13 ô), đẩy ngang 2 ô. Mục tiêu đứng cao hơn bạn 1 ô thì bớt 1 tim và 1 ô hất mỗi ô cao thêm. Mục tiêu đang bay (vừa bị hất) bị bỏ qua. Boss (God Slayer, thủ lĩnh nhiệm vụ, Wither, Ender Dragon, Warden) chỉ nhận sát thương, không bị hất. Trong 3 giây sóng bạn chậm đi 80%.
+- Dưới Lv 3 giữ chuột phải không hiện thanh nạp, nhả ra vẫn ra Impact kèm dòng "Seismic Wave unlocks at Lv 3".
+
+**Crystal Prison (D143, hệ Khống chế):** chọn ô chiêu. Hồi chiêu 48 giây, bắt đầu khi chiêu thật sự tung ra (nhắm trượt thì không tốn).
+- **Chuột trái:** nhốt thứ bạn đang ngắm (quái hoặc người chơi, tối đa 64 ô). Ngắm vào khối thì lồng hiện ngay trước khối đó. Ngắm trượt, hoặc ngắm vào sinh vật cao/rộng hơn 3 ô (Ghast...) thì không tung.
+- **Chuột phải:** nhốt bạn và sinh vật gần nhất quanh bạn.
+- Lồng là hộp rỗng 3x3x3, vỏ tinh thể dày 1 ô trên 6 mặt (54 khối, không có cạnh và góc). Khối bên trong bị xoá (nước cũng mất); khối không phá được (bedrock...) giữ nguyên; rương bị đè thì đồ rơi ra. Tinh thể phát sáng mức 7, quái không sinh ra trong lồng.
+- Tối đa 2 sinh vật bị nhốt: người/mục tiêu bạn chọn trước, còn chỗ thì bốc ngẫu nhiên trong số đứng gần. Phần còn lại (và mọi thứ cao/rộng hơn 3 ô) bị đẩy ra ngoài vỏ.
+- Quái thù địch bị nhốt (không phải vật triệu hồi, mob đã bắt) bị **Disarmed**: không chọn mục tiêu, không đánh trong `3 + 0,5·(Lv-1)` giây (Lv 1: 3 giây, Lv 20: 12,5 giây). Trong Death Match, đối thủ bị nhốt cũng bị Disarmed (không đánh, không dùng chiêu). Bạn và người chơi khác ngoài Death Match không bị. Enderman trong lồng không dịch chuyển được.
+- Lồng đứng `8 + (Lv-1)` giây (Lv 1: 8, Lv 20: 27), hết giờ tinh thể biến mất (lưu trong world nên thoát game vẫn biến mất đúng hạn).
+- Tinh thể có 20 mức theo level: độ cứng `0,3 + 2,7·(Lv-1)/19` (kính 0,3 → deepslate 3) và chịu nổ `0,3 + 9,7·(Lv-1)/19` (Lv 20 = 10). Phá bằng tay hoặc cuốc đều được, không rơi đồ.
+
+| Lv | Lồng đứng | Disarmed | Độ cứng | Chịu nổ |
+|---|---|---|---|---|
+| 1 | 8 giây | 3 giây | 0,3 | 0,3 |
+| 10 | 17 giây | 7,5 giây | 1,6 | 4,9 |
+| 20 | 27 giây | 12,5 giây | 3 | 10 |
+
+| Lv | Impact (tim) | Wave (tim/đợt) | Hất (ô) |
+|---|---|---|---|
+| 1 | 5 | - | - |
+| 2 | 6 | - | - |
+| 3 | 6 | 2 | 5 |
+| 5 | 7 | 3 | 6 |
+| 7 | 8 | 4 | 7 |
+| 10 | 10 | 5 | 8 |
+| 15 | 12 | 8 | 11 |
+| 20 | 15 | 8 | 13 |
 
 **Soul Grasp (D134–D136):** nhắm một sinh vật trong 16 block, giữ chuột phải để kéo sợi dây; đầy thanh là sinh vật thành của mình (hồi chiêu 120 giây chỉ khi thành công, huỷ giữa chừng không tốn). Thời gian giữ = máu tối đa / 20 giây, từ 1 đến 5 giây. Chuột trái mở danh sách (Follow, Stay, Guard, Call, Release).
 
