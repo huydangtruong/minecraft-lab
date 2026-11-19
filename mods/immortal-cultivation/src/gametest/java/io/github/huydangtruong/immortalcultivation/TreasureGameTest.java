@@ -31,6 +31,34 @@ public class TreasureGameTest {
 		return d;
 	}
 
+	/** {non-empty stacks, 1 if a level bottle is among them}. */
+	private static int[] stacks(ServerLevel level, BlockPos chest) {
+		ChestBlockEntity box = (ChestBlockEntity) level.getBlockEntity(chest);
+		int n = 0;
+		int bottle = 0;
+		for (int i = 0; i < box.getContainerSize(); i++) {
+			if (!box.getItem(i).isEmpty()) {
+				n++;
+				bottle |= box.getItem(i).is(io.github.huydangtruong.immortalcultivation.reward.RewardBoxes.BOTTLE) ? 1 : 0;
+			}
+		}
+		return new int[] {n, bottle};
+	}
+
+	@GameTest(maxTicks = 100)
+	public void megaEndermanStays(GameTestHelper c) {
+		ServerLevel level = c.getLevel();
+		TreasureSavedData d = fresh(c);
+		DeadlyTreasure.place(level, d, c.absolutePos(new BlockPos(1, 1, 1)), false, "endermen");
+		List<Mob> g = guards(level, d);
+		c.assertTrue(!g.isEmpty() && g.get(0) instanceof net.minecraft.world.entity.monster.Enderman, "Mega Endermen");
+		net.minecraft.world.entity.monster.Enderman e = (net.minecraft.world.entity.monster.Enderman) g.get(0);
+		c.assertTrue(!e.teleport(e.getX() + 8, e.getY(), e.getZ()), "a Mega Enderman cannot teleport");
+		c.assertTrue(!e.isSensitiveToWater(), "nor fears water");
+		DeadlyTreasure.fail(level.getServer(), d);
+		c.succeed();
+	}
+
 	private static List<Mob> guards(ServerLevel level, TreasureSavedData d) {
 		List<Mob> out = new ArrayList<>();
 		for (String id : d.guards) {
@@ -48,16 +76,10 @@ public class TreasureGameTest {
 		DeadlyTreasure.Spot spot = DeadlyTreasure.place(level, d, c.absolutePos(new BlockPos(1, 1, 1)), false, "blazes");
 		BlockPos chest = spot.chest();
 		c.assertTrue(level.getBlockEntity(chest) instanceof ChestBlockEntity, "a chest stands at " + chest);
-		ChestBlockEntity box = (ChestBlockEntity) level.getBlockEntity(chest);
-		int stacks = 0;
-		boolean bottle = false;
-		for (int i = 0; i < box.getContainerSize(); i++) {
-			if (!box.getItem(i).isEmpty()) {
-				stacks++;
-				bottle |= box.getItem(i).is(io.github.huydangtruong.immortalcultivation.reward.RewardBoxes.BOTTLE);
-			}
-		}
-		c.assertTrue(stacks >= 8 && bottle, "bottle, apple and 6+ more: " + stacks);
+		c.assertTrue(stacks(level, chest)[0] == 0, "empty while locked: nothing for hoppers or explosions to take");
+		level.setBlock(chest, Blocks.AIR.defaultBlockState(), 3); // blown up by TNT, say
+		DeadlyTreasure.tick(level.getServer());
+		c.assertTrue(level.getBlockEntity(chest) instanceof ChestBlockEntity, "a destroyed chest comes back");
 		List<Mob> g = guards(level, d);
 		c.assertTrue(g.size() == 6, "6 Mega Blazes, got " + g.size());
 		c.assertTrue(Math.abs(g.get(0).getMaxHealth() - 80f) < 0.01f, "x4 health: " + g.get(0).getMaxHealth());
@@ -67,6 +89,8 @@ public class TreasureGameTest {
 			m.kill(level);
 		}
 		c.assertTrue(!DeadlyTreasure.locked(level, chest), "open when all guards are dead");
+		int[] loot = stacks(level, chest);
+		c.assertTrue(loot[0] >= 8 && loot[1] == 1, "bottle, apple and 6+ more once open: " + loot[0]);
 		c.assertTrue(d.phase == TreasureRules.Phase.IDLE, "event over: " + d.phase);
 		level.setBlock(chest, Blocks.AIR.defaultBlockState(), 3);
 		c.succeed();

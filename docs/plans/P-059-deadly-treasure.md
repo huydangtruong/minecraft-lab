@@ -12,9 +12,10 @@ A guarded chest ~1000 blocks from a player, 2 days after the Crimson Master or t
 - Glow textures: `scripts/mega-glow/GenMegaGlow.java <26.3.jar> <out> [preview]` keeps eye/mouth/pattern pixels of the vanilla texture in the species colour.
 - Crimson `RewardRoll.BASE_ITEMS`: iron, redstone, lapis, gunpowder removed.
 
-## Known gaps
-- Explosions (TNT) can still break the locked chest; hoppers under it can pull items.
-- Endermen teleport and may leave the home radius.
+## Gaps closed (D152)
+- The chest stays empty while locked; the loot goes in when the last guard dies (nothing for hoppers, copper golems or explosions to take).
+- A locked chest that is blown up or removed is put back on the next event tick (every second while the chunk is loaded).
+- Mega Endermen never teleport and do not fear water/rain (`EndermanCageMixin`); arrows still bounce off them like vanilla.
 
 ## Tests
-JUnit `TreasureRulesTest`. Game tests `TreasureGameTest` (place + lock + success, time-out, trigger, x4 damage). Client `TreasureClientTest` (title, glow line-up screenshots).
+JUnit `TreasureRulesTest`. Game tests `TreasureGameTest` (place + empty-while-locked + chest restored + loot on success, time-out, trigger, x4 damage, Mega Enderman stays). Client `TreasureClientTest` (title, glow line-up screenshots).
