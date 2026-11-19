@@ -21,7 +21,8 @@
 		"PassiveVisionMixin",
 		"PassiveWaterVisionMixin",
 		"DeathMatchSkyMixin",
-		"DeathMatchFogMixin"
+		"DeathMatchFogMixin",
+		"MegaRenderStateMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

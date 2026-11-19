@@ -10,10 +10,10 @@ import java.util.random.RandomGenerator;
 public final class RewardRoll {
 	/** Each card is an elixir with this chance, otherwise an item. */
 	public static final double ELIXIR_CHANCE = 0.5;
-	/** Base item pool, same for every tier; amounts come from the collect quests (QuestGenerator). */
+	/** Base item pool, same for every tier; amounts come from the collect quests (QuestGenerator). Iron, redstone, lapis
+	 * and gunpowder moved to the Deadly Treasure (D150). */
 	public static final List<String> BASE_ITEMS = List.of(
-		"minecraft:iron_ingot", "minecraft:gold_ingot", "minecraft:diamond", "minecraft:emerald",
-		"minecraft:redstone", "minecraft:lapis_lazuli", "minecraft:ender_pearl", "minecraft:gunpowder");
+		"minecraft:gold_ingot", "minecraft:diamond", "minecraft:emerald", "minecraft:ender_pearl");
 
 	public static final List<RewardOption> GOLD_SPECIALS = List.of(
 		new RewardOption("minecraft:enchanted_golden_apple", 4), new RewardOption("minecraft:emerald", 32));
