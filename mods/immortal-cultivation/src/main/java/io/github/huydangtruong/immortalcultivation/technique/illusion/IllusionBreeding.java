@@ -36,7 +36,7 @@ public final class IllusionBreeding {
 	public static void giveXpToOwner(Animal a, int xp) {
 		Mark m = MARKED.get(a.getUUID());
 		if (m != null && m.owner() != null && a.level().getPlayerByUUID(m.owner()) instanceof net.minecraft.server.level.ServerPlayer p) {
-			p.giveExperiencePoints(xp);
+			p.giveExperiencePoints(io.github.huydangtruong.immortalcultivation.passive.Passives.bonusXp(p, xp)); // D148 XP gain bonus
 		}
 	}
 }

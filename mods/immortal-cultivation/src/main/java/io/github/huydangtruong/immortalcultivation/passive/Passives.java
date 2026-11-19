@@ -31,8 +31,8 @@ public final class Passives {
 		}
 	}
 
-	/** XP gain bonus: XP from an orb the player touched. */
-	public static int orbXp(ServerPlayer p, int amount) {
+	/** XP gain bonus: vanilla XP from an orb, a crop harvest, or a clone's breeding (D148). */
+	public static int bonusXp(ServerPlayer p, int amount) {
 		return PassiveRules.boostedXp(amount, level(p, Passive.XP), p.getRandom().nextDouble());
 	}
 

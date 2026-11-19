@@ -35,7 +35,7 @@ A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [w
 | 0.31.0 contains | P-056 Seism (17th technique: Impact boulder, Wave from Lv 3) and Crystal Prison (18th: crystal cage, disarm) (D142–D146); fixes: clones/guardians/angels ignore the owner's grasped mobs, grasped mobs do not burn in the sun. Server game tests green (201). Not playtested by hand |
 | 0.31.1 contains | Fix: unclaimed reward boxes go into a chest on the ground when the Crimson Master leaves (D147). Server game tests green (202) |
 | 0.32.0 contains | P-057 Passives tab (D148): 5 passives x 10 levels, 5 XP levels per upgrade. Server game tests green (208), client test `PassiveClientTest` green |
-| On `main`, not released | Passives: on/off switch left of "+" instead of clicking the gem (D148) |
+| On `main`, not released | Passives: on/off switch left of "+" instead of clicking the gem; XP gain bonus also on crop harvest XP and clone breeding XP (D148). Server game tests green (209) |
 
 Release steps: [workflow/release.md](../workflow/release.md). Release **only when Huy says so**.
 

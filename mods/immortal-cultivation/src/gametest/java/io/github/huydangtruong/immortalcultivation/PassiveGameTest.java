@@ -95,6 +95,19 @@ public class PassiveGameTest {
 	}
 
 	@GameTest(maxTicks = 100)
+	public void cropHarvestXpGetsTheBonus(GameTestHelper c) {
+		player(c); // switches the mod on
+		FlightBladeGameTest.floor(c);
+		ServerPlayer p = FlightBladeGameTest.survivor(c); // harvest XP skips Creative
+		FlightBladeGameTest.place(c, p, 5.5, 1, 5.5, 0f, 0f);
+		set(p, Passive.XP, 10);
+		ImmortalCultivation.onCropHarvest(p, 100);
+		c.assertTrue(p.totalExperience == 130, "100 crops x 1 XP +30% = 130, was " + p.totalExperience);
+		FlightBladeGameTest.drop(c, p);
+		c.succeed();
+	}
+
+	@GameTest(maxTicks = 100)
 	public void protectedSlotsSurviveDeath(GameTestHelper c) {
 		ServerPlayer p = player(c);
 		set(p, Passive.INVENTORY, 7); // main hand, offhand, 4 armor, hotbar
