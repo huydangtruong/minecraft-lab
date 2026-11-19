@@ -16,6 +16,7 @@
 		"CrystalExplosionMixin",
 		"CropGrowthTickMixin",
 		"CropPlantMixin",
+		"MegaDamageMixin",
 		"DisplayAccess",
 		"EndermanCageMixin",
 		"ExperienceOrbMixin",

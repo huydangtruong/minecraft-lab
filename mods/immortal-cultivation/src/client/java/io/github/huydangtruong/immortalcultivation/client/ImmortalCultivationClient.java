@@ -17,6 +17,7 @@ public class ImmortalCultivationClient implements ClientModInitializer {
 		HudElementRegistry.attachElementAfter(VanillaHudElements.CHAT,
 			Identifier.fromNamespaceAndPath("permahearts", "skill_bar"), new SkillBarHud());
 		ClientSkills.register();
+		MegaGlowLayer.register(); // P-059
 		MenuScreens.register(WandererMenus.TYPE, WandererScreen::new);
 		MenuScreens.register(io.github.huydangtruong.immortalcultivation.reward.RewardBoxes.MENU, RewardBoxScreen::new); // P-027
 		StatsPanel.register();

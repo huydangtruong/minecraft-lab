@@ -126,7 +126,7 @@ public final class DangerMobs {
 			|| e instanceof net.minecraft.world.entity.boss.enderdragon.EnderDragon
 			|| e instanceof net.minecraft.world.entity.monster.warden.Warden
 			|| e instanceof OwnedSummon || e instanceof Illusion || WandererNpc.isWanderer(e)
-			|| e.hasAttached(GraspedMob.ATTACHMENT)
+			|| e.hasAttached(GraspedMob.ATTACHMENT) || io.github.huydangtruong.immortalcultivation.treasure.MegaMobs.isMega(e)
 			|| e.entityTags().contains(QuestBoss.TAG) || e.entityTags().contains(QuestBoss.MINION_TAG);
 	}
 
