@@ -305,7 +305,7 @@ public final class PassivesTab {
 			boolean hoverSwitch = hasSwitch && in(mx, my, sw);
 			g.fill(tx, y, right, y + ROW_H, hoverRow && !hoverPlus && !hoverSwitch ? 0xFFBDBDBD : 0xFFABABAB);
 			g.outline(tx, y, right - tx, ROW_H, 0xFF8B8B8B);
-			gem(g, p, gem[0], gem[1], level == 0 || !isOn(d, p));
+			gem(g, p, gem[0], gem[1], level == 0);
 			if (hasSwitch) {
 				drawSwitch(g, sw, isOn(d, p), level >= 1, hoverSwitch && level >= 1);
 			}
@@ -340,7 +340,7 @@ public final class PassivesTab {
 		boolean hb = in(mx, my, bk);
 		g.blitSprite(RenderPipelines.GUI_TEXTURED, Identifier.withDefaultNamespace(hb ? "widget/button_highlighted" : "widget/button"), bk[0], bk[1], bk[2], bk[3]);
 		g.text(font, "Back", bk[0] + (bk[2] - font.width("Back")) / 2, bk[1] + 4, 0xFFFFFFFF, true);
-		gem(g, p, tx + 40, bk[1], level == 0 || !isOn(d, p));
+		gem(g, p, tx + 40, bk[1], level == 0);
 		Component name = Component.literal(p.displayName()).withStyle(ChatFormatting.BOLD);
 		g.text(font, name, tx + 60, bk[1] + 4, TOTAL, false);
 
