@@ -207,6 +207,7 @@ final class FarmTask implements WorkTask {
 		}
 		if (haveSeed) {
 			sl.setBlock(pos, crop.defaultBlockState(), 3);
+			io.github.huydangtruong.immortalcultivation.passive.CropGrowth.planted(sl, pos, a.owner()); // P-058
 		}
 		for (ItemStack d : drops) {
 			if (!d.isEmpty()) {
@@ -232,6 +233,7 @@ final class FarmTask implements WorkTask {
 			return;
 		}
 		sl.setBlock(pos.above(), cropOf(seed).defaultBlockState(), 3);
+		io.github.huydangtruong.immortalcultivation.passive.CropGrowth.planted(sl, pos.above(), a.owner()); // P-058
 		a.swingForAttack(InteractionHand.MAIN_HAND);
 		g.acted(0);
 	}

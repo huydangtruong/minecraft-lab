@@ -84,6 +84,7 @@ public class ImmortalCultivation implements ModInitializer {
 		io.github.huydangtruong.immortalcultivation.passive.PassiveAttachment.PASSIVES.identifier();
 		io.github.huydangtruong.immortalcultivation.technique.TechniqueNet.register();
 		io.github.huydangtruong.immortalcultivation.passive.PassiveNet.register(); // P-057: Passives tab
+		io.github.huydangtruong.immortalcultivation.passive.CropGrowth.register(); // P-058: Crop growth
 		io.github.huydangtruong.immortalcultivation.notes.NotesNet.register(); // P-042: Notes panel
 		io.github.huydangtruong.immortalcultivation.technique.TechniqueSelection.init();
 		HeartsAttachment.DM_PROTECTED.identifier();

@@ -8,6 +8,7 @@ public enum Passive {
 	VISION("vision", "Increase vision"),
 	HUNGER("hunger", "Hunger sustain"),
 	XP("xp", "XP gain bonus"),
+	GROWTH("growth", "Crop growth"),
 	INVENTORY("inventory", "Inventory protect");
 
 	private final String id;
@@ -24,6 +25,11 @@ public enum Passive {
 
 	public String displayName() {
 		return displayName;
+	}
+
+	/** Passives with an on/off switch in the tab. */
+	public boolean toggleable() {
+		return this == VISION || this == GROWTH;
 	}
 
 	public static Optional<Passive> byId(String id) {

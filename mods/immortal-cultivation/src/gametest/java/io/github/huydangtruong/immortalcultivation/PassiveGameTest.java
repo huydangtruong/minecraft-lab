@@ -1,5 +1,6 @@
 package io.github.huydangtruong.immortalcultivation;
 
+import io.github.huydangtruong.immortalcultivation.passive.CropGrowth;
 import io.github.huydangtruong.immortalcultivation.passive.Passive;
 import io.github.huydangtruong.immortalcultivation.passive.PassiveAttachment;
 import io.github.huydangtruong.immortalcultivation.passive.PassiveData;
@@ -8,7 +9,10 @@ import io.github.huydangtruong.immortalcultivation.passive.PassiveRules;
 import io.github.huydangtruong.immortalcultivation.passive.Passives;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ExperienceOrb;
@@ -128,6 +132,62 @@ public class PassiveGameTest {
 		c.assertTrue(ri.getItem(39).is(Items.IRON_HELMET), "helmet kept");
 		c.assertTrue(ri.getItem(20).isEmpty(), "row 2 dropped");
 		c.assertTrue(PassiveAttachment.get(r).level(Passive.INVENTORY) == 7, "passive levels survive death");
+		c.succeed();
+	}
+
+	@GameTest(maxTicks = 100)
+	public void plantedCropsGrowFasterForTheOwner(GameTestHelper c) {
+		ServerPlayer p = player(c);
+		BlockPos soil = c.absolutePos(new BlockPos(1, 1, 1));
+		BlockPos crop = soil.above();
+		c.getLevel().setBlockAndUpdate(soil, Blocks.FARMLAND.defaultBlockState());
+		c.getLevel().setBlockAndUpdate(crop, Blocks.WHEAT.defaultBlockState());
+		RandomSource r = RandomSource.create(1);
+		set(p, Passive.GROWTH, 10);
+		CropGrowth.remember(p);
+		c.assertTrue(CropGrowth.extraTicks(c.getLevel(), crop, r) == 0, "nobody planted it: no bonus");
+		CropGrowth.planted(c.getLevel(), crop, p.getUUID());
+		c.assertTrue(CropGrowth.extraTicks(c.getLevel(), crop, r) == 2, "Lv 10 = +200% = two extra attempts");
+		c.assertTrue(PassiveNet.apply(p, PassiveNet.TOGGLE, "growth") == null, "growth can be switched");
+		c.assertTrue(CropGrowth.extraTicks(c.getLevel(), crop, r) == 0, "switched off: no bonus");
+		PassiveNet.apply(p, PassiveNet.TOGGLE, "growth");
+		c.assertTrue(CropGrowth.extraTicks(c.getLevel(), crop, r) == 2, "back on");
+		CropGrowth.planted(c.getLevel(), soil, p.getUUID());
+		c.assertTrue(CropGrowth.extraTicks(c.getLevel(), soil, r) == 0, "farmland is not a crop");
+		p.gameMode.destroyBlock(crop);
+		c.assertTrue(CropGrowth.extraTicks(c.getLevel(), crop, r) == 0, "breaking the crop forgets the owner");
+		c.succeed();
+	}
+
+	@GameTest(maxTicks = 100)
+	public void extraAttemptsGrowTheCrop(GameTestHelper c) {
+		ServerPlayer p = player(c);
+		BlockPos soil = c.absolutePos(new BlockPos(1, 1, 1));
+		BlockPos crop = soil.above();
+		c.getLevel().setBlockAndUpdate(soil, Blocks.FARMLAND.defaultBlockState());
+		c.getLevel().setBlockAndUpdate(crop, Blocks.WHEAT.defaultBlockState());
+		set(p, Passive.GROWTH, 10);
+		CropGrowth.planted(c.getLevel(), crop, p.getUUID());
+		// count how often vanilla random ticks advance the crop, with and without the bonus
+		RandomSource r = RandomSource.create(7);
+		int grown = 0;
+		for (int i = 0; i < 400; i++) {
+			c.getLevel().setBlockAndUpdate(crop, Blocks.WHEAT.defaultBlockState());
+			c.getLevel().getBlockState(crop).randomTick(c.getLevel(), crop, r);
+			if (c.getLevel().getBlockState(crop).getValue(net.minecraft.world.level.block.CropBlock.AGE) > 0) {
+				grown++;
+			}
+		}
+		set(p, Passive.GROWTH, 0);
+		int plain = 0;
+		for (int i = 0; i < 400; i++) {
+			c.getLevel().setBlockAndUpdate(crop, Blocks.WHEAT.defaultBlockState());
+			c.getLevel().getBlockState(crop).randomTick(c.getLevel(), crop, r);
+			if (c.getLevel().getBlockState(crop).getValue(net.minecraft.world.level.block.CropBlock.AGE) > 0) {
+				plain++;
+			}
+		}
+		c.assertTrue(grown > plain, "Lv 10 should grow more often: " + grown + " vs " + plain);
 		c.succeed();
 	}
 }

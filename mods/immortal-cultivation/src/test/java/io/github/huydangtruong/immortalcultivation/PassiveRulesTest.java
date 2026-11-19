@@ -72,4 +72,27 @@ class PassiveRulesTest {
 		assertEquals(1.2, d.activeVision(), 1e-9);
 		assertEquals(0, d.withVisionOn(false).activeVision());
 	}
+
+	@Test
+	void growthIsTwentyPercentPerLevel() {
+		assertEquals(0, PassiveRules.growthPercent(0));
+		assertEquals(20, PassiveRules.growthPercent(1));
+		assertEquals(200, PassiveRules.growthPercent(10));
+		assertEquals(0, PassiveRules.extraGrowth(0, 0.0));
+		assertEquals(1, PassiveRules.extraGrowth(1, 0.19)); // 20% chance of one extra attempt
+		assertEquals(0, PassiveRules.extraGrowth(1, 0.2));
+		assertEquals(1, PassiveRules.extraGrowth(6, 0.5)); // 120%: one, plus 20% chance of a second
+		assertEquals(2, PassiveRules.extraGrowth(6, 0.1));
+		assertEquals(2, PassiveRules.extraGrowth(10, 0.99)); // 200%: always two
+		assertEquals("+200%", PassiveRules.value(Passive.GROWTH, 10));
+	}
+
+	@Test
+	void growthSwitch() {
+		PassiveData d = PassiveData.DEFAULT.withLevel(Passive.GROWTH, 4);
+		assertTrue(d.isOn(Passive.GROWTH));
+		assertEquals(4, d.activeLevel(Passive.GROWTH));
+		assertEquals(0, d.withOn(Passive.GROWTH, false).activeLevel(Passive.GROWTH));
+		assertTrue(d.withOn(Passive.GROWTH, false).isOn(Passive.VISION), "the vision switch is separate");
+	}
 }
