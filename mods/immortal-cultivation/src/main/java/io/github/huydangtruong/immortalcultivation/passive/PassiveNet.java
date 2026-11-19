@@ -14,7 +14,9 @@ import net.minecraft.server.level.ServerPlayer;
 /** Client to server requests of the Passives tab (D148). The server checks everything; {@link #apply} is what tests call. */
 public final class PassiveNet {
 	public static final int UPGRADE = 0;
-	public static final int TOGGLE_VISION = 1;
+	/** Flips the switch of a toggleable passive (Increase vision, Crop growth). */
+	public static final int TOGGLE = 1;
+	public static final int TOGGLE_VISION = TOGGLE;
 
 	public record PassiveAction(int kind, String passive) implements CustomPacketPayload {
 		public static final Type<PassiveAction> TYPE = new Type<>(Identifier.fromNamespaceAndPath(ImmortalCultivation.NAMESPACE, "passive_action"));
@@ -62,13 +64,19 @@ public final class PassiveNet {
 				}
 				p.giveExperienceLevels(-PassiveRules.COST_LEVELS);
 				PassiveAttachment.set(p, d.withLevel(passive, level + 1));
+				CropGrowth.remember(p);
 				return null;
 			}
-			case TOGGLE_VISION -> {
-				if (d.level(Passive.VISION) < 1) {
-					return "Learn Increase vision first";
+			case TOGGLE -> {
+				Passive passive = Passive.byId(id).orElse(null);
+				if (passive == null || !passive.toggleable()) {
+					return "That passive has no switch";
 				}
-				PassiveAttachment.set(p, d.withVisionOn(!d.visionOn()));
+				if (d.level(passive) < 1) {
+					return "Learn " + passive.displayName() + " first";
+				}
+				PassiveAttachment.set(p, d.withOn(passive, !d.isOn(passive)));
+				CropGrowth.remember(p);
 				return null;
 			}
 			default -> {

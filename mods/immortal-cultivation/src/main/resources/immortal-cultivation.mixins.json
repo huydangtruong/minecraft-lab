@@ -14,6 +14,8 @@
 		"BlockDisplayAccess",
 		"BrainGraspMixin",
 		"CrystalExplosionMixin",
+		"CropGrowthTickMixin",
+		"CropPlantMixin",
 		"DisplayAccess",
 		"EndermanCageMixin",
 		"ExperienceOrbMixin",

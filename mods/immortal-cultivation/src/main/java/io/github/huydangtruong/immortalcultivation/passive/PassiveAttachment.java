@@ -20,6 +20,7 @@ public final class PassiveAttachment {
 	public static final StreamCodec<ByteBuf, PassiveData> STREAM_CODEC = StreamCodec.composite(
 		INT_MAP, PassiveData::levels,
 		ByteBufCodecs.BOOL, PassiveData::visionOn,
+		ByteBufCodecs.BOOL, PassiveData::growthOn,
 		PassiveData::new);
 
 	public static final AttachmentType<PassiveData> PASSIVES = AttachmentRegistry.create(

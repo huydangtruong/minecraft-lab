@@ -64,6 +64,17 @@ public final class PassiveRules {
 		return amount + whole + (roll < bonus - whole ? 1 : 0);
 	}
 
+	/** Crop growth (P-058): +20% growth per level, +200% at level 10 (3 times as fast). */
+	public static int growthPercent(int level) {
+		return 20 * clamp(level);
+	}
+
+	/** Extra growth attempts for one random tick of an owned crop; roll in [0,1) rounds the fraction by chance. */
+	public static int extraGrowth(int level, double roll) {
+		int pct = growthPercent(level);
+		return pct / 100 + (roll < (pct % 100) / 100.0 ? 1 : 0);
+	}
+
 	/** Name of the slot group a level adds (1-based), shown in the tab. */
 	public static String inventoryGroup(int level) {
 		return switch (level) {
@@ -109,6 +120,7 @@ public final class PassiveRules {
 			case VISION -> pct(vision(level) * 100);
 			case HUNGER -> num(hungerFloor(level) / 2.0);
 			case XP -> xpPercent(level) + "%";
+			case GROWTH -> "+" + growthPercent(level) + "%";
 			case INVENTORY -> protectedSlots(level, 0).size() + " slots";
 		};
 	}
