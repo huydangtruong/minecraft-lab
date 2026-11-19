@@ -7,6 +7,8 @@ import net.fabricmc.fabric.api.client.rendering.v1.FabricRenderState;
 import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityRenderLayerRegistrationCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.RenderStateDataKey;
 import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.model.monster.skeleton.SkeletonModel;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
@@ -29,15 +31,21 @@ public final class MegaGlowLayer<S extends LivingEntityRenderState, M extends En
 		EntityTypes.ENDERMAN, EntityTypes.WITCH, EntityTypes.STRAY, EntityTypes.BOGGED, EntityTypes.DROWNED, EntityTypes.GUARDIAN,
 		EntityTypes.ELDER_GUARDIAN);
 
-	public MegaGlowLayer(RenderLayerParent<S, M> parent) {
+	/** Model the glow is drawn on; for the bogged it is the moss outer layer, which hides the inner face. */
+	private final EntityModel<? super S> model;
+
+	public MegaGlowLayer(RenderLayerParent<S, M> parent, EntityModel<? super S> model) {
 		super(parent);
+		this.model = model;
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	public static void register() {
 		LivingEntityRenderLayerRegistrationCallback.EVENT.register((type, renderer, helper, context) -> {
 			if (TYPES.contains(type)) {
-				helper.register(new MegaGlowLayer(renderer));
+				EntityModel model = type == EntityTypes.BOGGED
+					? new SkeletonModel(context.bakeLayer(ModelLayers.BOGGED_OUTER_LAYER)) : renderer.getModel();
+				helper.register(new MegaGlowLayer(renderer, model));
 			}
 		});
 	}
@@ -52,7 +60,7 @@ public final class MegaGlowLayer<S extends LivingEntityRenderState, M extends En
 		if (species == null || state.isInvisible) {
 			return;
 		}
-		collector.order(1).submitModel(getParentModel(), state, pose, RenderTypes.eyes(texture(species)), light,
+		collector.order(2).submitModel(model, state, pose, RenderTypes.eyes(texture(species)), light,
 			OverlayTexture.NO_OVERLAY, state.outlineColor);
 	}
 }

@@ -19,10 +19,10 @@ public class TreasureClientTest implements FabricClientGameTest {
 			server.runCommand("fill -14 100 -6 14 112 14 air");
 			server.runCommand("tp @a 0 100 0 0 10");
 			context.waitTicks(20);
-			server.runCommand("treasure start");
+			server.runCommand("execute as @p at @p run treasure start");
 			context.waitTicks(15);
 			context.takeScreenshot("treasure-title");
-			server.runCommand("treasure giveup");
+			server.runCommand("execute as @p at @p run treasure giveup");
 			context.waitTicks(130);
 			for (int page = 0; page < 4; page++) {
 				server.runCommand("kill @e[tag=permahearts.mega]");
