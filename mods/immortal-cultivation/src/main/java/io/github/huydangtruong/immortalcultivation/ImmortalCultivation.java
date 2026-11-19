@@ -246,7 +246,7 @@ public class ImmortalCultivation implements ModInitializer {
 	/** D140: vanilla experience (not HeartXP) for crops (player break, Illusion harvest), given straight to the player. Nothing when the mod is off or the player is Creative/Spectator. */
 	public static void onCropHarvest(ServerPlayer sp, int crops) {
 		if (crops > 0 && enabled(sp.level().getServer()) && !sp.isCreative() && !sp.isSpectator()) {
-			sp.giveExperiencePoints(HeartRules.CROP_XP * crops);
+			sp.giveExperiencePoints(io.github.huydangtruong.immortalcultivation.passive.Passives.bonusXp(sp, HeartRules.CROP_XP * crops)); // D148 XP gain bonus
 		}
 	}
 
