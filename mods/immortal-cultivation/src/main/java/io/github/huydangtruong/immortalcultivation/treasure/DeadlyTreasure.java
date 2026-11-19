@@ -184,17 +184,6 @@ public final class DeadlyTreasure {
 			level.setBlock(pos.above(), Blocks.AIR.defaultBlockState(), 3);
 		}
 		level.setBlock(pos, Blocks.CHEST.defaultBlockState().setValue(ChestBlock.WATERLOGGED, spot.water()), 3);
-		if (level.getBlockEntity(pos) instanceof ChestBlockEntity chest) {
-			List<Integer> slots = new ArrayList<>();
-			for (int i = 0; i < chest.getContainerSize(); i++) {
-				slots.add(i);
-			}
-			java.util.Collections.shuffle(slots, new java.util.Random(RNG.nextLong()));
-			List<RewardOption> loot = TreasureRules.loot(RNG);
-			for (int i = 0; i < loot.size() && i < slots.size(); i++) {
-				chest.setItem(slots.get(i), RewardBoxes.cardStack(loot.get(i), level.registryAccess()));
-			}
-		}
 		d.placed = true;
 		d.chest = pos.asLong();
 		d.group = group.id();
@@ -308,8 +297,43 @@ public final class DeadlyTreasure {
 		return air >= 147;
 	}
 
-	/** Guards with no target attack the nearest player within 24 blocks. */
+	/**
+	 * The chest stays empty while locked (nothing for hoppers, golems or explosions to take); the loot goes in when the
+	 * last guard dies. A chest blown up or otherwise removed comes back.
+	 */
+	private static ChestBlockEntity ensureChest(ServerLevel level, BlockPos pos) {
+		if (!(level.getBlockEntity(pos) instanceof ChestBlockEntity)) {
+			boolean water = level.getFluidState(pos).is(FluidTags.WATER);
+			level.setBlock(pos, Blocks.CHEST.defaultBlockState().setValue(ChestBlock.WATERLOGGED, water), 3);
+		}
+		return level.getBlockEntity(pos) instanceof ChestBlockEntity chest ? chest : null;
+	}
+
+	private static void fillLoot(ServerLevel level, BlockPos pos) {
+		level.getChunkAt(pos); // loads the chunk if the last guard died far away
+		ChestBlockEntity chest = ensureChest(level, pos);
+		if (chest == null) {
+			return;
+		}
+		List<Integer> slots = new ArrayList<>();
+		for (int i = 0; i < chest.getContainerSize(); i++) {
+			if (chest.getItem(i).isEmpty()) {
+				slots.add(i);
+			}
+		}
+		java.util.Collections.shuffle(slots, new java.util.Random(RNG.nextLong()));
+		List<RewardOption> loot = TreasureRules.loot(RNG);
+		for (int i = 0; i < loot.size() && i < slots.size(); i++) {
+			chest.setItem(slots.get(i), RewardBoxes.cardStack(loot.get(i), level.registryAccess()));
+		}
+	}
+
+	/** Guards with no target attack the nearest player within 24 blocks; a destroyed chest is put back. */
 	private static void guardTick(ServerLevel level, TreasureSavedData d) {
+		BlockPos chestPos = BlockPos.of(d.chest);
+		if (level.isLoaded(chestPos)) {
+			ensureChest(level, chestPos);
+		}
 		for (String id : d.guards) {
 			if (level.getEntity(UUID.fromString(id)) instanceof Mob m && m.isAlive() && m.getTarget() == null) {
 				ServerPlayer p = nearestPlayer(level, m);
@@ -352,6 +376,7 @@ public final class DeadlyTreasure {
 
 	private static void success(MinecraftServer server, TreasureSavedData d) {
 		BlockPos c = BlockPos.of(d.chest);
+		fillLoot(server.overworld(), c);
 		for (ServerPlayer p : server.getPlayerList().getPlayers()) {
 			title(p, text("is open! X " + c.getX() + ", Y " + c.getY() + ", Z " + c.getZ()));
 		}
