@@ -63,10 +63,10 @@ public class PassiveClientTest implements FabricClientGameTest {
 			if (context.computeOnClient(mc -> mc.player.experienceLevel) != 15) {
 				throw new AssertionError("the upgrade should cost 5 levels");
 			}
-			clickGui(context, spot(context, 2 * n + Passive.VISION.ordinal())); // the Vision gem: off
+			clickGui(context, spot(context, 2 * n + Passive.VISION.ordinal())); // the Vision switch: off
 			context.waitTicks(5);
 			if (data(context).visionOn()) {
-				throw new AssertionError("clicking the Vision gem did not turn it off");
+				throw new AssertionError("the Vision switch did not turn it off");
 			}
 			context.takeScreenshot("passives-list");
 			clickGui(context, spot(context, Passive.INVENTORY.ordinal()));

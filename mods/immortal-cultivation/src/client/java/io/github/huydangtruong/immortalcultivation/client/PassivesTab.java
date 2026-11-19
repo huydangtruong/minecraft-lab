@@ -141,7 +141,7 @@ public final class PassivesTab {
 	private static String description(Passive p) {
 		return switch (p) {
 			case COOLDOWN -> "Every technique cools down faster, on top of its own level.";
-			case VISION -> "See in the dark like Night Vision, with no effect icon. Above 100%: brighter, clearer under water, weaker Darkness. Click the gem in the list to turn it on or off.";
+			case VISION -> "See in the dark like Night Vision, with no effect icon. Above 100%: brighter, clearer under water, weaker Darkness. Use the switch next to + to turn it on or off.";
 			case HUNGER -> "Your food bar never drops below this many drumsticks. From level 3 you can always sprint.";
 			case XP -> "More experience from every XP orb you pick up.";
 			case INVENTORY -> "Items in these slots stay with you when you die, also in Death Match. Curse of Vanishing still destroys them; XP still drops.";
@@ -170,6 +170,35 @@ public final class PassivesTab {
 
 	private static int[] gemRect(int tx, int rowY) {
 		return new int[] {tx + 1, rowY + 4, 16, 16};
+	}
+
+	/** The on/off switch, left of "+" (only for passives that can be switched off). */
+	private static final int SWITCH_W = 18;
+	private static final int SWITCH_H = 10;
+
+	private static boolean toggleable(Passive p) {
+		return p == Passive.VISION;
+	}
+
+	private static boolean isOn(PassiveData d, Passive p) {
+		return p != Passive.VISION || d.visionOn();
+	}
+
+	private static int[] switchRect(int right, int rowY) {
+		int[] plus = plusRect(right, rowY);
+		return new int[] {plus[0] - 3 - SWITCH_W, rowY + (ROW_H - SWITCH_H) / 2, SWITCH_W, SWITCH_H};
+	}
+
+	/** Track green with the knob right when on; grey with the knob left when off; dim when not learned. */
+	private static void drawSwitch(GuiGraphicsExtractor g, int[] r, boolean on, boolean enabled, boolean hover) {
+		int x = r[0];
+		int y = r[1];
+		g.fill(x, y, x + r[2], y + r[3], 0xFF373737);
+		int track = !enabled ? 0xFF6B6B6B : on ? (hover ? 0xFF5CC85C : 0xFF3FA83F) : (hover ? 0xFF9A9A9A : 0xFF7A7A7A);
+		g.fill(x + 1, y + 1, x + r[2] - 1, y + r[3] - 1, track);
+		int kx = on ? x + r[2] - 1 - 8 : x + 1;
+		g.fill(kx, y + 1, kx + 8, y + r[3] - 1, enabled ? 0xFFF0F0F0 : 0xFFA0A0A0);
+		g.fill(kx, y + r[3] - 2, kx + 8, y + r[3] - 1, enabled ? 0xFFB0B0B0 : 0xFF808080);
 	}
 
 	private static int[] plusRect(int right, int rowY) {
@@ -256,16 +285,17 @@ public final class PassivesTab {
 			int[] plus = plusRect(right, y);
 			boolean hoverRow = in(mx, my, row);
 			boolean hoverPlus = in(mx, my, plus);
-			boolean hoverGem = in(mx, my, gem);
-			g.fill(tx, y, right, y + ROW_H, hoverRow && !hoverPlus ? 0xFFBDBDBD : 0xFFABABAB);
+			int[] sw = switchRect(right, y);
+			boolean hasSwitch = toggleable(p);
+			boolean hoverSwitch = hasSwitch && in(mx, my, sw);
+			g.fill(tx, y, right, y + ROW_H, hoverRow && !hoverPlus && !hoverSwitch ? 0xFFBDBDBD : 0xFFABABAB);
 			g.outline(tx, y, right - tx, ROW_H, 0xFF8B8B8B);
-			boolean off = p == Passive.VISION && level >= 1 && !d.visionOn();
-			gem(g, p, gem[0], gem[1], level == 0 || off);
-			if (p == Passive.VISION && level >= 1 && hoverGem) {
-				g.outline(gem[0] - 1, gem[1] - 1, gem[2] + 2, gem[3] + 2, GOLD);
+			gem(g, p, gem[0], gem[1], level == 0 || !isOn(d, p));
+			if (hasSwitch) {
+				drawSwitch(g, sw, isOn(d, p), level >= 1, hoverSwitch && level >= 1);
 			}
 			String title = PassiveRules.title(p, level);
-			int maxW = plus[0] - 1 - (tx + 20);
+			int maxW = (hasSwitch ? sw[0] : plus[0]) - 1 - (tx + 20);
 			if (font.width(title) > maxW) {
 				title = font.plainSubstrByWidth(title, maxW - font.width("..")) + "..";
 			}
@@ -280,8 +310,9 @@ public final class PassivesTab {
 					: xp < PassiveRules.COST_LEVELS ? "Needs " + PassiveRules.COST_LEVELS + " XP levels"
 					: "Upgrade to Lv " + (level + 1) + ": " + PassiveRules.value(p, level + 1) + " (" + PassiveRules.COST_LEVELS + " levels)";
 				g.setTooltipForNextFrame(font, Component.literal(tip), mx, my);
-			} else if (hoverGem && p == Passive.VISION && level >= 1) {
-				g.setTooltipForNextFrame(font, Component.literal(d.visionOn() ? "On: click to turn off" : "Off: click to turn on"), mx, my);
+			} else if (hoverSwitch) {
+				String tip = level < 1 ? "Learn it first" : isOn(d, p) ? "On: click to turn off" : "Off: click to turn on";
+				g.setTooltipForNextFrame(font, Component.literal(tip), mx, my);
 			} else if (hoverRow) {
 				g.setTooltipForNextFrame(font, Component.literal("Lv " + level + " / " + PassiveRules.MAX_LEVEL + ": click for details"), mx, my);
 			}
@@ -294,7 +325,7 @@ public final class PassivesTab {
 		boolean hb = in(mx, my, bk);
 		g.blitSprite(RenderPipelines.GUI_TEXTURED, Identifier.withDefaultNamespace(hb ? "widget/button_highlighted" : "widget/button"), bk[0], bk[1], bk[2], bk[3]);
 		g.text(font, "Back", bk[0] + (bk[2] - font.width("Back")) / 2, bk[1] + 4, 0xFFFFFFFF, true);
-		gem(g, p, tx + 40, bk[1], level == 0 || p == Passive.VISION && !d.visionOn());
+		gem(g, p, tx + 40, bk[1], level == 0 || !isOn(d, p));
 		Component name = Component.literal(p.displayName()).withStyle(ChatFormatting.BOLD);
 		g.text(font, name, tx + 60, bk[1] + 4, TOTAL, false);
 
@@ -347,11 +378,9 @@ public final class PassivesTab {
 				if (canUpgrade(d, p)) {
 					send(PassiveNet.UPGRADE, p); // one click spends 5 levels, no confirm (D148)
 				}
-			} else if (p == Passive.VISION && in(mx, my, gemRect(tx, y))) {
+			} else if (toggleable(p) && in(mx, my, switchRect(right, y))) {
 				if (d.level(p) >= 1) {
 					send(PassiveNet.TOGGLE_VISION, p);
-				} else {
-					detail = p;
 				}
 			} else {
 				detail = p;
@@ -363,7 +392,7 @@ public final class PassivesTab {
 
 	// ---- tests ----
 
-	/** GUI centres for the client test: row titles 0..4, "+" buttons 0..4, gems 0..4, then Back. */
+	/** GUI centres for the client test: row titles 0..4, "+" buttons 0..4, on/off switches 0..4, then Back. */
 	public static List<int[]> hotspots(int x0, int y0, int w, int h) {
 		int tx = x0 + 7;
 		int right = x0 + w - 7;
@@ -377,8 +406,8 @@ public final class PassivesTab {
 			out.add(new int[] {r[0] + PLUS / 2, r[1] + PLUS / 2});
 		}
 		for (int i = 0; i < n; i++) {
-			int[] r = gemRect(tx, rowY(y0, i));
-			out.add(new int[] {r[0] + 8, r[1] + 8});
+			int[] r = switchRect(right, rowY(y0, i));
+			out.add(new int[] {r[0] + SWITCH_W / 2, r[1] + SWITCH_H / 2});
 		}
 		int[] bk = backRect(tx, y0);
 		out.add(new int[] {bk[0] + bk[2] / 2, bk[1] + bk[3] / 2});

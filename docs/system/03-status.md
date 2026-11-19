@@ -35,13 +35,13 @@ A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [w
 | 0.31.0 contains | P-056 Seism (17th technique: Impact boulder, Wave from Lv 3) and Crystal Prison (18th: crystal cage, disarm) (D142–D146); fixes: clones/guardians/angels ignore the owner's grasped mobs, grasped mobs do not burn in the sun. Server game tests green (201). Not playtested by hand |
 | 0.31.1 contains | Fix: unclaimed reward boxes go into a chest on the ground when the Crimson Master leaves (D147). Server game tests green (202) |
 | 0.32.0 contains | P-057 Passives tab (D148): 5 passives x 10 levels, 5 XP levels per upgrade. Server game tests green (208), client test `PassiveClientTest` green |
-| On `main`, not released | Nothing |
+| On `main`, not released | Passives: on/off switch left of "+" instead of clicking the gem (D148) |
 
 Release steps: [workflow/release.md](../workflow/release.md). Release **only when Huy says so**.
 
 ## In flight
 
-- **P-057 Passives tab released in 0.32.0** (D148): third Cultivation tab; Reduce cooldown, Increase vision (client lightmap, toggle on the gem), Hunger sustain, XP gain bonus (orbs only), Inventory protect (kept slots ride on the dead player to COPY_FROM). Not playtested by hand. Flaky seen once during P-057 runs (all passed on rerun): `danger_game_test_zombie_at_twenty...` (max health 100), `grasp_game_test_a_grasped_zombie_does_not_burn_in_the_sun`, God Slayer hunt flow, golem guardian.
+- **P-057 Passives tab released in 0.32.0** (D148): third Cultivation tab; Reduce cooldown, Increase vision (client lightmap, on/off switch left of "+", on main after 0.32.0), Hunger sustain, XP gain bonus (orbs only), Inventory protect (kept slots ride on the dead player to COPY_FROM). Not playtested by hand. Flaky seen once during P-057 runs (all passed on rerun): `danger_game_test_zombie_at_twenty...` (max health 100), `grasp_game_test_a_grasped_zombie_does_not_burn_in_the_sun`, God Slayer hunt flow, golem guardian.
 - **P-056 Seism + Crystal Prison released in 0.31.0** (D142–D146), not playtested by hand. Bosses can be caged; a disarmed Death Match opponent keeps techniques (D146). Client screenshots of the Techniques tab do not show the two new rows (test scroll only).
 - **P-054 Danger level + elites released in 0.30.0** (D137–D139), not released, not playtested. Spawn mixins (cap raise, day spawns) only load-tested: no mob-count measurement at L25. Gamerules `permahearts:danger_level` (on), `permahearts:danger_spawn_ceiling` (4). Gear is armor only; Venomous does nothing to undead; pre-update mobs get the buff on first load. Day events, formation block, other affixes: BL-025..027.
 
