@@ -42,17 +42,14 @@ public class GolemClientTest implements FabricClientGameTest {
 			server.runOnServer(sv -> husk(sv).getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED).setBaseValue(0)); // NoAI mobs do not slide
 			context.waitTicks(10);
 
-			// blade: the hit bleeds and throws the husk back
+			// Life Stealer (D158, D159): a click drains the husk, which then bleeds
 			context.getInput().pressKey(ClientSkills.KEYS[0]);
 			context.waitTicks(15);
-			check(context.computeOnClient(mc -> ClientSkills.focusOf(mc.player) == Technique.BLADE), "the blade is in hand");
+			check(context.computeOnClient(mc -> ClientSkills.focusOf(mc.player) == Technique.BLADE), "Life Stealer is in hand");
 			context.getInput().pressMouse(LEFT);
 			context.waitTicks(6);
-			context.takeScreenshot("70-blade-hit-knockback");
+			context.takeScreenshot("70-life-stealer");
 			check(server.computeOnServer(s -> husk(s).hasEffect(Bleeding.EFFECT)), "the husk bleeds");
-			context.waitTicks(30);
-			double dx = server.computeOnServer(s -> husk(s).getX());
-			check(dx > 2.2 + 2.0 && dx < 2.2 + 6.0, "a level 10 hit throws it about 4 blocks, x = " + dx);
 			server.runCommand("kill @e[type=husk]");
 
 			// guardian: slot key X (slot 2), right click casts at once; three guardians at level 15

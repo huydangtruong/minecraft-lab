@@ -88,7 +88,6 @@ class TechniqueRulesTest {
 		assertEquals(64, TechniqueRules.phaseSightRange(20));
 		assertArrayEquals(new double[] {15, 15 + 25.0 * 9 / 19, 40}, at(TechniqueRules::flightSeconds), 1e-9);
 		assertArrayEquals(new double[] {-0.20, -0.20 + 1.2 * 9 / 19, 1.0}, at(TechniqueRules::flightSpeedBonus), 1e-9);
-		assertArrayEquals(new double[] {8, 12.5, 17.5}, at(TechniqueRules::bladeDamage), 1e-9);
 		assertEquals(0.04f, TechniqueRules.flyingSpeed(1), 1e-6f); // 80% of creative (0.05)
 		assertEquals(0.1f, TechniqueRules.flyingSpeed(20), 1e-6f); // 200% of creative
 		assertArrayEquals(new double[] {150, 50 * (3 + 47.0 * 9 / 19), 2500}, at(TechniqueRules::teleportRange), 1e-9);
@@ -99,8 +98,7 @@ class TechniqueRulesTest {
 		assertEquals("3 s", TechniqueRules.stats(Technique.TELEPORT, 1).get(2).value());
 		assertEquals(0.5f, io.github.huydangtruong.immortalcultivation.technique.SkillBarLogic.charge(30, 3f), 1e-6);
 		assertEquals(80, Technique.FLIGHT.cooldownSeconds());
-		assertEquals(12, Technique.BLADE.cooldownSeconds());
-		assertArrayEquals(new double[] {2, 2 + 4 * 9 / 19.0, 6}, at(TechniqueRules::bladeKnockback), 1e-9);
+		assertEquals(24, Technique.BLADE.cooldownSeconds()); // D158
 		assertEquals(120, Technique.GOLEM.cooldownSeconds());
 		assertEquals(1, TechniqueRules.golemCount(1));
 		assertEquals(1, TechniqueRules.golemCount(9));

@@ -42,8 +42,10 @@ public final class TechniqueNet {
 	/** CAST / SELECT of the skill bar (P-011b). */
 	public static final int CAST = 0;
 	public static final int SELECT = 1;
-	/** Blade hit (P-014): slot = entity id of the target, charge unused. */
+	/** Unused since Life Stealer (D158); kept so the numbering stays. */
 	public static final int HIT = 2;
+	/** D159: the button that started Solar Lance was let go. */
+	public static final int RELEASE = 3;
 
 	/** kind CAST: slot 0..3 and charge 0..1. kind SELECT: slot -1 (the cross) or 0..3. kind HIT: slot = target entity id. */
 	public record SkillAction(int kind, int slot, float charge) implements CustomPacketPayload {
@@ -76,8 +78,8 @@ public final class TechniqueNet {
 				}
 			} else if (payload.kind() == SELECT) {
 				select(ctx.player(), payload.slot());
-			} else if (payload.kind() == HIT) {
-				TechniqueCasts.bladeAttack(ctx.player(), payload.slot()); // refusals are silent
+			} else if (payload.kind() == RELEASE) {
+				Lance.release(ctx.player()); // nothing happens when no beam runs
 			}
 		});
 		ServerPlayNetworking.registerGlobalReceiver(TechniqueAction.TYPE, (payload, ctx) -> {
@@ -125,9 +127,11 @@ public final class TechniqueNet {
 		}
 		float c = Float.isNaN(charge) ? 1f : Math.max(0f, Math.min(1f, charge));
 		if (!TechniqueCasts.cast(p, t, level, c)) {
-			return t == Technique.TELEPORT ? "No safe place to land" : "You cannot cast now";
+			return t == Technique.TELEPORT ? "No safe place to land" : t == Technique.BLADE ? "No target in range" : "You cannot cast now";
 		}
-		TechniqueAttachment.set(p, TechniqueAttachment.get(p).withCooldown(t, now + io.github.huydangtruong.immortalcultivation.passive.Passives.cooldown(p, TechniqueRules.cooldownTicks(t, level))));
+		// D157: Solar Lance shows the cooldown bar from the first tick (beam time + 45 s); Lance.stop sets the real 45 s when the beam ends
+		int extra = t == Technique.LANCE ? LanceRules.DURATION_TICKS : 0;
+		TechniqueAttachment.set(p, TechniqueAttachment.get(p).withCooldown(t, now + extra + io.github.huydangtruong.immortalcultivation.passive.Passives.cooldown(p, TechniqueRules.cooldownTicks(t, level))));
 		return null;
 	}
 

@@ -92,7 +92,8 @@ public final class TechniquesTab {
 			case SACRIFICE -> "Health for invulnerability.";
 			case TELEPORT -> "Charge, then step far away in the direction you look. Like an ender pearl, but much farther and no damage.";
 			case FLIGHT -> "Fly freely like in creative, faster at higher levels. You glide down gently when it ends.";
-			case BLADE -> "Left click a target to cut it with a blood-stained blade. It bleeds and flies back, and you heal for the damage dealt.";
+			case BLADE -> "Click a target within 16 blocks to drain its blood: you heal what it loses. It then bleeds and is slowed for 2 s.";
+			case LANCE -> "Click and hold: a beam of sunlight from your hand to where you aim, up to 256 blocks. Everything on it burns, twice as hard every 3 s. Let go to stop.";
 			case GOLEM -> "Summon loyal violet iron golems that fight for you for 90 seconds. More and stronger at higher levels.";
 			case AQUA -> "Breathe, swim fast and dig freely underwater.";
 			case ILLUSION -> "Creates illusions of yourself that fight for you. Who attacks you, or whom you attack, becomes their target. The item in your first hotbar slot picks their job (an empty first slot means they fight): hoe farms, rod fishes, axe chops, shears shear, bucket milks, wheat/carrots/seeds breed. Drops go to a chest near the cast point.";

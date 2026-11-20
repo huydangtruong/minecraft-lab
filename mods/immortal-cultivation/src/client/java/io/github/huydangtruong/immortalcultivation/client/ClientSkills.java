@@ -194,8 +194,10 @@ public final class ClientSkills {
 	/** Left click: throws at once with full charge. */
 	public static void onAttackClick(Minecraft mc) {
 		if (mc.gui.screen() == null && intercepting(mc)) {
-			if (selectedTechnique(mc) == Technique.BLADE) {
-				bladeClick(mc);
+			if (selectedTechnique(mc) == Technique.LANCE) {
+				if (cast(mc, selected, 1f)) {
+					ClientLance.started(1); // D159: the beam lasts while this button stays held
+				}
 			} else if (selectedTechnique(mc) == Technique.GRASP) {
 				ClientGrasp.openList(); // D134: left click opens the list of grasped mobs
 			} else if (selectedTechnique(mc) == Technique.WARP) {
@@ -207,19 +209,6 @@ public final class ClientSkills {
 			} else {
 				cast(mc, selected, 1f);
 			}
-		}
-	}
-
-	/** Life Steal Blade: swing, and when the crosshair is on a living entity ask the server for a hit (it checks everything). */
-	private static void bladeClick(Minecraft mc) {
-		long left = data(mc.player).cooldownLeft(Technique.BLADE, mc.level.getGameTime());
-		if (left > 0) {
-			mc.player.sendOverlayMessage(Component.literal("On cooldown: " + SkillBarLogic.secondsLeft(left) + " s"));
-			return;
-		}
-		mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
-		if (mc.hitResult instanceof EntityHitResult hit && hit.getEntity() instanceof LivingEntity target) {
-			ClientPlayNetworking.send(new TechniqueNet.SkillAction(TechniqueNet.HIT, target.getId(), 0f));
 		}
 	}
 
@@ -277,7 +266,7 @@ public final class ClientSkills {
 			useWasDown = down;
 			return;
 		}
-		if (t == null || t == Technique.BLADE) { // right click does nothing with the blade
+		if (t == null) {
 			charging = false;
 			useWasDown = down;
 			return;
@@ -292,8 +281,8 @@ public final class ClientSkills {
 					charging = true;
 					chargeTicks = 0;
 				}
-			} else {
-				cast(mc, selected, 1f);
+			} else if (cast(mc, selected, 1f) && t == Technique.LANCE) {
+				ClientLance.started(2); // D159: the beam runs while the right button stays down
 			}
 		} else if (down && charging) {
 			chargeTicks++;

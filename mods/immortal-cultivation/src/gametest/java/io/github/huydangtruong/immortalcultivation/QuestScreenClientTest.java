@@ -242,13 +242,21 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 		clickGui(context, hotspots(context).get(HS_ROW), LEFT); // the fire row
 		check(techniqueData(server).inSlot(0) == fire, "the fire row with slot 1 in edit mode should slot it");
 		clickGui(context, hotspots(context).get(HS_SLOT + 1), LEFT); // edit slot 2
+		scrollList(context, -1);
+		scrollList(context, -1); // P-061: Frozen Breath is the sixth row now, one notch brings it into view
 		clickGui(context, hotspots(context).get(HS_ROW + io.github.huydangtruong.immortalcultivation.technique.Technique.ICE.ordinal()), LEFT); // the ice row
+		scrollList(context, 1);
+		scrollList(context, 1);
 		check(techniqueData(server).inSlot(1) == ice, "the ice row with slot 2 in edit mode should slot it");
 		check(techniqueData(server).inSlot(0) == fire, "slot 1 keeps fire");
 		// move: edit slot 1, + on ice -> slot 1 ice, slot 2 empty
 		clickGui(context, hotspots(context).get(HS_SLOT), LEFT);
 		context.takeScreenshot("09f-move-before"); // fire + ice slotted, editing slot 1
+		scrollList(context, -1);
+		scrollList(context, -1);
 		clickGui(context, hotspots(context).get(HS_ROW + io.github.huydangtruong.immortalcultivation.technique.Technique.ICE.ordinal()), LEFT);
+		scrollList(context, 1);
+		scrollList(context, 1);
 		check(techniqueData(server).inSlot(0) == ice, "slot 1 should hold ice after the move");
 		check(techniqueData(server).inSlot(1) == null, "slot 2 should be empty after ice moved out of it");
 		context.takeScreenshot("09f2-after-move");
@@ -290,6 +298,8 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 		context.takeScreenshot("09g-technique-detail-max");
 		clickGui(context, hotspots(context).get(HS_BACK), LEFT);
 		scrollList(context, 10);
+		scrollList(context, -1);
+		scrollList(context, -1);
 		clickGui(context, hotspots(context).get(HS_INFO + io.github.huydangtruong.immortalcultivation.technique.Technique.ICE.ordinal()), LEFT); // ice level 4: now -> next numbers
 		context.takeScreenshot("98-technique-detail-level"); // green level text and bar
 		context.takeScreenshot("09h-technique-detail-ice");

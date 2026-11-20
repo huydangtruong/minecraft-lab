@@ -37,12 +37,14 @@ A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [w
 | 0.32.0 contains | P-057 Passives tab (D148): 5 passives x 10 levels, 5 XP levels per upgrade. Server game tests green (208), client test `PassiveClientTest` green |
 | 0.33.0 contains | Passives: on/off switch left of "+" instead of clicking the gem; XP gain bonus also on crop harvest XP and clone breeding XP (D148); 6th passive Crop growth, +20%/level on crops the player or their clones plant (P-058, D149); gems keep their colour when switched off (D151); Deadly Treasure event with Mega guards, Crimson base items trimmed (P-059, D150); locked chest empty until opened, restored if destroyed, Mega Endermen do not teleport (D152); reward box cards 60% elixir (D153). Server game tests green (216). Not playtested by hand |
 | 0.33.1 contains | Seismic Impact boulder falls 0.5 s instead of 0.2 s (D154). Server game tests green (216) |
-| On `main`, not released | Nothing |
+| On `main`, not released | Nothing (P-060 `/admin` panel is on branch `feat/P-060-admin-panel`, not merged) |
 
 Release steps: [workflow/release.md](../workflow/release.md). Release **only when Huy says so**.
 
 ## In flight
 
+- **P-061 Solar Lance, Life Stealer, Soul Grasp cột sáng (D156-D159)** on `feat/P-061-lance-stealer` (dev branch `feat/P-061-dev`): built, `build` and client test green, not merged, not playtested by hand. Solar Lance (19th technique) bắn khi giữ chuột, thả là dừng (D159); Life Stealer thay Life Steal Blade, để lại chảy máu + chậm 80% trong 2 giây (custom effect `permahearts:drained`); Soul Grasp tether thay bằng cột sáng từ trời. New `RELEASE` packet kind. Screenshots in `docs/playtest/`.
+- **P-060 `/admin` panel (D155)** on `feat/P-060-admin-panel`: built, `build` and client test green, not merged, not playtested by hand. `/admin` (OP level 2) opens a two-panel screen; Confirm runs the lines as the player. Confirm clears the draft; Esc keeps it.
 - **P-058 Crop growth and P-059 Deadly Treasure released in 0.33.0** (D149–D153), not playtested by hand. Admin command `/treasure status|start|here [group]|lineup <0-3>|giveup`.
 - **P-057 Passives tab released in 0.32.0** (D148): third Cultivation tab; Reduce cooldown, Increase vision (client lightmap, on/off switch left of "+", on main after 0.32.0), Hunger sustain, XP gain bonus (orbs only), Inventory protect (kept slots ride on the dead player to COPY_FROM). Not playtested by hand. Flaky seen once during P-057 runs (all passed on rerun): `danger_game_test_zombie_at_twenty...` (max health 100), `grasp_game_test_a_grasped_zombie_does_not_burn_in_the_sun`, God Slayer hunt flow, golem guardian.
 - **P-056 Seism + Crystal Prison released in 0.31.0** (D142–D146), not playtested by hand. Bosses can be caged; a disarmed Death Match opponent keeps techniques (D146). Client screenshots of the Techniques tab do not show the two new rows (test scroll only).

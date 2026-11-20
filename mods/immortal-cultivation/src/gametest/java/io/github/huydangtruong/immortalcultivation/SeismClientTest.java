@@ -46,7 +46,7 @@ public class SeismClientTest implements FabricClientGameTest {
 			context.getInput().pressMouse(LEFT);
 			context.waitTicks(2);
 			context.takeScreenshot("110-seism-boulder");
-			context.waitTicks(3);
+			context.waitTicks(12); // D154: the boulder falls for 10 ticks
 			context.takeScreenshot("111-seism-impact");
 			boolean hurt = server.computeOnServer(s -> s.overworld().getEntities(net.minecraft.world.entity.EntityTypes.HUSK, e -> e.getHealth() < e.getMaxHealth()).size() >= 1);
 			check(hurt, "the boulder hurt a husk");

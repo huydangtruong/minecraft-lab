@@ -26,60 +26,6 @@ public class GolemGameTest {
 		return h;
 	}
 
-	private static void armBlade(ServerPlayer p, int level) {
-		TechniqueAttachment.set(p, TechniqueAttachment.get(p).withLevel(Technique.BLADE, level, 10).withEmeralds(TechniqueRules.MAX_EMERALDS).withSlot(0, Technique.BLADE));
-		TechniqueSelection.set(p, 0);
-	}
-
-	// ---- Life Steal Blade ----
-
-	@GameTest(maxTicks = 120)
-	public void bladeHitDealsEightKnocksBackTwoBlocksAndBleeds(GameTestHelper c) {
-		FlightBladeGameTest.enable(c);
-		FlightBladeGameTest.floor(c);
-		ServerPlayer p = FlightBladeGameTest.survivor(c);
-		FlightBladeGameTest.place(c, p, 5.5, 1, 1.0, 0f, 0f);
-		Husk h = husk(c, 3.5);
-		armBlade(p, 1);
-		c.runAfterDelay(8, () -> { // let the husk land: it slides on the ground, not in the air
-			double z0 = h.getZ();
-			float before = h.getHealth();
-			String error = TechniqueCasts.bladeAttack(p, h.getId());
-			c.assertTrue(error == null, "hit refused: " + error);
-			float dealt = before - h.getHealth();
-			c.assertTrue(dealt > 8.8f && dealt <= 9f, "base 1 + 8 = 9 damage, was " + dealt);
-			c.assertTrue(h.hasEffect(Bleeding.EFFECT), "the target bleeds");
-			c.runAfterDelay(50, () -> {
-				double slid = h.getZ() - z0;
-				c.assertTrue(slid > 1.5 && slid < 2.6, "knocked back about 2 blocks at level 1, was " + slid);
-				float lost = before - dealt - h.getHealth();
-				c.assertTrue(lost >= 2.0f && lost <= 4.0f, "bled about 1 per second for 2.5 s, lost " + lost);
-				FlightBladeGameTest.drop(c, p);
-				c.succeed();
-			});
-		});
-	}
-
-	@GameTest(maxTicks = 120)
-	public void bladeKnocksBackSixBlocksAtLevelTwenty(GameTestHelper c) {
-		FlightBladeGameTest.enable(c);
-		FlightBladeGameTest.floor(c);
-		ServerPlayer p = FlightBladeGameTest.survivor(c);
-		FlightBladeGameTest.place(c, p, 5.5, 1, 0.0, 0f, 0f); // the test structure is 8 long: the husk must not hit its wall
-		Husk h = husk(c, 1.2);
-		armBlade(p, 20);
-		c.runAfterDelay(8, () -> {
-			double z0 = h.getZ();
-			c.assertTrue(TechniqueCasts.bladeAttack(p, h.getId()) == null, "hit works");
-			c.runAfterDelay(60, () -> {
-				double slid = h.getZ() - z0;
-				c.assertTrue(slid > 5.2 && slid < 6.6, "knocked back about 6 blocks at level 20, was " + slid);
-				FlightBladeGameTest.drop(c, p);
-				c.succeed();
-			});
-		});
-	}
-
 	@GameTest(maxTicks = 40)
 	public void bleedingIsHarmfulAndHurtsOverTime(GameTestHelper c) {
 		FlightBladeGameTest.enable(c);

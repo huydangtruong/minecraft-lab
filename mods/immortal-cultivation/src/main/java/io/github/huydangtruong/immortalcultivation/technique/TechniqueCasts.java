@@ -50,6 +50,9 @@ public final class TechniqueCasts {
 		Frostbite.init();
 		Stun.init();
 		Bleeding.init();
+		StealerSlow.init();
+		Lance.init();
+		LifeStealer.init();
 		TechniqueTimers.init();
 		VioletGuardian.init();
 		WarriorAngel.init();
@@ -96,7 +99,10 @@ public final class TechniqueCasts {
 				return Flight.start(caster, lvl);
 			}
 			case BLADE -> {
-				return false; // the blade is not cast: a left click hits (bladeHit)
+				return LifeStealer.cast(caster, lvl);
+			}
+			case LANCE -> {
+				return Lance.cast(caster, lvl);
 			}
 			case GOLEM -> {
 				VioletGuardian.summon(caster, lvl);
@@ -246,86 +252,6 @@ public final class TechniqueCasts {
 	/** Blood Oath cancels every damage except void, /kill and the like (tag bypasses_invulnerability). */
 	public static boolean blocksDamage(LivingEntity entity, DamageSource source) {
 		return oathActive(entity) && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY);
-	}
-
-	// ---- Life Steal Blade ----
-
-	/** Attack damage from the base value and this mod's modifiers only: the held item and other gear do not count. */
-	public static double bladeBase(ServerPlayer p) {
-		AttributeInstance inst = p.getAttribute(Attributes.ATTACK_DAMAGE);
-		if (inst == null) {
-			return 1;
-		}
-		List<StatMath.Mod> mods = new ArrayList<>();
-		for (AttributeModifier m : inst.getModifiers()) {
-			mods.add(new StatMath.Mod(m.amount(), m.operation().ordinal(), m.id().getNamespace().equals(ImmortalCultivation.NAMESPACE)));
-		}
-		return StatMath.baseWithMine(inst.getBaseValue(), mods);
-	}
-
-	/**
-	 * A left click with the blade on an entity (P-014). Checks the technique is selected, the range, the line of sight and
-	 * the cooldown (a landed hit starts it); null when it hit, else the reason (silent: the client swings anyway). The hit deals
-	 * base attack + bladeDamage and heals the attacker by the health actually removed.
-	 */
-	public static String bladeAttack(ServerPlayer p, int targetId) {
-		if (TechniqueSelection.selectedTechnique(p) != Technique.BLADE) {
-			return "The blade is not selected";
-		}
-		if (!(p.level().getEntity(targetId) instanceof LivingEntity target) || !TechniqueDamage.affectable(target, p)) {
-			return "No target";
-		}
-		if (!p.isWithinEntityInteractionRange(target, 1.0) || !p.hasLineOfSight(target)) {
-			return "Out of reach";
-		}
-		TechniqueData d = TechniqueAttachment.get(p);
-		long now = p.level().getServer().overworld().getGameTime();
-		if (d.onCooldown(Technique.BLADE, now)) {
-			return "On cooldown: " + (d.cooldownLeft(Technique.BLADE, now) + 19) / 20 + " s";
-		}
-		bladeHit(p, target, d.level(Technique.BLADE));
-		TechniqueAttachment.set(p, TechniqueAttachment.get(p).withCooldown(Technique.BLADE, now + io.github.huydangtruong.immortalcultivation.passive.Passives.cooldown(p, Technique.BLADE.cooldownTicks())));
-		return null;
-	}
-
-	/** Ground friction: a body on flat ground keeps 0.91 * 0.6 of its speed each tick, so it slides speed / (1 - 0.546). */
-	static final double SLIDE_FACTOR = 1 - 0.91 * 0.6;
-
-	/** Throws the target horizontally away from the attacker so it slides about {@code blocks} on flat ground (D60). */
-	static void knockBack(ServerPlayer from, LivingEntity target, double blocks) {
-		Vec3 dir = new Vec3(target.getX() - from.getX(), 0, target.getZ() - from.getZ());
-		if (dir.lengthSqr() < 1e-6) {
-			dir = from.getLookAngle().multiply(1, 0, 1);
-		}
-		dir = dir.normalize();
-		double speed = blocks * SLIDE_FACTOR;
-		target.setDeltaMovement(dir.x * speed, Math.min(0, target.getDeltaMovement().y), dir.z * speed);
-		target.needsSync = true; // sends the new velocity to clients (the old hurtMarked)
-	}
-
-	/** The hit itself, no checks. Returns the health the target actually lost (which the attacker gets back). */
-	public static float bladeHit(ServerPlayer p, LivingEntity target, int level) {
-		ServerLevel sl = p.level();
-		float damage = (float) (bladeBase(p) + TechniqueRules.bladeDamage(Mth.clamp(level, 1, TechniqueRules.MAX_LEVEL)));
-		float before = target.getHealth() + target.getAbsorptionAmount();
-		TechniqueDamage.hurt(sl, target, p, p, DamageTypes.PLAYER_ATTACK, damage);
-		float dealt = Math.max(0f, before - (target.getHealth() + target.getAbsorptionAmount()));
-		if (dealt > 0) {
-			p.heal(dealt);
-		}
-		if (target.isAlive()) {
-			target.addEffect(new MobEffectInstance(Bleeding.EFFECT, TechniqueRules.BLEED_SECONDS * 20, 0, false, true, true));
-		}
-		knockBack(p, target, TechniqueRules.bladeKnockback(Mth.clamp(level, 1, TechniqueRules.MAX_LEVEL)));
-		p.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
-		Vec3 from = target.position().add(0, target.getBbHeight() * 0.6, 0);
-		Vec3 to = p.getEyePosition().subtract(0, 0.4, 0);
-		for (int i = 0; i < 8; i++) { // red drops fly from the target toward the attacker
-			Vec3 at = from.lerp(to, i / 8.0);
-			sl.sendParticles(new DustParticleOptions(0xb01010, 1.0f), at.x, at.y, at.z, 1, 0.08, 0.08, 0.08, 0.0);
-		}
-		sl.playSound(null, target.blockPosition(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 1f, 0.8f);
-		return dealt;
 	}
 
 	// ---- ticking ----
