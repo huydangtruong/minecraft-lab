@@ -43,6 +43,7 @@ Release steps: [workflow/release.md](../workflow/release.md). Release **only whe
 
 ## In flight
 
+- **P-061 Solar Lance, Life Stealer, Soul Grasp cột sáng (D156-D159)** on `feat/P-061-lance-stealer` (dev branch `feat/P-061-dev`): built, `build` and client test green, not merged, not playtested by hand. Solar Lance (19th technique) bắn khi giữ chuột, thả là dừng (D159); Life Stealer thay Life Steal Blade, để lại chảy máu + chậm 80% trong 2 giây (custom effect `permahearts:drained`); Soul Grasp tether thay bằng cột sáng từ trời. New `RELEASE` packet kind. Screenshots in `docs/playtest/`.
 - **P-060 `/admin` panel (D155)** on `feat/P-060-admin-panel`: built, `build` and client test green, not merged, not playtested by hand. `/admin` (OP level 2) opens a two-panel screen; Confirm runs the lines as the player. Confirm clears the draft; Esc keeps it.
 - **P-058 Crop growth and P-059 Deadly Treasure released in 0.33.0** (D149–D153), not playtested by hand. Admin command `/treasure status|start|here [group]|lineup <0-3>|giveup`.
 - **P-057 Passives tab released in 0.32.0** (D148): third Cultivation tab; Reduce cooldown, Increase vision (client lightmap, on/off switch left of "+", on main after 0.32.0), Hunger sustain, XP gain bonus (orbs only), Inventory protect (kept slots ride on the dead player to COPY_FROM). Not playtested by hand. Flaky seen once during P-057 runs (all passed on rerun): `danger_game_test_zombie_at_twenty...` (max health 100), `grasp_game_test_a_grasped_zombie_does_not_burn_in_the_sun`, God Slayer hunt flow, golem guardian.

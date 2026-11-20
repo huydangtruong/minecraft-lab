@@ -268,20 +268,6 @@ public final class TechniqueRules {
 		return linear(level, -0.20, 1.0); // D54: 80% of creative at level 1, 200% at 20
 	}
 
-	/** Life Steal Blade damage on top of the player's base attack (D52, D60): 8 at level 1, +0.5 per level (17.5 at 20). */
-	public static double bladeDamage(int level) {
-		int l = Math.max(1, Math.min(MAX_LEVEL, level));
-		return 8 + 0.5 * (l - 1);
-	}
-
-	/** Blocks a Life Steal Blade hit throws the target back on flat ground (D60): 2 at level 1 up to 6 at 20. */
-	public static double bladeKnockback(int level) {
-		return linear(level, 2, 6);
-	}
-
-	/** Seconds the Life Steal Blade makes the target bleed (D60), 1 damage per second. */
-	public static final int BLEED_SECONDS = 4;
-
 	/** Violet Guardian (D60): golems summoned, 1 at levels 1-9, 2 at 10-14, 3 at 15-19, 4 at 20. */
 	public static int golemCount(int level) {
 		int l = Math.max(1, Math.min(MAX_LEVEL, level));
@@ -434,9 +420,6 @@ public final class TechniqueRules {
 		return Math.max(0, (accel - WATER_ACCEL) / ((speed - WATER_ACCEL) * (onGround ? 1 : 0.5)));
 	}
 
-	/** Unused since the blade got a 12 s cooldown (D52); kept for reference. */
-	public static final double BLADE_ATTACK_SPEED = 1.6;
-
 	/** Vanilla creative flying speed (Abilities default); the flight speed bonus is applied on top of it. */
 	public static final float CREATIVE_FLYING_SPEED = 0.05f;
 
@@ -559,10 +542,15 @@ public final class TechniqueRules {
 				new Stat("Speed", pct(1 + flightSpeedBonus(level)) + " of creative"),
 				new Stat("Cooldown", t.cooldownSeconds() + " s"));
 			case BLADE -> List.of(
-				new Stat("Damage", num(bladeDamage(level))), // D57: just the number
-				new Stat("Bleeding", BLEED_SECONDS + " s"),
-				new Stat("Knockback", num(bladeKnockback(level)) + " blocks"),
-				new Stat("Life steal", "all damage dealt"),
+				new Stat("Drains", pct(StealerRules.pct(level)) + " of its max health"),
+				new Stat("At most", num(StealerRules.cap(level)) + " health"),
+				new Stat("Range", num(StealerRules.RANGE) + " blocks"),
+				new Stat("Then", "bleeds and slowed " + pct(StealerRules.SLOW) + " for " + StealerRules.SLOW_SECONDS + " s"),
+				new Stat("Cooldown", t.cooldownSeconds() + " s"));
+			case LANCE -> List.of(
+				new Stat("Damage", num(LanceRules.damagePerSecond(level, 0)) + " per second, doubles every 3 s (up to " + num(LanceRules.damagePerSecond(level, 3 * LanceRules.STAGE_TICKS)) + ")"),
+				new Stat("Range", num(LanceRules.RANGE) + " blocks"),
+				new Stat("Fires", "up to " + LanceRules.DURATION_TICKS / 20 + " s while you hold the button"),
 				new Stat("Cooldown", t.cooldownSeconds() + " s"));
 			case TELEPORT -> List.of(
 				new Stat("Range", num(teleportRange(level)) + " blocks"),

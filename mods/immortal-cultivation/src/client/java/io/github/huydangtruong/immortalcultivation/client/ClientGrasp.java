@@ -120,7 +120,12 @@ public final class ClientGrasp {
 			if (t == null || !t.isAlive()) {
 				targetId = -1;
 			} else {
-				// the beam is drawn every frame by submitBeam
+				// the pillar is drawn every frame by submitBeam; a few soft particles rise from its foot
+				if (mc.player.tickCount % 2 == 0) {
+					double r = t.getBbWidth() * 0.5;
+					mc.level.addParticle(ParticleTypes.END_ROD, t.getX() + (mc.level.getRandom().nextDouble() - 0.5) * r * 2, t.getY() + 0.1,
+						t.getZ() + (mc.level.getRandom().nextDouble() - 0.5) * r * 2, 0, 0.04, 0);
+				}
 			}
 		}
 		if (!selectedGrasp) {
@@ -152,21 +157,7 @@ public final class ClientGrasp {
 		}
 	}
 
-	/** Where the beam leaves the player: the right hand (first person: near the bottom right of the screen). */
-	private static Vec3 handPos(Minecraft mc, net.minecraft.client.Camera cam, float pt) {
-		if (!cam.isDetached()) {
-			var f = cam.forwardVector();
-			var l = cam.leftVector();
-			var u = cam.upVector();
-			return cam.position().add(f.x() * 0.6 - l.x() * 0.38 - u.x() * 0.32, f.y() * 0.6 - l.y() * 0.38 - u.y() * 0.32,
-				f.z() * 0.6 - l.z() * 0.38 - u.z() * 0.32);
-		}
-		Vec3 base = mc.player.getPosition(pt).add(0, mc.player.getBbHeight() * 0.7, 0);
-		double yaw = Math.toRadians(mc.player.getYRot());
-		return base.add(-Math.cos(yaw) * 0.4 - Math.sin(yaw) * 0.3, 0, -Math.sin(yaw) * 0.4 + Math.cos(yaw) * 0.3);
-	}
-
-	/** Draws the tether as a continuous gold line of light with a soft glow, every frame (a quad ribbon facing the camera). */
+	/** D156: while the hold runs, a pillar of light falls from high in the sky onto the mob (no tether from the hand). */
 	private static void submitBeam(net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext ctx) {
 		Minecraft mc = Minecraft.getInstance();
 		if (!tethering() || mc.level == null || mc.player == null) {
@@ -177,51 +168,12 @@ public final class ClientGrasp {
 			return;
 		}
 		float pt = mc.getDeltaTracker().getGameTimeDeltaPartialTick(false);
-		var cam = mc.gameRenderer.mainCamera();
-		Vec3 camPos = cam.position();
-		Vec3 from = handPos(mc, cam, pt).subtract(camPos);
-		Vec3 to = t.getPosition(pt).add(0, t.getBbHeight() / 2, 0).subtract(camPos);
-		Vec3 dir = to.subtract(from);
-		Vec3 side = dir.cross(to.add(from).scale(0.5)); // across the view direction
-		if (side.lengthSqr() < 1e-8) {
-			return;
-		}
-		side = side.normalize();
-		float f = fraction();
-		float time = (mc.player.tickCount + pt);
-		float pulse = 1f + 0.12f * (float) Math.sin(time * 0.9f);
-		float power = 0.55f + 0.45f * f; // brighter with the charge
-		Vec3 s = side;
-		ctx.submitNodeCollector().submitCustomGeometry(ctx.poseStack(), net.minecraft.client.renderer.rendertype.RenderTypes.debugQuads(), (pose, vc) -> {
-			// {half width, red, green, blue, alpha}: outer glow, glow, gold body, white-gold core
-			float[][] layers = {
-				{0.12f, 1f, 0.78f, 0.25f, 0.14f},
-				{0.065f, 1f, 0.82f, 0.30f, 0.30f},
-				{0.03f, 1f, 0.78f, 0.15f, 0.75f},
-				{0.012f, 1f, 0.97f, 0.75f, 1f}};
-			int seg = 24;
-			for (float[] L : layers) {
-				float w = L[0] * pulse * (0.7f + 0.3f * power);
-				int a = Math.min(255, Math.round(L[4] * power * 255));
-				for (int i = 0; i < seg; i++) {
-					Vec3 p0 = from.lerp(to, i / (double) seg), p1 = from.lerp(to, (i + 1) / (double) seg);
-					quad(pose, vc, p0, p1, s, w, L, a);
-				}
-			}
-		});
+		Vec3 foot = t.getPosition(pt);
+		Vec3 top = foot.add(0, SKY_HEIGHT, 0);
+		float power = 0.55f + 0.45f * fraction(); // brighter with the charge
+		LightBeam.draw(ctx, top, foot, power, 2.4f, mc.player.tickCount + pt);
 	}
 
-	private static void quad(com.mojang.blaze3d.vertex.PoseStack.Pose pose, com.mojang.blaze3d.vertex.VertexConsumer vc, Vec3 p0, Vec3 p1,
-			Vec3 side, float w, float[] c, int a) {
-		int r = Math.round(c[1] * 255), g = Math.round(c[2] * 255), b = Math.round(c[3] * 255);
-		Vec3 o = side.scale(w);
-		vertex(pose, vc, p0.add(o), r, g, b, a);
-		vertex(pose, vc, p1.add(o), r, g, b, a);
-		vertex(pose, vc, p1.subtract(o), r, g, b, a);
-		vertex(pose, vc, p0.subtract(o), r, g, b, a);
-	}
-
-	private static void vertex(com.mojang.blaze3d.vertex.PoseStack.Pose pose, com.mojang.blaze3d.vertex.VertexConsumer vc, Vec3 p, int r, int g, int b, int a) {
-		vc.addVertex(pose, (float) p.x, (float) p.y, (float) p.z).setColor(r, g, b, a);
-	}
+	/** How high above the mob the pillar starts. */
+	private static final double SKY_HEIGHT = 96;
 }

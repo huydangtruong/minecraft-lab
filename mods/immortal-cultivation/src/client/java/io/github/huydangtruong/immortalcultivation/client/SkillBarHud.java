@@ -82,6 +82,15 @@ public class SkillBarHud implements HudElement {
 			Component name = Component.literal(sel.displayName() + "  Lv " + d.level(sel));
 			g.text(mc.font, name, right - mc.font.width(name), top - 11, 0xFFFFFFFF, true);
 		}
+		float lance = ClientLance.localFraction();
+		if (lance >= 0f) { // D157: Solar Lance bar, full to empty over 12 s, same spot as the charge bar
+			int w = 102;
+			int bx = (g.guiWidth() - w) / 2;
+			int by = g.guiHeight() - 62;
+			g.fill(bx, by, bx + w, by + 5, 0xA0000000);
+			g.fill(bx + 1, by + 1, bx + 1 + Math.round((w - 2) * lance), by + 4, 0xFFFF9A20);
+			g.outline(bx, by, w, 5, 0xFF202020);
+		}
 		if (ClientSkills.charging()) { // power bar at the centre, just above the health / armour rows
 			float c = ClientSkills.chargeFraction();
 			int w = 102;
