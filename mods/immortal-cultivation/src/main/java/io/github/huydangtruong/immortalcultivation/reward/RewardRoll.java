@@ -8,8 +8,8 @@ import java.util.random.RandomGenerator;
 
 /** Rolls the cards of a reward box (D76). All the numbers of the rules are constants here. No Minecraft imports. */
 public final class RewardRoll {
-	/** Each card is an elixir with this chance, otherwise an item. */
-	public static final double ELIXIR_CHANCE = 0.5;
+	/** Each card is an elixir with this chance, otherwise an item (D153: 60/40). */
+	public static final double ELIXIR_CHANCE = 0.6;
 	/** Base item pool, same for every tier; amounts come from the collect quests (QuestGenerator). Iron, redstone, lapis
 	 * and gunpowder moved to the Deadly Treasure (D150). */
 	public static final List<String> BASE_ITEMS = List.of(
@@ -59,7 +59,7 @@ public final class RewardRoll {
 		return pool;
 	}
 
-	/** tier.options() cards: each 50% elixir (uniform, may repeat) or item (uniform, no repeats). */
+	/** tier.options() cards: each 60% elixir (uniform, may repeat) or item (uniform, no repeats). */
 	public static List<RewardOption> roll(RewardTier tier, RandomGenerator rng) {
 		List<RewardOption> elixirs = new ArrayList<>();
 		for (ElixirStat s : ElixirStat.values()) {
