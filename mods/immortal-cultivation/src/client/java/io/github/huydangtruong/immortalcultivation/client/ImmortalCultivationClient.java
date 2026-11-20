@@ -35,6 +35,9 @@ public class ImmortalCultivationClient implements ClientModInitializer {
 		ClientGrasp.register(); // Soul Grasp (P-053)
 		ClientSeism.register(); // Seism camera shake (P-056)
 		net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.registerGlobalReceiver(
+			io.github.huydangtruong.immortalcultivation.admin.AdminNetworking.Open.TYPE,
+			(payload, ctx) -> ctx.client().gui.setScreen(new AdminScreen(payload))); // P-060: /admin panel
+		net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.registerGlobalReceiver(
 			io.github.huydangtruong.immortalcultivation.technique.warp.Warp.Menu.TYPE, (payload, ctx) -> {
 				var mc = ctx.client();
 				if (mc.gui.screen() instanceof WarpScreen open) {
