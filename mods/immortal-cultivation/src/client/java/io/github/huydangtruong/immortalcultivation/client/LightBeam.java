@@ -12,6 +12,18 @@ final class LightBeam {
 	private LightBeam() {}
 
 	/** Where a beam leaves a player: the right hand (first person: near the bottom right of the screen). */
+	/** Front of the chest, centred: where Solar Lance fires from. */
+	static Vec3 chestPos(Minecraft mc, net.minecraft.client.Camera cam, Entity who, float pt) {
+		if (who == mc.player && !cam.isDetached()) {
+			var f = cam.forwardVector();
+			var u = cam.upVector();
+			return cam.position().add(f.x() * 0.6 - u.x() * 0.45, f.y() * 0.6 - u.y() * 0.45, f.z() * 0.6 - u.z() * 0.45);
+		}
+		Vec3 base = who.getPosition(pt).add(0, who.getBbHeight() * 0.72, 0);
+		double yaw = Math.toRadians(who.getYRot());
+		return base.add(-Math.sin(yaw) * 0.35, 0, Math.cos(yaw) * 0.35);
+	}
+
 	static Vec3 handPos(Minecraft mc, net.minecraft.client.Camera cam, Entity who, float pt) {
 		if (who == mc.player && !cam.isDetached()) {
 			var f = cam.forwardVector();

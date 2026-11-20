@@ -92,7 +92,7 @@ public final class ClientLance {
 			if (who == null) {
 				continue;
 			}
-			LightBeam.draw(ctx, LightBeam.handPos(mc, cam, who, pt), e.getValue().end, 1f, 1.5f, mc.player.tickCount + pt);
+			LightBeam.draw(ctx, LightBeam.chestPos(mc, cam, who, pt), e.getValue().end, 1f, 1.5f, mc.player.tickCount + pt);
 		}
 	}
 }
