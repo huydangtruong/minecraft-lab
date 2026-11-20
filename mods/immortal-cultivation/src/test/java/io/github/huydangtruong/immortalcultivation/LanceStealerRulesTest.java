@@ -31,7 +31,8 @@ class LanceStealerRulesTest {
 
 	@Test
 	void stealerTakesPercentOfMaxHealthUpToCap() {
-		assertEquals(4.0, StealerRules.amount(1, 20), 1e-9); // 20% of 20
+		assertEquals(6.0, StealerRules.amount(1, 20), 1e-9); // D164: 30% of 20
+		assertEquals(0.68, StealerRules.pct(20), 1e-9);
 		assertEquals(7.0, StealerRules.amount(1, 200), 1e-9); // capped at 7
 		assertEquals(0.0, StealerRules.amount(1, 0), 1e-9);
 		assertEquals(7 + 3, StealerRules.cap(2), 1e-9);
