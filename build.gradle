@@ -45,6 +45,14 @@ subprojects {
 		useJUnitPlatform()
 	}
 
+	// Run only some server game tests: ./gradlew :<id>:runGameTest -Pgt='<namespace>:<prefix>*' (fabric-api.gametest.filter,
+	// a vanilla test selector). See docs/workflow/team.md "Test theo phạm vi thay đổi".
+	tasks.matching { it.name == 'runGameTest' }.configureEach {
+		if (project.hasProperty('gt')) {
+			jvmArgs "-Dfabric-api.gametest.filter=${project.property('gt')}"
+		}
+	}
+
 	// The dev client (runClient) starts muted: Huy may be playing or asleep while agents test. Client game tests are
 	// muted by a mixin in the test mod (src/gametest).
 	tasks.matching { it.name == 'runClient' }.configureEach {

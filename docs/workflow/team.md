@@ -19,17 +19,55 @@
 - **Manager (Opus) mỏng**: viết brief ngắn, giao **một** dev Sonnet làm trọn (số liệu, code, test, chạy test **một lần** theo mức ở mục "Test theo phạm vi thay đổi", merge vào nhánh tính năng); manager chỉ đọc báo cáo rồi merge vào `main`. Không chạy lại client test khi dev đã báo xanh; không tự mò javap.
 - Chỉnh số nhỏ (đổi một con số): không cần plan riêng, một dòng quyết định là đủ.
 
-## Test theo phạm vi thay đổi (Huy, 2026-11-17)
+## Test theo phạm vi thay đổi (Huy, 2026-11-17, checklist 2026-11-21)
 
-Xác định phạm vi thay đổi trước, rồi chỉ chạy mức test tương ứng. Không chạy lại cả bộ cho một thay đổi nhỏ.
+Chỉ test đúng phần mà thay đổi chạm tới. Làm theo checklist này **trước khi chạy bất kỳ test nào**, và chép phần đã đánh dấu vào báo cáo.
 
-| Mức | Ví dụ | Chạy |
-|---|---|---|
-| **Nhỏ** | đổi một con số (hồi chiêu, thời gian tác dụng, sát thương), đổi chữ, dời vị trí HUD, 1–2 file | Biên dịch + JUnit: `./gradlew :<mod>:test` (hoặc `--tests <Class>` của phần đó). Thay đổi giao diện thì chạy client test **một lần** để có ảnh. Test hỏng ở mảng không liên quan (Boss, Crimson Master…) thì ghi lại, không chạy lại |
-| **Vừa** | một tính năng trong một mảng (một chiêu, một loại nhiệm vụ) | `./gradlew :<mod>:build` (JUnit + server game test). Chỉ chạy client test khi có sửa code client |
-| **Lớn** | nhiều file, nhiều mảng, đổi tên, đổi luồng chung (thanh chiêu, lưu dữ liệu, bộ cài) | Đủ hết: `build` + `runClientGameTest` (+ `scripts/test-installer.sh` nếu đụng bộ cài) |
+### Bước 1: thay đổi chạm tới đâu?
 
-Phát hành: `scripts/release.sh` tự chạy `build`. Manager ghi mức test đã chạy trong báo cáo.
+Chạy `git diff --name-only main...HEAD` (hoặc `git status`). Đánh dấu `[x]` các mảng có file bị sửa trong bảng dưới.
+
+| ☐ | Mảng | JUnit (`:test --tests`) | Game test server (`runGameTest -Pgt=`) | Client test (cả bộ, chỉ khi đổi màn hình mới) |
+|---|---|---|---|---|
+| ☐ | Fireball, Frozen Breath, Heaven Blast, Healing Domain, Undying Jutsu, Spirit Walk | `*TechniqueRulesTest` | `'*:technique_effects*'` | TechniqueClientTest |
+| ☐ | Thunder Strike | `*ThunderRulesTest` | `'*:thunder*'` | ThunderClientTest |
+| ☐ | Seism | `*SeismRulesTest` | `'*:seism*'` | SeismClientTest |
+| ☐ | Solar Lance, Life Stealer | `*LanceStealerRulesTest` | `'*:lance*'` | LanceClientTest |
+| ☐ | Crystal Prison | `*CrystalRulesTest` | `'*:crystal*'` | CrystalClientTest |
+| ☐ | Soul Grasp | `*GraspRulesTest` | `'*:grasp*'` | GraspClientTest |
+| ☐ | Cosmic Warping | `*WarpRulesTest` | `'*:warp*'` | WarpClientTest |
+| ☐ | Quantum Leap | `*TechniqueRulesTest` | `'*:thousand_mile_step*'` | TeleportClientTest |
+| ☐ | Cloud Travel | `*TechniqueRulesTest` | `'*:flight_blade*'` | FlightBladeClientTest |
+| ☐ | Aqua Marine | `*TechniqueRulesTest` | `'*:aqua*'` | AquaClientTest |
+| ☐ | Violet Guardian | `*TechniqueRulesTest` | `'*:golem*'` | GolemClientTest |
+| ☐ | Warrior Angel | `*TechniqueRulesTest` | `'*:angel*'` | AngelClientTest |
+| ☐ | Illusion | `*TechniqueRulesTest` | `'*:illusion*'` | IllusionClientTest |
+| ☐ | Thanh chiêu, danh sách chiêu, hồi chiêu chung | `*SkillBarLogicTest`, `*TechniqueDataTest` | `'*:technique_game*'` | SkillBarClientTest, TechniqueClientTest |
+| ☐ | Tim, HeartXP, linh dược | `*Heart*`, `*ElixirStatTest`, `*StatMathTest` | `'*:immortal_cultivation*'` | LabelsClientTest |
+| ☐ | Nội tại (Passives) | `*PassiveRulesTest` | `'*:passive*'` | PassiveClientTest |
+| ☐ | Crimson Master, nhiệm vụ, rương quà | `*QuestLogicTest`, `*RewardBoxTest`, `*StayTimeTest`, `*BloodMoonArenaTest` | `'*:wanderer*'`, `'*:reward_box*'` | QuestScreenClientTest, RewardBoxClientTest |
+| ☐ | God Slayer | `*GodSlayer*` | `'*:god_slayer*'` | GodSlayerClientTest |
+| ☐ | Danger level, quái tinh anh | `*DangerRulesTest` | `'*:danger*'` | DangerClientTest |
+| ☐ | Deadly Treasure | `*TreasureRulesTest` | `'*:treasure*'` | TreasureClientTest |
+| ☐ | Notes | `*NoteRulesTest` | `'*:notes*'` | NotesClientTest |
+| ☐ | Death Match | `*DeathMatchTest` | – | – |
+| ☐ | XP thu hoạch | – | `'*:harvest_xp*'` | – |
+| ☐ | /testmode, /admin | `*TestModeRulesTest`, `*AdminDraftTest` | `'*:admin*'` (TestModeGameTest chưa được khai báo trong `fabric.mod.json` nên chưa bao giờ chạy) | AdminClientTest |
+| ☐ | **Phần chung**: enum `Technique`, `TechniqueNet`, `TechniqueData`, lưu dữ liệu, đổi tên, `build.gradle`, bộ cài | cả bộ | cả bộ | cả bộ |
+
+### Bước 2: thay đổi thuộc loại nào?
+
+- [ ] **Chỉ hình ảnh** (màu, vị trí tia, vị trí HUD, icon): chỉ biên dịch `./gradlew :immortal-cultivation:compileClientJava`. **Không** chạy client test để chụp ảnh; Huy xem trong game.
+- [ ] **Đổi số hoặc chữ của một mảng** (hồi chiêu, sát thương, thời gian): chỉ chạy JUnit của mảng đó, ví dụ `./gradlew :immortal-cultivation:test --tests '*ThunderRulesTest'`. Nếu số đó có trong game test của mảng, chạy thêm game test của mảng đó.
+- [ ] **Logic mới hoặc sửa logic trong một mảng**: chạy JUnit và game test của các mảng đã đánh dấu, ví dụ `./gradlew :immortal-cultivation:runGameTest -Pgt='*:lance*'` (khoảng 10 giây). Có màn hình mới thì chạy client test **một lần** ở cuối; bộ này không lọc được nên chạy cả bộ.
+- [ ] **Đụng phần chung** (dòng cuối của bảng): chạy đủ `./gradlew :immortal-cultivation:build` và `runClientGameTest`, thêm `scripts/test-installer.sh` nếu đụng bộ cài.
+
+### Bước 3: chạy và báo cáo
+
+- Chỉ chạy đúng các lệnh đã chọn ở bước 2. Muốn lọc nhiều mảng cùng lúc thì chạy `runGameTest` vài lần, mỗi lần một `-Pgt`.
+- Test hỏng ở mảng không đánh dấu: ghi lại, không sửa, không chạy lại.
+- Trong báo cáo, ghi các mảng đã đánh dấu, loại thay đổi và lệnh đã chạy.
+- Phát hành: `scripts/release.sh` tự chạy `build` (JUnit + toàn bộ game test server), nên cả bộ vẫn được kiểm tra một lần trước mỗi bản phát hành.
 
 ## Minecraft lúc test phải tắt tiếng (Huy, 2026-11-15)
 

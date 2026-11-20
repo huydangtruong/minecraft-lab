@@ -27,12 +27,15 @@ JDK 25 is required (`/usr/libexec/java_home -v 25`; installed at `~/Library/Java
 ```sh
 ./gradlew :immortal-cultivation:build         # compile + JUnit + server game tests (jar in mods/immortal-cultivation/build/libs/)
 ./gradlew :immortal-cultivation:test          # JUnit only
+./gradlew :immortal-cultivation:runGameTest -Pgt='*:lance*'   # server game tests of one area only
 ./gradlew :immortal-cultivation:runClient     # dev Minecraft with the mod, in mods/immortal-cultivation/run/ (own saves)
 scripts/install.sh [mod-id]          # build + install into the Essential profile
 scripts/package.sh                   # zip for a friend
 ```
 
 ## Rules
+
+- **Test only what the change touches**: fill the checklist in docs/workflow/team.md "Test theo phạm vi thay đổi" before running any test.
 
 - **Two names (D132).** Mod id = `immortal-cultivation` (Fabric id, Gradle project, jar, release tag). Data namespace = `permahearts` (every `Identifier`, `assets/permahearts`, `data/permahearts`, lang keys, key bindings, game rule ids, codec fields; constant `ImmortalCultivation.NAMESPACE`). Never change the namespace: saves and options depend on it.
 - **Minecraft 26.3 is not obfuscated**: use Mojang names directly (no Yarn, no mappings). Look names up with `javap` on `~/Library/Application Support/minecraft/versions/26.3/26.3.jar` (see 00-environment.md). Never guess an API name from older versions; check it and add what you learn to 02-findings.md.

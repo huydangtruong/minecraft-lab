@@ -13,6 +13,7 @@
 |---|---|---|
 ## Steps
 ## Tests
+- Test scope checklist (docs/workflow/team.md "Test theo phạm vi thay đổi"): areas ticked = …; change type = …; commands = …
 ## Verify
 ```sh
 export JAVA_HOME=$(/usr/libexec/java_home -v 25)
