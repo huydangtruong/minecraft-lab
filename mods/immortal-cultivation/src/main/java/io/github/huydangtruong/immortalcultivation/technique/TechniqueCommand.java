@@ -1,6 +1,7 @@
 package io.github.huydangtruong.immortalcultivation.technique;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.minecraft.commands.CommandSourceStack;
@@ -10,7 +11,7 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
-/** Op command for tests and playtests: /technique set|emeralds|cooldowns. */
+/** Op command for tests and playtests: /technique set|emeralds|cooldowns|nocooldown. */
 public final class TechniqueCommand {
 	private TechniqueCommand() {}
 
@@ -53,6 +54,16 @@ public final class TechniqueCommand {
 							ServerPlayer p = EntityArgument.getPlayer(ctx, "player");
 							TechniqueAttachment.set(p, TechniqueAttachment.get(p).withoutCooldowns());
 							ctx.getSource().sendSuccess(() -> Component.literal("Cooldowns cleared"), true);
+							return 1;
+						}))))
+			.then(Commands.literal("nocooldown")
+				.then(Commands.argument("player", EntityArgument.player())
+					.then(Commands.argument("on", BoolArgumentType.bool())
+						.executes(ctx -> {
+							ServerPlayer p = EntityArgument.getPlayer(ctx, "player");
+							boolean on = BoolArgumentType.getBool(ctx, "on");
+							TechniqueAttachment.set(p, TechniqueAttachment.get(p).withNoCooldown(on));
+							ctx.getSource().sendSuccess(() -> Component.literal("No cooldown " + (on ? "on" : "off")), true);
 							return 1;
 						})))));
 	}

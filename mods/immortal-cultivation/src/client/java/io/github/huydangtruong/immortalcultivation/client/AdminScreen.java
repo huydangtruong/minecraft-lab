@@ -68,6 +68,7 @@ public class AdminScreen extends Screen {
 	private final EnumSet<DangerRules.Affix> affixes = EnumSet.noneOf(DangerRules.Affix.class);
 	private boolean cultivationOn;
 	private boolean dangerOn;
+	private boolean noCooldownOn;
 	private int groupIndex = -1; // -1 = random group
 	private String status = "";
 	private MultiLineEditBox box;
@@ -77,6 +78,7 @@ public class AdminScreen extends Screen {
 		this.rules = rules;
 		this.cultivationOn = rules.cultivation();
 		this.dangerOn = rules.danger();
+		this.noCooldownOn = rules.noCooldown();
 		this.fieldText.put("ceiling", String.valueOf(rules.spawnCeiling()));
 	}
 
@@ -297,10 +299,12 @@ public class AdminScreen extends Screen {
 	private void buildPlayer(int[] row) {
 		numberRow(row, "hearts", "10", "Set hearts", 1, HeartRules.MAX, n -> "hearts set @s " + n);
 		numberRow(row, "heartxp", "0", "Set HeartXP", 0, 499, n -> "hearts xp @s " + n);
+		numberRow(row, "level", "30", "Set level", 0, 1000, n -> "experience set @s " + n + " levels");
 		numberRow(row, "emeralds", "64", "Give emeralds", 0, TechniqueRules.MAX_EMERALDS, n -> "technique emeralds @s " + n);
 		keyedPair(row, "testmode", "Testmode full", "testmode full", "Testmode reset", "testmode reset");
 		addLine(row[0], 0, 188, "Clear cooldowns", "technique cooldowns @s clear");
 		row[0]++;
+		switchRow(row, "nocooldown", "No cooldown", noCooldownOn, on -> noCooldownOn = on, on -> "technique nocooldown @s " + on);
 	}
 
 	private void buildTechniques(int[] row) {
@@ -394,8 +398,8 @@ public class AdminScreen extends Screen {
 
 	private void buildWorld(int[] row) {
 		label(row, "Game rules");
-		switchRow(row, "rule:ic", "Cultivation", cultivationOn, on -> cultivationOn = on, "permahearts:immortal_cultivation");
-		switchRow(row, "rule:danger", "Danger level", dangerOn, on -> dangerOn = on, "permahearts:danger_level");
+		switchRow(row, "rule:ic", "Cultivation", cultivationOn, on -> cultivationOn = on, on -> "gamerule permahearts:immortal_cultivation " + on);
+		switchRow(row, "rule:danger", "Danger level", dangerOn, on -> dangerOn = on, on -> "gamerule permahearts:danger_level " + on);
 		numberRow(row, "ceiling", String.valueOf(rules.spawnCeiling()), "Spawn ceiling", 1, 16,
 			n -> "gamerule permahearts:danger_spawn_ceiling " + n);
 		label(row, "Vanilla");
@@ -406,14 +410,14 @@ public class AdminScreen extends Screen {
 		row[0]++;
 	}
 
-	private void switchRow(int[] row, String key, String name, boolean initial, java.util.function.Consumer<Boolean> remember, String rule) {
+	private void switchRow(int[] row, String key, String name, boolean initial, java.util.function.Consumer<Boolean> remember, java.util.function.Function<Boolean, String> line) {
 		boolean[] on = {initial};
 		Button[] b = new Button[1];
 		b[0] = put(row[0], 0, Button.builder(Component.literal(name + ": " + (on[0] ? "ON" : "OFF")), x -> {
 			on[0] = !on[0];
 			remember.accept(on[0]);
 			b[0].setMessage(Component.literal(name + ": " + (on[0] ? "ON" : "OFF")));
-			set(key, "gamerule " + rule + " " + on[0]);
+			set(key, line.apply(on[0]));
 		}).bounds(0, 0, 188, BTN_H).build());
 		row[0]++;
 	}

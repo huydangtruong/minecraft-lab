@@ -225,6 +225,27 @@ public class TechniqueGameTest {
 		context.succeed();
 	}
 
+	/** D160: /technique nocooldown on: casting twice in a row works and no cooldown is stored; off again: the cooldown applies. */
+	@GameTest(maxTicks = 100)
+	public void noCooldownSwitchLetsCastRepeatAndOffRestoresCooldown(GameTestHelper context) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+		ServerPlayer p = caster(context, Technique.REPULSE, 7, 1);
+		TechniqueAttachment.set(p, TechniqueAttachment.get(p).withCooldown(Technique.REPULSE, now(p) + 500));
+		var server = context.getLevel().getServer();
+		server.getCommands().getDispatcher().execute("technique nocooldown @s true", server.createCommandSourceStack().withEntity(p));
+		TechniqueData d = TechniqueAttachment.get(p);
+		context.assertTrue(d.noCooldown() && !d.onCooldown(Technique.REPULSE, now(p)), "switch on drops the running cooldown");
+		context.assertTrue(TechniqueNet.cast(p, 1, 1f) == null, "first cast with the switch on");
+		context.assertTrue(TechniqueNet.cast(p, 1, 1f) == null, "second cast right away with the switch on");
+		d = TechniqueAttachment.get(p);
+		context.assertTrue(d.cooldownUntil().isEmpty() && d.cooldownLeft(Technique.REPULSE, now(p)) == 0, "no cooldown is stored");
+		server.getCommands().getDispatcher().execute("technique nocooldown @s false", server.createCommandSourceStack().withEntity(p));
+		context.assertTrue(!TechniqueAttachment.get(p).noCooldown(), "switch is off");
+		context.assertTrue(TechniqueNet.cast(p, 1, 1f) == null, "cast after the switch is off");
+		String err = TechniqueNet.cast(p, 1, 1f);
+		context.assertTrue(err != null && err.startsWith("On cooldown"), "the cooldown applies again, was " + err);
+		context.succeed();
+	}
+
 	@GameTest(maxTicks = 100)
 	public void castRefusedForEmptyLockedAndSwitchOff(GameTestHelper context) {
 		ServerPlayer p = caster(context, Technique.HEALING, 3, 0);

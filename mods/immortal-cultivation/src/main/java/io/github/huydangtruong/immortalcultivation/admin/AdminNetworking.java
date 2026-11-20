@@ -19,13 +19,14 @@ import net.minecraft.server.level.ServerPlayer;
 public final class AdminNetworking {
 	private AdminNetworking() {}
 
-	/** Server to client: open the panel. Carries the current values of the mod game rules. */
-	public record Open(boolean cultivation, boolean danger, int spawnCeiling) implements CustomPacketPayload {
+	/** Server to client: open the panel. Carries the current values of the mod game rules and the player's no-cooldown switch. */
+	public record Open(boolean cultivation, boolean danger, int spawnCeiling, boolean noCooldown) implements CustomPacketPayload {
 		public static final Type<Open> TYPE = new Type<>(Identifier.fromNamespaceAndPath(ImmortalCultivation.NAMESPACE, "admin_open"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Open> CODEC = StreamCodec.composite(
 			ByteBufCodecs.BOOL, Open::cultivation,
 			ByteBufCodecs.BOOL, Open::danger,
 			ByteBufCodecs.VAR_INT, Open::spawnCeiling,
+				ByteBufCodecs.BOOL, Open::noCooldown,
 			Open::new);
 
 		@Override
@@ -65,7 +66,8 @@ public final class AdminNetworking {
 		}
 		MinecraftServer server = p.level().getServer();
 		var rules = server.getGameRules();
-		ServerPlayNetworking.send(p, new Open(rules.get(ImmortalCultivation.ENABLED), rules.get(Danger.ENABLED), rules.get(Danger.SPAWN_CEILING)));
+		ServerPlayNetworking.send(p, new Open(rules.get(ImmortalCultivation.ENABLED), rules.get(Danger.ENABLED), rules.get(Danger.SPAWN_CEILING),
+			io.github.huydangtruong.immortalcultivation.technique.TechniqueAttachment.get(p).noCooldown()));
 		return true;
 	}
 

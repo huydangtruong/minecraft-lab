@@ -87,4 +87,18 @@ class TechniqueDataTest {
 		assertEquals(d, TechniqueData.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow());
 		assertEquals(TechniqueData.DEFAULT, TechniqueData.CODEC.parse(JsonOps.INSTANCE, new com.google.gson.JsonObject()).getOrThrow());
 	}
+
+	@Test
+	void noCooldownStoresNothingAndSurvivesTheCodec() {
+		TechniqueData d = TechniqueData.DEFAULT.withCooldown(Technique.FIRE, 500).withNoCooldown(true);
+		assertTrue(d.cooldownUntil().isEmpty());
+		d = d.withCooldown(Technique.FIRE, 900);
+		assertFalse(d.onCooldown(Technique.FIRE, 0));
+		assertEquals(0, d.cooldownLeft(Technique.FIRE, 0));
+		TechniqueData back = TechniqueData.CODEC.parse(com.mojang.serialization.JsonOps.INSTANCE,
+			TechniqueData.CODEC.encodeStart(com.mojang.serialization.JsonOps.INSTANCE, d).getOrThrow()).getOrThrow();
+		assertTrue(back.noCooldown());
+		d = d.withNoCooldown(false).withCooldown(Technique.FIRE, 900);
+		assertTrue(d.onCooldown(Technique.FIRE, 0));
+	}
 }

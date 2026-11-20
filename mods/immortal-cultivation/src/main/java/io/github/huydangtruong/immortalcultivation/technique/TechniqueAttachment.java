@@ -27,6 +27,7 @@ public final class TechniqueAttachment {
 		ByteBufCodecs.VAR_INT, TechniqueData::emeralds,
 		STRINGS, TechniqueData::slots,
 		LONG_MAP, TechniqueData::cooldownUntil,
+		ByteBufCodecs.BOOL, TechniqueData::noCooldown,
 		TechniqueData::new);
 
 	public static final AttachmentType<TechniqueData> TECHNIQUES = AttachmentRegistry.create(
