@@ -158,3 +158,9 @@ Thế giới có **Danger level 0–30**, bắt đầu từ 0. Mỗi lần Crims
 - Không áp cho boss, thủ lĩnh, God Slayer, mob đã thu phục, đồng minh triệu hồi, bản sao ảo ảnh.
 - **Elite** (từ level 20): 5% ở level 20 → 15% ở level 30. Máu gấp đôi, tên cam kèm phẩm chất, hạt cam. Số phẩm chất: 1 (level 20–24), tới 2 (25–29), tới 3 (30). Phẩm chất: Swift (chạy nhanh +40%), Ironhide (nhận ít hơn 40% sát thương), Regenerating (hồi 1% máu mỗi giây), Blazing (đánh trúng đốt 4 giây, miễn lửa), Venomous (đánh trúng gây độc 5 giây; xác sống miễn độc). 50% rơi 1–3 emerald. Soul Grasp thu phục được và giữ phẩm chất.
 - Lệnh (op): `/danger info`, `/danger set <0..30>`, `/danger elite <phẩm chất...>` (thả một zombie elite trước mặt để thử).
+
+## Bảng /admin (P-060, D155)
+
+- `/admin` (chỉ OP cấp 2; người thường nhận thông báo từ chối) mở pop-up hai nửa. Trái: tab Player, Techniques, Crimson Master, God Slayer, Danger, Treasure, World với nút, công tắc, thanh kéo; mỗi lần bấm chỉ thêm một dòng lệnh vào ô bên phải. Công tắc/thanh kéo cùng một cài đặt (hearts, HeartXP, emeralds, mức chiêu, Danger, level boss, gamerule, ngày/đêm, thời tiết, chế độ chơi) thay dòng cũ thay vì thêm dòng mới.
+- Phải: ô chữ tự xuống dòng, sửa/xoá tay được, mỗi dòng một lệnh (không cần `/`, tối đa 64 dòng, 256 ký tự). Confirm: đóng bảng, server kiểm quyền lại rồi chạy lần lượt các dòng như người chơi tự gõ, rồi xoá nháp. Clear xoá hết. Esc/X đóng mà không chạy, giữ nháp cho lần mở sau.
+- Tab World: công tắc `permahearts:immortal_cultivation` và `permahearts:danger_level`, ô số `danger_spawn_ceiling`, day/night, clear/rain, creative/survival, "Kill hostile within 32" (nhóm `#permahearts:hostile`).

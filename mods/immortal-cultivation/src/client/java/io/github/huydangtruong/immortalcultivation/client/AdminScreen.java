@@ -37,7 +37,7 @@ public class AdminScreen extends Screen {
 	private static final int BTN_H = 20;
 	private static final int TAB_W = 80;
 	private static final int CONTENT_W = 188;
-	private static final int LEFT_W = 4 + TAB_W + 6 + CONTENT_W + 4;
+	private static final int LEFT_W = 4 + TAB_W + 6 + CONTENT_W + 8;
 	private static final int FRAME = 0xFFC6C6C6;
 	private static final int TEXT = 0xFF404040;
 
@@ -272,7 +272,8 @@ public class AdminScreen extends Screen {
 	private void numberRow(int[] row, String key, String defaultText, String buttonLabel, int min, int max, java.util.function.IntFunction<String> line) {
 		EditBox eb = new EditBox(font, 0, 0, 48, BTN_H, Component.literal(key));
 		eb.setMaxLength(4);
-		eb.setValue(fieldText.getOrDefault(key, defaultText));
+		fieldText.putIfAbsent(key, defaultText);
+		eb.setValue(fieldText.get(key));
 		eb.setResponder(v -> fieldText.put(key, v));
 		put(row[0], 0, eb);
 		button(row[0], 52, 136, buttonLabel, () -> {
@@ -463,7 +464,7 @@ public class AdminScreen extends Screen {
 			int trackH = viewRows() * ROW_H - 2;
 			int barH = Math.max(12, trackH * viewRows() / totalRows);
 			int barY = trackTop + (trackH - barH) * scroll / Math.max(1, totalRows - viewRows());
-			int bx = x0() + LEFT_W - 6;
+			int bx = x0() + LEFT_W - 7;
 			g.fill(bx, trackTop, bx + 2, trackTop + trackH, 0xFF8B8B8B);
 			g.fill(bx, barY, bx + 2, barY + barH, 0xFF404040);
 		}

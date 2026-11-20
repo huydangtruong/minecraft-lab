@@ -62,8 +62,8 @@ public class AdminClientTest implements FabricClientGameTest {
 			}
 			AtomicInteger hearts = new AtomicInteger();
 			server.runOnServer(s -> hearts.set(HeartRules.maxHearts(HeartsAttachment.get(s.getPlayerList().getPlayers().get(0)))));
-			if (hearts.get() != 10) {
-				throw new AssertionError("Confirm did not run the lines: hearts " + hearts.get());
+			if (hearts.get() != 50) {
+				throw new AssertionError("Confirm did not run the lines in order (hearts set 10, then testmode full = 50): hearts " + hearts.get());
 			}
 			if (!AdminScreen.draft().isEmpty()) {
 				throw new AssertionError("the draft was not cleared after Confirm");
