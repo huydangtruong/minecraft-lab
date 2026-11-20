@@ -54,4 +54,13 @@ class LanceStealerRulesTest {
 		org.junit.jupiter.api.Assertions.assertTrue(LanceRules.breakable(1.5f));
 		org.junit.jupiter.api.Assertions.assertFalse(LanceRules.breakable(-1f));
 	}
+
+	@org.junit.jupiter.api.Test
+	void beamWidthGrowsSmoothlyToTwoAndAHalf() {
+		assertEquals(1f, LanceRules.widthFactor(LanceRules.DURATION_TICKS), 1e-6);
+		assertEquals(1.75f, LanceRules.widthFactor(LanceRules.DURATION_TICKS / 2), 1e-6);
+		assertEquals(2.5f, LanceRules.widthFactor(0), 1e-6);
+		org.junit.jupiter.api.Assertions.assertTrue(LanceRules.widthFactor(100) < LanceRules.widthFactor(99));
+		assertEquals(2.5f, LanceRules.widthFactor(-5), 1e-6);
+	}
 }

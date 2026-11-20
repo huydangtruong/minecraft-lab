@@ -29,6 +29,14 @@ public final class LanceRules {
 		return damagePerSecond(level, ticksFiring) * DAMAGE_INTERVAL / 20.0;
 	}
 
+	/** D163: the beam looks wider the longer it fires: 1 at the start, MAX_WIDTH_FACTOR after the full 12 s, growing smoothly. */
+	public static final float MAX_WIDTH_FACTOR = 2.5f;
+
+	public static float widthFactor(int ticksLeft) {
+		float firing = Math.max(0f, Math.min(1f, 1f - ticksLeft / (float) DURATION_TICKS));
+		return 1f + (MAX_WIDTH_FACTOR - 1f) * firing;
+	}
+
 	/** Fraction of the bar left (1 = full, 0 = empty). */
 	public static float barFraction(int ticksLeft) {
 		return Math.max(0f, Math.min(1f, ticksLeft / (float) DURATION_TICKS));
