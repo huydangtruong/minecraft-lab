@@ -36,7 +36,7 @@ A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [w
 | 0.31.1 contains | Fix: unclaimed reward boxes go into a chest on the ground when the Crimson Master leaves (D147). Server game tests green (202) |
 | 0.32.0 contains | P-057 Passives tab (D148): 5 passives x 10 levels, 5 XP levels per upgrade. Server game tests green (208), client test `PassiveClientTest` green |
 | 0.33.0 contains | Passives: on/off switch left of "+" instead of clicking the gem; XP gain bonus also on crop harvest XP and clone breeding XP (D148); 6th passive Crop growth, +20%/level on crops the player or their clones plant (P-058, D149); gems keep their colour when switched off (D151); Deadly Treasure event with Mega guards, Crimson base items trimmed (P-059, D150); locked chest empty until opened, restored if destroyed, Mega Endermen do not teleport (D152); reward box cards 60% elixir (D153). Server game tests green (216). Not playtested by hand |
-| On `main`, not released | Nothing |
+| On `main`, not released | Seismic Impact boulder falls 0.5 s instead of 0.2 s (D154) |
 
 Release steps: [workflow/release.md](../workflow/release.md). Release **only when Huy says so**.
 

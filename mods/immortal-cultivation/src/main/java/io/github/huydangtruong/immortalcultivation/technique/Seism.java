@@ -51,7 +51,7 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 /**
- * D142 Seism. Seismic Impact: a boulder (block display) falls on the aimed point for 4 ticks while the point follows
+ * D142 Seism. Seismic Impact: a boulder (block display) falls on the aimed point for 10 ticks (0.5 s) while the point follows
  * the crosshair, then hurts hostile non-boss mobs around it. Seismic Wave (Lv 3+, held 1 s): three quake pulses around
  * the caster that lift and hurt everything on the ground. Runs from the server tick; the rules are in SeismRules.
  */

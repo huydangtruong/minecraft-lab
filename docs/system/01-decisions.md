@@ -155,3 +155,4 @@
 | D151 | Ngọc nội tại khi tắt | Viên ngọc giữ màu khi tắt công tắc (chỉ xám khi chưa học, Lv 0); trạng thái bật/tắt xem ở công tắc. | 2026-11-19 |
 | D152 | Rương Deadly Treasure khi khóa | Rương rỗng khi còn lính canh, đồ chỉ vào rương khi lính cuối cùng chết (phễu/golem/TNT không lấy được gì). Rương bị nổ/mất sẽ tự đặt lại. Mega Enderman không dịch chuyển và không sợ nước/mưa. | 2026-11-19 |
 | D153 | Tỉ lệ linh dược trong rương quà | Thay tỉ lệ của D108: mỗi thẻ (ô) trong rương quà Crimson Master **60% linh dược, 40% đồ**; phần còn lại của D108 giữ nguyên. | 2026-11-20 |
+| D154 | Thời gian vận chiêu Seismic Impact | Tảng đá của Seismic Impact rơi trong **0,5 s** (10 tick) thay vì 0,2 s của D142; trong lúc đó điểm rơi vẫn đi theo tâm ngắm. Phần còn lại của D142 giữ nguyên. | 2026-11-20 |

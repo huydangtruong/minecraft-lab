@@ -67,8 +67,8 @@ public class SeismGameTest {
 		Zombie z = zombie(c, 5.5, 1, 10.5);
 		Cow cow = cow(c, 6.5, 1, 10.5);
 		Seism.impact(p, 1, abs(c, 5.5, 1, 10.5));
-		c.runAfterDelay(3, () -> c.assertTrue(z.getHealth() == 20f, "the boulder is still falling, health " + z.getHealth()));
-		c.runAfterDelay(10, () -> {
+		c.runAfterDelay(8, () -> c.assertTrue(z.getHealth() == 20f, "the boulder is still falling, health " + z.getHealth()));
+		c.runAfterDelay(16, () -> {
 			c.assertTrue(near(z.getHealth(), 10f), "zombie lost 10 HP at Lv 1, health " + z.getHealth());
 			c.assertTrue(cow.getHealth() == 10f, "the cow is not hurt, health " + cow.getHealth());
 			c.assertTrue(p.getHealth() == p.getMaxHealth(), "the caster is not hurt");
