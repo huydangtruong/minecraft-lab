@@ -19,6 +19,7 @@ class TreasureRulesTest {
 			List<RewardOption> loot = TreasureRules.loot(rng);
 			assertEquals("permahearts:enlightenment_bottle", loot.get(0).itemId());
 			assertEquals("minecraft:enchanted_golden_apple", loot.get(1).itemId());
+			assertEquals(2, loot.get(1).count()); // D166
 			assertTrue(loot.size() >= 8 && loot.size() <= 10, "size " + loot.size());
 			assertEquals(loot.size(), new HashSet<>(loot).size(), "no repeats");
 			assertFalse(loot.stream().anyMatch(o -> o.itemId().equals("minecraft:netherite_ingot")));

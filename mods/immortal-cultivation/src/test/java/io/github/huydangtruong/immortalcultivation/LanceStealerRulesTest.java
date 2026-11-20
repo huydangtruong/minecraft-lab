@@ -31,7 +31,8 @@ class LanceStealerRulesTest {
 
 	@Test
 	void stealerTakesPercentOfMaxHealthUpToCap() {
-		assertEquals(4.0, StealerRules.amount(1, 20), 1e-9); // 20% of 20
+		assertEquals(6.0, StealerRules.amount(1, 20), 1e-9); // D164: 30% of 20
+		assertEquals(0.68, StealerRules.pct(20), 1e-9);
 		assertEquals(7.0, StealerRules.amount(1, 200), 1e-9); // capped at 7
 		assertEquals(0.0, StealerRules.amount(1, 0), 1e-9);
 		assertEquals(7 + 3, StealerRules.cap(2), 1e-9);
@@ -53,5 +54,14 @@ class LanceStealerRulesTest {
 		org.junit.jupiter.api.Assertions.assertTrue(LanceRules.breakable(0f));
 		org.junit.jupiter.api.Assertions.assertTrue(LanceRules.breakable(1.5f));
 		org.junit.jupiter.api.Assertions.assertFalse(LanceRules.breakable(-1f));
+	}
+
+	@org.junit.jupiter.api.Test
+	void beamWidthGrowsSmoothlyToTwoAndAHalf() {
+		assertEquals(1f, LanceRules.widthFactor(LanceRules.DURATION_TICKS), 1e-6);
+		assertEquals(1.75f, LanceRules.widthFactor(LanceRules.DURATION_TICKS / 2), 1e-6);
+		assertEquals(2.5f, LanceRules.widthFactor(0), 1e-6);
+		org.junit.jupiter.api.Assertions.assertTrue(LanceRules.widthFactor(100) < LanceRules.widthFactor(99));
+		assertEquals(2.5f, LanceRules.widthFactor(-5), 1e-6);
 	}
 }

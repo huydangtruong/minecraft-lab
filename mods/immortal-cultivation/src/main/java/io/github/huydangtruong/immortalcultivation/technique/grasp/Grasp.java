@@ -683,9 +683,24 @@ public final class Grasp {
 		ServerPlayer o = server.getPlayerList().getPlayer(ga.owner());
 		if (t % 10 == 0 && o != null && o.isAlive() && o.level() == sl && GraspRules.Mode.of(ga.mode()) == GraspRules.Mode.FOLLOW
 			&& m.distanceToSqr(o) > GraspRules.FOLLOW_TELEPORT * GraspRules.FOLLOW_TELEPORT) {
-			Vec3 at = GraspGoals.freeSpotNear(sl, m, o.position().add(m.getRandom().nextDouble() * 3 - 1.5, 0, m.getRandom().nextDouble() * 3 - 1.5));
+			Vec3 at = GraspGoals.freeSpotNear(sl, m, GraspGoals.followSpot(m, o)); // D165: its own spot, not on the owner
 			m.getNavigation().stop();
 			m.snapTo(at.x, at.y, at.z);
+		}
+		if (o != null && o.isAlive() && o.level() == sl && m.getTarget() == null && GraspRules.Mode.of(ga.mode()) == GraspRules.Mode.FOLLOW) {
+			// D165: a follower inside 2 blocks of its owner is gently pushed out, so a crowd never stands on the owner
+			double dx = m.getX() - o.getX(), dz = m.getZ() - o.getZ();
+			double h2 = dx * dx + dz * dz;
+			if (h2 < GraspRules.FOLLOW_KEEP_OUT * GraspRules.FOLLOW_KEEP_OUT && Math.abs(m.getY() - o.getY()) < 2) {
+				double h = Math.sqrt(h2);
+				if (h < 1e-3) {
+					double a = m.getUUID().hashCode() * 2.399963229728653;
+					dx = Math.cos(a);
+					dz = Math.sin(a);
+					h = 1;
+				}
+				m.setDeltaMovement(m.getDeltaMovement().add(dx / h * 0.08, 0, dz / h * 0.08));
+			}
 		}
 		if (t % 5 == 0 && o != null) {
 			AABB box = m.getBoundingBox().inflate(2.5, 1.5, 2.5);

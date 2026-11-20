@@ -363,8 +363,8 @@ public class TechniqueEffectsGameTest {
 		});
 	}
 
-	/** D99: Heaven Blast stuns a mob for 1.0 s at Lv 1: it neither walks towards its target nor hits it, then it moves again. */
-	@GameTest(maxTicks = 140)
+	/** D162: Heaven Blast stuns a mob for 2 s at Lv 1: it neither walks towards its target nor hits it, then it moves again. */
+	@GameTest(maxTicks = 160)
 	public void repulseStunsAMobThenItWalksAgain(GameTestHelper c) {
 		enable(c, true);
 		floor(c);
@@ -377,21 +377,21 @@ public class TechniqueEffectsGameTest {
 			TechniqueCasts.cast(p, Technique.REPULSE, 1, 1f);
 			c.assertTrue(h.hasEffect(Stun.EFFECT), "the husk should be stunned");
 			int ticks = h.getEffect(Stun.EFFECT).getDuration();
-			c.assertTrue(ticks >= 19 && ticks <= 20, "Lv 1 stun is 1 s = 20 ticks, was " + ticks);
+			c.assertTrue(ticks >= 39 && ticks <= 40, "Lv 1 stun is 2 s = 40 ticks, was " + ticks);
 			float health = p.getHealth();
 			c.assertTrue(!h.doHurtTarget(c.getLevel(), p) && p.getHealth() == health, "a stunned husk cannot hit");
 			double[] at12 = new double[1];
 			c.runAfterDelay(12, () -> at12[0] = h.position().distanceTo(p.position()));
-			c.runAfterDelay(19, () -> {
+			c.runAfterDelay(38, () -> {
 				double d = h.position().distanceTo(p.position());
 				c.assertTrue(d >= at12[0] - 0.05, "a stunned husk must not walk towards its target: " + at12[0] + " -> " + d);
 			});
 			double[] at24 = new double[1];
-			c.runAfterDelay(24, () -> {
+			c.runAfterDelay(44, () -> {
 				at24[0] = h.position().distanceTo(p.position());
-				c.assertTrue(!h.hasEffect(Stun.EFFECT), "the stun should be over after 1 s");
+				c.assertTrue(!h.hasEffect(Stun.EFFECT), "the stun should be over after 2 s");
 			});
-			c.runAfterDelay(80, () -> {
+			c.runAfterDelay(100, () -> {
 				double d = h.position().distanceTo(p.position());
 				c.assertTrue(d < at24[0] - 1.0, "after the stun the husk walks to its target again: " + at24[0] + " -> " + d);
 				drop(c, p);
@@ -415,7 +415,7 @@ public class TechniqueEffectsGameTest {
 			Husk h = husk(c, 5.5, 7.5, true);
 			TechniqueCasts.cast(caster, Technique.REPULSE, 20, 1f);
 			int ticks = h.getEffect(Stun.EFFECT).getDuration();
-			c.assertTrue(ticks >= 57 && ticks <= 58, "Lv 20 stun is 2.9 s = 58 ticks, was " + ticks);
+			c.assertTrue(ticks >= 134 && ticks <= 135, "Lv 20 stun is 6.75 s = 135 ticks, was " + ticks);
 			c.assertTrue(!other.hasEffect(Stun.EFFECT), "a player is never stunned");
 			c.succeed();
 		} finally {
@@ -437,7 +437,7 @@ public class TechniqueEffectsGameTest {
 		TechniqueCasts.cast(caster, Technique.REPULSE, 1, 1f);
 		c.assertTrue(b.hasEffect(Stun.EFFECT), "the boss is stunned too");
 		int ticks = b.getEffect(Stun.EFFECT).getDuration();
-		c.assertTrue(ticks == 2, "the boss is stunned for 10% of 20 ticks = 2, was " + ticks);
+		c.assertTrue(ticks == 4, "the boss is stunned for 10% of 40 ticks = 4, was " + ticks);
 		b.discard();
 		c.succeed();
 	}

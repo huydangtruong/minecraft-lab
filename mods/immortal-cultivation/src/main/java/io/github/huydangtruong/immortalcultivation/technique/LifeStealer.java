@@ -28,7 +28,7 @@ import net.minecraft.world.phys.Vec3;
 /** D158, D159 Life Stealer: drains the living entity under the crosshair (16 blocks), heals the caster, leaves it bleeding and slowed. */
 public final class LifeStealer {
 	private static final DustParticleOptions BLOOD = new DustParticleOptions(0xb01010, 1.0f);
-	private static final int STREAM_TICKS = 10; // blood flies for 0.5 s
+	private static final int STREAM_TICKS = 30; // D162: blood flies for 1.5 s (was 0.5 s)
 
 	private static final class Stream {
 		final ServerLevel level;

@@ -59,6 +59,19 @@ public final class ClientLance {
 		return b == null ? -1f : LanceRules.barFraction(b.ticksLeft);
 	}
 
+	/** The local player's beam end point, or null when none runs (for the HUD overlay). */
+	static Vec3 localEnd() {
+		Minecraft mc = Minecraft.getInstance();
+		Beam b = mc.player == null ? null : BEAMS.get(mc.player.getId());
+		return b == null ? null : b.end;
+	}
+
+	static int localTicksLeft() {
+		Minecraft mc = Minecraft.getInstance();
+		Beam b = mc.player == null ? null : BEAMS.get(mc.player.getId());
+		return b == null ? 0 : b.ticksLeft;
+	}
+
 	private static void tick(Minecraft mc) {
 		if (mc.player == null || mc.level == null) {
 			BEAMS.clear();
@@ -92,7 +105,7 @@ public final class ClientLance {
 			if (who == null) {
 				continue;
 			}
-			LightBeam.draw(ctx, LightBeam.chestPos(mc, cam, who, pt), e.getValue().end, 1f, 1.5f, mc.player.tickCount + pt);
+			LightBeam.draw(ctx, LightBeam.chestPos(mc, cam, who, pt), e.getValue().end, 1f, 1.5f * LanceRules.widthFactor(e.getValue().ticksLeft), mc.player.tickCount + pt);
 		}
 	}
 }

@@ -34,6 +34,7 @@ public class ImmortalCultivationClient implements ClientModInitializer {
 		EntityRendererRegistry.register(io.github.huydangtruong.immortalcultivation.technique.warp.WarpPortal.TYPE, WarpPortalRenderer::new);
 		ClientGrasp.register(); // Soul Grasp (P-053)
 		ClientLance.register(); // Solar Lance (P-061)
+		LanceBeamHud.register(); // Solar Lance beam over the HUD (D163)
 		ClientSeism.register(); // Seism camera shake (P-056)
 		net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.registerGlobalReceiver(
 			io.github.huydangtruong.immortalcultivation.admin.AdminNetworking.Open.TYPE,

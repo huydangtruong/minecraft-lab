@@ -126,8 +126,8 @@ public class LanceStealerGameTest {
 		p.setHealth(10f);
 		double speed = z.getAttributeValue(Attributes.MOVEMENT_SPEED);
 		c.assertTrue(LifeStealer.cast(p, 1), "the cast finds the zombie under the crosshair");
-		c.assertTrue(Math.abs(z.getHealth() - 16f) < 0.01f, "20% of 20 health is drained, health " + z.getHealth());
-		c.assertTrue(Math.abs(p.getHealth() - 14f) < 0.01f, "the caster gets it back, health " + p.getHealth());
+		c.assertTrue(Math.abs(z.getHealth() - 14f) < 0.01f, "30% of 20 health is drained, health " + z.getHealth());
+		c.assertTrue(Math.abs(p.getHealth() - 16f) < 0.01f, "the caster gets the 6 back, health " + p.getHealth());
 		c.assertTrue(z.hasEffect(Bleeding.EFFECT), "the target is bleeding");
 		c.assertTrue(z.hasEffect(StealerSlow.EFFECT), "the target is slowed");
 		double slowed = z.getAttributeValue(Attributes.MOVEMENT_SPEED);
@@ -160,7 +160,7 @@ public class LanceStealerGameTest {
 		z.getAttribute(Attributes.MAX_HEALTH).setBaseValue(200);
 		z.setHealth(200f);
 		LifeStealer.cast(p, 1);
-		c.assertTrue(Math.abs(z.getHealth() - 193f) < 0.01f, "20% of 200 is capped at 7, health " + z.getHealth());
+		c.assertTrue(Math.abs(z.getHealth() - 193f) < 0.01f, "30% of 200 is capped at 7, health " + z.getHealth());
 		FlightBladeGameTest.drop(c, p);
 		c.succeed();
 	}

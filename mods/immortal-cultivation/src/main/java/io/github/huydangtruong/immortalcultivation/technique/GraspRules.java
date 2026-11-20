@@ -14,6 +14,10 @@ public final class GraspRules {
 	public static final int NO_SIGHT_TICKS = 20;
 	/** A following mob teleports next to its owner when farther than this (blocks). */
 	public static final double FOLLOW_TELEPORT = 12;
+	/** D165: a following mob keeps its own spot on a ring this far from its owner (blocks), so a crowd never stands on the owner. */
+	public static final double FOLLOW_RING_MIN = 2.5, FOLLOW_RING_MAX = 3.5;
+	/** D165: a follower closer than this to its owner (blocks, flat distance) is pushed out. */
+	public static final double FOLLOW_KEEP_OUT = 2.2;
 	/** Patrol radius of Guard mode (blocks). */
 	public static final double GUARD_RADIUS = 8;
 	/** Radius of Stay mode: it goes back to its post when pulled farther than this. */
@@ -59,6 +63,16 @@ public final class GraspRules {
 	}
 
 	private GraspRules() {}
+
+	/**
+	 * D165: offset {dx, dz} of a following mob's spot around its owner, from a stable per-mob seed (the golden angle spreads
+	 * seeds round the circle; even seeds on the inner ring, odd on the outer one).
+	 */
+	public static double[] followSpot(int seed) {
+		double angle = seed * 2.399963229728653;
+		double r = (seed & 1) == 0 ? FOLLOW_RING_MIN : FOLLOW_RING_MAX;
+		return new double[] {Math.cos(angle) * r, Math.sin(angle) * r};
+	}
 
 	private static int clamp(int level) {
 		return Math.max(1, Math.min(MAX_LEVEL, level));

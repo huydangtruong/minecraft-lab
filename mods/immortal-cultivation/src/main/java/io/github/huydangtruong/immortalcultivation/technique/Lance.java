@@ -106,6 +106,9 @@ public final class Lance {
 		Active a = new Active(p.level(), level);
 		ACTIVE.put(p.getUUID(), a);
 		p.level().playSound(null, p.blockPosition(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.8f, 1.9f);
+		// D163: a harsh searing start
+		p.level().playSound(null, p.blockPosition(), SoundEvents.GUARDIAN_ATTACK, SoundSource.PLAYERS, 1.0f, 1.6f);
+		p.level().playSound(null, p.blockPosition(), SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 1.0f, 0.7f);
 		fire(p, a);
 		return true;
 	}
@@ -225,7 +228,12 @@ public final class Lance {
 				sl.sendParticles(SPARK, c.x, c.y, c.z, 6, e.getBbWidth() * 0.3, e.getBbHeight() * 0.25, e.getBbWidth() * 0.3, 0.1);
 				sl.sendParticles(ParticleTypes.FLAME, c.x, c.y, c.z, 2, e.getBbWidth() * 0.25, e.getBbHeight() * 0.2, e.getBbWidth() * 0.25, 0.04);
 			}
+			// D163: harsher, crackling and sizzling, louder as the beam grows (never above 1.3)
+			float grow = LanceRules.widthFactor(LanceRules.DURATION_TICKS - a.ticks);
 			sl.playSound(null, p.blockPosition(), SoundEvents.BEACON_AMBIENT, SoundSource.PLAYERS, 0.5f, 2f);
+			sl.playSound(null, p.blockPosition(), SoundEvents.FIRE_AMBIENT, SoundSource.PLAYERS, 0.6f * grow, 1.4f);
+			sl.playSound(null, p.blockPosition(), SoundEvents.LAVA_POP, SoundSource.PLAYERS, 0.5f * grow, 0.6f + 0.8f * sl.getRandom().nextFloat());
+			sl.playSound(null, p.blockPosition(), SoundEvents.BLASTFURNACE_FIRE_CRACKLE, SoundSource.PLAYERS, 0.5f * grow, 1.8f);
 		}
 		a.ticks++;
 	}
