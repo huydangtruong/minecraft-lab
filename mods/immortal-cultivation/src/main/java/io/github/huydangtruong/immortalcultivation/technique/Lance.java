@@ -13,6 +13,7 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -62,6 +63,8 @@ public final class Lance {
 		final int techLevel;
 		int ticks;
 		Vec3 end = Vec3.ZERO;
+		BlockPos mining;
+		int mineTicks;
 
 		Active(ServerLevel level, int techLevel) {
 			this.level = level;
@@ -121,6 +124,7 @@ public final class Lance {
 		long now = p.level().getServer().overworld().getGameTime();
 		TechniqueAttachment.set(p, TechniqueAttachment.get(p).withCooldown(Technique.LANCE,
 			now + Passives.cooldown(p, Technique.LANCE.cooldownTicks())));
+		clearCrack(p, a);
 		broadcast(p, new State(p.getId(), false, a.end.x, a.end.y, a.end.z, 0));
 	}
 
@@ -131,12 +135,47 @@ public final class Lance {
 		}
 	}
 
-	/** Where the beam ends: the first block on the look ray, or 256 blocks out. */
-	public static Vec3 beamEnd(ServerPlayer p) {
+	private static BlockHitResult beamHit(ServerPlayer p) {
 		Vec3 eye = p.getEyePosition();
 		Vec3 end = eye.add(p.getViewVector(1f).scale(LanceRules.RANGE));
-		BlockHitResult block = p.level().clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, p));
-		return block.getType() == HitResult.Type.MISS ? end : block.getLocation();
+		return p.level().clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, p));
+	}
+
+	/** Where the beam ends: the first block on the look ray, or 256 blocks out. */
+	public static Vec3 beamEnd(ServerPlayer p) {
+		BlockHitResult block = beamHit(p);
+		return block.getType() == HitResult.Type.MISS ? p.getEyePosition().add(p.getViewVector(1f).scale(LanceRules.RANGE)) : block.getLocation();
+	}
+
+	private static void clearCrack(ServerPlayer p, Active a) {
+		if (a.mining != null) {
+			a.level.destroyBlockProgress(p.getId(), a.mining, -1);
+			a.mining = null;
+		}
+		a.mineTicks = 0;
+	}
+
+	/** D161: the block the beam ends on cracks while the beam rests on it and breaks (dropping items) after 6 ticks. */
+	private static void mine(ServerPlayer p, Active a, BlockHitResult hit) {
+		ServerLevel sl = a.level;
+		if (hit.getType() == HitResult.Type.MISS || !LanceRules.breakable(sl.getBlockState(hit.getBlockPos()).getDestroySpeed(sl, hit.getBlockPos()))) {
+			clearCrack(p, a);
+			return;
+		}
+		BlockPos pos = hit.getBlockPos();
+		if (!pos.equals(a.mining)) {
+			clearCrack(p, a);
+			a.mining = pos;
+		}
+		a.mineTicks++;
+		if (LanceRules.breaksBlock(a.mineTicks)) {
+			sl.destroyBlockProgress(p.getId(), pos, -1);
+			sl.destroyBlock(pos, true, p);
+			a.mining = null;
+			a.mineTicks = 0;
+		} else {
+			sl.destroyBlockProgress(p.getId(), pos, LanceRules.crackStage(a.mineTicks));
+		}
 	}
 
 	private static void tick(MinecraftServer server) {
@@ -169,7 +208,9 @@ public final class Lance {
 	private static void fire(ServerPlayer p, Active a) {
 		ServerLevel sl = a.level;
 		Vec3 eye = p.getEyePosition();
-		a.end = beamEnd(p);
+		BlockHitResult hit = beamHit(p);
+		a.end = hit.getType() == HitResult.Type.MISS ? eye.add(p.getViewVector(1f).scale(LanceRules.RANGE)) : hit.getLocation();
+		mine(p, a, hit);
 		broadcast(p, new State(p.getId(), true, a.end.x, a.end.y, a.end.z, LanceRules.DURATION_TICKS - a.ticks));
 		if (a.ticks % LanceRules.DAMAGE_INTERVAL == 0) {
 			float dmg = (float) LanceRules.damagePerHit(a.techLevel, a.ticks);

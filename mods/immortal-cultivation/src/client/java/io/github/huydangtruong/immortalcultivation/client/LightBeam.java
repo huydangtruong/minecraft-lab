@@ -17,7 +17,13 @@ final class LightBeam {
 		if (who == mc.player && !cam.isDetached()) {
 			var f = cam.forwardVector();
 			var u = cam.upVector();
-			return cam.position().add(f.x() * 0.6 - u.x() * 0.45, f.y() * 0.6 - u.y() * 0.45, f.z() * 0.6 - u.z() * 0.45);
+			// D161: bottom-centre of the screen at the real vertical FOV: down = distance * tan(fov / 2), a little more to sit just below the edge
+			float fov = cam.getFov();
+			if (!(fov > 1f && fov < 170f)) {
+				fov = mc.options.fov().get();
+			}
+			double down = 0.6 * Math.tan(Math.toRadians(fov) / 2) * 1.05;
+			return cam.position().add(f.x() * 0.6 - u.x() * down, f.y() * 0.6 - u.y() * down, f.z() * 0.6 - u.z() * down);
 		}
 		Vec3 base = who.getPosition(pt).add(0, who.getBbHeight() * 0.72, 0);
 		double yaw = Math.toRadians(who.getYRot());

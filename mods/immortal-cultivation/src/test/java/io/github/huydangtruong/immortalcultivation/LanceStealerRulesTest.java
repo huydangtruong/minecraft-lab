@@ -43,4 +43,15 @@ class LanceStealerRulesTest {
 		assertEquals(2, StealerRules.SLOW_SECONDS);
 		assertEquals(0.8, StealerRules.SLOW, 1e-9);
 	}
+
+	@Test
+	void theBeamBreaksABlockAfterSixTicksAndNeverAnUnbreakableOne() { // D161
+		org.junit.jupiter.api.Assertions.assertFalse(LanceRules.breaksBlock(5));
+		org.junit.jupiter.api.Assertions.assertTrue(LanceRules.breaksBlock(6));
+		assertEquals(8, LanceRules.crackStage(5));
+		assertEquals(0, LanceRules.crackStage(0));
+		org.junit.jupiter.api.Assertions.assertTrue(LanceRules.breakable(0f));
+		org.junit.jupiter.api.Assertions.assertTrue(LanceRules.breakable(1.5f));
+		org.junit.jupiter.api.Assertions.assertFalse(LanceRules.breakable(-1f));
+	}
 }
