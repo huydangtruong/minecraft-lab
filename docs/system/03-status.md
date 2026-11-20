@@ -2,7 +2,7 @@
 
 > Tóm tắt cho Huy: file này ghi việc đang làm dở và bước tiếp theo, để một phiên Claude mới đọc là làm tiếp được.
 > Manager cập nhật file này cuối mỗi đợt việc (merge, phát hành, quyết định mới).
-> Snapshot: 2026-11-21, after release 0.34.1.
+> Snapshot: 2026-11-21, after release 0.35.0.
 
 A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [workflow/team.md](../workflow/team.md) → the plan of the work in flight. Do not read the whole repo.
 
@@ -10,7 +10,7 @@ A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [w
 
 | What | Where |
 |---|---|
-| Last release | `immortal-cultivation-v0.34.1` (GitHub Releases on `huydangtruong/minecraft-lab`), `mod_version=0.34.1`. All old tags `permahearts-v*` were renamed to `immortal-cultivation-v*` on 2026-11-17 (D132); the installers still accept both prefixes |
+| Last release | `immortal-cultivation-v0.35.0` (GitHub Releases on `huydangtruong/minecraft-lab`), `mod_version=0.35.0`. All old tags `permahearts-v*` were renamed to `immortal-cultivation-v*` on 2026-11-17 (D132); the installers still accept both prefixes |
 | 0.12.0 contains | Warrior Angel (P-021, D62, D63), Aqua Marine (P-022, P-023, D64, D69), chieftain XP x10 and damage x2 (D65, D66), stronger Strength/Swiftness/Mining elixirs (D67), gold quest 64 (D68) |
 | 0.13.0 contains | Illusion technique (P-024, D71); D72 numbers (Warrior Angel, Cloud Travel, Undying Jutsu, Heaven Blast, Fireball, Frozen Breath); chieftain health 200 and the leader-bonus fix; Strength +2 (D70); "Death Match (PvP)" line |
 | 0.14.0 contains | Illusion work modes and hostile mobs targeting the clones (P-025, D73); Quantum Leap rename (turquoise) and Cosmic Warping portals (P-026, D74, D75); quest reward boxes (P-027, D76); technique slots cost 64, 128, 256, 512 emeralds (D77); clones plant bare farmland and pick up wool near the sheep. Not playtested by hand |
@@ -38,8 +38,9 @@ A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [w
 | 0.33.0 contains | Passives: on/off switch left of "+" instead of clicking the gem; XP gain bonus also on crop harvest XP and clone breeding XP (D148); 6th passive Crop growth, +20%/level on crops the player or their clones plant (P-058, D149); gems keep their colour when switched off (D151); Deadly Treasure event with Mega guards, Crimson base items trimmed (P-059, D150); locked chest empty until opened, restored if destroyed, Mega Endermen do not teleport (D152); reward box cards 60% elixir (D153). Server game tests green (216). Not playtested by hand |
 | 0.33.1 contains | Seismic Impact boulder falls 0.5 s instead of 0.2 s (D154). Server game tests green (216) |
 | 0.34.0 contains | P-060 `/admin` test panel: tabs on the left, command lines on the right, Confirm runs them (D155). P-061 Solar Lance, 19th technique: hold-to-fire laser 256 blocks, damage doubles every 3 s, 12 s max, 45 s cooldown (D157, D159); Life Stealer replaces Life Steal Blade (id `blade`, levels kept): 16-block drain with cap, Bleeding and -80% speed for 2 s, 24 s cooldown (D158, D159); Soul Grasp sky pillar instead of the hand tether (D156). SeismClientTest fixed for D154. Server + client game tests green. Not playtested by hand |
-| 0.34.1 contains | Solar Lance fires from the front of the chest. Test scope checklist per area in team.md, `runGameTest -Pgt` filter. Known gap: `TestModeGameTest` is not listed in the test `fabric.mod.json`, so it never runs |
-| On `main`, not released | P-062 (branch `feat/P-062-admin-player`, not merged): /admin Player tab gets Level field and No cooldown switch (D160, `/technique nocooldown`); `TestModeGameTest` now registered and runs. P-063 (branch `feat/P-063-lance-blocks`, not merged, on top of P-062): Solar Lance beam starts at screen bottom-centre by FOV and breaks blocks, one per 6 ticks (D161) |
+| 0.34.1 contains | Solar Lance fires from the front of the chest. Test scope checklist per area in team.md, `runGameTest -Pgt` filter. |
+| 0.35.0 contains | P-062: /admin Player tab Level field and No cooldown switch (D160, `/technique nocooldown`); `TestModeGameTest` registered and green. P-063: Solar Lance beam starts at screen bottom-centre by FOV and breaks blocks, one per 6 ticks, never unbreakable ones (D161). Area tests green (admin, test_mode, technique_game, lance). Not playtested by hand |
+| On `main`, not released | Nothing |
 
 Release steps: [workflow/release.md](../workflow/release.md). Release **only when Huy says so**.
 
