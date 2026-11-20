@@ -211,21 +211,35 @@ final class GraspGoals {
 		public boolean canUse() {
 			ServerPlayer o = ownerOf(mob);
 			return o != null && modeOf(mob) == GraspRules.Mode.FOLLOW && mob.getTarget() == null && o.level() == mob.level()
-				&& mob.distanceToSqr(o) > 4 * 4;
+				&& (mob.distanceToSqr(o) > 4.5 * 4.5 || mob.distanceToSqr(o) < 2 * 2); // D165: too far, or crowding the owner
 		}
 
 		@Override
 		public boolean canContinueToUse() {
 			ServerPlayer o = ownerOf(mob);
 			return o != null && modeOf(mob) == GraspRules.Mode.FOLLOW && mob.getTarget() == null && o.level() == mob.level()
-				&& mob.distanceToSqr(o) > 2.5 * 2.5;
+				&& mob.position().distanceToSqr(followSpot(mob, o)) > 0.5 * 0.5;
+		}
+
+		private int repath;
+
+		@Override
+		public void start() {
+			repath = 0;
 		}
 
 		@Override
 		public void tick() {
+			// D165: a counter, not tickCount % 8: goals without requiresUpdateEveryTick tick only every other game tick,
+			// so a mob with an odd tick phase never matched % 8 and stood still.
 			ServerPlayer o = ownerOf(mob);
-			if (o != null && mob.tickCount % 8 == 0) {
-				goTo(mob, o.getX(), o.getY(), o.getZ(), 1.2);
+			if (o != null && --repath <= 0) {
+				repath = 4;
+				Vec3 at = followSpot(mob, o);
+				goTo(mob, at.x, at.y, at.z, 1.2);
+				if (mob.getNavigation().isDone()) { // the spot is in the next block: no path, just step there
+					mob.getMoveControl().setWantedPosition(at.x, at.y, at.z, 1.0);
+				}
 			}
 		}
 
@@ -335,6 +349,12 @@ final class GraspGoals {
 		public void stop() {
 			mob.getNavigation().stop();
 		}
+	}
+
+	/** D165: this mob's own spot 2.5 to 3.5 blocks from its owner (stable per mob). */
+	static Vec3 followSpot(Mob mob, net.minecraft.world.entity.Entity owner) {
+		double[] d = GraspRules.followSpot(mob.getUUID().hashCode());
+		return owner.position().add(d[0], 0, d[1]);
 	}
 
 	/** Free spot near a position for a teleport (the same position when nothing nearby is free). */

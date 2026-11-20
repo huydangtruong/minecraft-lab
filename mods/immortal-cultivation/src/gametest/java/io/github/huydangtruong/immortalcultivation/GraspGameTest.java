@@ -108,6 +108,26 @@ public class GraspGameTest {
 		});
 	}
 
+	/** D165 (Huy's bug: 11 followers crowded onto him): following mobs that start on the owner step out to 2 blocks or more. */
+	@GameTest(maxTicks = 140)
+	public void followersKeepTwoBlocksFromTheOwner(GameTestHelper c) {
+		ServerPlayer p = grasper(c, 20);
+		FlightBladeGameTest.place(c, p, 4, 1, 4, -90f, 0f); // middle of the 8x8 test area: spots reach 3.5 out
+		Zombie[] zs = new Zombie[4];
+		for (int i = 0; i < zs.length; i++) {
+			zs[i] = c.spawn(EntityTypes.ZOMBIE, new Vec3(4 + (i % 2 == 0 ? 0.6 : -0.6), 1, 4 + (i < 2 ? 0.6 : -0.6)));
+			Grasp.tame(p, zs[i], 20);
+		}
+		c.runAfterDelay(120, () -> {
+			for (Zombie z : zs) {
+				double d = Math.sqrt(z.distanceToSqr(p.getX(), z.getY(), p.getZ()));
+				c.assertTrue(d >= 1.9, "a follower stands at least 2 blocks from its owner, was " + d);
+			}
+			cleanUp(c, p);
+			c.succeed();
+		});
+	}
+
 	/** Huy's bug: grasped undead burned in the sun (D134 says they never do). A plain zombie next to it must burn. */
 	@GameTest(maxTicks = 100)
 	public void aGraspedZombieDoesNotBurnInTheSun(GameTestHelper c) {

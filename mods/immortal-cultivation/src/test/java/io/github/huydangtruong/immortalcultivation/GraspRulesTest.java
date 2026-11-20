@@ -101,4 +101,15 @@ class GraspRulesTest {
 		assertEquals(120, TechniqueRules.cooldownSeconds(Technique.GRASP, 20));
 		assertEquals("11", TechniqueRules.stats(Technique.GRASP, 20).get(2).value());
 	}
+
+	@Test
+	void followSpotsAreTwoAndAHalfToThreeAndAHalfBlocksOut() { // D165
+		for (int seed : new int[] {0, 1, 7, -3, 123456789, Integer.MIN_VALUE, Integer.MAX_VALUE}) {
+			double[] d = GraspRules.followSpot(seed);
+			double r = Math.hypot(d[0], d[1]);
+			assertTrue(r >= GraspRules.FOLLOW_RING_MIN - 1e-9 && r <= GraspRules.FOLLOW_RING_MAX + 1e-9, "seed " + seed + " r " + r);
+		}
+		double[] a = GraspRules.followSpot(10), b = GraspRules.followSpot(12);
+		assertTrue(Math.hypot(a[0] - b[0], a[1] - b[1]) > 1, "neighbouring seeds get different spots");
+	}
 }
