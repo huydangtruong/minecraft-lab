@@ -2,7 +2,7 @@
 
 > Tóm tắt cho Huy: file này ghi việc đang làm dở và bước tiếp theo, để một phiên Claude mới đọc là làm tiếp được.
 > Manager cập nhật file này cuối mỗi đợt việc (merge, phát hành, quyết định mới).
-> Snapshot: 2026-11-19, after release 0.32.0.
+> Snapshot: 2026-11-20, after release 0.33.0.
 
 A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [workflow/team.md](../workflow/team.md) → the plan of the work in flight. Do not read the whole repo.
 
@@ -10,7 +10,7 @@ A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [w
 
 | What | Where |
 |---|---|
-| Last release | `immortal-cultivation-v0.32.0` (GitHub Releases on `huydangtruong/minecraft-lab`), `mod_version=0.32.0`. All old tags `permahearts-v*` were renamed to `immortal-cultivation-v*` on 2026-11-17 (D132); the installers still accept both prefixes |
+| Last release | `immortal-cultivation-v0.33.0` (GitHub Releases on `huydangtruong/minecraft-lab`), `mod_version=0.33.0`. All old tags `permahearts-v*` were renamed to `immortal-cultivation-v*` on 2026-11-17 (D132); the installers still accept both prefixes |
 | 0.12.0 contains | Warrior Angel (P-021, D62, D63), Aqua Marine (P-022, P-023, D64, D69), chieftain XP x10 and damage x2 (D65, D66), stronger Strength/Swiftness/Mining elixirs (D67), gold quest 64 (D68) |
 | 0.13.0 contains | Illusion technique (P-024, D71); D72 numbers (Warrior Angel, Cloud Travel, Undying Jutsu, Heaven Blast, Fireball, Frozen Breath); chieftain health 200 and the leader-bonus fix; Strength +2 (D70); "Death Match (PvP)" line |
 | 0.14.0 contains | Illusion work modes and hostile mobs targeting the clones (P-025, D73); Quantum Leap rename (turquoise) and Cosmic Warping portals (P-026, D74, D75); quest reward boxes (P-027, D76); technique slots cost 64, 128, 256, 512 emeralds (D77); clones plant bare farmland and pick up wool near the sheep. Not playtested by hand |
@@ -35,12 +35,14 @@ A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [w
 | 0.31.0 contains | P-056 Seism (17th technique: Impact boulder, Wave from Lv 3) and Crystal Prison (18th: crystal cage, disarm) (D142–D146); fixes: clones/guardians/angels ignore the owner's grasped mobs, grasped mobs do not burn in the sun. Server game tests green (201). Not playtested by hand |
 | 0.31.1 contains | Fix: unclaimed reward boxes go into a chest on the ground when the Crimson Master leaves (D147). Server game tests green (202) |
 | 0.32.0 contains | P-057 Passives tab (D148): 5 passives x 10 levels, 5 XP levels per upgrade. Server game tests green (208), client test `PassiveClientTest` green |
-| On `main`, not released | Passives: on/off switch left of "+" instead of clicking the gem; XP gain bonus also on crop harvest XP and clone breeding XP (D148); 6th passive Crop growth, +20%/level on crops the player or their clones plant (P-058, D149); gems keep their colour when switched off (D151); Deadly Treasure event with Mega guards, Crimson base items trimmed (P-059, D150); locked chest empty until opened, restored if destroyed, Mega Endermen do not teleport (D152); reward box cards 60% elixir (D153). Server game tests green (216) |
+| 0.33.0 contains | Passives: on/off switch left of "+" instead of clicking the gem; XP gain bonus also on crop harvest XP and clone breeding XP (D148); 6th passive Crop growth, +20%/level on crops the player or their clones plant (P-058, D149); gems keep their colour when switched off (D151); Deadly Treasure event with Mega guards, Crimson base items trimmed (P-059, D150); locked chest empty until opened, restored if destroyed, Mega Endermen do not teleport (D152); reward box cards 60% elixir (D153). Server game tests green (216). Not playtested by hand |
+| On `main`, not released | Nothing |
 
 Release steps: [workflow/release.md](../workflow/release.md). Release **only when Huy says so**.
 
 ## In flight
 
+- **P-058 Crop growth and P-059 Deadly Treasure released in 0.33.0** (D149–D153), not playtested by hand. Admin command `/treasure status|start|here [group]|lineup <0-3>|giveup`.
 - **P-057 Passives tab released in 0.32.0** (D148): third Cultivation tab; Reduce cooldown, Increase vision (client lightmap, on/off switch left of "+", on main after 0.32.0), Hunger sustain, XP gain bonus (orbs only), Inventory protect (kept slots ride on the dead player to COPY_FROM). Not playtested by hand. Flaky seen once during P-057 runs (all passed on rerun): `danger_game_test_zombie_at_twenty...` (max health 100), `grasp_game_test_a_grasped_zombie_does_not_burn_in_the_sun`, God Slayer hunt flow, golem guardian.
 - **P-056 Seism + Crystal Prison released in 0.31.0** (D142–D146), not playtested by hand. Bosses can be caged; a disarmed Death Match opponent keeps techniques (D146). Client screenshots of the Techniques tab do not show the two new rows (test scroll only).
 - **P-054 Danger level + elites released in 0.30.0** (D137–D139), not released, not playtested. Spawn mixins (cap raise, day spawns) only load-tested: no mob-count measurement at L25. Gamerules `permahearts:danger_level` (on), `permahearts:danger_spawn_ceiling` (4). Gear is armor only; Venomous does nothing to undead; pre-update mobs get the buff on first load. Day events, formation block, other affixes: BL-025..027.
