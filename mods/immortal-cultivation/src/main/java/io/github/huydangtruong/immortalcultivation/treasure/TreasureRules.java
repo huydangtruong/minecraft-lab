@@ -78,7 +78,7 @@ public final class TreasureRules {
 
 	/** Always in the chest. */
 	public static final List<RewardOption> ALWAYS = List.of(
-		new RewardOption("permahearts:enlightenment_bottle", 1), new RewardOption("minecraft:enchanted_golden_apple", 1));
+		new RewardOption("permahearts:enlightenment_bottle", 1), new RewardOption("minecraft:enchanted_golden_apple", 2)); // D166: two apples (was one)
 
 	/** Random part (no netherite ingot, D150). Weights: common 10, rare 4, very rare 1. */
 	public static final List<Loot> POOL = List.of(
@@ -92,7 +92,7 @@ public final class TreasureRules {
 		new Loot(RewardOption.book("minecraft:looting", 3), VERY_RARE), new Loot(RewardOption.book("minecraft:fortune", 3), VERY_RARE),
 		new Loot(RewardOption.book("minecraft:silk_touch", 1), VERY_RARE));
 
-	/** The chest content: the bottle, the apple, then 6..8 different random stacks by weight. */
+	/** The chest content: the bottle, two enchanted golden apples (D166), then 6..8 different random stacks by weight. */
 	public static List<RewardOption> loot(RandomGenerator rng) {
 		List<RewardOption> out = new ArrayList<>(ALWAYS);
 		List<Loot> free = new ArrayList<>(POOL);
