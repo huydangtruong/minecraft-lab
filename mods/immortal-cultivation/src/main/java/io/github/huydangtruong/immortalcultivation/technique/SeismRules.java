@@ -9,8 +9,8 @@ public final class SeismRules {
 	public static final double AIM_RANGE = 48;
 	/** The boulder appears this many blocks above the impact point. */
 	public static final double FALL_HEIGHT = 5;
-	/** Ticks the boulder falls (0.2 s); the impact point follows the crosshair meanwhile. */
-	public static final int FALL_TICKS = 4;
+	/** Ticks the boulder falls (0.5 s, D154); the impact point follows the crosshair meanwhile. */
+	public static final int FALL_TICKS = 10;
 	/** Impact radius in blocks (fixed). */
 	public static final double IMPACT_RADIUS = 3;
 	/** First level with the Wave. */

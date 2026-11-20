@@ -75,7 +75,7 @@ class SeismRulesTest {
 	@Test
 	void constantsAndRegistration() {
 		assertEquals(48, SeismRules.AIM_RANGE);
-		assertEquals(4, SeismRules.FALL_TICKS);
+		assertEquals(10, SeismRules.FALL_TICKS);
 		assertEquals(3, SeismRules.WAVE_RADII[0]);
 		assertEquals(4, SeismRules.WAVE_RADII[1]);
 		assertEquals(5, SeismRules.WAVE_RADII[2]);
@@ -93,8 +93,8 @@ class SeismRulesTest {
 	@Test
 	void boulderGrowsWhileItFalls() {
 		assertEquals(0.25f, SeismRules.boulderScale(SeismRules.fallProgress(0)), 1e-6);
-		assertEquals(1f, SeismRules.boulderScale(SeismRules.fallProgress(4)), 1e-6);
-		assertEquals(1f, SeismRules.boulderScale(SeismRules.fallProgress(9)), 1e-6);
+		assertEquals(1f, SeismRules.boulderScale(SeismRules.fallProgress(10)), 1e-6);
+		assertEquals(1f, SeismRules.boulderScale(SeismRules.fallProgress(15)), 1e-6);
 		assertTrue(SeismRules.knockbackSpeed(2) > 0);
 	}
 
