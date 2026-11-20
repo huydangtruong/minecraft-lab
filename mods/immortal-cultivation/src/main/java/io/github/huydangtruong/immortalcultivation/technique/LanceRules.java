@@ -6,6 +6,7 @@ public final class LanceRules {
 	public static final int DURATION_TICKS = 240; // 12 s at most, a release stops it earlier (D159)
 	public static final int DAMAGE_INTERVAL = 10;
 	public static final int STAGE_TICKS = 60; // damage doubles every 3 s
+	public static final int BREAK_TICKS = 6; // D161: the beam breaks the block it rests on after 0.3 s
 
 	private LanceRules() {}
 
@@ -31,5 +32,20 @@ public final class LanceRules {
 	/** Fraction of the bar left (1 = full, 0 = empty). */
 	public static float barFraction(int ticksLeft) {
 		return Math.max(0f, Math.min(1f, ticksLeft / (float) DURATION_TICKS));
+	}
+
+	/** True when the beam has rested on one block for enough ticks to break it. */
+	public static boolean breaksBlock(int ticksOnBlock) {
+		return ticksOnBlock >= BREAK_TICKS;
+	}
+
+	/** Vanilla crack stage 0..9 for the given ticks on a block. */
+	public static int crackStage(int ticksOnBlock) {
+		return Math.max(0, Math.min(9, ticksOnBlock * 10 / BREAK_TICKS));
+	}
+
+	/** Only blocks that can be mined at all (destroy speed 0 or more) break; bedrock, barriers and the like never do. */
+	public static boolean breakable(float destroySpeed) {
+		return destroySpeed >= 0;
 	}
 }

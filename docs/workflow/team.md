@@ -52,7 +52,7 @@ Chạy `git diff --name-only main...HEAD` (hoặc `git status`). Đánh dấu `[
 | ☐ | Notes | `*NoteRulesTest` | `'*:notes*'` | NotesClientTest |
 | ☐ | Death Match | `*DeathMatchTest` | – | – |
 | ☐ | XP thu hoạch | – | `'*:harvest_xp*'` | – |
-| ☐ | /testmode, /admin | `*TestModeRulesTest`, `*AdminDraftTest` | `'*:admin*'` (TestModeGameTest chưa được khai báo trong `fabric.mod.json` nên chưa bao giờ chạy) | AdminClientTest |
+| ☐ | /testmode, /admin | `*TestModeRulesTest`, `*AdminDraftTest` | `'*:admin*'`, `'*:test_mode*'` | AdminClientTest |
 | ☐ | **Phần chung**: enum `Technique`, `TechniqueNet`, `TechniqueData`, lưu dữ liệu, đổi tên, `build.gradle`, bộ cài | cả bộ | cả bộ | cả bộ |
 
 ### Bước 2: thay đổi thuộc loại nào?

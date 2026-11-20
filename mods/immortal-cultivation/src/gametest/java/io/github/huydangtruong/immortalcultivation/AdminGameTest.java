@@ -50,7 +50,7 @@ public class AdminGameTest {
 		ServerPlayer p = c.makeMockServerPlayerInLevel();
 		var id = p.nameAndId();
 		List<String> lines = List.of(
-			"hearts set @s 10", "hearts xp @s 0", "technique emeralds @s 64", "testmode full", "testmode reset", "technique cooldowns @s clear",
+			"hearts set @s 10", "hearts xp @s 0", "technique emeralds @s 64", "testmode full", "testmode reset", "technique cooldowns @s clear", "experience set @s 30 levels", "technique nocooldown @s true", "technique nocooldown @s false",
 			"technique set @s fire 5", "technique cast fire 1",
 			"quest summon", "quest skip", "quest complete 1", "quest giveup", "quest reset",
 			"boss summon @s", "boss level 3", "boss freeze stand", "boss freeze fly", "boss freeze fly_forward", "boss freeze off", "boss giveup",

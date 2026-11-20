@@ -93,4 +93,14 @@ class AdminDraftTest {
 		d.setText("a\n\n  \n/b\n");
 		assertEquals(List.of("a", "b"), d.lines());
 	}
+
+	@Test
+	void levelAndNoCooldownLinesReplaceByKey() {
+		AdminDraft d = new AdminDraft();
+		d.put("level", "experience set @s 10 levels");
+		d.put("nocooldown", "technique nocooldown @s true");
+		d.put("level", "experience set @s 50 levels");
+		d.put("nocooldown", "technique nocooldown @s false");
+		assertEquals(List.of("experience set @s 50 levels", "technique nocooldown @s false"), d.lines());
+	}
 }

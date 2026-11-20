@@ -18,7 +18,9 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 
 /** P-061: Solar Lance (D157, D159) and Life Stealer (D158, D159) on the server. The caster looks along +Z from (5.5, 1, 0.5). */
@@ -169,5 +171,34 @@ public class LanceStealerGameTest {
 		c.assertTrue(!LifeStealer.cast(p, 1), "nothing under the crosshair: the cast fails");
 		FlightBladeGameTest.drop(c, p);
 		c.succeed();
+	}
+
+	@GameTest(maxTicks = 40) // D161
+	public void theBeamBreaksAStoneBlockAfterAboutSixTicks(GameTestHelper c) {
+		ServerPlayer p = caster(c, Technique.LANCE);
+		BlockPos stone = new BlockPos(5, 2, 3); // on the eye-height line of the caster
+		c.setBlock(stone, Blocks.STONE);
+		Lance.cast(p, 1);
+		c.runAfterDelay(3, () -> c.assertTrue(c.getBlockState(stone).is(Blocks.STONE), "still standing after 3 ticks"));
+		c.runAfterDelay(14, () -> {
+			c.assertTrue(c.getBlockState(stone).isAir(), "the stone is broken after about 6 ticks");
+			Lance.release(p);
+			FlightBladeGameTest.drop(c, p);
+			c.succeed();
+		});
+	}
+
+	@GameTest(maxTicks = 40) // D161
+	public void theBeamNeverBreaksBedrock(GameTestHelper c) {
+		ServerPlayer p = caster(c, Technique.LANCE);
+		BlockPos rock = new BlockPos(5, 2, 3);
+		c.setBlock(rock, Blocks.BEDROCK);
+		Lance.cast(p, 1);
+		c.runAfterDelay(25, () -> {
+			c.assertTrue(c.getBlockState(rock).is(Blocks.BEDROCK), "bedrock stays");
+			Lance.release(p);
+			FlightBladeGameTest.drop(c, p);
+			c.succeed();
+		});
 	}
 }

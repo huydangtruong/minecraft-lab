@@ -39,7 +39,7 @@ A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [w
 | 0.33.1 contains | Seismic Impact boulder falls 0.5 s instead of 0.2 s (D154). Server game tests green (216) |
 | 0.34.0 contains | P-060 `/admin` test panel: tabs on the left, command lines on the right, Confirm runs them (D155). P-061 Solar Lance, 19th technique: hold-to-fire laser 256 blocks, damage doubles every 3 s, 12 s max, 45 s cooldown (D157, D159); Life Stealer replaces Life Steal Blade (id `blade`, levels kept): 16-block drain with cap, Bleeding and -80% speed for 2 s, 24 s cooldown (D158, D159); Soul Grasp sky pillar instead of the hand tether (D156). SeismClientTest fixed for D154. Server + client game tests green. Not playtested by hand |
 | 0.34.1 contains | Solar Lance fires from the front of the chest. Test scope checklist per area in team.md, `runGameTest -Pgt` filter. Known gap: `TestModeGameTest` is not listed in the test `fabric.mod.json`, so it never runs |
-| On `main`, not released | Nothing |
+| On `main`, not released | P-062 (branch `feat/P-062-admin-player`, not merged): /admin Player tab gets Level field and No cooldown switch (D160, `/technique nocooldown`); `TestModeGameTest` now registered and runs. P-063 (branch `feat/P-063-lance-blocks`, not merged, on top of P-062): Solar Lance beam starts at screen bottom-centre by FOV and breaks blocks, one per 6 ticks (D161) |
 
 Release steps: [workflow/release.md](../workflow/release.md). Release **only when Huy says so**.
 

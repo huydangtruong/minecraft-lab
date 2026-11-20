@@ -15,18 +15,20 @@ import java.util.Map;
  * @param emeralds      emeralds deposited toward the slots, 0..MAX_EMERALDS
  * @param slots         4 entries, technique id or "" for an empty slot
  * @param cooldownUntil technique id to the overworld game time (ticks) at which it is ready again
+ * @param noCooldown    D160 admin switch: no cooldown is ever stored and none counts (saved with the player)
  */
 public record TechniqueData(Map<String, Integer> levels, Map<String, Integer> spentPoints, int emeralds,
-	List<String> slots, Map<String, Long> cooldownUntil) {
+	List<String> slots, Map<String, Long> cooldownUntil, boolean noCooldown) {
 
-	public static final TechniqueData DEFAULT = new TechniqueData(Map.of(), Map.of(), 0, emptySlots(), Map.of());
+	public static final TechniqueData DEFAULT = new TechniqueData(Map.of(), Map.of(), 0, emptySlots(), Map.of(), false);
 
 	public static final Codec<TechniqueData> CODEC = RecordCodecBuilder.create(i -> i.group(
 		Codec.unboundedMap(Codec.STRING, Codec.INT).optionalFieldOf("levels", Map.of()).forGetter(TechniqueData::levels),
 		Codec.unboundedMap(Codec.STRING, Codec.INT).optionalFieldOf("spent_points", Map.of()).forGetter(TechniqueData::spentPoints),
 		Codec.INT.optionalFieldOf("emeralds", 0).forGetter(TechniqueData::emeralds),
 		Codec.STRING.listOf().optionalFieldOf("slots", emptySlots()).forGetter(TechniqueData::slots),
-		Codec.unboundedMap(Codec.STRING, Codec.LONG).optionalFieldOf("cooldown_until", Map.of()).forGetter(TechniqueData::cooldownUntil)
+		Codec.unboundedMap(Codec.STRING, Codec.LONG).optionalFieldOf("cooldown_until", Map.of()).forGetter(TechniqueData::cooldownUntil),
+		Codec.BOOL.optionalFieldOf("no_cooldown", false).forGetter(TechniqueData::noCooldown)
 	).apply(i, TechniqueData::new));
 
 	/** Normalises: slots always has exactly 4 entries, maps are copied (the record is immutable). */
@@ -78,12 +80,12 @@ public record TechniqueData(Map<String, Integer> levels, Map<String, Integer> sp
 	}
 
 	public boolean onCooldown(Technique t, long now) {
-		return cooldownEnd(t) > now;
+		return !noCooldown && cooldownEnd(t) > now;
 	}
 
 	/** Ticks left (0 when ready). */
 	public long cooldownLeft(Technique t, long now) {
-		return Math.max(0, cooldownEnd(t) - now);
+		return noCooldown ? 0 : Math.max(0, cooldownEnd(t) - now);
 	}
 
 	/** True when the technique in this slot is on cooldown (an empty slot never is). */
@@ -104,11 +106,11 @@ public record TechniqueData(Map<String, Integer> levels, Map<String, Integer> sp
 			l.put(t.id(), Math.min(TechniqueRules.MAX_LEVEL, level));
 			s.put(t.id(), Math.max(0, spent));
 		}
-		return new TechniqueData(l, s, emeralds, slots, cooldownUntil);
+		return new TechniqueData(l, s, emeralds, slots, cooldownUntil, noCooldown);
 	}
 
 	public TechniqueData withEmeralds(int n) {
-		return new TechniqueData(levels, spentPoints, n, slots, cooldownUntil);
+		return new TechniqueData(levels, spentPoints, n, slots, cooldownUntil, noCooldown);
 	}
 
 	/** Puts the technique in the slot (an empty id clears it). A technique sits in at most one slot, so it leaves any other. */
@@ -122,23 +124,32 @@ public record TechniqueData(Map<String, Integer> levels, Map<String, Integer> sp
 			}
 		}
 		s.set(slot, t == null ? "" : t.id());
-		return new TechniqueData(levels, spentPoints, emeralds, s, cooldownUntil);
+		return new TechniqueData(levels, spentPoints, emeralds, s, cooldownUntil, noCooldown);
 	}
 
 	public TechniqueData withoutFromSlots(Technique t) {
 		List<String> s = new ArrayList<>(slots);
 		s.replaceAll(id -> id.equals(t.id()) ? "" : id);
-		return new TechniqueData(levels, spentPoints, emeralds, s, cooldownUntil);
+		return new TechniqueData(levels, spentPoints, emeralds, s, cooldownUntil, noCooldown);
 	}
 
+	/** Starts a cooldown. With the no-cooldown switch on nothing is stored (the one place every technique's cooldown goes through). */
 	public TechniqueData withCooldown(Technique t, long untilTick) {
+		if (noCooldown) {
+			return this;
+		}
 		Map<String, Long> c = new HashMap<>(cooldownUntil);
 		c.put(t.id(), untilTick);
-		return new TechniqueData(levels, spentPoints, emeralds, slots, c);
+		return new TechniqueData(levels, spentPoints, emeralds, slots, c, noCooldown);
+	}
+
+	/** Turns the no-cooldown switch on or off. Turning it on also drops the cooldowns still running. */
+	public TechniqueData withNoCooldown(boolean on) {
+		return new TechniqueData(levels, spentPoints, emeralds, slots, on ? Map.of() : cooldownUntil, on);
 	}
 
 	public TechniqueData withoutCooldowns() {
-		return new TechniqueData(levels, spentPoints, emeralds, slots, Map.of());
+		return new TechniqueData(levels, spentPoints, emeralds, slots, Map.of(), noCooldown);
 	}
 
 	/** Which slots hold a technique (for the skill key cycle). */

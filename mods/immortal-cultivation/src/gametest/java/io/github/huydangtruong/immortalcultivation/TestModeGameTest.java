@@ -78,7 +78,7 @@ public class TestModeGameTest {
 		c.assertTrue(p.getMaxHealth() == 100f, "max health 100, was " + p.getMaxHealth());
 		CultivationData cd = HeartsAttachment.getCultivation(p);
 		for (ElixirStat s : ElixirStat.values()) {
-			int want = s == ElixirStat.STRENGTH ? 13 : 10; // strength had 3 before
+			int want = (s == ElixirStat.STRENGTH ? 3 : 0) + 2 * TestModeRules.ELIXIRS_EACH; // strength had 3 before; each full adds 10 (two fulls)
 			c.assertTrue(cd.level(s) == want, s.id() + " level " + cd.level(s) + ", want " + want);
 		}
 
