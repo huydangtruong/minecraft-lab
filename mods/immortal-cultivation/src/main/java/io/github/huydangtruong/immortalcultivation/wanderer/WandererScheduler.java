@@ -60,6 +60,8 @@ public final class WandererScheduler {
 			case WAITING -> {
 				if (d.nextDay() < 0) {
 					Wanderer.save(server, d.withNextDay(day + QuestGenerator.daysUntilNext(RNG)));
+				} else if (day >= d.nextDay() && io.github.huydangtruong.immortalcultivation.treasure.DeadlyTreasure.takesCrimsonSlot(server)) {
+					Wanderer.save(server, d.withNextDay(day + QuestGenerator.daysUntilNext(RNG))); // D172: this visit is the treasure's
 				} else if (day >= d.nextDay()) {
 					List<ServerPlayer> players = overworld.players();
 					if (!players.isEmpty()) {

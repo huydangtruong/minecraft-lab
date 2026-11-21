@@ -98,14 +98,19 @@ public final class DeadlyTreasure {
 		return d.phase == TreasureRules.Phase.ACTIVE && d.placed && d.chest == pos.asLong() && !d.guards.isEmpty();
 	}
 
-	/** The Crimson Master or the God Slayer left: the treasure comes 2 days later (if nothing is pending or running). */
-	public static void onEventLeft(MinecraftServer server) {
+	/** D172: the Crimson Master left, so the treasure takes its next visit day (if nothing is pending or running). */
+	public static void onCrimsonMasterLeft(MinecraftServer server) {
 		TreasureSavedData d = data(server);
 		if (d.phase == TreasureRules.Phase.IDLE) {
-			d.startAt = TreasureRules.scheduleAt(d.phase, d.startAt, Wanderer.clockTime(server));
+			d.startAt = TreasureRules.slotStart(Wanderer.data(server).nextDay());
 			d.phase = TreasureRules.Phase.PENDING;
 			d.setDirty();
 		}
+	}
+
+	/** D172: the Crimson Master skips its visit day while the treasure waits for it or runs. */
+	public static boolean takesCrimsonSlot(MinecraftServer server) {
+		return TreasureRules.crimsonSkips(data(server).phase);
 	}
 
 	// ---- life cycle ----

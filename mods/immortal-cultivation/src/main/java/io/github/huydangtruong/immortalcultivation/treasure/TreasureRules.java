@@ -9,8 +9,6 @@ import java.util.random.RandomGenerator;
 public final class TreasureRules {
 	private TreasureRules() {}
 
-	/** 2 Minecraft days after the Crimson Master or the God Slayer left. */
-	public static final long DELAY_TICKS = 2 * 24000L;
 	/** The event lasts 1 Minecraft day from the announcement. */
 	public static final long DURATION_TICKS = 24000L;
 	/** Horizontal distance from the chosen player. */
@@ -24,8 +22,8 @@ public final class TreasureRules {
 	/** Mega look: 1.3x bigger, half knockback. */
 	public static final double SCALE = 1.3;
 	public static final double KNOCKBACK_RESISTANCE = 0.5;
-	/** At least this many random stacks, up to MAX_RANDOM, besides the bottle and the apple. */
-	public static final int MIN_RANDOM = 6;
+	/** Random stacks besides the bottle, the apples and the carrots: always 8 (D172, was 6..8). */
+	public static final int MIN_RANDOM = 8;
 	public static final int MAX_RANDOM = 8;
 
 	/** entity: minecraft id; species: glow texture name; mult: health and damage multiplier. */
@@ -78,7 +76,8 @@ public final class TreasureRules {
 
 	/** Always in the chest. */
 	public static final List<RewardOption> ALWAYS = List.of(
-		new RewardOption("permahearts:enlightenment_bottle", 1), new RewardOption("minecraft:enchanted_golden_apple", 2)); // D166: two apples (was one)
+		new RewardOption("permahearts:enlightenment_bottle", 1), new RewardOption("minecraft:enchanted_golden_apple", 2), // D166: two apples (was one)
+		new RewardOption("minecraft:golden_carrot", 32)); // D172
 
 	/** Random part (no netherite ingot, D150). Weights: common 10, rare 4, very rare 1. */
 	public static final List<Loot> POOL = List.of(
@@ -92,7 +91,7 @@ public final class TreasureRules {
 		new Loot(RewardOption.book("minecraft:looting", 3), VERY_RARE), new Loot(RewardOption.book("minecraft:fortune", 3), VERY_RARE),
 		new Loot(RewardOption.book("minecraft:silk_touch", 1), VERY_RARE));
 
-	/** The chest content: the bottle, two enchanted golden apples (D166), then 6..8 different random stacks by weight. */
+	/** The chest content: the bottle, two enchanted golden apples (D166), 32 golden carrots, then 8 different random stacks by weight (D172). */
 	public static List<RewardOption> loot(RandomGenerator rng) {
 		List<RewardOption> out = new ArrayList<>(ALWAYS);
 		List<Loot> free = new ArrayList<>(POOL);
@@ -114,8 +113,16 @@ public final class TreasureRules {
 	/** Phase of the event. */
 	public enum Phase { IDLE, PENDING, ACTIVE }
 
-	/** What a trigger (Crimson Master or God Slayer left) does: schedule only when nothing is pending or running. */
-	public static long scheduleAt(Phase phase, long currentStart, long now) {
-		return phase == Phase.IDLE ? now + DELAY_TICKS : currentStart;
+	/**
+	 * D172: the treasure takes every other Crimson Master visit. When the Crimson Master leaves, the treasure waits for
+	 * the next visit day (nextDay) and starts at its beginning, like the Crimson Master would.
+	 */
+	public static long slotStart(long nextDay) {
+		return nextDay * 24000L;
+	}
+
+	/** D172: on its visit day the Crimson Master stays away while the treasure waits for that day or runs. */
+	public static boolean crimsonSkips(Phase phase) {
+		return phase != Phase.IDLE;
 	}
 }

@@ -330,7 +330,7 @@ public final class Wanderer {
 		server.getPlayerList().broadcastSystemMessage(Messages.farewell(), false);
 		giftLevels(server, completed);
 		io.github.huydangtruong.immortalcultivation.danger.Danger.onWandererLeft(server); // P-054: +1 danger level in 4800 ticks
-		io.github.huydangtruong.immortalcultivation.treasure.DeadlyTreasure.onEventLeft(server); // P-059
+		io.github.huydangtruong.immortalcultivation.treasure.DeadlyTreasure.onCrimsonMasterLeft(server); // P-059, D172: the treasure takes the next visit
 	}
 
 	// ---- leaving: give up and the end of the 2-day stay ----
@@ -374,7 +374,7 @@ public final class Wanderer {
 		server.getPlayerList().broadcastSystemMessage(message, false);
 		giftLevels(server, completed);
 		io.github.huydangtruong.immortalcultivation.danger.Danger.onWandererLeft(server); // P-054: +1 danger level in 4800 ticks
-		io.github.huydangtruong.immortalcultivation.treasure.DeadlyTreasure.onEventLeft(server); // P-059
+		io.github.huydangtruong.immortalcultivation.treasure.DeadlyTreasure.onCrimsonMasterLeft(server); // P-059, D172: the treasure takes the next visit
 	}
 
 	/**
