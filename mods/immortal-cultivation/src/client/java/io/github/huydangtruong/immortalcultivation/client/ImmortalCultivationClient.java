@@ -33,6 +33,7 @@ public class ImmortalCultivationClient implements ClientModInitializer {
 		// Cosmic Warping (P-026, D75)
 		EntityRendererRegistry.register(io.github.huydangtruong.immortalcultivation.technique.warp.WarpPortal.TYPE, WarpPortalRenderer::new);
 		ClientGrasp.register(); // Soul Grasp (P-053)
+		ClientMayhem.register(); // Crystal Mayhem HUD (P-064)
 		ClientLance.register(); // Solar Lance (P-061)
 		LanceBeamHud.register(); // Solar Lance beam over the HUD (D163)
 		ClientSeism.register(); // Seism camera shake (P-056)

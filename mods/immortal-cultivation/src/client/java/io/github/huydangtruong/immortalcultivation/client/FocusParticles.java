@@ -121,6 +121,12 @@ final class FocusParticles {
 					level.addParticle(ParticleTypes.END_ROD, x, y, z, (rnd.nextDouble() - 0.5) * 0.03, 0.02, (rnd.nextDouble() - 0.5) * 0.03);
 				}
 			}
+			case MAYHEM -> {
+				level.addParticle(new DustParticleOptions(0xB06CFF, 0.8f), x, y, z, 0, 0.01, 0);
+				if (rnd.nextInt(3) == 0) {
+					level.addParticle(ParticleTypes.END_ROD, x, y, z, (rnd.nextDouble() - 0.5) * 0.03, 0.02, (rnd.nextDouble() - 0.5) * 0.03);
+				}
+			}
 			case BLADE -> {
 				level.addParticle(DROP, x, y - 0.1, z, 0, -0.05, 0);
 				if (rnd.nextInt(2) == 0) {

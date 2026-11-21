@@ -122,6 +122,9 @@ public final class TechniqueNet {
 			return null;
 		}
 		long now = p.level().getServer().overworld().getGameTime();
+		if (t == Technique.MAYHEM) {
+			return Mayhem.input(p, level, charge); // D174: shards and the 30 s cooldown are handled by Mayhem itself
+		}
 		if (d.onCooldown(t, now)) {
 			return "On cooldown: " + (d.cooldownLeft(t, now) + 19) / 20 + " s";
 		}

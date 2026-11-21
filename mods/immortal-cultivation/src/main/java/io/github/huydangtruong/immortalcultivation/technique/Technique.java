@@ -10,6 +10,7 @@ public enum Technique {
 	SEISM("seism", "Seism", 28, true), // D142: tap = boulder where you aim, hold 1 s (Lv 3+) = three quake waves around you
 	LANCE("lance", "Solar Lance", 45, false), // D157, D159: a beam from the hand for up to 12 s while the button is held; the 45 s cooldown starts when it stops
 	BLADE("blade", "Life Stealer", 24, false), // D158: was Life Steal Blade (id kept so saved levels and slots carry over)
+	MAYHEM("mayhem", "Crystal Mayhem", 30, true), // D174: left click = amethyst shards (stronger in light), hold right click 1 s = budding amethyst that lights, slows and burns for 20 s
 	ICE("ice", "Frozen Breath", 18, true), // D80: was 24 s
 	REPULSE("repulse", "Heaven Blast", 20, false),
 	HEALING("healing", "Healing Domain", 40, false), // D80: was Healing Light, 60 s
