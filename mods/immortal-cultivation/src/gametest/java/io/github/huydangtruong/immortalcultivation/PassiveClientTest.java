@@ -49,7 +49,7 @@ public class PassiveClientTest implements FabricClientGameTest {
 				PassiveAttachment.set(p, PassiveData.DEFAULT.withLevel(Passive.COOLDOWN, 4).withLevel(Passive.VISION, 10)
 					.withLevel(Passive.HUNGER, 2).withLevel(Passive.INVENTORY, 7).withLevel(Passive.GUARD, 4));
 				var broken = new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DIAMOND_PICKAXE);
-				io.github.huydangtruong.immortalcultivation.passive.ItemGuard.breakGuarded(broken, 4);
+				io.github.huydangtruong.immortalcultivation.passive.ItemGuard.breakGuarded(broken, 4, broken.getMaxDamage() * 2); // worn to the Lv 4 cap (D179)
 				p.getInventory().setItem(0, broken);
 			});
 			context.waitTicks(30);

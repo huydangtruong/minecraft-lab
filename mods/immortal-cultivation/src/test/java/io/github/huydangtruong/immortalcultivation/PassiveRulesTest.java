@@ -105,11 +105,20 @@ class PassiveRulesTest {
 		assertEquals(1561, PassiveRules.debt(1, 1561)); // diamond pickaxe
 		assertEquals(937, PassiveRules.debt(5, 1561)); // 60%, rounded up
 		assertEquals(157, PassiveRules.debt(10, 1561)); // 156.1 rounded up
-		assertEquals("debt 70%", PassiveRules.value(Passive.GUARD, 4));
-		assertEquals("Item guard debt 10%", PassiveRules.title(Passive.GUARD, 10));
+		assertEquals("max debt 70%", PassiveRules.value(Passive.GUARD, 4));
+		assertEquals("Item guard max debt 10%", PassiveRules.title(Passive.GUARD, 10));
 		assertEquals("item_guard", Passive.GUARD.id());
 		assertEquals(true, Passive.GUARD.toggleable());
 		assertEquals(false, PassiveData.DEFAULT.withOn(Passive.GUARD, false).isOn(Passive.GUARD));
+	}
+
+	@Test
+	void itemGuardDebtGrowsWithWearUpToTheCap() { // D179
+		assertEquals(0, ItemGuardRules.grow(0, 0, 157)); // just broke: no debt
+		assertEquals(5, ItemGuardRules.grow(0, 5, 157));
+		assertEquals(157, ItemGuardRules.grow(150, 20, 157)); // capped
+		assertEquals(157, ItemGuardRules.grow(157, 1, 157));
+		assertEquals(900, ItemGuardRules.grow(900, 10, 157)); // above a lower cap (level went up): stays, never grows
 	}
 
 	@Test

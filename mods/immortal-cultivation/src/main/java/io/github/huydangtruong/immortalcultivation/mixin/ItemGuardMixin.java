@@ -25,8 +25,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * D176 Item guard. A stack that would break (damage reaches max) under a player with the passive stays, at full damage,
- * with a debt component. While the component is there the stack is dead weight: an empty hand for mining and attacking,
+ * D176/D179 Item guard. A stack that would break (damage reaches max) under a player with the passive stays, at full damage,
+ * with a debt component that starts at 0 and grows with further wear up to the cap of the passive level. While the component is there the stack is dead weight: an empty hand for mining and attacking,
  * no use, no attribute modifiers (armor, weapon), no enchantment effects (see EnchantmentGuardMixin). Elytra cannot glide
  * on its own because vanilla refuses gliding at damage >= max - 1. Repair (setDamageValue going down) pays the debt first.
  */
@@ -36,13 +36,17 @@ abstract class ItemGuardMixin {
 	private void permahearts$guardBreak(int newDamage, ServerPlayer player, Consumer<ItemStack> onBreak, CallbackInfo ci) {
 		ItemStack self = (ItemStack) (Object) this;
 		if (ItemGuard.isBroken(self)) {
-			ci.cancel(); // already broken: nothing more to lose
+			int level = player == null ? 0 : ItemGuard.level(player);
+			if (level >= 1) {
+				ItemGuard.wearBroken(self, level, newDamage); // D179: the debt grows up to the cap
+			}
+			ci.cancel(); // never destroyed once broken
 			return;
 		}
 		if (player != null && newDamage >= self.getMaxDamage()) {
 			int level = ItemGuard.level(player);
 			if (level >= 1) {
-				ItemGuard.breakGuarded(self, level);
+				ItemGuard.breakGuarded(self, level, newDamage);
 				ci.cancel();
 			}
 		}

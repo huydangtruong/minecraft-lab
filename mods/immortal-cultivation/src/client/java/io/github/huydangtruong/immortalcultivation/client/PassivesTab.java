@@ -175,7 +175,7 @@ public final class PassivesTab {
 			case XP -> "More experience from every XP orb you pick up.";
 			case GROWTH -> "Crops you or your clones plant grow faster (wheat, carrots, potatoes, beetroots, nether wart, cocoa, pumpkin and melon stems) while their area is loaded. Use the switch next to + to turn it on or off.";
 			case INVENTORY -> "Items in these slots stay with you when you die, also in Death Match. Curse of Vanishing still destroys them; XP still drops.";
-			case GUARD -> "Gear that would break turns broken instead: useless until repaired. Repair pays a debt first (100% of its durability at Lv 1, 10% at Lv 10). Anvil or Mending. Switch next to + turns it on or off.";
+			case GUARD -> "Gear at 0 durability is never destroyed: it stops working until repaired. More wear builds a debt, at most 100% of its durability at Lv 1, 10% at Lv 10. Repair (anvil or Mending) pays the debt first. Switch next to + turns it on or off.";
 		};
 	}
 

@@ -48,11 +48,20 @@ public final class ItemGuard {
 		return PassiveAttachment.get(p).activeLevel(Passive.GUARD);
 	}
 
-	/** Makes a stack that would break broken instead: full damage plus the debt (rounded up from the max). */
-	public static void breakGuarded(ItemStack s, int level) {
+	/**
+	 * D179: makes a stack that would break broken instead, at full damage. The debt starts at 0; wear past the last
+	 * durability point (newDamage above the max) already counts, up to the cap of the level.
+	 */
+	public static void breakGuarded(ItemStack s, int level, int newDamage) {
 		int max = s.getMaxDamage();
 		s.set(DataComponents.DAMAGE, max);
-		s.set(DEBT, PassiveRules.debt(level, max));
+		s.set(DEBT, ItemGuardRules.grow(0, newDamage - max, PassiveRules.debt(level, max)));
+	}
+
+	/** D179: wear on a stack that is already broken grows its debt, up to the cap of the player's level now. */
+	public static void wearBroken(ItemStack s, int level, int newDamage) {
+		int max = s.getMaxDamage();
+		s.set(DEBT, ItemGuardRules.grow(debt(s), newDamage - max, PassiveRules.debt(level, max)));
 	}
 
 	/** Called when damage of a broken stack goes down (Mending, anvil, ...): pays the debt first. Returns true when handled. */

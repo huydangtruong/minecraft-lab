@@ -51,33 +51,43 @@ public class ItemGuardGameTest {
 		return broke.get();
 	}
 
+	/** Broken, then worn until the debt reaches the cap of the player's level (D179). */
 	private static ItemStack broken(ServerPlayer p, Item item) {
 		ItemStack s = nearlyBroken(item);
 		wear(p, s);
+		wearMore(p, s, 100_000);
 		return s;
 	}
 
+	private static void wearMore(ServerPlayer p, ItemStack s, int amount) {
+		s.hurtAndBreak(amount, p.level(), p, x -> {});
+	}
+
 	@GameTest(maxTicks = 100)
-	public void itemGuardLevelOneKeepsPickaxeWithFullDebt(GameTestHelper c) {
+	public void itemGuardLevelOneDebtGrowsFromZeroToFull(GameTestHelper c) {
 		ServerPlayer p = player(c, 1);
 		ItemStack s = nearlyBroken(Items.DIAMOND_PICKAXE);
 		int callbacks = wear(p, s);
 		c.assertTrue(callbacks == 0 && s.getCount() == 1, "the pickaxe must not break");
 		c.assertTrue(s.getDamageValue() == 1561 && ItemGuard.isBroken(s), "full damage and broken");
-		c.assertTrue(ItemGuard.debt(s) == 1561, "Lv 1 debt is 100% = 1561, was " + ItemGuard.debt(s));
-		wear(p, s);
-		c.assertTrue(ItemGuard.debt(s) == 1561 && s.getDamageValue() == 1561, "a broken item takes no more damage");
+		c.assertTrue(ItemGuard.debt(s) == 0, "D179: no debt when it just reaches 0, was " + ItemGuard.debt(s));
+		c.assertTrue(wear(p, s) == 0 && ItemGuard.debt(s) == 1, "more wear builds debt: 1, was " + ItemGuard.debt(s));
+		wearMore(p, s, 500);
+		c.assertTrue(ItemGuard.debt(s) == 501 && s.getDamageValue() == 1561, "debt 501 at full damage, was " + ItemGuard.debt(s));
+		wearMore(p, s, 5000);
+		c.assertTrue(ItemGuard.debt(s) == 1561 && s.getCount() == 1, "Lv 1 cap 100% = 1561, never destroyed, was " + ItemGuard.debt(s));
 		FlightBladeGameTest.drop(c, p);
 		c.succeed();
 	}
 
 	@GameTest(maxTicks = 100)
-	public void itemGuardLevelTenDebtIsTenPercent(GameTestHelper c) {
+	public void itemGuardLevelTenDebtCapIsTenPercent(GameTestHelper c) {
 		ServerPlayer p = player(c, 10);
 		ItemStack s = broken(p, Items.DIAMOND_PICKAXE);
-		c.assertTrue(ItemGuard.debt(s) == 157, "Lv 10 debt 10% rounded up = 157, was " + ItemGuard.debt(s));
-		PassiveAttachment.set(p, PassiveAttachment.get(p).withLevel(Passive.GUARD, 1));
-		c.assertTrue(ItemGuard.debt(s) == 157, "the debt is fixed when it breaks");
+		c.assertTrue(ItemGuard.debt(s) == 157, "Lv 10 debt cap 10% rounded up = 157, was " + ItemGuard.debt(s));
+		PassiveAttachment.set(p, PassiveAttachment.get(p).withOn(Passive.GUARD, false));
+		wearMore(p, s, 50);
+		c.assertTrue(ItemGuard.debt(s) == 157 && s.getCount() == 1, "switched off: a broken item gains no debt and is not destroyed");
 		FlightBladeGameTest.drop(c, p);
 		c.succeed();
 	}
@@ -212,7 +222,8 @@ public class ItemGuardGameTest {
 		var enchants = c.getLevel().registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
 		s.enchant(enchants.getOrThrow(Enchantments.MENDING), 1);
 		wear(p, s);
-		c.assertTrue(ItemGuard.isBroken(s) && ItemGuard.debt(s) == 157, "broke with 157 debt");
+		wearMore(p, s, 100_000);
+		c.assertTrue(ItemGuard.isBroken(s) && ItemGuard.debt(s) == 157, "broke and wore to the 157 cap");
 		p.setItemInHand(InteractionHand.MAIN_HAND, s);
 		ExperienceOrb orb = new ExperienceOrb(c.getLevel(), p.getX(), p.getY(), p.getZ(), 100);
 		c.getLevel().addFreshEntity(orb);
