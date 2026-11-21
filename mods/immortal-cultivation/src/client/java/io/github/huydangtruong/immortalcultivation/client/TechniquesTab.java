@@ -93,6 +93,7 @@ public final class TechniquesTab {
 			case TELEPORT -> "Charge, then step far away in the direction you look. Like an ender pearl, but much farther and no damage.";
 			case FLIGHT -> "Fly freely like in creative, faster at higher levels. You glide down gently when it ends.";
 			case BLADE -> "Click a target within 16 blocks to drain its blood: you heal what it loses. It then bleeds and is slowed for 2 s.";
+			case MAYHEM -> "Left click: an amethyst shard that hurts more in light and leaves a cluster for 10 s. Hold right click 1 s: clusters near you turn into glowing budding amethyst that slows and burns for 20 s.";
 			case LANCE -> "Click and hold: a beam of sunlight from your hand to where you aim, up to 256 blocks. Everything on it burns, twice as hard every 3 s. Let go to stop.";
 			case GOLEM -> "Summon loyal violet iron golems that fight for you for 90 seconds. More and stronger at higher levels.";
 			case AQUA -> "Breathe, swim fast and dig freely underwater.";

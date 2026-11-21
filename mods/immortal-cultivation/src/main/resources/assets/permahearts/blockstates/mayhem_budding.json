@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "lit=false": { "model": "minecraft:block/budding_amethyst" },
+    "lit=true": { "model": "minecraft:block/budding_amethyst" }
+  }
+}

@@ -243,8 +243,12 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 		check(techniqueData(server).inSlot(0) == fire, "the fire row with slot 1 in edit mode should slot it");
 		clickGui(context, hotspots(context).get(HS_SLOT + 1), LEFT); // edit slot 2
 		scrollList(context, -1);
-		scrollList(context, -1); // P-061: Frozen Breath is the sixth row now, one notch brings it into view
+		scrollList(context, -1);
+		scrollList(context, -1);
+		scrollList(context, -1); // P-061: Frozen Breath is the seventh row now (P-064), four notches bring it into view
 		clickGui(context, hotspots(context).get(HS_ROW + io.github.huydangtruong.immortalcultivation.technique.Technique.ICE.ordinal()), LEFT); // the ice row
+		scrollList(context, 1);
+		scrollList(context, 1);
 		scrollList(context, 1);
 		scrollList(context, 1);
 		check(techniqueData(server).inSlot(1) == ice, "the ice row with slot 2 in edit mode should slot it");
@@ -254,7 +258,11 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 		context.takeScreenshot("09f-move-before"); // fire + ice slotted, editing slot 1
 		scrollList(context, -1);
 		scrollList(context, -1);
+		scrollList(context, -1);
+		scrollList(context, -1);
 		clickGui(context, hotspots(context).get(HS_ROW + io.github.huydangtruong.immortalcultivation.technique.Technique.ICE.ordinal()), LEFT);
+		scrollList(context, 1);
+		scrollList(context, 1);
 		scrollList(context, 1);
 		scrollList(context, 1);
 		check(techniqueData(server).inSlot(0) == ice, "slot 1 should hold ice after the move");
@@ -267,7 +275,7 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 		check(techniqueData(server).inSlot(1) == fire, "picking fire then clicking an outlined slot should slot it");
 		// slot first, then the row name 
 		clickGui(context, hotspots(context).get(HS_SLOT + 1), LEFT);
-		clickGui(context, hotspots(context).get(HS_ROW + io.github.huydangtruong.immortalcultivation.technique.Technique.THUNDER.ordinal()), LEFT); // P-056: a row that stays in view now that the list has 19 techniques
+		clickGui(context, hotspots(context).get(HS_ROW + io.github.huydangtruong.immortalcultivation.technique.Technique.THUNDER.ordinal()), LEFT); // P-056: a row that stays in view now that the list has 20 techniques
 		check(techniqueData(server).inSlot(1) == t.getEnumConstants()[io.github.huydangtruong.immortalcultivation.technique.Technique.THUNDER.ordinal()], "slot 2 then the Thunder Strike row should slot it");
 		// Cancel drops a picked technique: the next slot click selects the slot instead of assigning
 		clickGui(context, hotspots(context).get(HS_ROW), LEFT);
@@ -298,6 +306,8 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 		context.takeScreenshot("09g-technique-detail-max");
 		clickGui(context, hotspots(context).get(HS_BACK), LEFT);
 		scrollList(context, 10);
+		scrollList(context, -1);
+		scrollList(context, -1);
 		scrollList(context, -1);
 		scrollList(context, -1);
 		clickGui(context, hotspots(context).get(HS_INFO + io.github.huydangtruong.immortalcultivation.technique.Technique.ICE.ordinal()), LEFT); // ice level 4: now -> next numbers

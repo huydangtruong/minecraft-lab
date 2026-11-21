@@ -52,6 +52,7 @@ public final class TechniqueCasts {
 		Bleeding.init();
 		StealerSlow.init();
 		Lance.init();
+		Mayhem.init();
 		LifeStealer.init();
 		TechniqueTimers.init();
 		VioletGuardian.init();
@@ -103,6 +104,9 @@ public final class TechniqueCasts {
 			}
 			case LANCE -> {
 				return Lance.cast(caster, lvl);
+			}
+			case MAYHEM -> {
+				return Mayhem.input(caster, lvl, charge) == null; // D174: left click (charge 0) = a shard, charge 1 = the channel
 			}
 			case GOLEM -> {
 				VioletGuardian.summon(caster, lvl);

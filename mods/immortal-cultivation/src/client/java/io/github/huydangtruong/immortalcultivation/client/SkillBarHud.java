@@ -77,6 +77,14 @@ public class SkillBarHud implements HudElement {
 		if (walk != null && walk.getDuration() > 0) { // the server mirrors the Spirit Walk end tick into this effect (D115)
 			lineY = timeLine(g, mc, right, "Spirit Walk", walk.getDuration(), 0xFFC8A8FF, lineY);
 		}
+		if (ClientMayhem.visible(mc)) { // D174: shards left and the seconds left of Light Strike Reflection
+			if (ClientMayhem.windowTicks() > 0) {
+				lineY = timeLine(g, mc, right, "Light Strike", ClientMayhem.windowTicks(), 0xFFD9A8FF, lineY);
+			}
+			Component shards = Component.literal("Shards " + ClientMayhem.shards() + "/" + io.github.huydangtruong.immortalcultivation.technique.MayhemRules.SHARDS);
+			g.text(mc.font, shards, right - mc.font.width(shards), lineY, 0xFFD9A8FF, true);
+			lineY -= 12;
+		}
 		Technique sel = ClientSkills.selectedTechnique(mc);
 		if (sel != null) {
 			Component name = Component.literal(sel.displayName() + "  Lv " + d.level(sel));

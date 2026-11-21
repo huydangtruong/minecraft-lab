@@ -548,6 +548,13 @@ public final class TechniqueRules {
 				new Stat("Range", num(StealerRules.RANGE) + " blocks"),
 				new Stat("Then", "bleeds and slowed " + pct(StealerRules.SLOW) + " for " + StealerRules.SLOW_SECONDS + " s"),
 				new Stat("Cooldown", t.cooldownSeconds() + " s"));
+			case MAYHEM -> List.of(
+				new Stat("Shard", num(MayhemRules.shardDamage(level, 0, 0)) + " (up to " + num(MayhemRules.shardDamage(level, 15, 0)) + " in daylight)"),
+				new Stat("Shards", MayhemRules.SHARDS + ", one every " + num(MayhemRules.shardDelaySeconds(level)) + " s"),
+				new Stat("Buddings", String.valueOf(MayhemRules.maxBuddings(level))),
+				new Stat("Burn", num(MayhemRules.burnDamage(level)) + " per second, " + MayhemRules.burnRadius(level) + " blocks"),
+				new Stat("Lasts", MayhemRules.WINDOW_TICKS / 20 + " s after the hold"),
+				new Stat("Cooldown", t.cooldownSeconds() + " s"));
 			case LANCE -> List.of(
 				new Stat("Damage", num(LanceRules.damagePerSecond(level, 0)) + " per second (up to " + num(LanceRules.damagePerSecond(level, 3 * LanceRules.STAGE_TICKS)) + ")"),
 				new Stat("Range", num(LanceRules.RANGE) + " blocks"),

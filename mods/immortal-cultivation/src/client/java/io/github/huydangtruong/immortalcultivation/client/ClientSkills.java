@@ -44,6 +44,7 @@ public final class ClientSkills {
 	private static boolean charging;
 	private static int chargeTicks;
 	private static boolean useWasDown;
+	private static final String MAYHEM_HOLD_HINT = "Hold right click for 1 s to start Light Strike Reflection";
 
 	private ClientSkills() {}
 
@@ -175,7 +176,7 @@ public final class ClientSkills {
 		if (t == null) {
 			return false;
 		}
-		long left = t == Technique.WARP ? 0 : d.cooldownLeft(t, mc.level.getGameTime()); // D75: placing a portal has no cooldown
+		long left = t == Technique.WARP || t == Technique.MAYHEM ? 0 : d.cooldownLeft(t, mc.level.getGameTime()); // D75: placing a portal has no cooldown; D174: Mayhem keeps its own state (the server answers)
 		if (left > 0) {
 			mc.player.sendOverlayMessage(Component.literal("On cooldown: " + SkillBarLogic.secondsLeft(left) + " s"));
 			return false;
@@ -204,6 +205,8 @@ public final class ClientSkills {
 				ClientPlayNetworking.send(new io.github.huydangtruong.immortalcultivation.technique.warp.Warp.Request(io.github.huydangtruong.immortalcultivation.technique.warp.Warp.OPEN, "")); // D75: left click opens the warp menu
 			} else if (selectedTechnique(mc) == Technique.SEISM) {
 				cast(mc, selected, 0f); // D142: left click is always the boulder (a full charge would start the Wave)
+			} else if (selectedTechnique(mc) == Technique.MAYHEM) {
+				cast(mc, selected, 0f); // D174: left click = one shard (a full charge would be the channel)
 			} else if (selectedTechnique(mc) == Technique.CRYSTAL) {
 				cast(mc, selected, 0f); // D143: left click cages what you aim at (right click sends 1 = cage around you)
 			} else {
@@ -274,7 +277,7 @@ public final class ClientSkills {
 		if (down && !useWasDown) {
 			if (t.charged()) {
 				TechniqueData d = data(mc.player);
-				long left = t == Technique.WARP ? 0 : d.cooldownLeft(t, mc.level.getGameTime()); // D75: placing a portal has no cooldown
+				long left = t == Technique.WARP || t == Technique.MAYHEM ? 0 : d.cooldownLeft(t, mc.level.getGameTime()); // D75: placing a portal has no cooldown
 				if (left > 0) {
 					cast(mc, selected, 1f); // only shows the cooldown message
 				} else {
@@ -289,7 +292,9 @@ public final class ClientSkills {
 		} else if (!down && charging) {
 			float c = currentCharge();
 			charging = false;
-			if (t == Technique.WARP && !TechniqueRules.warpPlaceReady(c)) {
+			if (t == Technique.MAYHEM && c < 1f) {
+				mc.player.sendOverlayMessage(Component.literal(MAYHEM_HOLD_HINT)); // D174: let go too early, nothing happens
+			} else if (t == Technique.WARP && !TechniqueRules.warpPlaceReady(c)) {
 				mc.player.sendOverlayMessage(Component.literal(TechniqueNet.WARP_HOLD_HINT)); // D79: let go too early, no portal
 			} else {
 				if (t == Technique.SEISM && c >= 1f && data(mc.player).level(t) < SeismRules.WAVE_MIN_LEVEL) {
