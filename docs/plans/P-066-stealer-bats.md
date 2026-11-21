@@ -3,7 +3,7 @@
 > **Tóm tắt cho Huy (VN, ≤ 3 dòng):** Life Stealer có hoạt cảnh mới (D180): 4 con dơi bay tới từ 4 phía, cắn và nhấc mục tiêu lên 2 ô, hút máu dần trong 2 giây (10 lượt, mỗi 0,2 giây), rồi bay ra 4 phía biến mất, mục tiêu rơi xuống.
 
 - **Status:** ready
-- **Mod / decision:** `immortal-cultivation`, D180 (read it first; it changes D158/D162, keeps D159/D164) · **Branch:** `feat/P-066-stealer-bats` · **Depends on:** none
+- **Mod / decision:** `immortal-cultivation`, D180 (read it first; it changes D158/D162, keeps D159; the amount is D181: 36% + 2% per level) · **Branch:** `feat/P-066-stealer-bats` · **Depends on:** none
 
 ## Goal
 Replace the instant drain of Life Stealer with a 2-second bat drain, exactly as D180 in `docs/system/01-decisions.md`.

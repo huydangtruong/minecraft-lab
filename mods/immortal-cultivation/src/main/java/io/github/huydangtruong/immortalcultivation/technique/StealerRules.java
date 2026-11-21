@@ -13,9 +13,9 @@ public final class StealerRules {
 		return Math.max(1, Math.min(TechniqueRules.MAX_LEVEL, level));
 	}
 
-	/** Share of the target's max health drained: D164: 30% at Lv 1, +2% per level (68% at Lv 20). */
+	/** Share of the target's max health drained: D181: 36% at Lv 1, +2% per level (74% at Lv 20); was 30% (D164). */
 	public static double pct(int level) {
-		return 0.30 + 0.02 * (clamp(level) - 1);
+		return 0.36 + 0.02 * (clamp(level) - 1);
 	}
 
 	/** Most health points one cast drains: 7 at Lv 1, +3 per level (64 at Lv 20). */
