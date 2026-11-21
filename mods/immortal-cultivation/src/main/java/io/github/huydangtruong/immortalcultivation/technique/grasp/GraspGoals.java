@@ -2,6 +2,7 @@ package io.github.huydangtruong.immortalcultivation.technique.grasp;
 
 import io.github.huydangtruong.immortalcultivation.mixin.MobGoalAccess;
 import io.github.huydangtruong.immortalcultivation.technique.GraspRules;
+import io.github.huydangtruong.immortalcultivation.technique.WitchRules;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -70,6 +71,9 @@ final class GraspGoals {
 			}
 			goals.addGoal(5, new FollowGoal(pm));
 			goals.addGoal(5, new PostGoal(pm));
+			if (pm instanceof net.minecraft.world.entity.monster.Witch w) {
+				goals.addGoal(2, new WitchHealGoal(w)); // D167
+			}
 		}
 		targets.addGoal(1, new TargetPick(mob));
 		mob.setCanPickUpLoot(false);
@@ -348,6 +352,42 @@ final class GraspGoals {
 		@Override
 		public void stop() {
 			mob.getNavigation().stop();
+		}
+	}
+
+	/** D167: a grasped witch throws Healing or Regeneration at a hurt owner or ally within 10 blocks (its enemy potions come from the ranged attack). */
+	private static final class WitchHealGoal extends Goal implements Ours {
+		private final net.minecraft.world.entity.monster.Witch witch;
+		private long next;
+		private int wait;
+		private LivingEntity ally;
+
+		WitchHealGoal(net.minecraft.world.entity.monster.Witch witch) {
+			this.witch = witch;
+			setFlags(EnumSet.of(Flag.LOOK));
+		}
+
+		@Override
+		public boolean canUse() {
+			GraspedMob ga = witch.getAttached(GraspedMob.ATTACHMENT);
+			if (ga == null || --wait > 0 || witch.isDrinkingPotion() || witch.level().getGameTime() < next) {
+				return false;
+			}
+			wait = 5; // a counter, not tickCount % n (D165: goals tick on odd or even game ticks)
+			ally = WitchPotions.hurtAlly(witch, ga.owner());
+			return ally != null;
+		}
+
+		@Override
+		public boolean canContinueToUse() {
+			return false;
+		}
+
+		@Override
+		public void start() {
+			next = witch.level().getGameTime() + WitchRules.ALLY_COOLDOWN_TICKS;
+			witch.getLookControl().setLookAt(ally, 30f, 30f);
+			WitchPotions.throwAtAlly(witch, ally);
 		}
 	}
 

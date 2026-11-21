@@ -34,7 +34,9 @@
 		"NearestAttackableDecoyMixin",
 		"PlayerMixin",
 		"PlayerPhaseMixin",
-		"ServerPlayerHurtMixin"
+		"ServerPlayerHurtMixin",
+		"ThrownSplashPotionMixin",
+		"WitchThrowMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

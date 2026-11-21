@@ -13,6 +13,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.monster.Witch;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.phys.Vec3;
 
@@ -156,6 +157,130 @@ public class GraspGameTest {
 		c.assertTrue(Grasp.isGraspedBy(z, p.getUUID()), "grasped by its owner");
 		c.assertTrue(!Grasp.isGraspedBy(z, java.util.UUID.randomUUID()), "not grasped by someone else");
 		c.assertTrue(!io.github.huydangtruong.immortalcultivation.technique.IllusionTargets.eligibleForTest(p, z), "the owner's clones do not fight it");
+		cleanUp(c, p);
+		c.succeed();
+	}
+
+	// ---- D167: grasped witch ----
+
+	private static Witch witchOf(GameTestHelper c, ServerPlayer p, double x, double z) {
+		Witch w = c.spawn(EntityTypes.WITCH, new Vec3(x, 1, z));
+		w.setPersistenceRequired();
+		Grasp.tame(p, w, 20);
+		return w;
+	}
+
+	/** A hurt owner gets Healing thrown at it by its own witch. */
+	@GameTest(maxTicks = 300)
+	public void aGraspedWitchHealsItsHurtOwner(GameTestHelper c) {
+		ServerPlayer p = grasper(c, 20);
+		FlightBladeGameTest.place(c, p, 4, 1, 4, -90f, 0f);
+		p.getFoodData().setFoodLevel(6); // below 18: no natural regeneration, only the potion can heal
+		p.setHealth(4f);
+		witchOf(c, p, 1.5, 4);
+		c.runAfterDelay(200, () -> {
+			c.assertTrue(p.getHealth() > 4.5f, "the witch healed its owner, health " + p.getHealth());
+			cleanUp(c, p);
+			c.succeed();
+		});
+	}
+
+	/** An undead enemy gets Healing (it hurts), the owner next to it gets nothing harmful from the splash. */
+	@GameTest(maxTicks = 300)
+	public void aGraspedWitchHurtsAZombieAndSparesTheOwnerBesideIt(GameTestHelper c) {
+		ServerPlayer p = grasper(c, 20);
+		FlightBladeGameTest.place(c, p, 6, 1, 3.2, -90f, 0f); // beside the zombie, inside the splash
+		p.getFoodData().setFoodLevel(6);
+		Zombie z = c.spawn(EntityTypes.ZOMBIE, new Vec3(6, 1, 4.2));
+		z.setNoAi(true);
+		z.setPersistenceRequired();
+		Witch w = witchOf(c, p, 1.5, 6.5);
+		w.setTarget(z);
+		float ownerHp = p.getHealth();
+		c.runAfterDelay(200, () -> {
+			c.assertTrue(z.getHealth() < z.getMaxHealth() || !z.isAlive(), "the zombie was hurt by a healing splash, health " + z.getHealth());
+			c.assertTrue(p.getHealth() >= ownerHp, "the owner lost no health, " + p.getHealth());
+			c.assertTrue(p.getActiveEffects().isEmpty(), "the owner has no potion effect, has " + p.getActiveEffects());
+			cleanUp(c, p);
+			c.succeed();
+		});
+	}
+
+	/** A living enemy gets a harmful potion (Slowness first); the owner beside it, inside the splash, gets no effect at all. */
+	@GameTest(maxTicks = 300)
+	public void aGraspedWitchSplashNeverTouchesTheOwnerBesideItsEnemy(GameTestHelper c) {
+		ServerPlayer p = grasper(c, 20);
+		FlightBladeGameTest.place(c, p, 6, 1, 3.2, -90f, 0f);
+		p.getFoodData().setFoodLevel(6);
+		net.minecraft.world.entity.animal.pig.Pig pig = c.spawn(EntityTypes.PIG, new Vec3(6, 1, 4.2));
+		pig.setNoAi(true);
+		pig.setPersistenceRequired();
+		Witch w = witchOf(c, p, 1.5, 6.5);
+		w.setTarget(pig);
+		float ownerHp = p.getHealth();
+		c.runAfterDelay(200, () -> {
+			c.assertTrue(pig.hasEffect(net.minecraft.world.effect.MobEffects.SLOWNESS) || pig.getHealth() < pig.getMaxHealth() || !pig.isAlive(),
+				"the enemy got a harmful potion");
+			c.assertTrue(p.getHealth() >= ownerHp, "the owner lost no health, " + p.getHealth());
+			c.assertTrue(p.getActiveEffects().isEmpty(), "the owner has no potion effect, has " + p.getActiveEffects());
+			cleanUp(c, p);
+			c.succeed();
+		});
+	}
+
+	// ---- D168: the All row ----
+
+	private static Zombie[] three(GameTestHelper c, ServerPlayer p) {
+		Zombie[] zs = new Zombie[3];
+		for (int i = 0; i < zs.length; i++) {
+			zs[i] = c.spawn(EntityTypes.ZOMBIE, new Vec3(0.8 + i * 0.4, 1, 0.8));
+			zs[i].setNoAi(true);
+			Grasp.tame(p, zs[i], 20);
+		}
+		return zs;
+	}
+
+	private static double flat(Zombie z, ServerPlayer p) {
+		return Math.sqrt(z.distanceToSqr(p.getX(), z.getY(), p.getZ()));
+	}
+
+	@GameTest(maxTicks = 60)
+	public void stayAllAndCallAllChangeEveryMob(GameTestHelper c) {
+		ServerPlayer p = grasper(c, 20);
+		FlightBladeGameTest.place(c, p, 5, 1, 5, -90f, 0f);
+		Zombie[] zs = three(c, p);
+		Grasp.handle(p, Grasp.ALL_MODE, "", 1);
+		for (Zombie z : zs) {
+			c.assertTrue(z.getAttached(GraspedMob.ATTACHMENT).mode() == 1, "every mob is on Stay");
+		}
+		Grasp.handle(p, Grasp.ALL_MODE, "", 2);
+		for (Zombie z : zs) {
+			c.assertTrue(z.getAttached(GraspedMob.ATTACHMENT).mode() == 2, "every mob is on Guard");
+		}
+		Grasp.handle(p, Grasp.ALL_CALL, "", 0);
+		for (Zombie z : zs) {
+			double d = flat(z, p);
+			c.assertTrue(d >= 2.3 && d <= 3.7, "called to its own ring spot, " + d + " blocks from the owner");
+		}
+		// the cooldown is running: a second Call all moves nobody
+		Vec3 far = c.absoluteVec(new Vec3(0.8, 1, 0.8));
+		zs[0].snapTo(far.x, far.y, far.z);
+		Grasp.handle(p, Grasp.ALL_CALL, "", 0);
+		c.assertTrue(flat(zs[0], p) > 4, "a mob on cooldown stays where it is");
+		cleanUp(c, p);
+		c.succeed();
+	}
+
+	@GameTest(maxTicks = 60)
+	public void releaseAllLetsEveryMobGo(GameTestHelper c) {
+		ServerPlayer p = grasper(c, 20);
+		Zombie[] zs = three(c, p);
+		c.assertTrue(held(c, p) == 3, "three held");
+		Grasp.handle(p, Grasp.ALL_RELEASE, "", 0);
+		c.assertTrue(held(c, p) == 0, "none held after Release all");
+		for (Zombie z : zs) {
+			c.assertTrue(!z.hasAttached(GraspedMob.ATTACHMENT), "attachment gone");
+		}
 		cleanUp(c, p);
 		c.succeed();
 	}
