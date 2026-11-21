@@ -8,7 +8,7 @@ public enum Technique {
 	FIRE("fire", "Fireball", 16, true), // names: D56
 	THUNDER("thunder", "Thunder Strike", 26, false), // D86: aim, 1 s warning, then lightning and a creeper-sized blast
 	SEISM("seism", "Seism", 28, true), // D142: tap = boulder where you aim, hold 1 s (Lv 3+) = three quake waves around you
-	LANCE("lance", "Solar Lance", 45, false), // D157, D159: a beam from the hand for up to 12 s while the button is held; the 45 s cooldown starts when it stops
+	LANCE("lance", "Solar Lance", 36, false), // D157, D159, D175: a beam from the hand for up to 12 s while the button is held; the 36 s cooldown starts when it stops
 	BLADE("blade", "Life Stealer", 24, false), // D158: was Life Steal Blade (id kept so saved levels and slots carry over)
 	MAYHEM("mayhem", "Crystal Mayhem", 30, true), // D174: left click = amethyst shards (stronger in light), hold right click 1 s = budding amethyst that lights, slows and burns for 20 s
 	ICE("ice", "Frozen Breath", 18, true), // D80: was 24 s

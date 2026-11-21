@@ -23,6 +23,12 @@ public class PassiveClientTest implements FabricClientGameTest {
 		context.waitTicks(6);
 	}
 
+	private static void clickGuiHover(ClientGameTestContext context, int[] gui) {
+		double scale = context.computeOnClient(mc -> mc.getWindow().getGuiScale());
+		context.getInput().setCursorPos(gui[0] * scale, gui[1] * scale);
+		context.waitTicks(10);
+	}
+
 	private static int[] spot(ClientGameTestContext context, int i) {
 		List<int[]> s = context.computeOnClient(mc -> StatsPanel.passiveHotspots());
 		return s.get(i);
@@ -41,7 +47,10 @@ public class PassiveClientTest implements FabricClientGameTest {
 			server.runOnServer(s -> {
 				var p = s.getPlayerList().getPlayers().get(0);
 				PassiveAttachment.set(p, PassiveData.DEFAULT.withLevel(Passive.COOLDOWN, 4).withLevel(Passive.VISION, 10)
-					.withLevel(Passive.HUNGER, 2).withLevel(Passive.INVENTORY, 7));
+					.withLevel(Passive.HUNGER, 2).withLevel(Passive.INVENTORY, 7).withLevel(Passive.GUARD, 4));
+				var broken = new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DIAMOND_PICKAXE);
+				io.github.huydangtruong.immortalcultivation.passive.ItemGuard.breakGuarded(broken, 4);
+				p.getInventory().setItem(0, broken);
 			});
 			context.waitTicks(30);
 			context.setScreen(() -> new net.minecraft.client.gui.screens.inventory.InventoryScreen(
@@ -77,7 +86,22 @@ public class PassiveClientTest implements FabricClientGameTest {
 			clickGui(context, spot(context, 3 * n)); // Back
 			clickGui(context, spot(context, Passive.VISION.ordinal()));
 			context.takeScreenshot("passives-detail-vision");
-			clickGui(context, spot(context, 3 * n));
+			clickGui(context, spot(context, 3 * n)); // Back from Vision
+			clickGui(context, spot(context, Passive.GUARD.ordinal()));
+			if (PassivesTab.detail() != Passive.GUARD) {
+				throw new AssertionError("clicking Item guard did not open its detail page");
+			}
+			context.takeScreenshot("passives-detail-item-guard");
+			clickGui(context, spot(context, 3 * n)); // Back
+			// a broken item in the hotbar: hover it for the red tooltip
+			int[] at = context.computeOnClient(mc -> {
+				var screen = (net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<?>) mc.gui.screen();
+				var slot = screen.getMenu().getSlot(36);
+				var acc = (io.github.huydangtruong.immortalcultivation.client.mixin.ContainerScreenAccess) screen;
+				return new int[] {acc.permahearts$leftPos() + slot.x + 8, acc.permahearts$topPos() + slot.y + 8};
+			});
+			clickGuiHover(context, at);
+			context.takeScreenshot("passives-broken-item-tooltip");
 			if (PassivesTab.detail() != null) {
 				throw new AssertionError("Back did not return to the list");
 			}
