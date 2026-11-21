@@ -745,10 +745,13 @@ public final class Grasp {
 		}
 		ServerPlayer o = server.getPlayerList().getPlayer(ga.owner());
 		if (t % 10 == 0 && o != null && o.isAlive() && o.level() == sl && GraspRules.Mode.of(ga.mode()) == GraspRules.Mode.FOLLOW
-			&& m.distanceToSqr(o) > GraspRules.FOLLOW_TELEPORT * GraspRules.FOLLOW_TELEPORT) {
-			Vec3 at = GraspGoals.freeSpotNear(sl, m, GraspGoals.followSpot(m, o)); // D165: its own spot, not on the owner
-			m.getNavigation().stop();
-			m.snapTo(at.x, at.y, at.z);
+			&& m.distanceToSqr(o) > GraspRules.FOLLOW_TELEPORT * GraspRules.FOLLOW_TELEPORT
+			&& !io.github.huydangtruong.immortalcultivation.technique.PhaseState.phasing(o)) { // D169: not while the owner is in the walls
+			Vec3 at = GraspGoals.freeSpotOrNull(sl, m, GraspGoals.followSpot(m, o)); // D165: its own spot, not on the owner
+			if (at != null) { // D169: never into a block
+				m.getNavigation().stop();
+				m.snapTo(at.x, at.y, at.z);
+			}
 		}
 		if (o != null && o.isAlive() && o.level() == sl && m.getTarget() == null && GraspRules.Mode.of(ga.mode()) == GraspRules.Mode.FOLLOW) {
 			// D165: a follower inside 2 blocks of its owner is gently pushed out, so a crowd never stands on the owner

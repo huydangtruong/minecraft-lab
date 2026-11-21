@@ -397,6 +397,17 @@ final class GraspGoals {
 		return owner.position().add(d[0], 0, d[1]);
 	}
 
+	/** D169: free spot near a position for a teleport, or null when nothing nearby is free (never into a block). */
+	static Vec3 freeSpotOrNull(ServerLevel sl, Mob mob, Vec3 want) {
+		for (int dy : new int[] {0, 1, 2, -1}) {
+			Vec3 at = want.add(0, dy, 0);
+			if (sl.noCollision(mob, mob.getDimensions(mob.getPose()).makeBoundingBox(at))) {
+				return at;
+			}
+		}
+		return null;
+	}
+
 	/** Free spot near a position for a teleport (the same position when nothing nearby is free). */
 	static Vec3 freeSpotNear(ServerLevel sl, Mob mob, Vec3 want) {
 		List<Vec3> tries = new ArrayList<>();

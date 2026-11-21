@@ -718,6 +718,9 @@ public final class Illusion extends PathfinderMob implements OwnedSummon {
 			}
 			double d2 = a.distanceToSqr(o);
 			if (d2 > TELEPORT_FROM * TELEPORT_FROM) {
+				if (PhaseState.phasing(o)) { // D169: wait while the owner is in the walls
+					return;
+				}
 				BlockPos p = SpawnSpots.standSpot(sl, o.blockPosition(), a.getRandom().nextInt(5) - 2, a.getRandom().nextInt(5) - 2);
 				a.snapTo(p.getX() + 0.5, p.getY(), p.getZ() + 0.5);
 				a.getNavigation().stop();

@@ -527,7 +527,7 @@ public class TechniqueEffectsGameTest {
 		TechniqueCasts.cast(p, Technique.PHASE, 10, 1f);
 		PhaseState s = p.getAttached(PhaseState.ATTACHMENT);
 		long ticks = s.endTick() - now;
-		c.assertTrue(Math.abs(ticks - Math.round(TechniqueRules.phaseSeconds(10) * 20)) <= 1, "level 10 should last 14.5 s, was " + ticks + " ticks");
+		c.assertTrue(Math.abs(ticks - Math.round(TechniqueRules.phaseSeconds(10) * 20)) <= 1, "level 10 should last 19 s, was " + ticks + " ticks");
 		TechniqueCasts.endPhase(p);
 		c.succeed();
 	}
