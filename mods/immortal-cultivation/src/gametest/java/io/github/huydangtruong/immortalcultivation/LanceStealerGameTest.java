@@ -91,7 +91,7 @@ public class LanceStealerGameTest {
 		c.runAfterDelay(LanceRules.DURATION_TICKS + 15, () -> {
 			c.assertTrue(!Lance.active(p), "off after 12 s");
 			long left = TechniqueAttachment.get(p).cooldownEnd(Technique.LANCE) - now(c);
-			c.assertTrue(left > 800 && left <= 900, "the 45 s cooldown started when the beam ended, left " + left);
+			c.assertTrue(left > 700 && left <= 800, "the 40 s cooldown started when the beam ended, left " + left);
 			FlightBladeGameTest.drop(c, p);
 			c.succeed();
 		});
@@ -110,7 +110,7 @@ public class LanceStealerGameTest {
 			c.assertTrue(atRelease[0] < z.getMaxHealth(), "it did hurt before the release");
 			c.assertTrue(!Lance.active(p), "off at once");
 			long left = TechniqueAttachment.get(p).cooldownEnd(Technique.LANCE) - now(c);
-			c.assertTrue(left > 850 && left <= 900, "the 45 s cooldown starts at the release, left " + left);
+			c.assertTrue(left > 750 && left <= 800, "the 40 s cooldown starts at the release, left " + left);
 		});
 		c.runAfterDelay(80, () -> {
 			c.assertTrue(z.getHealth() == atRelease[0], "no more damage after the release, " + atRelease[0] + " -> " + z.getHealth());
