@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.github.huydangtruong.immortalcultivation.passive.Passive;
+import io.github.huydangtruong.immortalcultivation.passive.ItemGuardRules;
 import io.github.huydangtruong.immortalcultivation.passive.PassiveData;
 import io.github.huydangtruong.immortalcultivation.passive.PassiveRules;
 import java.util.List;
@@ -94,5 +95,40 @@ class PassiveRulesTest {
 		assertEquals(4, d.activeLevel(Passive.GROWTH));
 		assertEquals(0, d.withOn(Passive.GROWTH, false).activeLevel(Passive.GROWTH));
 		assertTrue(d.withOn(Passive.GROWTH, false).isOn(Passive.VISION), "the vision switch is separate");
+	}
+
+	@Test
+	void itemGuardDebt() {
+		assertEquals(100, PassiveRules.debtPercent(1));
+		assertEquals(60, PassiveRules.debtPercent(5));
+		assertEquals(10, PassiveRules.debtPercent(10));
+		assertEquals(1561, PassiveRules.debt(1, 1561)); // diamond pickaxe
+		assertEquals(937, PassiveRules.debt(5, 1561)); // 60%, rounded up
+		assertEquals(157, PassiveRules.debt(10, 1561)); // 156.1 rounded up
+		assertEquals("debt 70%", PassiveRules.value(Passive.GUARD, 4));
+		assertEquals("Item guard debt 10%", PassiveRules.title(Passive.GUARD, 10));
+		assertEquals("item_guard", Passive.GUARD.id());
+		assertEquals(true, Passive.GUARD.toggleable());
+		assertEquals(false, PassiveData.DEFAULT.withOn(Passive.GUARD, false).isOn(Passive.GUARD));
+	}
+
+	@Test
+	void itemGuardRepairPaysDebtFirst() {
+		// a diamond pickaxe broke at Lv 5: damage 1561, debt 937
+		var r = ItemGuardRules.repair(937, 1561, 500);
+		assertEquals(437, r.debt());
+		assertEquals(1561, r.damage()); // nothing gained yet
+		assertEquals(true, r.broken(1561));
+		r = ItemGuardRules.repair(437, 1561, 1000);
+		assertEquals(0, r.debt());
+		assertEquals(998, r.damage()); // 563 left over becomes durability
+		assertEquals(false, r.broken(1561));
+		r = ItemGuardRules.repair(100, 1561, 100); // debt gone but still 0 durability
+		assertEquals(0, r.debt());
+		assertEquals(true, r.broken(1561));
+		r = ItemGuardRules.repairTo(157, 1561, 1000); // vanilla wants damage 1000 = 561 points
+		assertEquals(0, r.debt());
+		assertEquals(1157, r.damage());
+		assertEquals(157, ItemGuardRules.debtPaid(157, 9999));
 	}
 }

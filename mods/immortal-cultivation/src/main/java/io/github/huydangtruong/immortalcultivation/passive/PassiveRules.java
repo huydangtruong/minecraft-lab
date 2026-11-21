@@ -75,6 +75,17 @@ public final class PassiveRules {
 		return pct / 100 + (roll < (pct % 100) / 100.0 ? 1 : 0);
 	}
 
+	/** Item guard (D176): the durability debt of a broken item, in percent of its maximum: 100% at level 1, 10% at level 10. */
+	public static int debtPercent(int level) {
+		level = clamp(level);
+		return level == 0 ? 100 : 100 - 10 * (level - 1);
+	}
+
+	/** The debt written on an item that breaks at this level (rounded up). */
+	public static int debt(int level, int maxDamage) {
+		return (int) (((long) debtPercent(level) * Math.max(0, maxDamage) + 99) / 100);
+	}
+
 	/** Name of the slot group a level adds (1-based), shown in the tab. */
 	public static String inventoryGroup(int level) {
 		return switch (level) {
@@ -122,6 +133,7 @@ public final class PassiveRules {
 			case XP -> xpPercent(level) + "%";
 			case GROWTH -> "+" + growthPercent(level) + "%";
 			case INVENTORY -> protectedSlots(level, 0).size() + " slots";
+			case GUARD -> level == 0 ? "off" : "debt " + debtPercent(level) + "%";
 		};
 	}
 

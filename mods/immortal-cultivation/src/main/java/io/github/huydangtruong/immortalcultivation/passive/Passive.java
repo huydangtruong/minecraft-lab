@@ -2,14 +2,15 @@ package io.github.huydangtruong.immortalcultivation.passive;
 
 import java.util.Optional;
 
-/** The five passives of the Passives tab (D148). Pure Java. The id is saved: never rename one. */
+/** The passives of the Passives tab (D148). Pure Java. The id is saved: never rename one. */
 public enum Passive {
 	COOLDOWN("cooldown", "Reduce cooldown"),
 	VISION("vision", "Increase vision"),
 	HUNGER("hunger", "Hunger sustain"),
 	XP("xp", "XP gain bonus"),
 	GROWTH("growth", "Crop growth"),
-	INVENTORY("inventory", "Inventory protect");
+	INVENTORY("inventory", "Inventory protect"),
+	GUARD("item_guard", "Item guard");
 
 	private final String id;
 	private final String displayName;
@@ -29,7 +30,7 @@ public enum Passive {
 
 	/** Passives with an on/off switch in the tab. */
 	public boolean toggleable() {
-		return this == VISION || this == GROWTH;
+		return this == VISION || this == GROWTH || this == GUARD;
 	}
 
 	public static Optional<Passive> byId(String id) {

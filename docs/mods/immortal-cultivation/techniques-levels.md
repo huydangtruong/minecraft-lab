@@ -83,15 +83,17 @@ Công thức: máu tối đa bắt được = 20 + 5 × (Lv − 1); máu cộng 
 
 Mỗi nội tại 10 cấp, mỗi cấp 5 cấp XP. Không reset.
 
-| Cấp | Reduce cooldown | Increase vision | Hunger sustain (đùi gà) | XP gain bonus | Crop growth | Inventory protect (thêm) |
-|---|---|---|---|---|---|---|
-| 1 | 3% | 20% | 2,5 | 3% | +20% | Tay chính |
-| 2 | 4,5% | 31,1% | 3 | 6% | +40% | Tay phụ |
-| 3 | 6% | 42,2% | 3,5 | 9% | +60% | Mũ |
-| 4 | 7,5% | 53,3% | 4 | 12% | +80% | Giày |
-| 5 | 9% | 64,4% | 4,5 | 15% | +100% | Áo |
-| 6 | 10,5% | 75,6% | 5 | 18% | +120% | Quần |
-| 7 | 12% | 86,7% | 5,5 | 21% | +140% | 9 ô hotbar |
-| 8 | 13,5% | 97,8% | 6 | 24% | +160% | Hàng túi 1 |
-| 9 | 15% | 108,9% | 6,5 | 27% | +180% | Hàng túi 2 |
-| 10 | 16,5% | 120% | 7 | 30% | +200% | Hàng túi 3 |
+| Cấp | Reduce cooldown | Increase vision | Hunger sustain (đùi gà) | XP gain bonus | Crop growth | Inventory protect (thêm) | Item guard (nợ độ bền) |
+|---|---|---|---|---|---|---|---|
+| 1 | 3% | 20% | 2,5 | 3% | +20% | Tay chính | 100% |
+| 2 | 4,5% | 31,1% | 3 | 6% | +40% | Tay phụ | 90% |
+| 3 | 6% | 42,2% | 3,5 | 9% | +60% | Mũ | 80% |
+| 4 | 7,5% | 53,3% | 4 | 12% | +80% | Giày | 70% |
+| 5 | 9% | 64,4% | 4,5 | 15% | +100% | Áo | 60% |
+| 6 | 10,5% | 75,6% | 5 | 18% | +120% | Quần | 50% |
+| 7 | 12% | 86,7% | 5,5 | 21% | +140% | 9 ô hotbar | 40% |
+| 8 | 13,5% | 97,8% | 6 | 24% | +160% | Hàng túi 1 | 30% |
+| 9 | 15% | 108,9% | 6,5 | 27% | +180% | Hàng túi 2 | 20% |
+| 10 | 16,5% | 120% | 7 | 30% | +200% | Hàng túi 3 | 10% |
+
+**Item guard (D176, ngọc ruby đỏ, có công tắc):** đồ có độ bền sắp vỡ thì thành đồ hỏng: nằm yên trong túi, không dùng được (tool/vũ khí như tay không, cung/nỏ/cần câu/khiên không dùng được, giáp không cho giáp và phù phép, elytra không bay), tooltip đỏ "Broken: -N durability", thanh bền đỏ đầy. Nợ N = % trong bảng của độ bền tối đa (làm tròn lên), ghi lúc vỡ. Đe (nguyên liệu hoặc ghép hai món) và Mending trả nợ trước rồi mới tăng độ bền; hết nợ và còn ít nhất 1 độ bền là dùng lại. Mending chỉ sửa món đang cầm hoặc mặc. Ghép đồ hỏng trong ô chế tạo thì không được (chỉ dùng đe).

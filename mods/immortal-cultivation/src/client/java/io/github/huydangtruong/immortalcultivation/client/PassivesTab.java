@@ -18,14 +18,14 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 
 /**
- * Body of the Passives tab (P-057, D148; Crop growth P-058): six rows (gem, title with the value, 10-segment bar, "+" for 5 XP levels)
+ * Body of the Passives tab (P-057, D148; Crop growth P-058): seven rows (gem, title with the value, 10-segment bar, "+" for 5 XP levels)
  * and a detail page per passive (description, all 10 levels, Back). Switchable passives have an on/off switch left of "+".
  * The server checks every request (PassiveNet); this class only asks.
  */
 public final class PassivesTab {
-	private static final int LIST_TOP = 20;
-	private static final int ROW_H = 22;
-	private static final int ROW_PITCH = 23;
+	private static final int LIST_TOP = 18;
+	private static final int ROW_H = 19;
+	private static final int ROW_PITCH = 20;
 	private static final int PLUS = 16;
 	private static final int SEG_W = 9;
 	private static final int SEG_GAP = 1;
@@ -120,6 +120,16 @@ public final class PassivesTab {
 		"   OOOOOO   ",
 	};
 
+	private static final String[] RUBY = { // inverted triangle (trillion cut)
+		"OOOOOOOOOOOO",
+		"OWLLLMMMMDDO",
+		" OWLLMMMDDO ",
+		"  OLLMMMDO  ",
+		"   OLMMDO   ",
+		"    OMDO    ",
+		"     OO     ",
+	};
+
 	private static String[] shape(Passive p) {
 		return switch (p) {
 			case COOLDOWN -> SAPPHIRE;
@@ -128,6 +138,7 @@ public final class PassivesTab {
 			case XP -> TOPAZ;
 			case GROWTH -> EMERALD;
 			case INVENTORY -> DIAMOND;
+			case GUARD -> RUBY;
 		};
 	}
 
@@ -140,6 +151,7 @@ public final class PassivesTab {
 			case XP -> new int[] {0xFFFFF09A, 0xFFF2CF2A, 0xFFB8920E, 0xFF6B5406}; // topaz
 			case GROWTH -> new int[] {0xFF7CF29A, 0xFF2DBE5A, 0xFF178A3A, 0xFF0B4F20}; // emerald
 			case INVENTORY -> new int[] {0xFFE6FFFF, 0xFF9FE8F0, 0xFF4FB7C8, 0xFF1F6C78}; // diamond
+			case GUARD -> new int[] {0xFFFF9AA0, 0xFFE0243A, 0xFF9A1226, 0xFF5A0814}; // ruby
 		};
 	}
 
@@ -160,6 +172,7 @@ public final class PassivesTab {
 			case XP -> "More experience from every XP orb you pick up.";
 			case GROWTH -> "Crops you or your clones plant grow faster (wheat, carrots, potatoes, beetroots, nether wart, cocoa, pumpkin and melon stems) while their area is loaded. Use the switch next to + to turn it on or off.";
 			case INVENTORY -> "Items in these slots stay with you when you die, also in Death Match. Curse of Vanishing still destroys them; XP still drops.";
+			case GUARD -> "Gear that would break turns broken instead: useless until repaired. Repair pays a debt first (100% of its durability at Lv 1, 10% at Lv 10). Anvil or Mending. Switch next to + turns it on or off.";
 		};
 	}
 
@@ -184,7 +197,7 @@ public final class PassivesTab {
 	}
 
 	private static int[] gemRect(int tx, int rowY) {
-		return new int[] {tx + 1, rowY + 3, 16, 16};
+		return new int[] {tx + 1, rowY + (ROW_H - 16) / 2, 16, 16};
 	}
 
 	/** The on/off switch, left of "+" (only for passives that can be switched off). */
@@ -314,8 +327,8 @@ public final class PassivesTab {
 			if (font.width(title) > maxW) {
 				title = font.plainSubstrByWidth(title, maxW - font.width("..")) + "..";
 			}
-			g.text(font, title, tx + 20, y + 3, level > 0 ? TOTAL : BASE, false);
-			segments(g, tx + 20, y + 14, level);
+			g.text(font, title, tx + 20, y + 2, level > 0 ? TOTAL : BASE, false);
+			segments(g, tx + 20, y + 12, level);
 			boolean up = level < PassiveRules.MAX_LEVEL && xp >= PassiveRules.COST_LEVELS;
 			String sprite = !up ? "widget/button_disabled" : hoverPlus ? "widget/button_highlighted" : "widget/button";
 			g.blitSprite(RenderPipelines.GUI_TEXTURED, Identifier.withDefaultNamespace(sprite), plus[0], plus[1], PLUS, PLUS);

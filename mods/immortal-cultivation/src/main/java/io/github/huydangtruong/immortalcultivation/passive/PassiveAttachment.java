@@ -21,6 +21,7 @@ public final class PassiveAttachment {
 		INT_MAP, PassiveData::levels,
 		ByteBufCodecs.BOOL, PassiveData::visionOn,
 		ByteBufCodecs.BOOL, PassiveData::growthOn,
+		ByteBufCodecs.BOOL, PassiveData::guardOn,
 		PassiveData::new);
 
 	public static final AttachmentType<PassiveData> PASSIVES = AttachmentRegistry.create(

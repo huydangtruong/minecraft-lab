@@ -82,6 +82,7 @@ public class ImmortalCultivation implements ModInitializer {
 		HeartsAttachment.WANDERER.identifier();
 		io.github.huydangtruong.immortalcultivation.technique.TechniqueAttachment.TECHNIQUES.identifier();
 		io.github.huydangtruong.immortalcultivation.passive.PassiveAttachment.PASSIVES.identifier();
+		io.github.huydangtruong.immortalcultivation.passive.ItemGuard.init(); // P-065: Item guard debt component
 		io.github.huydangtruong.immortalcultivation.technique.TechniqueNet.register();
 		io.github.huydangtruong.immortalcultivation.passive.PassiveNet.register(); // P-057: Passives tab
 		io.github.huydangtruong.immortalcultivation.passive.CropGrowth.register(); // P-058: Crop growth
