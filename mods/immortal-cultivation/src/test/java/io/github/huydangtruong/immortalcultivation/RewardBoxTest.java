@@ -71,7 +71,7 @@ class RewardBoxTest {
 		assertEquals(4, RewardTier.GOLD.options());
 		assertEquals(5, RewardTier.DIAMOND.options());
 		for (RewardTier t : RewardTier.values()) {
-			assertEquals(t == RewardTier.EMERALD ? 2 : 1, t.picks());
+			assertEquals(t == RewardTier.EMERALD || t == RewardTier.DIAMOND ? 2 : 1, t.picks()); // D171
 		}
 	}
 
