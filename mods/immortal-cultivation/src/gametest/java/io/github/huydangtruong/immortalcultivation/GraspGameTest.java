@@ -1,6 +1,7 @@
 package io.github.huydangtruong.immortalcultivation;
 
 import io.github.huydangtruong.immortalcultivation.technique.GraspRules;
+import io.github.huydangtruong.immortalcultivation.technique.SafeTeleport;
 import io.github.huydangtruong.immortalcultivation.technique.Technique;
 import io.github.huydangtruong.immortalcultivation.technique.TechniqueAttachment;
 import io.github.huydangtruong.immortalcultivation.technique.TechniqueData;
@@ -127,6 +128,28 @@ public class GraspGameTest {
 			cleanUp(c, p);
 			c.succeed();
 		});
+	}
+
+	/** D170 (Huy's bug: followers teleported into the air and the water): a follower's teleport spot needs ground and no water. */
+	@GameTest(maxTicks = 20)
+	public void followTeleportOnlyLandsOnSafeGround(GameTestHelper c) {
+		for (int y = 0; y <= 4; y++) {
+			c.setBlock(new net.minecraft.core.BlockPos(5, y, 5), net.minecraft.world.level.block.Blocks.WATER);
+		}
+		Zombie z = c.spawn(EntityTypes.ZOMBIE, new Vec3(2.5, 1, 2.5));
+		z.setNoAi(true);
+		net.minecraft.world.entity.monster.Vex v = c.spawn(EntityTypes.VEX, new Vec3(2.5, 3, 2.5));
+		v.setNoAi(true);
+		Vec3 ground = SafeTeleport.spotOrNull(c.getLevel(), z, c.absoluteVec(new Vec3(2.5, 1, 2.5)));
+		c.assertTrue(ground != null, "a spot just above the floor is fine");
+		Vec3 low = SafeTeleport.spotOrNull(c.getLevel(), z, c.absoluteVec(new Vec3(2.5, 3, 2.5)));
+		c.assertTrue(low != null && Math.abs(low.y - ground.y) < 0.3, "2 blocks higher it lands on the same floor: " + low + " vs " + ground);
+		c.assertTrue(SafeTeleport.spotOrNull(c.getLevel(), z, c.absoluteVec(new Vec3(2.5, 5, 2.5))) == null, "a walker never teleports high in the air (owner flying)");
+		c.assertTrue(SafeTeleport.spotOrNull(c.getLevel(), z, Vec3.atBottomCenterOf(c.absolutePos(new net.minecraft.core.BlockPos(5, 1, 5)))) == null, "a walker never teleports into water (owner swimming)");
+		c.assertTrue(SafeTeleport.spotOrNull(c.getLevel(), v, c.absoluteVec(new Vec3(2.5, 5, 2.5))) != null, "a flier may teleport into the air");
+		z.discard();
+		v.discard();
+		c.succeed();
 	}
 
 	/** Huy's bug: grasped undead burned in the sun (D134 says they never do). A plain zombie next to it must burn. */

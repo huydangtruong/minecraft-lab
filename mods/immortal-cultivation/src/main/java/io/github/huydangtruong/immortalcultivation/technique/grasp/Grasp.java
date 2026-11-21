@@ -747,7 +747,7 @@ public final class Grasp {
 		if (t % 10 == 0 && o != null && o.isAlive() && o.level() == sl && GraspRules.Mode.of(ga.mode()) == GraspRules.Mode.FOLLOW
 			&& m.distanceToSqr(o) > GraspRules.FOLLOW_TELEPORT * GraspRules.FOLLOW_TELEPORT
 			&& !io.github.huydangtruong.immortalcultivation.technique.PhaseState.phasing(o)) { // D169: not while the owner is in the walls
-			Vec3 at = GraspGoals.freeSpotOrNull(sl, m, GraspGoals.followSpot(m, o)); // D165: its own spot, not on the owner
+			Vec3 at = io.github.huydangtruong.immortalcultivation.technique.SafeTeleport.spotOrNull(sl, m, GraspGoals.followSpot(m, o)); // D165: its own spot; D170: safe ground only
 			if (at != null) { // D169: never into a block
 				m.getNavigation().stop();
 				m.snapTo(at.x, at.y, at.z);

@@ -221,7 +221,7 @@ public final class VioletGuardian extends IronGolem implements OwnedSummon {
 				return;
 			}
 			if (g.distanceToSqr(o) > TELEPORT_FROM * TELEPORT_FROM && g.level() instanceof ServerLevel sl && !PhaseState.phasing(o)) { // D169
-				Vec3 at = g.freeSpotNear(sl, g, o.position().add(g.random.nextDouble() * 4 - 2, 0, g.random.nextDouble() * 4 - 2), null);
+				Vec3 at = SafeTeleport.spotOrNull(sl, g, o.position().add(g.random.nextDouble() * 4 - 2, 0, g.random.nextDouble() * 4 - 2)); // D170: safe ground only
 				if (at != null) { // D169: never into a block
 					g.getNavigation().stop();
 					g.snapTo(at.x, at.y, at.z);

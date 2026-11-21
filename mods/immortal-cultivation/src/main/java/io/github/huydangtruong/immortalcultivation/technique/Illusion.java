@@ -721,9 +721,11 @@ public final class Illusion extends PathfinderMob implements OwnedSummon {
 				if (PhaseState.phasing(o)) { // D169: wait while the owner is in the walls
 					return;
 				}
-				BlockPos p = SpawnSpots.standSpot(sl, o.blockPosition(), a.getRandom().nextInt(5) - 2, a.getRandom().nextInt(5) - 2);
-				a.snapTo(p.getX() + 0.5, p.getY(), p.getZ() + 0.5);
-				a.getNavigation().stop();
+				Vec3 p = SafeTeleport.spotOrNull(sl, a, o.position().add(a.getRandom().nextInt(5) - 2, 0, a.getRandom().nextInt(5) - 2)); // D170
+				if (p != null) { // D170: not into the air or water while the owner flies or swims
+					a.snapTo(p.x, p.y, p.z);
+					a.getNavigation().stop();
+				}
 				return;
 			}
 			if (lookLeft > 0) {

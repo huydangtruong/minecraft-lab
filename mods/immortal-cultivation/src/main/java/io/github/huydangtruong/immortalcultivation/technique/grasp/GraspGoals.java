@@ -99,9 +99,7 @@ final class GraspGoals {
 	}
 
 	static boolean flies(Mob mob) {
-		return mob.isNoGravity() || mob.getNavigation() instanceof net.minecraft.world.entity.ai.navigation.FlyingPathNavigation
-			|| mob instanceof net.minecraft.world.entity.monster.Ghast || mob instanceof net.minecraft.world.entity.monster.Phantom
-			|| mob instanceof net.minecraft.world.entity.monster.Vex || mob instanceof net.minecraft.world.entity.monster.Blaze;
+		return io.github.huydangtruong.immortalcultivation.technique.SafeTeleport.flies(mob);
 	}
 
 	/** Damage one hit of this mob does: its attribute when it has one, else 3 (villager) or 2 (D135), plus the held item. */
@@ -395,17 +393,6 @@ final class GraspGoals {
 	static Vec3 followSpot(Mob mob, net.minecraft.world.entity.Entity owner) {
 		double[] d = GraspRules.followSpot(mob.getUUID().hashCode());
 		return owner.position().add(d[0], 0, d[1]);
-	}
-
-	/** D169: free spot near a position for a teleport, or null when nothing nearby is free (never into a block). */
-	static Vec3 freeSpotOrNull(ServerLevel sl, Mob mob, Vec3 want) {
-		for (int dy : new int[] {0, 1, 2, -1}) {
-			Vec3 at = want.add(0, dy, 0);
-			if (sl.noCollision(mob, mob.getDimensions(mob.getPose()).makeBoundingBox(at))) {
-				return at;
-			}
-		}
-		return null;
 	}
 
 	/** Free spot near a position for a teleport (the same position when nothing nearby is free). */

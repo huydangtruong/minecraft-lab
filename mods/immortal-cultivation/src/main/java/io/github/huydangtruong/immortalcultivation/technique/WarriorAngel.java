@@ -265,7 +265,12 @@ public final class WarriorAngel extends Vex implements OwnedSummon {
 				if (PhaseState.phasing(o)) { // D169: wait while the owner is in the walls
 					return;
 				}
-				a.snapTo(o.getX() + a.random.nextDouble() * 3 - 1.5, o.getY() + 1.5, o.getZ() + a.random.nextDouble() * 3 - 1.5);
+				if (a.level() instanceof ServerLevel sl) { // D170: never into water or lava
+					Vec3 p = SafeTeleport.spotOrNull(sl, a, new Vec3(o.getX() + a.random.nextDouble() * 3 - 1.5, o.getY() + 1.5, o.getZ() + a.random.nextDouble() * 3 - 1.5));
+					if (p != null) {
+						a.snapTo(p.x, p.y, p.z);
+					}
+				}
 				return;
 			}
 			boolean far = a.distanceToSqr(o) > FOLLOW_FROM * FOLLOW_FROM;
