@@ -47,7 +47,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 /**
  * Deadly Treasure (P-059, D150): 2 days after the Crimson Master or the God Slayer left, a chest guarded by Mega mobs
  * appears ~1000 blocks from a player (60% in a cave, else on the surface; underwater when the surface is deep water).
- * The chest opens only when every guard is dead. After 1 day with guards left, chest and guards vanish (failed).
+ * The chest opens only when every guard is dead. After 2 days (D173) with guards left, chest and guards vanish (failed).
  */
 public final class DeadlyTreasure {
 	/** Blue-violet, the colour of every Deadly Treasure message. */
@@ -165,10 +165,13 @@ public final class DeadlyTreasure {
 		d.guards.clear();
 		d.setDirty();
 		for (ServerPlayer p : server.getPlayerList().getPlayers()) {
-			title(p, text("lies near X " + d.x + ", Z " + d.z + " (1 day)"));
+			title(p, text("lies near X " + d.x + ", Z " + d.z + " (2 days)"));
 		}
 		server.getPlayerList().broadcastSystemMessage(text("Deadly Treasure: a guarded chest lies near X " + d.x + ", Z " + d.z
-			+ ". Kill every Mega guard to open it. It vanishes in 1 day."), false);
+			+ ". Kill every Mega guard to open it. It vanishes in 2 days."), false);
+		if (far) {
+			io.github.huydangtruong.immortalcultivation.godslayer.GodSlayerHunt.onSpecialEvent(server); // D173: counts as a special event
+		}
 	}
 
 	public record Spot(BlockPos chest, boolean water, boolean cave) {}

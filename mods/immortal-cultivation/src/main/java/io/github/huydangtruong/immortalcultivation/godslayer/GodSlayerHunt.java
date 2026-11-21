@@ -101,10 +101,10 @@ public final class GodSlayerHunt {
 		return p.getGameProfile().name();
 	}
 
-	// ---- trigger from the Crimson Master ----
+	// ---- trigger from the special events (D173) ----
 
-	/** The Crimson Master has arrived. Called by the scheduler. */
-	public static void onCrimsonMasterVisit(MinecraftServer server) {
+	/** A special event began: the Crimson Master arrived or a Deadly Treasure started (D173). visitCount counts both. */
+	public static void onSpecialEvent(MinecraftServer server) {
 		onVisit(server, Wanderer.currentDay(server));
 	}
 

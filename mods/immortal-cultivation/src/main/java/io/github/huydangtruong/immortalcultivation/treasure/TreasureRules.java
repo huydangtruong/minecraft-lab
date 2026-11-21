@@ -9,8 +9,8 @@ import java.util.random.RandomGenerator;
 public final class TreasureRules {
 	private TreasureRules() {}
 
-	/** The event lasts 1 Minecraft day from the announcement. */
-	public static final long DURATION_TICKS = 24000L;
+	/** The event lasts 2 Minecraft days from the announcement (D173, was 1). */
+	public static final long DURATION_TICKS = 2 * 24000L;
 	/** Horizontal distance from the chosen player. */
 	public static final int DISTANCE = 1000;
 	/** The chest is placed once a player comes this close (chunks loaded), like the Crimson Master. */

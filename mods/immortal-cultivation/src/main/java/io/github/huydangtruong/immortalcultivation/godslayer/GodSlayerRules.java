@@ -19,7 +19,7 @@ public final class GodSlayerRules {
 	public static final int HUNT_TICKS = 12000;
 	public static final int WARNING_TICKS = 1200;
 
-	/** The boss can come from day 100, on every 4th Crimson Master visit, to players with at least 30 hearts. */
+	/** The boss can come from day 100, on every 4th special event (Crimson Master visit or Deadly Treasure, D173), to players with at least 30 hearts. */
 	public static final int MIN_DAY = 100;
 	public static final int VISIT_PERIOD = 4;
 	public static final int MIN_HEARTS = 30;
@@ -131,7 +131,7 @@ public final class GodSlayerRules {
 		return Math.max(1, (int) Math.round(ticks * CONTROL_RESIST));
 	}
 
-	/** Is this Crimson Master visit one that brings the boss: day 100 or later, every 4th visit. */
+	/** Is this special event (D173) one that brings the boss: day 100 or later, every 4th event. */
 	public static boolean isHuntVisit(long day, int visitCount) {
 		return day >= MIN_DAY && visitCount > 0 && visitCount % VISIT_PERIOD == 0;
 	}
