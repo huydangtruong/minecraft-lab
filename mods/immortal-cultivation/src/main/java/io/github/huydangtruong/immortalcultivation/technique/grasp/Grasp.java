@@ -68,6 +68,8 @@ public final class Grasp {
 	private static final Identifier SLOW_ID = Identifier.fromNamespaceAndPath(ImmortalCultivation.NAMESPACE, "grasp_slow");
 
 	public static final int START = 0, CANCEL = 1, LIST = 2, MODE = 3, CALL = 4, RELEASE = 5;
+	/** D168: the "All" row. target is ignored; ALL_MODE carries the mode in arg. */
+	public static final int ALL_MODE = 6, ALL_CALL = 7, ALL_RELEASE = 8;
 
 	/** Client to server. kind: START (arg = entity id), CANCEL, LIST, MODE (target = mob uuid, arg = mode), CALL, RELEASE. */
 	public record Request(int kind, String target, int arg) implements CustomPacketPayload {
@@ -310,7 +312,7 @@ public final class Grasp {
 
 	// ---- requests ----
 
-	private static void handle(ServerPlayer p, int kind, String target, int arg) {
+	public static void handle(ServerPlayer p, int kind, String target, int arg) {
 		MinecraftServer server = p.level().getServer();
 		if (!ImmortalCultivation.enabled(server) || !p.isAlive() || p.isSpectator() || level(p) < 1) {
 			endTether(p, true);
@@ -323,6 +325,9 @@ public final class Grasp {
 			case MODE -> setMode(p, target, arg);
 			case CALL -> call(p, target);
 			case RELEASE -> releaseRequest(p, target);
+			case ALL_MODE -> allMode(p, arg);
+			case ALL_CALL -> allCall(p);
+			case ALL_RELEASE -> allRelease(p);
 			default -> {}
 		}
 	}
@@ -512,15 +517,30 @@ public final class Grasp {
 
 	private static void releaseRequest(ServerPlayer p, String target) {
 		UUID id = parse(target);
+		if (id != null && releaseOne(p, id)) {
+			sendState(p, -1, 0);
+			sendMenu(p);
+		}
+	}
+
+	private static boolean releaseOne(ServerPlayer p, UUID id) {
 		GraspData data = GraspData.of(p.level().getServer());
-		if (id == null || data.find(p.getUUID(), id) == null) {
-			return;
+		if (data.find(p.getUUID(), id) == null) {
+			return false;
 		}
 		data.remove(p.getUUID(), id);
 		Entity e = p.level().getServer().overworld().getEntityInAnyDimension(id);
 		if (e instanceof Mob m) {
 			releaseMob(m, true);
 		} // an unloaded mob lets itself go when it loads (its record is gone)
+		return true;
+	}
+
+	/** D168: lets every mob of the player go. */
+	private static void allRelease(ServerPlayer p) {
+		for (GraspData.Entry e : new ArrayList<>(GraspData.of(p.level().getServer()).get(p.getUUID()).mobs())) {
+			releaseOne(p, e.mob());
+		}
 		sendState(p, -1, 0);
 		sendMenu(p);
 	}
@@ -565,11 +585,24 @@ public final class Grasp {
 	}
 
 	private static void setMode(ServerPlayer p, String target, int mode) {
-		UUID id = parse(target);
+		if (setModeOne(p, parse(target), mode)) {
+			sendMenu(p);
+		}
+	}
+
+	/** D168: the same mode for every mob of the player. */
+	private static void allMode(ServerPlayer p, int mode) {
+		for (GraspData.Entry e : new ArrayList<>(GraspData.of(p.level().getServer()).get(p.getUUID()).mobs())) {
+			setModeOne(p, e.mob(), mode);
+		}
+		sendMenu(p);
+	}
+
+	private static boolean setModeOne(ServerPlayer p, UUID id, int mode) {
 		GraspData data = GraspData.of(p.level().getServer());
 		GraspData.Entry e = id == null ? null : data.find(p.getUUID(), id);
 		if (e == null || mode < 0 || mode >= GraspRules.Mode.values().length) {
-			return;
+			return false;
 		}
 		data.replace(p.getUUID(), e.withMode(mode));
 		if (p.level().getServer().overworld().getEntityInAnyDimension(id) instanceof Mob m && m.getAttached(GraspedMob.ATTACHMENT) != null) {
@@ -579,7 +612,7 @@ public final class Grasp {
 			m.getNavigation().stop();
 			m.setTarget(null);
 		}
-		sendMenu(p);
+		return true;
 	}
 
 	private static void call(ServerPlayer p, String target) {
@@ -597,12 +630,42 @@ public final class Grasp {
 			p.sendOverlayMessage(Component.literal("It is too far away to hear you"));
 			return;
 		}
-		Vec3 at = GraspGoals.freeSpotNear(p.level(), m, p.position().add(p.getLookAngle().multiply(2, 0, 2)));
+		callTo(p, m, p.position().add(p.getLookAngle().multiply(2, 0, 2)), now);
+		sendMenu(p);
+	}
+
+	/** Teleports a mob to a spot near a point and starts its Call cooldown. */
+	private static void callTo(ServerPlayer p, Mob m, Vec3 want, long now) {
+		Vec3 at = GraspGoals.freeSpotNear(p.level(), m, want);
 		m.getNavigation().stop();
 		m.snapTo(at.x, at.y, at.z);
 		m.setTarget(null);
-		CALL_READY.put(id, now + GraspRules.CALL_COOLDOWN_TICKS);
+		CALL_READY.put(m.getUUID(), now + GraspRules.CALL_COOLDOWN_TICKS);
 		p.level().sendParticles(ParticleTypes.END_ROD, at.x, at.y + m.getBbHeight() / 2, at.z, 12, 0.4, 0.4, 0.4, 0.05);
+	}
+
+	/** D168: calls every mob whose cooldown is ready, each to its own ring spot (D165); says how many came. */
+	private static void allCall(ServerPlayer p) {
+		long now = p.level().getGameTime();
+		int came = 0, waiting = 0, far = 0;
+		for (GraspData.Entry e : new ArrayList<>(GraspData.of(p.level().getServer()).get(p.getUUID()).mobs())) {
+			if (CALL_READY.getOrDefault(e.mob(), 0L) > now) {
+				waiting++;
+			} else if (p.level().getEntity(e.mob()) instanceof Mob m && m.isAlive()) {
+				callTo(p, m, GraspGoals.followSpot(m, p), now);
+				came++;
+			} else {
+				far++;
+			}
+		}
+		String msg = came + (came == 1 ? " mob came" : " mobs came");
+		if (waiting > 0) {
+			msg += ", " + waiting + " still waiting";
+		}
+		if (far > 0) {
+			msg += ", " + far + " too far away";
+		}
+		p.sendOverlayMessage(Component.literal(msg));
 		sendMenu(p);
 	}
 
@@ -682,10 +745,13 @@ public final class Grasp {
 		}
 		ServerPlayer o = server.getPlayerList().getPlayer(ga.owner());
 		if (t % 10 == 0 && o != null && o.isAlive() && o.level() == sl && GraspRules.Mode.of(ga.mode()) == GraspRules.Mode.FOLLOW
-			&& m.distanceToSqr(o) > GraspRules.FOLLOW_TELEPORT * GraspRules.FOLLOW_TELEPORT) {
-			Vec3 at = GraspGoals.freeSpotNear(sl, m, GraspGoals.followSpot(m, o)); // D165: its own spot, not on the owner
-			m.getNavigation().stop();
-			m.snapTo(at.x, at.y, at.z);
+			&& m.distanceToSqr(o) > GraspRules.FOLLOW_TELEPORT * GraspRules.FOLLOW_TELEPORT
+			&& !io.github.huydangtruong.immortalcultivation.technique.PhaseState.phasing(o)) { // D169: not while the owner is in the walls
+			Vec3 at = io.github.huydangtruong.immortalcultivation.technique.SafeTeleport.spotOrNull(sl, m, GraspGoals.followSpot(m, o)); // D165: its own spot; D170: safe ground only
+			if (at != null) { // D169: never into a block
+				m.getNavigation().stop();
+				m.snapTo(at.x, at.y, at.z);
+			}
 		}
 		if (o != null && o.isAlive() && o.level() == sl && m.getTarget() == null && GraspRules.Mode.of(ga.mode()) == GraspRules.Mode.FOLLOW) {
 			// D165: a follower inside 2 blocks of its owner is gently pushed out, so a crowd never stands on the owner

@@ -22,6 +22,7 @@
 		"ExperienceOrbMixin",
 		"EntityCollisionContextMixin",
 		"EntityInWallMixin",
+		"TamableTeleportMixin",
 		"FoodDataMixin",
 		"FoodPropertiesMixin",
 		"GhastMixin",
@@ -34,7 +35,9 @@
 		"NearestAttackableDecoyMixin",
 		"PlayerMixin",
 		"PlayerPhaseMixin",
-		"ServerPlayerHurtMixin"
+		"ServerPlayerHurtMixin",
+		"ThrownSplashPotionMixin",
+		"WitchThrowMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

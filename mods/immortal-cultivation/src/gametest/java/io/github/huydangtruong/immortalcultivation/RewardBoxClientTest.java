@@ -129,6 +129,10 @@ public class RewardBoxClientTest implements FabricClientGameTest {
 		if (mask != 0b10) {
 			throw new AssertionError("a click on card 1 should select only it, mask was " + mask);
 		}
+		if (tier.picks() == 2) { // D171: the diamond box takes two cards, so card 0 too
+			clickGui(context, 8 + 25, 30 + 40, InputConstants.MOUSE_BUTTON_LEFT);
+			context.waitTicks(10);
+		}
 		// Hover the first card: its item tooltip.
 		double[] hover = context.computeOnClient(mc -> {
 			double scale = mc.getWindow().getGuiScale();

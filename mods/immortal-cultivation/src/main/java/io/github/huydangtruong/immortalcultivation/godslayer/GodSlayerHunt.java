@@ -101,10 +101,10 @@ public final class GodSlayerHunt {
 		return p.getGameProfile().name();
 	}
 
-	// ---- trigger from the Crimson Master ----
+	// ---- trigger from the special events (D173) ----
 
-	/** The Crimson Master has arrived. Called by the scheduler. */
-	public static void onCrimsonMasterVisit(MinecraftServer server) {
+	/** A special event began: the Crimson Master arrived or a Deadly Treasure started (D173). visitCount counts both. */
+	public static void onSpecialEvent(MinecraftServer server) {
 		onVisit(server, Wanderer.currentDay(server));
 	}
 
@@ -379,7 +379,6 @@ public final class GodSlayerHunt {
 			reward(killer, boss, server);
 			server.getPlayerList().broadcastSystemMessage(Messages.godSlayerLost(), false);
 			server.getPlayerList().broadcastSystemMessage(Messages.godSlayerFallen(d.level), false);
-			io.github.huydangtruong.immortalcultivation.treasure.DeadlyTreasure.onEventLeft(server); // P-059
 		} else {
 			d.clearHunt(); // killed by something else (a command): no reward, the level stays
 		}
@@ -435,7 +434,6 @@ public final class GodSlayerHunt {
 		}
 		hideBar();
 		d.clearHunt();
-		io.github.huydangtruong.immortalcultivation.treasure.DeadlyTreasure.onEventLeft(server); // P-059
 	}
 
 	private static void endQuiet(MinecraftServer server, GodSlayerSavedData d) {

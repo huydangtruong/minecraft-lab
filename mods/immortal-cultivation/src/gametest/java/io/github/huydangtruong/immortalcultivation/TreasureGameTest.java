@@ -112,16 +112,19 @@ public class TreasureGameTest {
 	}
 
 	@GameTest(maxTicks = 100)
-	public void leavingSchedulesInTwoDays(GameTestHelper c) {
+	public void crimsonMasterLeavingGivesItsNextVisitToTheTreasure(GameTestHelper c) { // D172
 		MinecraftServer s = c.getLevel().getServer();
 		TreasureSavedData d = DeadlyTreasure.data(s);
 		d.clear();
-		long now = Wanderer.clockTime(s);
-		DeadlyTreasure.onEventLeft(s);
-		c.assertTrue(d.phase == TreasureRules.Phase.PENDING && d.startAt == now + TreasureRules.DELAY_TICKS, "pending in 2 days");
-		DeadlyTreasure.onEventLeft(s);
-		c.assertTrue(d.startAt == now + TreasureRules.DELAY_TICKS, "a second trigger changes nothing");
+		long next = Wanderer.data(s).nextDay();
+		DeadlyTreasure.onCrimsonMasterLeft(s);
+		c.assertTrue(d.phase == TreasureRules.Phase.PENDING && d.startAt == next * 24000L, "pending for the next visit day " + next + ": " + d.startAt);
+		c.assertTrue(DeadlyTreasure.takesCrimsonSlot(s), "the Crimson Master skips that day");
+		long first = d.startAt;
+		DeadlyTreasure.onCrimsonMasterLeft(s);
+		c.assertTrue(d.startAt == first, "a second trigger changes nothing");
 		d.clear();
+		c.assertTrue(!DeadlyTreasure.takesCrimsonSlot(s), "idle: the Crimson Master comes");
 		c.succeed();
 	}
 

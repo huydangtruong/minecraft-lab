@@ -24,6 +24,11 @@ public class GraspScreen extends Screen {
 	private static final int ROW_H = 46;
 	private static final int TOP = 30;
 	private static final int BOTTOM = 8;
+	private static final int ALL_H = 20;
+	/** D168 "All" row buttons: x offset from the panel left, width, label. Follow, Stay, Guard, Call, Release all. */
+	private static final int[] ALL_X = {30, 74, 118, 162, 206};
+	private static final int[] ALL_W = {42, 42, 42, 40, 66};
+	private static final String[] ALL_LABEL = {"Follow", "Stay", "Guard", "Call", "Release all"};
 	private static final int GOLD = 0xFF9A7A20;
 	private static final int PANEL = 0xF0101018;
 	private static final String[] MODES = {"Follow", "Stay", "Guard"};
@@ -31,6 +36,7 @@ public class GraspScreen extends Screen {
 	private Grasp.Menu menu;
 	private double scroll;
 	private String confirm;
+	private boolean confirmAll;
 	private int sinceRefresh;
 
 	public GraspScreen(Grasp.Menu menu) {
@@ -69,12 +75,21 @@ public class GraspScreen extends Screen {
 		return Math.max(8, (height - panelHeight()) / 2);
 	}
 
-	private int listTop() {
+	/** D168: the "All" row sits between the header and the list; no row, no mobs to command. */
+	private boolean hasAllRow() {
+		return !menu.rows().isEmpty();
+	}
+
+	private int allRowY() {
 		return panelTop() + TOP;
 	}
 
+	private int listTop() {
+		return panelTop() + TOP + (hasAllRow() ? ALL_H : 0);
+	}
+
 	private int listHeight() {
-		return panelHeight() - TOP - BOTTOM;
+		return panelHeight() - (listTop() - panelTop()) - BOTTOM;
 	}
 
 	private double maxScroll() {
@@ -117,6 +132,9 @@ public class GraspScreen extends Screen {
 		if (menu.rows().isEmpty()) {
 			g.text(font, "Hold right click on a mob to grasp it.", left + 8, listTop() + 6, 0xFFA0A0B0);
 		}
+		if (hasAllRow()) {
+			drawAllRow(g, left, allRowY(), mouseX, mouseY);
+		}
 		g.enableScissor(left + 1, listTop(), left + w - 1, listTop() + listHeight());
 		int y = listTop() - (int) scroll;
 		List<Runnable> tips = new ArrayList<>();
@@ -135,6 +153,41 @@ public class GraspScreen extends Screen {
 			int barY = listTop() + (int) ((listHeight() - barH) * (scroll / maxScroll()));
 			g.fill(left + w - 4, barY, left + w - 2, barY + barH, 0xFF8A7A50);
 		}
+	}
+
+	private void drawAllRow(GuiGraphicsExtractor g, int left, int y, int mouseX, int mouseY) {
+		g.text(font, Component.literal("All"), left + 8, y + 3, 0xFFFFD24A, true);
+		for (int i = 0; i < ALL_X.length; i++) {
+			int bx = left + ALL_X[i];
+			boolean release = i == ALL_X.length - 1;
+			String text = release && confirmAll ? "Sure?" : ALL_LABEL[i];
+			button(g, bx, y, ALL_W[i], text, release && confirmAll, over(mouseX, mouseY, bx, y, ALL_W[i], BTN_H), 0xFF8A2020);
+		}
+	}
+
+	private void clickAll(int mx, int my) {
+		int left = panelLeft(), y = allRowY();
+		for (int i = 0; i < ALL_X.length; i++) {
+			if (!over(mx, my, left + ALL_X[i], y, ALL_W[i], BTN_H)) {
+				continue;
+			}
+			boolean release = i == ALL_X.length - 1;
+			confirm = null;
+			if (i < 3) {
+				confirmAll = false;
+				ClientPlayNetworking.send(new Grasp.Request(Grasp.ALL_MODE, "", i));
+			} else if (i == 3) {
+				confirmAll = false;
+				ClientPlayNetworking.send(new Grasp.Request(Grasp.ALL_CALL, "", 0));
+			} else if (release && confirmAll) {
+				confirmAll = false;
+				ClientPlayNetworking.send(new Grasp.Request(Grasp.ALL_RELEASE, "", 0));
+			} else {
+				confirmAll = true;
+			}
+			return;
+		}
+		confirmAll = false;
 	}
 
 	private void button(GuiGraphicsExtractor g, int x, int y, int w, String text, boolean on, boolean hover, int onColor) {
@@ -217,6 +270,10 @@ public class GraspScreen extends Screen {
 	@Override
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
 		double mx = event.x(), my = event.y();
+		if (hasAllRow() && my >= allRowY() && my < allRowY() + ALL_H) {
+			clickAll((int) mx, (int) my);
+			return true;
+		}
 		if (!inList(my)) {
 			return super.mouseClicked(event, doubleClick);
 		}
@@ -233,6 +290,7 @@ public class GraspScreen extends Screen {
 	}
 
 	private void click(Grasp.Row r, int mx, int my, int x0, int x1, int y) {
+		confirmAll = false;
 		int by = y + BTN_Y;
 		for (int i = 0; i < MODES.length; i++) {
 			if (over(mx, my, modeX(x0, i), by, 42, BTN_H)) {

@@ -60,6 +60,8 @@ public final class WandererScheduler {
 			case WAITING -> {
 				if (d.nextDay() < 0) {
 					Wanderer.save(server, d.withNextDay(day + QuestGenerator.daysUntilNext(RNG)));
+				} else if (day >= d.nextDay() && io.github.huydangtruong.immortalcultivation.treasure.DeadlyTreasure.takesCrimsonSlot(server)) {
+					Wanderer.save(server, d.withNextDay(day + QuestGenerator.daysUntilNext(RNG))); // D172: this visit is the treasure's
 				} else if (day >= d.nextDay()) {
 					List<ServerPlayer> players = overworld.players();
 					if (!players.isEmpty()) {
@@ -120,7 +122,7 @@ public final class WandererScheduler {
 			}
 		}
 		Wanderer.spawnNpc(level, feet, Wanderer.newQuest(level.getServer()), 0f);
-		// P-032: every 4th visit from day 100 may bring the God Slayer.
-		io.github.huydangtruong.immortalcultivation.godslayer.GodSlayerHunt.onCrimsonMasterVisit(level.getServer());
+		// P-032, D173: every 4th special event (Crimson Master or Deadly Treasure) from day 100 may bring the God Slayer.
+		io.github.huydangtruong.immortalcultivation.godslayer.GodSlayerHunt.onSpecialEvent(level.getServer());
 	}
 }
