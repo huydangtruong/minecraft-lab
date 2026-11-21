@@ -182,7 +182,7 @@ public final class Mayhem {
 		BlockHitResult block = sl.clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, p));
 		Vec3 limit = block.getType() == HitResult.Type.MISS ? end : block.getLocation();
 		EntityHitResult hit = ProjectileUtil.getEntityHitResult(sl, p, eye, limit, new AABB(eye, limit).inflate(1.0),
-			e -> e instanceof LivingEntity le && TechniqueDamage.affectable(le, p) && !Lance.isFriend(le, p), 0.3f);
+			e -> e instanceof LivingEntity le && hits(le, p), 0.3f);
 		Vec3 stop = hit != null ? hit.getLocation() : limit;
 		trail(sl, eye.add(0, -0.2, 0), stop);
 		sl.playSound(null, p.blockPosition(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.8f, 1.6f);
@@ -367,6 +367,15 @@ public final class Mayhem {
 	}
 
 	/** Once a second: slowness and burn damage for everything near an active budding, each target once. */
+	/**
+	 * Targets of the shards and the burn: the usual technique filter, and D182: other players only when the PvP game rule
+	 * is on (a Death Match needs PvP on, so its opponents stay targets). With PvP off a shard flies through players.
+	 */
+	public static boolean hits(LivingEntity e, ServerPlayer p) {
+		return TechniqueDamage.affectable(e, p) && !Lance.isFriend(e, p)
+			&& (!(e instanceof net.minecraft.world.entity.player.Player) || io.github.huydangtruong.immortalcultivation.wanderer.DeathMatch.pvpAllowed(p.level().getServer()));
+	}
+
 	private static void burn(ServerPlayer p, Run r, List<BlockPos> active) {
 		ServerLevel sl = r.level;
 		double radius = MayhemRules.burnRadius(r.techLevel);
@@ -375,7 +384,7 @@ public final class Mayhem {
 		for (BlockPos pos : active) {
 			Vec3 c = Vec3.atCenterOf(pos);
 			targets.addAll(sl.getEntitiesOfClass(LivingEntity.class, new AABB(c, c).inflate(radius),
-				e -> TechniqueDamage.affectable(e, p) && !Lance.isFriend(e, p) && e.getBoundingBox().getCenter().distanceTo(c) <= radius));
+				e -> hits(e, p) && e.getBoundingBox().getCenter().distanceTo(c) <= radius));
 			sl.sendParticles(SPARKLE, c.x, c.y + 0.6, c.z, 3, 0.4, 0.4, 0.4, 0.02);
 		}
 		for (LivingEntity e : targets) {
