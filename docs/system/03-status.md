@@ -2,7 +2,7 @@
 
 > Tóm tắt cho Huy: file này ghi việc đang làm dở và bước tiếp theo, để một phiên Claude mới đọc là làm tiếp được.
 > Manager cập nhật file này cuối mỗi đợt việc (merge, phát hành, quyết định mới).
-> Snapshot: 2026-11-21, after release 0.37.0.
+> Snapshot: 2026-11-21, after release 0.38.0.
 
 A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [workflow/team.md](../workflow/team.md) → the plan of the work in flight. Do not read the whole repo.
 
@@ -10,7 +10,7 @@ A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [w
 
 | What | Where |
 |---|---|
-| Last release | `immortal-cultivation-v0.37.0` (GitHub Releases on `huydangtruong/minecraft-lab`), `mod_version=0.37.0`. All old tags `permahearts-v*` were renamed to `immortal-cultivation-v*` on 2026-11-17 (D132); the installers still accept both prefixes |
+| Last release | `immortal-cultivation-v0.38.0` (GitHub Releases on `huydangtruong/minecraft-lab`), `mod_version=0.38.0`. All old tags `permahearts-v*` were renamed to `immortal-cultivation-v*` on 2026-11-17 (D132); the installers still accept both prefixes |
 | 0.12.0 contains | Warrior Angel (P-021, D62, D63), Aqua Marine (P-022, P-023, D64, D69), chieftain XP x10 and damage x2 (D65, D66), stronger Strength/Swiftness/Mining elixirs (D67), gold quest 64 (D68) |
 | 0.13.0 contains | Illusion technique (P-024, D71); D72 numbers (Warrior Angel, Cloud Travel, Undying Jutsu, Heaven Blast, Fireball, Frozen Breath); chieftain health 200 and the leader-bonus fix; Strength +2 (D70); "Death Match (PvP)" line |
 | 0.14.0 contains | Illusion work modes and hostile mobs targeting the clones (P-025, D73); Quantum Leap rename (turquoise) and Cosmic Warping portals (P-026, D74, D75); quest reward boxes (P-027, D76); technique slots cost 64, 128, 256, 512 emeralds (D77); clones plant bare farmland and pick up wool near the sheep. Not playtested by hand |
@@ -43,6 +43,7 @@ A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [w
 | 0.35.1 contains | Heaven Blast stun 2 s + 0.25 s/level (D162). Life Stealer: blood flies 1.5 s (D162), drains 30% at Lv 1, +2%/level (D164). Solar Lance drawn over the HUD in first person, grows to 2.5x width by 12 s, harsher sound, shorter Damage text (D163). Soul Grasp followers keep their own spot 2.5-3.5 blocks from the owner, fixed odd-phase mobs never following (D165). Deadly Treasure chest has 2 enchanted golden apples (D166). Area tests green. Not playtested by hand |
 | 0.36.0 contains | Grasped witch throws healing at the owner and allies, harmful potions at enemies (D167); Soul Grasp "All" row: Follow, Stay, Guard, Call, Release all (D168). Spirit Walk 10 s + 1 s/level, sight 24-96 blocks; followers (grasped mobs, guardians, clones, angels, pets) never teleport into walls while the owner phases (D169), and only onto safe ground, never into the air or water (D170). Diamond reward box: pick 2 of 5 (D171). Deadly Treasure takes every other Crimson Master visit, chest adds 32 golden carrots, always 8 random stacks (D172); lasts 2 days; God Slayer on every 4th special event (D173). Area tests green. Not playtested by hand |
 | 0.37.0 contains | P-064 Crystal Mayhem, 20th technique (D174): left click Shard Projection (light-based damage, 20 shards, 10 s amethyst clusters), hold right click Light Strike Reflection (chain of lit buddings that burn 1 + 0.5/level and slow, 20 s, then 30 s cooldown). Server + client game tests green. Not playtested by hand |
+| 0.38.0 contains | P-065 Item guard, 7th passive (D176): items do not break, they become broken with a durability debt of 100% (Lv1) down to 10% (Lv10), unusable until the anvil or Mending pays it; crafting-grid repair of a broken item refused, grindstone vanilla. Solar Lance cooldown 36 s (D175). Fix: flaky sun-burn grasp test. Server game tests green; client suite green once, new screenshots not looked at. Not playtested by hand |
 | On `main`, not released | Nothing |
 
 Release steps: [workflow/release.md](../workflow/release.md). Release **only when Huy says so**.
