@@ -444,6 +444,7 @@ public final class Grasp {
 		mob.setCustomNameVisible(true);
 		mob.setPersistenceRequired();
 		mob.setTarget(null);
+		leaveRaid(mob);
 		GraspGoals.apply(mob);
 		LOADED.add(mob);
 		data.add(p.getUUID(), snapshot(mob, mob.getAttached(GraspedMob.ATTACHMENT)));
@@ -455,6 +456,27 @@ public final class Grasp {
 			sl.playSound(null, mob.blockPosition(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.8f, 1.8f);
 		}
 		sendState(p, -1, 0);
+	}
+
+	/**
+	 * D185: a grasped raider (Vindicator, Pillager, Evoker, Witch, Ravager...) is no longer part of any raid: the raid
+	 * finishes without it and it never joins a new one. Called at tame time and every second (worlds grasped before the fix).
+	 */
+	static void leaveRaid(Mob mob) {
+		if (!(mob instanceof net.minecraft.world.entity.raid.Raider r)) {
+			return;
+		}
+		if (r.canJoinRaid()) {
+			r.setCanJoinRaid(false);
+		}
+		net.minecraft.world.entity.raid.Raid raid = r.getCurrentRaid();
+		if (raid != null && r.level() instanceof ServerLevel sl) {
+			if (raid.getLeader(r.getWave()) == r) {
+				raid.removeLeader(r.getWave());
+			}
+			raid.removeFromRaid(sl, r, true);
+			r.setCurrentRaid(null);
+		}
 	}
 
 	/** Sets the health bonus of a level on the mob. heal = tame time: health back to full. Updates the stored level. */
@@ -778,6 +800,7 @@ public final class Grasp {
 			}
 		}
 		if (t % 20 == 0) {
+			leaveRaid(m);
 			GraspedMob cur = m.getAttached(GraspedMob.ATTACHMENT);
 			if (cur != null && data.find(cur.owner(), m.getUUID()) != null) {
 				data.replace(cur.owner(), snapshot(m, cur));
