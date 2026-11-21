@@ -87,11 +87,11 @@ class GodSlayerRulesTest {
 
 	@Test
 	void huntVisitAndHearts() {
-		assertFalse(GodSlayerRules.isHuntVisit(99, 4));
-		assertTrue(GodSlayerRules.isHuntVisit(100, 4));
-		assertFalse(GodSlayerRules.isHuntVisit(100, 5));
-		assertTrue(GodSlayerRules.isHuntVisit(300, 8));
-		assertFalse(GodSlayerRules.isHuntVisit(300, 0));
+		assertFalse(GodSlayerRules.isHuntSlot(99, 2)); // D184: not before day 100
+		assertTrue(GodSlayerRules.isHuntSlot(100, 2)); // Crimson, Treasure, Crimson, Treasure -> the boss's slot
+		assertFalse(GodSlayerRules.isHuntSlot(300, 1));
+		assertFalse(GodSlayerRules.isHuntSlot(300, 0));
+		assertTrue(GodSlayerRules.isHuntSlot(300, 5)); // treasures before day 100 kept counting
 		assertTrue(GodSlayerRules.heartsEnough(30));
 		assertFalse(GodSlayerRules.heartsEnough(29));
 	}

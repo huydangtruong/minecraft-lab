@@ -19,9 +19,12 @@ public final class GodSlayerRules {
 	public static final int HUNT_TICKS = 12000;
 	public static final int WARNING_TICKS = 1200;
 
-	/** The boss can come from day 100, on every 4th special event (Crimson Master visit or Deadly Treasure, D173), to players with at least 30 hearts. */
+	/**
+	 * D184: from day 100 the boss takes the special-event slot after every 2nd Deadly Treasure (Crimson Master, Treasure,
+	 * Crimson Master, Treasure, God Slayer), and hunts a player with at least 30 hearts.
+	 */
 	public static final int MIN_DAY = 100;
-	public static final int VISIT_PERIOD = 4;
+	public static final int TREASURES_PER_HUNT = 2;
 	public static final int MIN_HEARTS = 30;
 
 	/** Beyond this distance (or in another dimension, or stuck this long) the boss teleports next to its target (D100). */
@@ -131,9 +134,9 @@ public final class GodSlayerRules {
 		return Math.max(1, (int) Math.round(ticks * CONTROL_RESIST));
 	}
 
-	/** Is this special event (D173) one that brings the boss: day 100 or later, every 4th event. */
-	public static boolean isHuntVisit(long day, int visitCount) {
-		return day >= MIN_DAY && visitCount > 0 && visitCount % VISIT_PERIOD == 0;
+	/** D184: is this special-event slot the boss's? treasuresSince = Deadly Treasures started since the boss's last slot. */
+	public static boolean isHuntSlot(long day, int treasuresSince) {
+		return day >= MIN_DAY && treasuresSince >= TREASURES_PER_HUNT;
 	}
 
 	public static boolean heartsEnough(int hearts) {

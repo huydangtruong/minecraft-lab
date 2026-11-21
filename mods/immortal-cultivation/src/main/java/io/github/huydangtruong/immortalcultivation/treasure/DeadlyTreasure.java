@@ -170,7 +170,7 @@ public final class DeadlyTreasure {
 		server.getPlayerList().broadcastSystemMessage(text("Deadly Treasure: a guarded chest lies near X " + d.x + ", Z " + d.z
 			+ ". Kill every Mega guard to open it. It vanishes in 2 days."), false);
 		if (far) {
-			io.github.huydangtruong.immortalcultivation.godslayer.GodSlayerHunt.onSpecialEvent(server); // D173: counts as a special event
+			io.github.huydangtruong.immortalcultivation.godslayer.GodSlayerHunt.onTreasure(server); // D184: every 2nd treasure gives the next slot to the boss
 		}
 	}
 
