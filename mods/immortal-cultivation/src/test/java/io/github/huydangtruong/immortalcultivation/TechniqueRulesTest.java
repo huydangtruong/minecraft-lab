@@ -13,11 +13,11 @@ import org.junit.jupiter.api.Test;
 class TechniqueRulesTest {
 	@Test
 	void xpCostsMatchHuysTotals() {
-		assertEquals(6, TechniqueRules.upgradeCost(1));
-		assertEquals(10, TechniqueRules.upgradeCost(10));
-		assertEquals(14, TechniqueRules.upgradeCost(20));
-		assertEquals(80, TechniqueRules.totalCost(10));
-		assertEquals(200, TechniqueRules.totalCost(20));
+		assertEquals(5, TechniqueRules.upgradeCost(1)); // D178: flat 5 levels
+		assertEquals(5, TechniqueRules.upgradeCost(10));
+		assertEquals(5, TechniqueRules.upgradeCost(20));
+		assertEquals(50, TechniqueRules.totalCost(10));
+		assertEquals(100, TechniqueRules.totalCost(20));
 		for (int l = 2; l <= 20; l++) {
 			assertEquals(true, TechniqueRules.upgradeCost(l) >= TechniqueRules.upgradeCost(l - 1), "never cheaper at level " + l);
 		}

@@ -36,15 +36,18 @@ public final class TechniqueRules {
 
 	// ---- XP ----
 
-	/** Experience levels the upgrade to toLevel costs: round(5.8 + 0.4 * toLevel) = 6, 7, 7 ... 14. */
+	/** Experience levels each upgrade costs (D178: a flat 5 at every level, like passives; was round(5.8 + 0.4 * L) = 6 ... 14). */
+	public static final int COST_LEVELS = 5;
+
+	/** Experience levels the upgrade to toLevel costs: 5 at every level (D178). */
 	public static int upgradeCost(int toLevel) {
 		if (toLevel < 1 || toLevel > MAX_LEVEL) {
 			throw new IllegalArgumentException("level " + toLevel);
 		}
-		return (63 + 4 * toLevel) / 10;
+		return COST_LEVELS;
 	}
 
-	/** Levels spent in total to go from 0 to level (80 for 10, 200 for 20). */
+	/** Levels spent in total to go from 0 to level (50 for 10, 100 for 20). */
 	public static int totalCost(int level) {
 		int sum = 0;
 		for (int l = 1; l <= level; l++) {
