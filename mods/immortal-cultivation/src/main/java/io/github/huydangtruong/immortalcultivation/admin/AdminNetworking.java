@@ -19,14 +19,18 @@ import net.minecraft.server.level.ServerPlayer;
 public final class AdminNetworking {
 	private AdminNetworking() {}
 
-	/** Server to client: open the panel. Carries the current values of the mod game rules and the player's no-cooldown switch. */
-	public record Open(boolean cultivation, boolean danger, int spawnCeiling, boolean noCooldown) implements CustomPacketPayload {
+	/**
+	 * Server to client: open the panel. Carries the current values of the mod game rules, the player's no-cooldown switch and
+	 * (D186) the player's elixir counts in {@link io.github.huydangtruong.immortalcultivation.ElixirStat} order.
+	 */
+	public record Open(boolean cultivation, boolean danger, int spawnCeiling, boolean noCooldown, List<Integer> elixirs) implements CustomPacketPayload {
 		public static final Type<Open> TYPE = new Type<>(Identifier.fromNamespaceAndPath(ImmortalCultivation.NAMESPACE, "admin_open"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Open> CODEC = StreamCodec.composite(
 			ByteBufCodecs.BOOL, Open::cultivation,
 			ByteBufCodecs.BOOL, Open::danger,
 			ByteBufCodecs.VAR_INT, Open::spawnCeiling,
-				ByteBufCodecs.BOOL, Open::noCooldown,
+			ByteBufCodecs.BOOL, Open::noCooldown,
+			ByteBufCodecs.VAR_INT.apply(ByteBufCodecs.list(64)), Open::elixirs,
 			Open::new);
 
 		@Override
@@ -66,8 +70,10 @@ public final class AdminNetworking {
 		}
 		MinecraftServer server = p.level().getServer();
 		var rules = server.getGameRules();
+		var cultivation = io.github.huydangtruong.immortalcultivation.HeartsAttachment.getCultivation(p);
+		List<Integer> elixirs = java.util.Arrays.stream(io.github.huydangtruong.immortalcultivation.ElixirStat.values()).map(cultivation::level).toList();
 		ServerPlayNetworking.send(p, new Open(rules.get(ImmortalCultivation.ENABLED), rules.get(Danger.ENABLED), rules.get(Danger.SPAWN_CEILING),
-			io.github.huydangtruong.immortalcultivation.technique.TechniqueAttachment.get(p).noCooldown()));
+			io.github.huydangtruong.immortalcultivation.technique.TechniqueAttachment.get(p).noCooldown(), elixirs));
 		return true;
 	}
 
