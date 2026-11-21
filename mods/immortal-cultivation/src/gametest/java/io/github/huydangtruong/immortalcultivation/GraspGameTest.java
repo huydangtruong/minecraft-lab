@@ -153,16 +153,18 @@ public class GraspGameTest {
 	}
 
 	/** Huy's bug: grasped undead burned in the sun (D134 says they never do). A plain zombie next to it must burn. */
-	@GameTest(maxTicks = 100)
+	@GameTest(maxTicks = 260)
 	public void aGraspedZombieDoesNotBurnInTheSun(GameTestHelper c) {
 		ServerPlayer p = grasper(c, 10);
 		c.getLevel().getServer().getCommands().performPrefixedCommand(c.getLevel().getServer().createCommandSourceStack(), "time set noon");
+		c.getLevel().getServer().getCommands().performPrefixedCommand(c.getLevel().getServer().createCommandSourceStack(), "weather clear");
 		Zombie mine = c.spawn(EntityTypes.ZOMBIE, new Vec3(6.5, 1, 5.5));
 		mine.setNoAi(true);
 		Grasp.tame(p, mine, 10);
 		Zombie wild = c.spawn(EntityTypes.ZOMBIE, new Vec3(6.5, 1, 2.5));
 		wild.setNoAi(true);
-		c.runAfterDelay(60, () -> {
+		// A zombie in full sun catches fire with about 4% chance per tick: 200 ticks makes a miss very unlikely.
+		c.runAfterDelay(200, () -> {
 			c.assertTrue(wild.isOnFire() || !wild.isAlive(), "control: a plain zombie burns at noon");
 			c.assertTrue(!mine.isOnFire(), "the grasped zombie does not burn");
 			cleanUp(c, p);
