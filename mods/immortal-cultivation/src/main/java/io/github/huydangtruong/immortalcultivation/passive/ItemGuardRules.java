@@ -1,8 +1,9 @@
 package io.github.huydangtruong.immortalcultivation.passive;
 
 /**
- * Item guard (D176), pure Java. A "broken" stack sits at full damage (0 durability) and carries a debt in durability
- * points; repair pays the debt first. The stack works again when the debt is 0 and it has at least 1 durability.
+ * Item guard (D176, D179), pure Java. A "broken" stack sits at full damage (0 durability) and carries a debt in durability
+ * points: 0 when it breaks, then every further point of wear adds to it up to the cap of the passive level. Repair pays
+ * the debt first. The stack works again when the debt is 0 and it has at least 1 durability.
  */
 public final class ItemGuardRules {
 	private ItemGuardRules() {}
@@ -12,6 +13,14 @@ public final class ItemGuardRules {
 		public boolean broken(int maxDamage) {
 			return stillBroken(debt, damage, maxDamage);
 		}
+	}
+
+	/** D179: debt after {@code wear} more points on a broken stack, never above {@code cap} (a debt already above it stays). */
+	public static int grow(int debt, int wear, int cap) {
+		if (wear <= 0 || debt >= cap) {
+			return debt;
+		}
+		return (int) Math.min(cap, (long) debt + wear);
 	}
 
 	/** A broken item is back in use only when nothing is owed and it has durability again. */

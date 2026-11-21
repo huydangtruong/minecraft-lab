@@ -155,7 +155,7 @@ public final class StatsPanel {
 					return !NotesTab.scroll(panelX(inv), ((ContainerScreenAccess) inv).permahearts$topPos(), W, H, mx, my, sy);
 				}
 				if (tab == Tab.PASSIVES) {
-					return true; // five rows fit: nothing scrolls
+					return !PassivesTab.scroll(panelX(inv), ((ContainerScreenAccess) inv).permahearts$topPos(), W, H, mx, my, sy);
 				}
 				return !TechniquesTab.scroll(panelX(inv), ((ContainerScreenAccess) inv).permahearts$topPos(), W, H, mx, my, sy);
 			});

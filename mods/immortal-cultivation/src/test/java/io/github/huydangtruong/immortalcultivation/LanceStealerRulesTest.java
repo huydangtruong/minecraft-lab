@@ -31,8 +31,9 @@ class LanceStealerRulesTest {
 
 	@Test
 	void stealerTakesPercentOfMaxHealthUpToCap() {
-		assertEquals(6.0, StealerRules.amount(1, 20), 1e-9); // D164: 30% of 20
-		assertEquals(0.68, StealerRules.pct(20), 1e-9);
+		assertEquals(5.4, StealerRules.amount(1, 15), 1e-9); // D181: 36% of 15
+		assertEquals(7.0, StealerRules.amount(1, 20), 1e-9); // 7.2 capped at 7
+		assertEquals(0.74, StealerRules.pct(20), 1e-9);
 		assertEquals(7.0, StealerRules.amount(1, 200), 1e-9); // capped at 7
 		assertEquals(0.0, StealerRules.amount(1, 0), 1e-9);
 		assertEquals(7 + 3, StealerRules.cap(2), 1e-9);
@@ -43,6 +44,21 @@ class LanceStealerRulesTest {
 		assertEquals(2, StealerRules.BLEED_SECONDS);
 		assertEquals(2, StealerRules.SLOW_SECONDS);
 		assertEquals(0.8, StealerRules.SLOW, 1e-9);
+	}
+
+	@Test
+	void stealerDrainsInTenPulsesOverTwoSeconds() { // D180
+		assertEquals(10, StealerRules.PULSES);
+		assertEquals(40, StealerRules.drainTicks()); // 2 s
+		assertEquals(0.7, StealerRules.pulse(1, 20), 1e-9); // 7 / 10
+		assertEquals(StealerRules.amount(5, 100), StealerRules.pulse(5, 100) * StealerRules.PULSES, 1e-9);
+		assertEquals(0.0, StealerRules.liftProgress(0), 1e-9);
+		assertEquals(1.0, StealerRules.liftProgress(StealerRules.LIFT_TICKS), 1e-9);
+		assertEquals(1.0, StealerRules.liftProgress(99), 1e-9);
+		assertEquals(2.0, StealerRules.LIFT_HEIGHT, 1e-9);
+		assertEquals(StealerRules.BAT_FAR, StealerRules.batDistance(0, false), 1e-9);
+		assertEquals(StealerRules.BAT_NEAR, StealerRules.batDistance(StealerRules.FLY_IN_TICKS, false), 1e-9);
+		assertEquals(StealerRules.BAT_FAR, StealerRules.batDistance(StealerRules.FLY_OUT_TICKS, true), 1e-9);
 	}
 
 	@Test

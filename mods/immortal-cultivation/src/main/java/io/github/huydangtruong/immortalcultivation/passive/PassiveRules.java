@@ -133,7 +133,7 @@ public final class PassiveRules {
 			case XP -> xpPercent(level) + "%";
 			case GROWTH -> "+" + growthPercent(level) + "%";
 			case INVENTORY -> protectedSlots(level, 0).size() + " slots";
-			case GUARD -> level == 0 ? "off" : "debt " + debtPercent(level) + "%";
+			case GUARD -> level == 0 ? "off" : "max debt " + debtPercent(level) + "%";
 		};
 	}
 

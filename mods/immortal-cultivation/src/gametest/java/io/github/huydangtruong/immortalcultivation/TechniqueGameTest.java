@@ -45,18 +45,18 @@ public class TechniqueGameTest {
 	@GameTest(maxTicks = 100)
 	public void upgradeSpendsLevelsAndRefusesWithoutXp(GameTestHelper context) {
 		ServerPlayer p = player(context);
-		p.giveExperienceLevels(10);
+		p.giveExperienceLevels(8);
 		int before = TechniqueRules.points(p.experienceLevel, p.experienceProgress);
-		context.assertTrue(act(p, TechniqueNet.UPGRADE, Technique.FIRE, 0) == null, "upgrade with 10 levels should work");
+		context.assertTrue(act(p, TechniqueNet.UPGRADE, Technique.FIRE, 0) == null, "upgrade with 8 levels should work");
 		TechniqueData d = TechniqueAttachment.get(p);
 		context.assertTrue(d.level(Technique.FIRE) == 1, "fire should be level 1, was " + d.level(Technique.FIRE));
-		context.assertTrue(p.experienceLevel == 10 - TechniqueRules.upgradeCost(1), "levels left should be " + (10 - TechniqueRules.upgradeCost(1)) + ", was " + p.experienceLevel);
+		context.assertTrue(p.experienceLevel == 8 - TechniqueRules.upgradeCost(1), "levels left should be " + (8 - TechniqueRules.upgradeCost(1)) + ", was " + p.experienceLevel);
 		int paid = before - TechniqueRules.points(p.experienceLevel, p.experienceProgress);
 		context.assertTrue(paid > 0 && d.spent(Technique.FIRE) == paid, "spent points should be " + paid + ", was " + d.spent(Technique.FIRE));
-		// 4 levels left, the next upgrade costs 7: refused, nothing changes
+		// 3 levels left, the next upgrade costs 5 (D178): refused, nothing changes
 		String err = act(p, TechniqueNet.UPGRADE, Technique.FIRE, 0);
 		context.assertTrue(err != null, "upgrade without enough levels must be refused");
-		context.assertTrue(TechniqueAttachment.get(p).level(Technique.FIRE) == 1 && p.experienceLevel == 4, "refused upgrade must not change anything");
+		context.assertTrue(TechniqueAttachment.get(p).level(Technique.FIRE) == 1 && p.experienceLevel == 3, "refused upgrade must not change anything");
 		// bad id
 		context.assertTrue(TechniqueNet.apply(p, TechniqueNet.UPGRADE, "nope", 0) != null, "unknown technique must be refused");
 		context.succeed();

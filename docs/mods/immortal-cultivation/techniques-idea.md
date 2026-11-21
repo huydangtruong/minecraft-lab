@@ -46,7 +46,7 @@ Tóm tắt lời Huy, chưa phải quyết định cuối. Câu hỏi còn mở 
 ## Bổ sung (Huy, cùng ngày)
 
 - Hồi chiêu Lửa và Băng **gấp đôi**; màu lửa giữ nguyên. Lv tối đa **20**; số liệu Lv 10 như đề xuất là ổn.
-- XP: tới Lv 10 khoảng **80 level**, tới Lv 20 khoảng **200 level** (tôi hiểu là tổng cộng dồn).
+- XP: tới Lv 10 khoảng **80 level**, tới Lv 20 khoảng **200 level** (tôi hiểu là tổng cộng dồn). D178 (2026-11-21): nay mỗi cấp 5 level, tổng 50 level tới Lv 10, 100 level tới Lv 20.
 - Thêm 2 chiêu: **Xuyên tường** (10 giây đi xuyên mọi thứ từ độ cao đang đứng trở lên, không bị rơi) và **Hất tung** (đẩy văng mọi thứ xung quanh + sát thương nhỏ, thiên về phòng thủ).
 - Phím **R**; thích kiểu giữ R ra bảng tròn của Essential (như chat wheel Dota): rê chuột lên chiêu để chọn.
 - Hồi máu: hồi cho người chơi và cả sinh vật xung quanh (chó, động vật, kể cả kẻ thù nếu đứng trong vòng); vòng đứng yên.

@@ -284,6 +284,27 @@ public class MayhemGameTest {
 	}
 
 	@GameTest(maxTicks = 40)
+	public void otherPlayersAreTargetsOnlyWithPvpOn(GameTestHelper c) { // D182
+		ServerPlayer p = caster(c, 1);
+		ServerPlayer other = FlightBladeGameTest.survivor(c);
+		Zombie z = zombie(c, 5.5, 4.5);
+		var server = c.getLevel().getServer();
+		boolean pvp = server.getGameRules().get(net.minecraft.world.level.gamerules.GameRules.PVP);
+		try {
+			server.getGameRules().set(net.minecraft.world.level.gamerules.GameRules.PVP, false, server);
+			c.assertTrue(!Mayhem.hits(other, p), "PvP off: another player is not hit");
+			c.assertTrue(Mayhem.hits(z, p), "PvP off: mobs are still hit");
+			server.getGameRules().set(net.minecraft.world.level.gamerules.GameRules.PVP, true, server);
+			c.assertTrue(Mayhem.hits(other, p), "PvP on: another player is hit");
+			c.assertTrue(!Mayhem.hits(p, p), "never the caster");
+		} finally {
+			server.getGameRules().set(net.minecraft.world.level.gamerules.GameRules.PVP, pvp, server);
+		}
+		FlightBladeGameTest.drop(c, other);
+		finish(c, p);
+	}
+
+	@GameTest(maxTicks = 40)
 	public void theCastCommandPathWorks(GameTestHelper c) {
 		ServerPlayer p = caster(c, 1);
 		zombie(c, 5.5, 4.5);
