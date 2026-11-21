@@ -87,6 +87,9 @@ public class PassiveClientTest implements FabricClientGameTest {
 			clickGui(context, spot(context, Passive.VISION.ordinal()));
 			context.takeScreenshot("passives-detail-vision");
 			clickGui(context, spot(context, 3 * n)); // Back from Vision
+			context.runOnClient(mc -> PassivesTab.scrollTo(true)); // Item guard is below the view: scroll down
+			context.waitTicks(2);
+			context.takeScreenshot("passives-list-scrolled");
 			clickGui(context, spot(context, Passive.GUARD.ordinal()));
 			if (PassivesTab.detail() != Passive.GUARD) {
 				throw new AssertionError("clicking Item guard did not open its detail page");

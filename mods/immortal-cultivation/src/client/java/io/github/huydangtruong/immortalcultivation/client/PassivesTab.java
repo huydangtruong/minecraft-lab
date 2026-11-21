@@ -23,9 +23,12 @@ import net.minecraft.util.FormattedCharSequence;
  * The server checks every request (PassiveNet); this class only asks.
  */
 public final class PassivesTab {
-	private static final int LIST_TOP = 18;
-	private static final int ROW_H = 19;
-	private static final int ROW_PITCH = 20;
+	private static final int LIST_TOP = 20;
+	private static final int ROW_H = 22;
+	private static final int ROW_PITCH = 23;
+	private static final int SCROLL_STEP = 12;
+	/** List scroll in pixels (0 = top): the rows keep their size and the list scrolls when they do not fit. */
+	private static int scroll;
 	private static final int PLUS = 16;
 	private static final int SEG_W = 9;
 	private static final int SEG_GAP = 1;
@@ -193,7 +196,16 @@ public final class PassivesTab {
 	// ---- geometry ----
 
 	private static int rowY(int y0, int i) {
-		return y0 + LIST_TOP + i * ROW_PITCH;
+		return y0 + LIST_TOP + i * ROW_PITCH - scroll;
+	}
+
+	/** Height of the scrolling list area: from LIST_TOP down to the panel's bottom padding. */
+	private static int listH(int h) {
+		return h - 7 - LIST_TOP;
+	}
+
+	private static int maxScroll(int h) {
+		return Math.max(0, Passive.values().length * ROW_PITCH - 2 - listH(h));
 	}
 
 	private static int[] gemRect(int tx, int rowY) {
@@ -252,7 +264,7 @@ public final class PassivesTab {
 		int right = x0 + w - 7;
 		PassiveData d = data();
 		if (detail == null) {
-			drawList(g, font, d, tx, right, y0, mx, my);
+			drawList(g, font, d, tx, right, y0, h, mx, my);
 		} else {
 			drawDetail(g, font, d, detail, tx, right, y0, mx, my);
 		}
@@ -301,21 +313,29 @@ public final class PassivesTab {
 		}
 	}
 
-	private static void drawList(GuiGraphicsExtractor g, Font font, PassiveData d, int tx, int right, int y0, int mx, int my) {
+	private static void drawList(GuiGraphicsExtractor g, Font font, PassiveData d, int tx, int right, int y0, int h, int mx, int my) {
 		Passive[] all = Passive.values();
 		int xp = xpLevels();
+		int viewTop = y0 + LIST_TOP;
+		int viewH = listH(h);
+		scroll = Math.max(0, Math.min(maxScroll(h), scroll));
+		boolean inView = my >= viewTop && my < viewTop + viewH;
+		g.enableScissor(tx, viewTop, right, viewTop + viewH);
 		for (int i = 0; i < all.length; i++) {
 			Passive p = all[i];
 			int y = rowY(y0, i);
+			if (y + ROW_H < viewTop || y > viewTop + viewH) {
+				continue;
+			}
 			int level = d.level(p);
 			int[] row = {tx, y, right - tx, ROW_H};
 			int[] gem = gemRect(tx, y);
 			int[] plus = plusRect(right, y);
-			boolean hoverRow = in(mx, my, row);
-			boolean hoverPlus = in(mx, my, plus);
+			boolean hoverRow = inView && in(mx, my, row);
+			boolean hoverPlus = inView && in(mx, my, plus);
 			int[] sw = switchRect(right, y);
 			boolean hasSwitch = toggleable(p);
-			boolean hoverSwitch = hasSwitch && in(mx, my, sw);
+			boolean hoverSwitch = inView && hasSwitch && in(mx, my, sw);
 			g.fill(tx, y, right, y + ROW_H, hoverRow && !hoverPlus && !hoverSwitch ? 0xFFBDBDBD : 0xFFABABAB);
 			g.outline(tx, y, right - tx, ROW_H, 0xFF8B8B8B);
 			gem(g, p, gem[0], gem[1], level == 0);
@@ -327,8 +347,8 @@ public final class PassivesTab {
 			if (font.width(title) > maxW) {
 				title = font.plainSubstrByWidth(title, maxW - font.width("..")) + "..";
 			}
-			g.text(font, title, tx + 20, y + 2, level > 0 ? TOTAL : BASE, false);
-			segments(g, tx + 20, y + 12, level);
+			g.text(font, title, tx + 20, y + 3, level > 0 ? TOTAL : BASE, false);
+			segments(g, tx + 20, y + 14, level);
 			boolean up = level < PassiveRules.MAX_LEVEL && xp >= PassiveRules.COST_LEVELS;
 			String sprite = !up ? "widget/button_disabled" : hoverPlus ? "widget/button_highlighted" : "widget/button";
 			g.blitSprite(RenderPipelines.GUI_TEXTURED, Identifier.withDefaultNamespace(sprite), plus[0], plus[1], PLUS, PLUS);
@@ -344,6 +364,14 @@ public final class PassivesTab {
 			} else if (hoverRow) {
 				g.setTooltipForNextFrame(font, Component.literal("Lv " + level + " / " + PassiveRules.MAX_LEVEL + ": click for details"), mx, my);
 			}
+		}
+		g.disableScissor();
+		int max = maxScroll(h);
+		if (max > 0) {
+			int content = all.length * ROW_PITCH - 2;
+			int barH = Math.max(8, viewH * viewH / content);
+			int barY = viewTop + (viewH - barH) * scroll / max;
+			g.fill(right + 1, barY, right + 3, barY + barH, 0xFF555555);
 		}
 	}
 
@@ -395,6 +423,9 @@ public final class PassivesTab {
 			}
 			return false;
 		}
+		if (!in(mx, my, new int[] {tx, y0 + LIST_TOP, right - tx, listH(h)})) {
+			return false; // a row scrolled out of view cannot be clicked
+		}
 		Passive[] all = Passive.values();
 		for (int i = 0; i < all.length; i++) {
 			Passive p = all[i];
@@ -418,12 +449,27 @@ public final class PassivesTab {
 		return false;
 	}
 
+	/** Mouse wheel over the list (not on a detail page). Returns true when it was handled. */
+	public static boolean scroll(int x0, int y0, int w, int h, double mx, double my, double amount) {
+		if (detail != null || !in(mx, my, new int[] {x0 + 7, y0 + LIST_TOP, w - 14, listH(h)})) {
+			return false;
+		}
+		scroll = Math.max(0, Math.min(maxScroll(h), scroll - (int) Math.signum(amount) * SCROLL_STEP));
+		return true;
+	}
+
 	// ---- tests ----
 
-	/** GUI centres for the client test: row titles 0..4, "+" buttons 0..4, on/off switches 0..4, then Back. */
+	/** Scroll the list to the top (false) or the bottom (true) for the client test; clamped on the next draw or hotspots call. */
+	public static void scrollTo(boolean end) {
+		scroll = end ? Integer.MAX_VALUE : 0;
+	}
+
+	/** GUI centres for the client test: row titles, "+" buttons, on/off switches (one per passive, at the current scroll), then Back. */
 	public static List<int[]> hotspots(int x0, int y0, int w, int h) {
 		int tx = x0 + 7;
 		int right = x0 + w - 7;
+		scroll = Math.max(0, Math.min(maxScroll(h), scroll));
 		List<int[]> out = new ArrayList<>();
 		int n = Passive.values().length;
 		for (int i = 0; i < n; i++) {
