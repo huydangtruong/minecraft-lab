@@ -14,6 +14,10 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ambient.Bat;
+import net.minecraft.world.phys.AABB;
+import java.util.List;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.zombie.Zombie;
@@ -40,6 +44,14 @@ public class LanceStealerGameTest {
 		e.setPersistenceRequired();
 		e.setNoAi(true);
 		e.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.STONE_BUTTON)); // no sunburn
+		return e;
+	}
+
+	/** A zombie that obeys gravity (a NoAI mob hovers) but cannot walk away. */
+	private static Zombie faller(GameTestHelper c, double x, double z) {
+		Zombie e = zombie(c, x, z);
+		e.setNoAi(false);
+		e.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0);
 		return e;
 	}
 
@@ -119,50 +131,166 @@ public class LanceStealerGameTest {
 		});
 	}
 
-	@GameTest(maxTicks = 30)
-	public void theDrainTakesAPercentHealsTheCasterAndLeavesBleedingAndSlow(GameTestHelper c) { // D158, D159
+	private static List<Bat> bats(GameTestHelper c) {
+		return c.getLevel().getEntitiesOfClass(Bat.class, new AABB(c.absoluteVec(new Vec3(2.0, 0, 3.0)), c.absoluteVec(new Vec3(9.0, 6, 10.0))));
+	}
+
+	/** Height of e above the floor of the test (the zombies stand at relative y = 1). */
+	private static double up(GameTestHelper c, LivingEntity e) {
+		return e.getY() - c.absoluteVec(new Vec3(0, 1, 0)).y;
+	}
+
+	@GameTest(maxTicks = 120) // D158, D159, D180, D181
+	public void theDrainTakesAPercentOver2sHealsTheCasterAndLeavesBleedingAndSlow(GameTestHelper c) {
 		ServerPlayer p = caster(c, Technique.BLADE);
 		Zombie z = zombie(c, 5.5, 6.5);
 		p.setHealth(10f);
 		double speed = z.getAttributeValue(Attributes.MOVEMENT_SPEED);
 		c.assertTrue(LifeStealer.cast(p, 1), "the cast finds the zombie under the crosshair");
-		c.assertTrue(Math.abs(z.getHealth() - 13f) < 0.01f, "36% of 20 = 7.2, capped at 7 (D181), health " + z.getHealth());
-		c.assertTrue(Math.abs(p.getHealth() - 17f) < 0.01f, "the caster gets the 7 back, health " + p.getHealth());
-		c.assertTrue(z.hasEffect(Bleeding.EFFECT), "the target is bleeding");
-		c.assertTrue(z.hasEffect(StealerSlow.EFFECT), "the target is slowed");
-		double slowed = z.getAttributeValue(Attributes.MOVEMENT_SPEED);
-		c.assertTrue(Math.abs(slowed - speed * 0.2) < 1e-6, "exactly -80% speed: " + speed + " -> " + slowed);
-		int left = z.getEffect(StealerSlow.EFFECT).getDuration();
-		c.assertTrue(left > 30 && left <= 40, "about 2 s of slow, ticks " + left);
-		FlightBladeGameTest.drop(c, p);
-		c.succeed();
+		c.assertTrue(z.getHealth() == 20f, "nothing is drained at the cast: the bats are still flying in");
+		c.runAfterDelay(28, () -> { // mid drain: pulses at ticks 10, 14, ... 46 of 0.7 each
+			c.assertTrue(z.getHealth() < 20f && z.getHealth() > 13.5f, "half drained, health " + z.getHealth());
+			c.assertTrue(Math.abs((20f - z.getHealth()) - (p.getHealth() - 10f)) < 0.01f, "the caster is healed what the pulses took");
+			c.assertTrue(!z.hasEffect(StealerSlow.EFFECT), "no slow before the end");
+		});
+		c.runAfterDelay(49, () -> { // the last pulse is at tick 46; the bleeding starts at the end (tick 50)
+			c.assertTrue(Math.abs(z.getHealth() - 13f) < 0.01f, "36% of 20 = 7.2, capped at 7 (D181), health " + z.getHealth());
+			c.assertTrue(Math.abs(p.getHealth() - 17f) < 0.01f, "the caster gets the 7 back, health " + p.getHealth());
+		});
+		c.runAfterDelay(54, () -> {
+			c.assertTrue(z.hasEffect(Bleeding.EFFECT), "the target is bleeding");
+			c.assertTrue(z.hasEffect(StealerSlow.EFFECT), "the target is slowed");
+			double slowed = z.getAttributeValue(Attributes.MOVEMENT_SPEED);
+			c.assertTrue(Math.abs(slowed - speed * 0.2) < 1e-6, "exactly -80% speed: " + speed + " -> " + slowed);
+			int left = z.getEffect(StealerSlow.EFFECT).getDuration();
+			c.assertTrue(left > 30 && left <= 40, "about 2 s of slow, ticks " + left);
+			FlightBladeGameTest.drop(c, p);
+			c.succeed();
+		});
 	}
 
-	@GameTest(maxTicks = 80)
-	public void theBleedingAndSlowWearOffAfterTwoSeconds(GameTestHelper c) { // D159
+	@GameTest(maxTicks = 160)
+	public void theBleedingAndSlowWearOffAfterTwoSeconds(GameTestHelper c) { // D159: counted from the end of the drain
 		ServerPlayer p = caster(c, Technique.BLADE);
 		Zombie z = zombie(c, 5.5, 6.5);
 		double speed = z.getAttributeValue(Attributes.MOVEMENT_SPEED);
 		LifeStealer.cast(p, 1);
-		c.runAfterDelay(20, () -> c.assertTrue(z.hasEffect(Bleeding.EFFECT) && z.hasEffect(StealerSlow.EFFECT), "both still on after 1 s"));
-		c.runAfterDelay(55, () -> {
-			c.assertTrue(!z.hasEffect(Bleeding.EFFECT) && !z.hasEffect(StealerSlow.EFFECT), "both gone after 2 s");
+		c.runAfterDelay(40, () -> c.assertTrue(!z.hasEffect(Bleeding.EFFECT), "not yet bleeding during the drain"));
+		c.runAfterDelay(70, () -> c.assertTrue(z.hasEffect(Bleeding.EFFECT) && z.hasEffect(StealerSlow.EFFECT), "both still on 1 s after the drain"));
+		c.runAfterDelay(105, () -> {
+			c.assertTrue(!z.hasEffect(Bleeding.EFFECT) && !z.hasEffect(StealerSlow.EFFECT), "both gone 2 s after the drain");
 			c.assertTrue(Math.abs(z.getAttributeValue(Attributes.MOVEMENT_SPEED) - speed) < 1e-6, "the speed is back");
 			FlightBladeGameTest.drop(c, p);
 			c.succeed();
 		});
 	}
 
-	@GameTest(maxTicks = 30)
+	@GameTest(maxTicks = 80)
 	public void theDrainIsCappedOnBigTargets(GameTestHelper c) {
 		ServerPlayer p = caster(c, Technique.BLADE);
 		Zombie z = zombie(c, 5.5, 6.5);
 		z.getAttribute(Attributes.MAX_HEALTH).setBaseValue(200);
 		z.setHealth(200f);
 		LifeStealer.cast(p, 1);
-		c.assertTrue(Math.abs(z.getHealth() - 193f) < 0.01f, "36% of 200 is capped at 7, health " + z.getHealth());
-		FlightBladeGameTest.drop(c, p);
-		c.succeed();
+		c.runAfterDelay(49, () -> {
+			c.assertTrue(Math.abs(z.getHealth() - 193f) < 0.01f, "36% of 200 is capped at 7, health " + z.getHealth());
+			FlightBladeGameTest.drop(c, p);
+			c.succeed();
+		});
+	}
+
+	@GameTest(maxTicks = 100) // D180
+	public void fourBatsLiftTheTargetTwoBlocksThenItFallsAndTheBatsVanish(GameTestHelper c) {
+		ServerPlayer p = caster(c, Technique.BLADE);
+		Zombie z = faller(c, 5.5, 6.5);
+		LifeStealer.cast(p, 1);
+		c.assertTrue(bats(c).size() == 4, "four bats appear at the cast, " + bats(c).size());
+		c.runAfterDelay(35, () -> {
+			c.assertTrue(Math.abs(up(c, z) - 2.0) < 0.05, "held 2 blocks up, height " + up(c, z));
+			c.assertTrue(bats(c).size() == 4, "the bats are still around it");
+			c.assertTrue(z.isNoGravity(), "no gravity while held");
+		});
+		c.runAfterDelay(48, () -> c.assertTrue(Math.abs(up(c, z) - 2.0) < 0.05, "still held just before the end, height " + up(c, z)));
+		c.runAfterDelay(85, () -> {
+			c.assertTrue(up(c, z) < 0.05, "back on the ground, height " + up(c, z));
+			c.assertTrue(!z.isNoGravity(), "gravity is back");
+			c.assertTrue(z.getHealth() > 11.5f, "no fall damage (only a little bleeding): health " + z.getHealth());
+			c.assertTrue(bats(c).isEmpty(), "no bat left: " + bats(c).size());
+			FlightBladeGameTest.drop(c, p);
+			c.succeed();
+		});
+	}
+
+	@GameTest(maxTicks = 80) // D180: ceiling
+	public void underALowCeilingTheTargetIsLiftedLessAndNeverIntoABlock(GameTestHelper c) {
+		ServerPlayer p = caster(c, Technique.BLADE);
+		Zombie z = faller(c, 5.5, 6.5);
+		c.setBlock(new BlockPos(5, 4, 6), Blocks.STONE); // the head (1.95 tall, from y = 1) can rise by 1.05 at most
+		LifeStealer.cast(p, 1);
+		c.runAfterDelay(35, () -> {
+			double h = up(c, z);
+			c.assertTrue(h > 0.9 && h <= 1.06, "lifted about 1 block, height " + h);
+			c.assertTrue(c.getLevel().noCollision(z), "never inside a block");
+		});
+		c.runAfterDelay(70, () -> {
+			c.assertTrue(up(c, z) < 0.05, "down again, height " + up(c, z));
+			FlightBladeGameTest.drop(c, p);
+			c.succeed();
+		});
+	}
+
+	@GameTest(maxTicks = 80) // D180
+	public void aTargetKilledMidDrainEndsItAtOnce(GameTestHelper c) {
+		ServerPlayer p = caster(c, Technique.BLADE);
+		Zombie z = zombie(c, 5.5, 6.5);
+		LifeStealer.cast(p, 1);
+		c.runAfterDelay(25, () -> z.kill(c.getLevel()));
+		c.runAfterDelay(30, () -> c.assertTrue(!LifeStealer.draining(z) || bats(c).size() <= 4, "the bats are leaving"));
+		c.runAfterDelay(45, () -> {
+			c.assertTrue(!LifeStealer.draining(z), "the drain is over");
+			c.assertTrue(bats(c).isEmpty(), "no bat left: " + bats(c).size());
+			FlightBladeGameTest.drop(c, p);
+			c.succeed();
+		});
+	}
+
+	@GameTest(maxTicks = 80) // D180
+	public void ifTheCasterDiesTheDrainStopsAndTheTargetFalls(GameTestHelper c) {
+		ServerPlayer p = caster(c, Technique.BLADE);
+		Zombie z = faller(c, 5.5, 6.5);
+		LifeStealer.cast(p, 1);
+		c.runAfterDelay(30, () -> {
+			c.assertTrue(up(c, z) > 1.5, "lifted before the caster dies");
+			p.kill(c.getLevel());
+		});
+		c.runAfterDelay(34, () -> {
+			c.assertTrue(!LifeStealer.draining(z), "the drain stopped");
+			c.assertTrue(!z.isNoGravity(), "gravity is back");
+			c.assertTrue(bats(c).isEmpty(), "the bats are gone: " + bats(c).size());
+		});
+		c.runAfterDelay(60, () -> {
+			c.assertTrue(up(c, z) < 0.05, "the target is back on the ground, height " + up(c, z));
+			c.assertTrue(!z.hasEffect(StealerSlow.EFFECT), "no slow when the drain was cut short");
+			c.succeed();
+		});
+	}
+
+	@GameTest(maxTicks = 80) // D180: bosses are bitten but never lifted
+	public void aBossIsDrainedButNotLifted(GameTestHelper c) {
+		ServerPlayer p = caster(c, Technique.BLADE);
+		Zombie z = zombie(c, 5.5, 6.5);
+		z.addTag(io.github.huydangtruong.immortalcultivation.wanderer.QuestBoss.TAG);
+		LifeStealer.cast(p, 1);
+		c.runAfterDelay(35, () -> {
+			c.assertTrue(up(c, z) < 0.05, "a boss stays on the ground, height " + up(c, z));
+			c.assertTrue(z.getHealth() < 20f, "but it is drained, health " + z.getHealth());
+			c.assertTrue(bats(c).size() == 4, "and the bats are on it");
+		});
+		c.runAfterDelay(70, () -> {
+			c.assertTrue(bats(c).isEmpty(), "bats gone");
+			FlightBladeGameTest.drop(c, p);
+			c.succeed();
+		});
 	}
 
 	@GameTest(maxTicks = 20)

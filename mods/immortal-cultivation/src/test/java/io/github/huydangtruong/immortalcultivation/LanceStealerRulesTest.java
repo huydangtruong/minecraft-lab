@@ -47,6 +47,21 @@ class LanceStealerRulesTest {
 	}
 
 	@Test
+	void stealerDrainsInTenPulsesOverTwoSeconds() { // D180
+		assertEquals(10, StealerRules.PULSES);
+		assertEquals(40, StealerRules.drainTicks()); // 2 s
+		assertEquals(0.7, StealerRules.pulse(1, 20), 1e-9); // 7 / 10
+		assertEquals(StealerRules.amount(5, 100), StealerRules.pulse(5, 100) * StealerRules.PULSES, 1e-9);
+		assertEquals(0.0, StealerRules.liftProgress(0), 1e-9);
+		assertEquals(1.0, StealerRules.liftProgress(StealerRules.LIFT_TICKS), 1e-9);
+		assertEquals(1.0, StealerRules.liftProgress(99), 1e-9);
+		assertEquals(2.0, StealerRules.LIFT_HEIGHT, 1e-9);
+		assertEquals(StealerRules.BAT_FAR, StealerRules.batDistance(0, false), 1e-9);
+		assertEquals(StealerRules.BAT_NEAR, StealerRules.batDistance(StealerRules.FLY_IN_TICKS, false), 1e-9);
+		assertEquals(StealerRules.BAT_FAR, StealerRules.batDistance(StealerRules.FLY_OUT_TICKS, true), 1e-9);
+	}
+
+	@Test
 	void theBeamBreaksABlockAfterSixTicksAndNeverAnUnbreakableOne() { // D161
 		org.junit.jupiter.api.Assertions.assertFalse(LanceRules.breaksBlock(5));
 		org.junit.jupiter.api.Assertions.assertTrue(LanceRules.breaksBlock(6));
