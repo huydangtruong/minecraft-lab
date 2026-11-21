@@ -37,7 +37,7 @@ import net.minecraft.world.phys.Vec3;
 /**
  * D157, D159 Solar Lance: a beam from the caster's hand to the crosshair (first block, at most 256 blocks) for up to 12 s
  * while the button that cast it stays held; letting go stops it. Every living entity on the line (not the caster's friends)
- * takes damage every 10 ticks that doubles every 3 s. Stopping for any reason starts the 40 s cooldown.
+ * takes damage every 10 ticks that doubles every 3 s. Stopping for any reason starts the 36 s cooldown.
  */
 public final class Lance {
 	/** Server to client: the beam of one caster. active = false removes it. ticksLeft drives the bar. */
@@ -118,7 +118,7 @@ public final class Lance {
 		stop(p);
 	}
 
-	/** Ends the beam for any reason (release, 12 s, death, dimension change, logout) and starts the 40 s cooldown. */
+	/** Ends the beam for any reason (release, 12 s, death, dimension change, logout) and starts the 36 s cooldown. */
 	static void stop(ServerPlayer p) {
 		Active a = ACTIVE.remove(p.getUUID());
 		if (a == null) {
