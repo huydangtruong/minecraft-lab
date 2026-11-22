@@ -2,17 +2,13 @@
 
 - textures/entity/warp_portal_ring.png: purple outline ring with a soft halo (static)
 - textures/entity/warp_portal_swirl.png: white spiral arms, tinted per owner by the renderer and rotated over time
-Run: python3 -I mods/immortal-cultivation/tools/make_warp_textures.py
+Run: python3 mods/immortal-cultivation/tools/make_warp_textures.py
 """
-import importlib.util
 import math
 import os
 
 HERE = os.path.dirname(__file__)
-spec = importlib.util.spec_from_file_location("hearts", os.path.join(HERE, "make_heart_sprites.py"))
-hearts = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(hearts)
-write_png = hearts.write_png
+from pngkit import write_png
 
 OUT = os.path.join(HERE, "..", "src", "main", "resources", "assets", "permahearts", "textures", "entity")
 N = 64

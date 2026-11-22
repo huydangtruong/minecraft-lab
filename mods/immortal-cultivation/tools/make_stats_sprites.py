@@ -2,16 +2,12 @@
 on a rounded button in the style of the recipe book button. Original art (the Stats tab shows the Nether Star item).
 
 - stats/button.png, stats/button_highlighted.png (20x18)
-Run: python3 -I mods/immortal-cultivation/tools/make_stats_sprites.py
+Run: python3 mods/immortal-cultivation/tools/make_stats_sprites.py
 """
-import importlib.util
 import os
 
 HERE = os.path.dirname(__file__)
-spec = importlib.util.spec_from_file_location("hearts", os.path.join(HERE, "make_heart_sprites.py"))
-hearts = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(hearts)
-write_png, rgba, CLEAR = hearts.write_png, hearts.rgba, hearts.CLEAR
+from pngkit import write_png, rgba, CLEAR
 
 OUT = os.path.join(HERE, "..", "src", "main", "resources", "assets", "permahearts", "textures", "gui", "sprites", "stats")
 

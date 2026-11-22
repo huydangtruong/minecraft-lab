@@ -1,16 +1,12 @@
 """Draws the Bottle of Enlightenment item sprite (P-030, D89): a 16x16 green-gold glowing bottle with a dark outline.
 
 - textures/item/enlightenment_bottle.png
-Run: python3 -I mods/immortal-cultivation/tools/make_enlightenment_bottle_sprite.py
+Run: python3 mods/immortal-cultivation/tools/make_enlightenment_bottle_sprite.py
 """
-import importlib.util
 import os
 
 HERE = os.path.dirname(__file__)
-spec = importlib.util.spec_from_file_location("hearts", os.path.join(HERE, "make_heart_sprites.py"))
-hearts = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(hearts)
-write_png, rgba, CLEAR = hearts.write_png, hearts.rgba, hearts.CLEAR
+from pngkit import write_png, rgba, CLEAR
 
 OUT = os.path.join(HERE, "..", "src", "main", "resources", "assets", "permahearts", "textures", "item")
 

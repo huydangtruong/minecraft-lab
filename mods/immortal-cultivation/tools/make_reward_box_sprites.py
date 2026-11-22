@@ -2,16 +2,12 @@
 plus the grey "?" chest shown on quest lines (the real box is rolled at claim, D90).
 
 - textures/item/silver_reward_box.png, gold_reward_box.png, diamond_reward_box.png, emerald_reward_box.png, mystery_box.png
-Run: python3 -I mods/immortal-cultivation/tools/make_reward_box_sprites.py
+Run: python3 mods/immortal-cultivation/tools/make_reward_box_sprites.py
 """
-import importlib.util
 import os
 
 HERE = os.path.dirname(__file__)
-spec = importlib.util.spec_from_file_location("hearts", os.path.join(HERE, "make_heart_sprites.py"))
-hearts = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(hearts)
-write_png, rgba, CLEAR = hearts.write_png, hearts.rgba, hearts.CLEAR
+from pngkit import write_png, rgba, CLEAR
 
 OUT = os.path.join(HERE, "..", "src", "main", "resources", "assets", "permahearts", "textures", "item")
 

@@ -1,6 +1,7 @@
 """D217: the trash can icon (16x16) drawn in the trash slot of the inventory screen.
 Run: python3 tools/make_trash_sprite.py  -> assets/permahearts/textures/gui/sprites/trash/trash.png"""
-import zlib, struct, os
+import os
+import pngkit
 
 OUT = os.path.join(os.path.dirname(__file__), "..", "src", "main", "resources", "assets", "permahearts",
                    "textures", "gui", "sprites", "trash")
@@ -28,16 +29,7 @@ ROWS = [
 ]
 
 def write_png(path, rows):
-    raw = b''
-    for row in rows:
-        raw += b'\0' + b''.join(bytes(C[ch]) if ch != '.' else bytes((0, 0, 0, 0)) for ch in row)
-    def chunk(t, d):
-        c = struct.pack('>I', len(d)) + t + d
-        return c + struct.pack('>I', zlib.crc32(t + d) & 0xffffffff)
-    w, h = len(rows[0]), len(rows)
-    with open(path, 'wb') as f:
-        f.write(b'\x89PNG\r\n\x1a\n' + chunk(b'IHDR', struct.pack('>IIBBBBB', w, h, 8, 6, 0, 0, 0))
-                + chunk(b'IDAT', zlib.compress(raw, 9)) + chunk(b'IEND', b''))
+    pngkit.write_png(path, [[C[ch] if ch != '.' else pngkit.CLEAR for ch in row] for row in rows])
 
 if __name__ == "__main__":
     assert all(len(r) == 16 for r in ROWS) and len(ROWS) == 16
