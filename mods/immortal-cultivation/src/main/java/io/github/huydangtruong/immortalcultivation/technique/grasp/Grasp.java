@@ -240,7 +240,9 @@ public final class Grasp {
 
 	public static void handle(ServerPlayer p, int kind, String target, int arg) {
 		MinecraftServer server = p.level().getServer();
-		if (!ImmortalCultivation.enabled(server) || !p.isAlive() || p.isSpectator() || level(p) < 1) {
+		// B15: a player who reset the technique to level 0 can still look at the list and let mobs go
+		boolean keepsWorking = kind == LIST || kind == RELEASE || kind == ALL_RELEASE;
+		if (!ImmortalCultivation.enabled(server) || !p.isAlive() || p.isSpectator() || (level(p) < 1 && !keepsWorking)) {
 			endTether(p, true);
 			return;
 		}

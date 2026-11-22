@@ -395,6 +395,29 @@ public class GraspGameTest {
 		c.succeed();
 	}
 
+	/** P-077 B15: at technique level 0 the list and Release still work, everything else does not. */
+	@GameTest(maxTicks = 60)
+	public void releaseStillWorksAtLevelZero(GameTestHelper c) {
+		ServerPlayer p = grasper(c, 20);
+		Zombie a = c.spawn(EntityTypes.ZOMBIE, new Vec3(0.8, 1, 0.8));
+		Zombie b = c.spawn(EntityTypes.ZOMBIE, new Vec3(1.4, 1, 0.8));
+		a.setNoAi(true);
+		b.setNoAi(true);
+		Grasp.tame(p, a, 20);
+		Grasp.tame(p, b, 20);
+		c.assertTrue(held(c, p) == 2, "two mobs held");
+		TechniqueAttachment.set(p, TechniqueData.DEFAULT.withLevel(Technique.GRASP, 0, 10)
+			.withEmeralds(TechniqueRules.MAX_EMERALDS).withSlot(0, Technique.GRASP));
+		Grasp.handle(p, Grasp.CALL, a.getUUID().toString(), 0);
+		c.assertTrue(a.distanceTo(p) > 4, "Call needs level 1");
+		Grasp.handle(p, Grasp.RELEASE, a.getUUID().toString(), 0);
+		c.assertTrue(held(c, p) == 1 && !a.hasAttached(GraspedMob.ATTACHMENT), "Release works at level 0");
+		Grasp.handle(p, Grasp.ALL_RELEASE, "", 0);
+		c.assertTrue(held(c, p) == 0 && !b.hasAttached(GraspedMob.ATTACHMENT), "Release all works at level 0");
+		cleanUp(c, p);
+		c.succeed();
+	}
+
 	// ---- D168: the All row ----
 
 	private static Zombie[] three(GameTestHelper c, ServerPlayer p) {
