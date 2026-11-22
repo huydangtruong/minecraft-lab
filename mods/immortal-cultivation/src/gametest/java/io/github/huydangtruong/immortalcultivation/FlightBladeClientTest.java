@@ -51,7 +51,7 @@ public class FlightBladeClientTest implements FabricClientGameTest {
 			context.getInput().pressMouse(LEFT);
 			context.waitTicks(4);
 			context.takeScreenshot("51-blade-hit");
-			context.waitTicks(10);
+			context.waitTicks(60); // D180: the bats arrive in ~0.5 s, then drain for 2 s
 			float husk1 = server.computeOnServer(FlightBladeClientTest::huskHealth);
 			check(husk1 < husk0 - 3, "the blade should have hurt the husk: " + husk0 + " -> " + husk1);
 			float hp = server.computeOnServer(s -> s.getPlayerList().getPlayers().get(0).getHealth());
