@@ -5,31 +5,26 @@ import zlib, struct, os
 OUT = os.path.join(os.path.dirname(__file__), "..", "src", "main", "resources", "assets", "permahearts",
                    "textures", "gui", "sprites", "trash")
 C = {
-    'K': (40, 40, 48, 255),     # outline
-    'L': (150, 156, 168, 255),  # lid light
-    'l': (112, 118, 130, 255),  # lid shadow
-    'B': (176, 182, 194, 255),  # body light
-    'b': (132, 138, 150, 255),  # body mid
-    'd': (92, 98, 110, 255),    # body dark / slats
-    'H': (210, 214, 224, 255),  # handle highlight
+    'K': (55, 55, 55, 255),  # outline only (D217 fix), the dark grey of vanilla slot shadows
 }
+# Outline only, centred: two empty rows above and below (it used to sit on the slot's bottom edge).
 ROWS = [
     "................",
     "................",
     "......KKKK......",
-    ".....KHHHHK.....",
+    "......K..K......",
     "..KKKKKKKKKKKK..",
-    "..KLLLLLLLLLlK..",
-    "..KllllllllllK..",
-    "...KKKKKKKKKK...",
-    "...KBdBdBdBbK...",
-    "...KBdBdBdBbK...",
-    "...KBdBdBdBbK...",
-    "...KBdBdBdBbK...",
-    "...KBdBdBdBbK...",
-    "...KBdBdBdBbK...",
-    "....KbbbbbbK....",
+    "...K........K...",
+    "...K..K..K..K...",
+    "...K..K..K..K...",
+    "...K..K..K..K...",
+    "...K..K..K..K...",
+    "...K..K..K..K...",
+    "...K..K..K..K...",
+    "...K........K...",
     "....KKKKKKKK....",
+    "................",
+    "................",
 ]
 
 def write_png(path, rows):

@@ -115,7 +115,7 @@ public final class StatsPanel {
 					open = false; // the recipe book button was pressed: it moved the inventory already
 				}
 				b.setPosition(left(inv) + 126, inv.height / 2 - 22);
-				nb.setPosition(left(inv) + 148, inv.height / 2 - 23); // 18x18 slot, centred on the 18-high buttons
+				nb.setPosition(left(inv) + 148, inv.height / 2 - 22); // 18x18 slot, edges level with the 18-high buttons (D217 fix)
 				int top = ((ContainerScreenAccess) inv).permahearts$topPos();
 				for (TabButton t : tabs) {
 					t.visible = open && tab != Tab.NOTES; // P-043: the Notes page has no edge tabs
