@@ -72,6 +72,21 @@ public class WheelClientTest implements FabricClientGameTest {
 			check(ClientSkills.selected() == 2, "scroll up wraps to the last open slot");
 			check(context.computeOnClient(mc -> ((TechniqueWheelScreen) mc.gui.screen()).slot()) == 2, "the wheel follows the scroll");
 			check(context.computeOnClient(mc -> mc.player.getInventory().getSelectedSlot()) == hotbar, "the hotbar did not scroll");
+
+			// D196: a pick keeps the wheel open; scroll on and pick again; only letting go of R closes it
+			context.runOnClient(mc -> ((TechniqueWheelScreen) mc.gui.screen()).choose(ClientSkills.data(mc.player), Technique.FLIGHT));
+			context.waitTicks(5);
+			check(context.computeOnClient(mc -> mc.gui.screen() instanceof TechniqueWheelScreen), "the wheel stays open after a pick");
+			check(context.computeOnClient(mc -> ClientSkills.data(mc.player).inSlot(2)) == Technique.FLIGHT, "slot 3 now holds Flight");
+			context.getInput().scroll(1);
+			context.waitTicks(3);
+			check(ClientSkills.selected() == 1, "scroll still works after a pick");
+			context.runOnClient(mc -> ((TechniqueWheelScreen) mc.gui.screen()).choose(ClientSkills.data(mc.player), Technique.GOLEM));
+			context.waitTicks(5);
+			check(context.computeOnClient(mc -> mc.gui.screen() instanceof TechniqueWheelScreen), "still open after a second pick");
+			check(context.computeOnClient(mc -> ClientSkills.data(mc.player).inSlot(1)) == Technique.GOLEM, "slot 2 now holds Golem");
+			context.getInput().scroll(-1);
+			context.waitTicks(3);
 			ClientSkills.testWheelHeld = false;
 			context.waitTicks(5);
 			check(context.computeOnClient(mc -> mc.gui.screen() == null), "the wheel closes on release");

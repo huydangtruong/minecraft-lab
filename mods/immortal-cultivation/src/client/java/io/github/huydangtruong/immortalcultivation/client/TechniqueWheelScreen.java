@@ -20,8 +20,8 @@ import net.minecraft.network.chat.Component;
  * D188/D193 technique wheel: opened by holding R (from the cross it first selects the lowest ready slot). A top row shows the
  * technique slots; the mouse wheel moves the target slot. The technique already in the edited slot is drawn darkened.
  * D188: opened by holding R while a technique slot is selected. Shows the learned techniques by group; a click
- * puts that technique in the selected slot (the server swaps two slots when it already sits in another one). Letting go of R,
- * or Esc, closes it without a change. The world keeps running behind it.
+ * puts that technique in the selected slot (the server swaps two slots when it already sits in another one). D196: the wheel
+ * stays open after a pick, so one can scroll on and pick again; only letting go of R (or Esc) closes it. The world keeps running.
  */
 public class TechniqueWheelScreen extends Screen {
 	private static final int CELL = 22;
@@ -216,7 +216,7 @@ public class TechniqueWheelScreen extends Screen {
 			g.centeredText(font, s, x0 + w / 2, y0 + h - 13, RED);
 		} else {
 			warn = false;
-			g.centeredText(font, "Click: set. Scroll: next slot. Release " + ClientSkills.WHEEL.getTranslatedKeyMessage().getString() + ": cancel.", x0 + w / 2, y0 + h - 13, 0xFF8888A0);
+			g.centeredText(font, "Click: set. Scroll: next slot. Release " + ClientSkills.WHEEL.getTranslatedKeyMessage().getString() + ": close.", x0 + w / 2, y0 + h - 13, 0xFF8888A0);
 		}
 		if (hover != null) {
 			g.setTooltipForNextFrame(font, Component.literal(hover.displayName() + (d.onCooldown(hover, now) ? " (cooling down)" : "")), mouseX, mouseY);
@@ -249,10 +249,9 @@ public class TechniqueWheelScreen extends Screen {
 		return super.mouseClicked(event, doubleClick);
 	}
 
-	/** Same technique: just close. Selected slot cooling: red line, stay open (the server checks too). Else ask and close. */
-	void choose(TechniqueData d, Technique t) {
+	/** Same technique: nothing. Selected slot cooling: red line (the server checks too). Else ask. The wheel stays open (D196). */
+	public void choose(TechniqueData d, Technique t) {
 		if (d.inSlot(slot) == t) {
-			onClose();
 			return;
 		}
 		if (d.slotOnCooldown(slot, minecraft.level.getGameTime())) {
@@ -262,6 +261,6 @@ public class TechniqueWheelScreen extends Screen {
 		ClientPlayNetworking.send(new TechniqueNet.TechniqueAction(TechniqueNet.ASSIGN, t.id(), slot));
 		ClientPlayNetworking.send(new TechniqueNet.SkillAction(TechniqueNet.SELECT, slot, 0f)); // D193: the server selection follows an empty slot that was just filled
 		ClientSkills.keepSlotForFill();
-		onClose();
+		warn = false;
 	}
 }
