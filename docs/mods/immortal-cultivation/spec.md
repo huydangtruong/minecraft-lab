@@ -138,26 +138,27 @@ Heaven Blast choáng mọi sinh vật không phải người chơi bị đẩy: 
 
 ## Sát Khí (Danger level) và mob Elite (P-054, D137, D138, D139)
 
-Thế giới có **Danger level 0–30**, bắt đầu từ 0. Mỗi lần Crimson Master rời đi, khoảng 4 phút (4800 tick) sau level +1 (tối đa 30, không giảm). Mỗi lần tăng: chữ cam "Danger level X" giữa màn hình, dòng nhỏ bên dưới, một dòng chat và tiếng kèn. Màn hình chỉ số có dòng "Danger level X".
+Thế giới có **Danger level 0–50** (D206: giãn từ 0–30 lên 0–50, level 50 = level 30 cũ), bắt đầu từ 0. Mỗi lần Crimson Master rời đi, khoảng 4 phút (4800 tick) sau level +1 (tối đa 50, không giảm; muốn lên tối đa cần 50 lần). Mỗi lần tăng: chữ cam "Danger level X" giữa màn hình, dòng nhỏ bên dưới, một dòng chat và tiếng kèn. Màn hình chỉ số có dòng "Danger level X". Save cũ được đổi một lần: level mới = level cũ × 5/3 (30 → 50).
 
 | Level | Số mob (chỉ Overworld) | Sức mạnh (máu + sát thương, mọi thế giới) | Mở thêm |
 |---|---|---|---|
-| 1 | +10% | +8% | |
-| 4 | +40% | +30% | Pillager |
-| 6 | +60% | +45% | Vindicator, mob ra khi mưa |
-| 8 | +80% | +60% | mob ra ban ngày (15%) |
-| 10 | +100% | +75% | Blaze, Wither Skeleton (chỗ tối) |
-| 12 / 14 / 16 | +120% / +140% / +160% | +90% / +105% / +120% | Evoker / Piglin Brute / Ravager |
-| 20 | +200% | +150% | ban ngày nhiều như ban đêm, Elite xuất hiện |
-| 21 | +220% | +165% | mob mặc thêm giáp |
-| 25 | +300% (dừng) | +225% | |
-| 30 | +300% | +300% | mọi mob mặc giáp có ít nhất 1 món netherite |
+| 1 | +6% | +5% | |
+| 7 | +42% | +32% | Pillager |
+| 10 | +60% | +45% | Vindicator, mob ra khi mưa |
+| 13 | +78% | +59% | mob ra ban ngày (15%) |
+| 17 | +102% | +77% | Blaze, Wither Skeleton (chỗ tối) |
+| 20 / 23 / 27 | +120% / +138% / +162% | +90% / +104% / +122% | Evoker / Piglin Brute / Ravager |
+| 33 | +198% | +149% | ban ngày nhiều như ban đêm, Elite xuất hiện |
+| 35 | +220% | +165% | mob mặc thêm giáp |
+| 42 | +300% (dừng) | +228% | |
+| 50 | +300% | +300% | mọi mob mặc giáp có ít nhất 1 món netherite |
 
 - Mob ra ban ngày không cháy nắng. Ánh sáng từ đuốc vẫn chặn mob như vanilla. Peaceful: tắt hết.
 - Trần số mob: gamerule `permahearts:danger_spawn_ceiling` (mặc định 4 lần vanilla). Gamerule `permahearts:danger_level` bật / tắt Sát Khí.
 - Không áp cho boss, thủ lĩnh, God Slayer, mob đã thu phục, đồng minh triệu hồi, bản sao ảo ảnh.
-- **Elite** (từ level 20): 5% ở level 20 → 15% ở level 30. Máu gấp đôi, tên cam kèm phẩm chất, hạt cam. Số phẩm chất: 1 (level 20–24), tới 2 (25–29), tới 3 (30). Phẩm chất: Swift (chạy nhanh +40%), Ironhide (nhận ít hơn 40% sát thương), Regenerating (hồi 1% máu mỗi giây), Blazing (đánh trúng đốt 4 giây, miễn lửa), Venomous (đánh trúng gây độc 5 giây; xác sống miễn độc). 50% rơi 1–3 emerald. Soul Grasp thu phục được và giữ phẩm chất.
-- Lệnh (op): `/danger info`, `/danger set <0..30>`, `/danger elite <phẩm chất...>` (thả một zombie elite trước mặt để thử).
+- **Elite** (từ level 33): 5% ở level 33 → 15% ở level 50. Máu gấp đôi, tên cam kèm phẩm chất, hạt cam. Số phẩm chất: 1 (level 33–41), tới 2 (42–49), tới 3 (50). Phẩm chất: Swift (chạy nhanh +40%), Ironhide (nhận ít hơn 40% sát thương), Regenerating (hồi 1% máu mỗi giây), Blazing (đánh trúng đốt 4 giây, miễn lửa), Venomous (đánh trúng gây độc 5 giây; xác sống miễn độc). 50% rơi 1–3 emerald. Soul Grasp thu phục được và giữ phẩm chất.
+- **XP theo máu (D207)**: mob bị Sát Khí tăng máu rơi XP nhân đúng tỉ lệ máu tăng (1 + sức mạnh, elite nhân thêm 2), làm tròn. Level 0 và mob không bị tăng: XP vanilla.
+- Lệnh (op): `/danger info`, `/danger set <0..50>`, `/danger elite <phẩm chất...>` (thả một zombie elite trước mặt để thử).
 
 ## Bảng /admin (P-060, D155)
 

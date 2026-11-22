@@ -189,7 +189,7 @@ public final class DangerMobs {
 			}
 			ItemStack stack = new ItemStack(item);
 			if (plan.enchanted()[i]) {
-				stack.enchant(protection, 1 + RNG.nextInt(lvl >= 26 ? 4 : 3));
+				stack.enchant(protection, 1 + RNG.nextInt(lvl >= DangerRules.PROTECTION_4_LEVEL ? 4 : 3));
 			}
 			m.setItemSlot(ARMOR_SLOTS[i], stack);
 			m.setDropChance(ARMOR_SLOTS[i], 0.085f);
@@ -264,6 +264,16 @@ public final class DangerMobs {
 	/** Hook of the hurt mixin: Blazing elites ignore fire damage. */
 	public static boolean ignoresFire(LivingEntity e) {
 		return e.hasAttached(AFFIXES) && affixes(e).contains(Affix.BLAZING);
+	}
+
+	/** D207: XP multiplier of a mob from its danger health boost (strength modifier and elite doubling); 1 when unboosted. */
+	public static double xpFactor(LivingEntity e) {
+		AttributeInstance inst = e.getAttribute(Attributes.MAX_HEALTH);
+		if (inst == null) {
+			return 1.0;
+		}
+		AttributeModifier strength = inst.getModifier(HEALTH_ID);
+		return DangerRules.xpFactor(strength == null ? 0 : strength.amount(), inst.hasModifier(ELITE_HEALTH_ID));
 	}
 
 	public static boolean isDaySpawn(Entity e) {

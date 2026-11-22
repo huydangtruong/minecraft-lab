@@ -39,7 +39,7 @@ public final class DangerSpawn {
 			return false;
 		}
 		int lvl = Danger.level(sl.getServer());
-		if (lvl < 6) {
+		if (!DangerRules.rainSpawns(lvl)) { // rain comes first, day spawns later
 			return false;
 		}
 		int limit = la.dimensionType().monsterSpawnBlockLightLimit();
@@ -82,7 +82,7 @@ public final class DangerSpawn {
 			return base;
 		}
 		int lvl = Danger.level(level.getServer());
-		if (lvl < 4) {
+		if (lvl < DangerRules.FIRST_TYPE_LEVEL) {
 			return base;
 		}
 		WeightedList.Builder<MobSpawnSettings.SpawnerData> b = WeightedList.builder();
