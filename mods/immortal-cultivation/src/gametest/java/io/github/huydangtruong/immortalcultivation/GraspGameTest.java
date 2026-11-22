@@ -128,6 +128,42 @@ public class GraspGameTest {
 		c.succeed();
 	}
 
+	@GameTest(maxTicks = 40)
+	public void aGraspedPatrolVindicatorDropsItsHoldGroundAndPatrolGoals(GameTestHelper c) { // D191
+		ServerPlayer p = grasper(c, 10);
+		net.minecraft.world.entity.monster.illager.Vindicator v = c.spawn(EntityTypes.VINDICATOR, new Vec3(6.5, 1, 5.5));
+		v.findPatrolTarget(); // a patrol member, like the ones that spawn at night
+		Grasp.tame(p, v, 10);
+		var left = v.getGoalSelector().getAvailableGoals().stream().map(w -> w.getGoal().getClass().getName())
+			.filter(n -> n.contains("HoldGround") || n.contains("Patrol") || n.contains("PathfindToRaid") || n.contains("Celebration")).toList();
+		c.assertTrue(left.isEmpty(), "no raider goal holds it in place or pulls it away: " + left);
+		c.assertTrue(v.getGoalSelector().getAvailableGoals().stream().anyMatch(w -> w.getGoal().getClass().getName().contains("MeleeAttack")),
+			"it still has its melee attack");
+		cleanUp(c, p);
+		c.succeed();
+	}
+
+	@GameTest(maxTicks = 40)
+	public void theVexesOfAGraspedEvokerNeverAttackTheOwner(GameTestHelper c) { // D192
+		ServerPlayer p = grasper(c, 10);
+		net.minecraft.world.entity.monster.illager.Evoker ev = c.spawn(EntityTypes.EVOKER, new Vec3(6.5, 1, 5.5));
+		ev.setNoAi(true);
+		Grasp.tame(p, ev, 10);
+		net.minecraft.world.entity.monster.Vex mine = c.spawn(EntityTypes.VEX, new Vec3(4.5, 2, 4.5));
+		mine.setOwner(ev);
+		mine.setNoAi(true);
+		net.minecraft.world.entity.monster.Vex wild = c.spawn(EntityTypes.VEX, new Vec3(2.5, 2, 2.5));
+		wild.setNoAi(true);
+		c.assertTrue(!mine.canAttack(p), "a vex of the grasped evoker never attacks its owner");
+		c.assertTrue(Grasp.isGraspedBy(mine, p.getUUID()), "it counts as the owner's ally (techniques and allies skip it)");
+		c.assertTrue(!ev.canAttack(mine), "the evoker's other followers leave it alone");
+		c.assertTrue(wild.canAttack(p), "a wild vex still attacks the player");
+		mine.discard();
+		wild.discard();
+		cleanUp(c, p);
+		c.succeed();
+	}
+
 	/** D165 (Huy's bug: 11 followers crowded onto him): following mobs that start on the owner step out to 2 blocks or more. */
 	@GameTest(maxTicks = 140)
 	public void followersKeepTwoBlocksFromTheOwner(GameTestHelper c) {

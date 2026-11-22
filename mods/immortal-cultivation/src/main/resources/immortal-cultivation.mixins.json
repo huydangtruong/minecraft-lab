@@ -37,6 +37,7 @@
 		"NearestAttackableDecoyMixin",
 		"PlayerMixin",
 		"PlayerPhaseMixin",
+		"RaiderNaturalSpawnMixin",
 		"RepairRecipeGuardMixin",
 		"ServerPlayerHurtMixin",
 		"ThrownSplashPotionMixin",
