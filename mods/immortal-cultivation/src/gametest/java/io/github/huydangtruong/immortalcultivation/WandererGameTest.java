@@ -65,6 +65,33 @@ public class WandererGameTest {
 		e.hurtServer(level, level.damageSources().playerAttack(p), 1000f);
 	}
 
+	/** P-077 B1: shift-clicking a done line's reward gives the rolled box, not the "?" mystery box. */
+	@GameTest(maxTicks = 100)
+	public void shiftClickOnRewardGivesTheRealBox(GameTestHelper context) {
+		MinecraftServer s = context.getLevel().getServer();
+		try {
+			enable(context, true);
+			start(context);
+			Wanderer.accept(s);
+			ServerPlayer p = testPlayer(context);
+			context.assertTrue(Wanderer.complete(s, 0), "line 0 should complete");
+			var snap = io.github.huydangtruong.immortalcultivation.wanderer.QuestSnapshot.of(Wanderer.quest(s).orElseThrow());
+			var menu = new io.github.huydangtruong.immortalcultivation.wanderer.WandererMenu(1, p.getInventory(), snap, s, null);
+			menu.quickMoveStack(p, 4);
+			boolean real = false;
+			for (int i = 0; i < p.getInventory().getContainerSize(); i++) {
+				ItemStack st = p.getInventory().getItem(i);
+				context.assertTrue(!st.is(io.github.huydangtruong.immortalcultivation.reward.RewardBoxes.MYSTERY), "no mystery box may reach the inventory, slot " + i + " " + st);
+				real |= io.github.huydangtruong.immortalcultivation.reward.RewardBoxes.tierOf(st).isPresent();
+			}
+			context.assertTrue(real, "the inventory should hold a rolled reward box");
+			context.assertTrue(Wanderer.data(s).quest().orElseThrow().lines().get(0).claimed(), "line 0 should be claimed");
+			context.succeed();
+		} finally {
+			Wanderer.reset(s);
+		}
+	}
+
 	/** D65: a chieftain drops 10 times the XP of the same mob without the boss tag. */
 	@GameTest(maxTicks = 100)
 	public void chieftainDropsTenTimesXp(GameTestHelper context) {

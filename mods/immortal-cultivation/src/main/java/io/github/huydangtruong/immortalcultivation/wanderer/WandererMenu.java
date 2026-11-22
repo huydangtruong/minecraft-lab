@@ -319,12 +319,19 @@ public class WandererMenu extends AbstractContainerMenu {
 		ItemStack original = slot.getItem();
 		ItemStack copy = original.copy();
 		if (index >= REWARD_BASE && index < INV_START) {
-			// Reward: move a copy, and only when it fits do we empty (= claim) the slot.
-			ItemStack moving = original.copy();
-			if (!moveItemStackTo(moving, INV_START, INV_END, true) || !moving.isEmpty()) {
+			// Reward: both boxes stack to 1, so a free inventory slot is the room test. Then claim the line for real (D90 roll)
+			// and move the real box, not the "?" shown in the slot.
+			if (p.getInventory().getFreeSlot() < 0) {
 				return ItemStack.EMPTY;
 			}
-			slot.set(ItemStack.EMPTY);
+			ItemStack real = slot.container.removeItemNoUpdate(slot.getContainerSlot());
+			if (real.isEmpty()) {
+				return ItemStack.EMPTY;
+			}
+			moveItemStackTo(real, INV_START, INV_END, true);
+			if (!real.isEmpty()) {
+				p.getInventory().add(real);
+			}
 			return copy;
 		}
 		if (index < REWARD_BASE) {
