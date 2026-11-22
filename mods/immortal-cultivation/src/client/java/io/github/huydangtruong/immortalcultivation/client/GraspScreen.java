@@ -48,6 +48,11 @@ public class GraspScreen extends Screen {
 	public void update(GraspNet.Menu m) {
 		this.menu = m;
 		this.sinceRefresh = 0;
+		clampScroll(); // a released mob shortens the list (B8)
+	}
+
+	private void clampScroll() {
+		scroll = Math.max(0, Math.min(scroll, maxScroll()));
 	}
 
 	@Override
@@ -136,6 +141,7 @@ public class GraspScreen extends Screen {
 		if (hasAllRow()) {
 			drawAllRow(g, left, allRowY(), mouseX, mouseY);
 		}
+		clampScroll();
 		g.enableScissor(left + 1, listTop(), left + w - 1, listTop() + listHeight());
 		int y = listTop() - (int) scroll;
 		List<Runnable> tips = new ArrayList<>();
