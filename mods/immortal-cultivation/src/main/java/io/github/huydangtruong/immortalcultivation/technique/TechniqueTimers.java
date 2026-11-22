@@ -42,7 +42,8 @@ public final class TechniqueTimers {
 		sync(p, AQUA, remaining(p.getAttached(AquaMarine.END), now));
 	}
 
-	private static long remaining(Long end, long now) {
+	/** Remaining ticks given a saved end tick (null = not active) and the game time; never negative. */
+	public static long remaining(Long end, long now) {
 		return end == null ? 0 : Math.max(0, end - now);
 	}
 

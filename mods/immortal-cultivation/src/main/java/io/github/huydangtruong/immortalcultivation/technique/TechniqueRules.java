@@ -1,5 +1,6 @@
 package io.github.huydangtruong.immortalcultivation.technique;
 
+import io.github.huydangtruong.immortalcultivation.technique.grasp.GraspRules;
 import java.util.List;
 
 /**

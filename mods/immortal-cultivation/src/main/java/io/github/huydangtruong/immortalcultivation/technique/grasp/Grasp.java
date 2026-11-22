@@ -1,14 +1,17 @@
 package io.github.huydangtruong.immortalcultivation.technique.grasp;
 
+import io.github.huydangtruong.immortalcultivation.Uuids;
 import io.github.huydangtruong.immortalcultivation.ImmortalCultivation;
 import io.github.huydangtruong.immortalcultivation.godslayer.GodSlayer;
-import io.github.huydangtruong.immortalcultivation.technique.GraspCalls;
-import io.github.huydangtruong.immortalcultivation.technique.GraspRules;
+import io.github.huydangtruong.immortalcultivation.technique.grasp.GraspCalls;
+import io.github.huydangtruong.immortalcultivation.technique.grasp.GraspRules;
 import io.github.huydangtruong.immortalcultivation.technique.Illusion;
 import io.github.huydangtruong.immortalcultivation.technique.OwnedSummon;
 import io.github.huydangtruong.immortalcultivation.technique.Technique;
 import io.github.huydangtruong.immortalcultivation.technique.TechniqueAttachment;
-import io.github.huydangtruong.immortalcultivation.technique.TechniqueData;
+import io.github.huydangtruong.immortalcultivation.technique.grasp.GraspNet.Menu;
+import io.github.huydangtruong.immortalcultivation.technique.grasp.GraspNet.Row;
+import io.github.huydangtruong.immortalcultivation.technique.grasp.GraspNet.State;
 import io.github.huydangtruong.immortalcultivation.wanderer.DeathMatch;
 import io.github.huydangtruong.immortalcultivation.wanderer.QuestBoss;
 import io.github.huydangtruong.immortalcultivation.wanderer.WandererNpc;
@@ -23,26 +26,17 @@ import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.level.TicketType;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
@@ -60,9 +54,6 @@ import net.minecraft.world.entity.monster.Guardian;
 import net.minecraft.world.entity.monster.cubemob.Slime;
 import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -73,120 +64,15 @@ import net.minecraft.world.phys.Vec3;
  */
 public final class Grasp {
 	public static final Identifier BONUS_ID = Identifier.fromNamespaceAndPath(ImmortalCultivation.NAMESPACE, "grasp_bonus");
-	private static final Identifier SLOW_ID = Identifier.fromNamespaceAndPath(ImmortalCultivation.NAMESPACE, "grasp_slow");
 
 	public static final int START = 0, CANCEL = 1, LIST = 2, MODE = 3, CALL = 4, RELEASE = 5;
 	/** D168: the "All" row. target is ignored; ALL_MODE carries the mode in arg. */
 	public static final int ALL_MODE = 6, ALL_CALL = 7, ALL_RELEASE = 8;
 
-	/** Client to server. kind: START (arg = entity id), CANCEL, LIST, MODE (target = mob uuid, arg = mode), CALL, RELEASE. */
-	public record Request(int kind, String target, int arg) implements CustomPacketPayload {
-		public static final Type<Request> TYPE = new Type<>(Identifier.fromNamespaceAndPath(ImmortalCultivation.NAMESPACE, "grasp_request"));
-		public static final StreamCodec<RegistryFriendlyByteBuf, Request> CODEC = StreamCodec.composite(
-			ByteBufCodecs.VAR_INT, Request::kind,
-			ByteBufCodecs.STRING_UTF8, Request::target,
-			ByteBufCodecs.VAR_INT, Request::arg,
-			Request::new);
-
-		@Override
-		public Type<? extends CustomPacketPayload> type() {
-			return TYPE;
-		}
-	}
-
-	/** Server to client: mobs held now, and the tether in progress (targetId -1 = none) with its length in ticks. */
-	public record State(int held, int targetId, int duration) implements CustomPacketPayload {
-		public static final Type<State> TYPE = new Type<>(Identifier.fromNamespaceAndPath(ImmortalCultivation.NAMESPACE, "grasp_state"));
-		public static final StreamCodec<RegistryFriendlyByteBuf, State> CODEC = StreamCodec.composite(
-			ByteBufCodecs.VAR_INT, State::held,
-			ByteBufCodecs.VAR_INT, State::targetId,
-			ByteBufCodecs.VAR_INT, State::duration,
-			State::new);
-
-		@Override
-		public Type<? extends CustomPacketPayload> type() {
-			return TYPE;
-		}
-	}
-
-	/**
-	 * One line of the list. dist is -1 for a mob that is not loaded (shown "far away"); armorGear and weaponGear are the
-	 * tooltip lines (separated by newlines).
-	 */
-	public record Row(String id, String type, int number, int mode, boolean loaded, String dim, float dist, float hp, float maxHp,
-			float bonus, float armor, float damage, String armorGear, String weaponGear, int callLeft) {
-		static void write(RegistryFriendlyByteBuf b, Row r) {
-			b.writeUtf(r.id);
-			b.writeUtf(r.type);
-			b.writeVarInt(r.number);
-			b.writeVarInt(r.mode);
-			b.writeBoolean(r.loaded);
-			b.writeUtf(r.dim);
-			b.writeFloat(r.dist);
-			b.writeFloat(r.hp);
-			b.writeFloat(r.maxHp);
-			b.writeFloat(r.bonus);
-			b.writeFloat(r.armor);
-			b.writeFloat(r.damage);
-			b.writeUtf(r.armorGear);
-			b.writeUtf(r.weaponGear);
-			b.writeVarInt(r.callLeft);
-		}
-
-		static Row read(RegistryFriendlyByteBuf b) {
-			return new Row(b.readUtf(), b.readUtf(), b.readVarInt(), b.readVarInt(), b.readBoolean(), b.readUtf(), b.readFloat(),
-				b.readFloat(), b.readFloat(), b.readFloat(), b.readFloat(), b.readFloat(), b.readUtf(), b.readUtf(), b.readVarInt());
-		}
-	}
-
-	/** Server to client: what the list screen shows. */
-	public record Menu(List<Row> rows, int max, int level) implements CustomPacketPayload {
-		public static final Type<Menu> TYPE = new Type<>(Identifier.fromNamespaceAndPath(ImmortalCultivation.NAMESPACE, "grasp_menu"));
-		public static final StreamCodec<RegistryFriendlyByteBuf, Menu> CODEC = StreamCodec.of((b, m) -> {
-			b.writeVarInt(m.rows.size());
-			for (Row r : m.rows) {
-				Row.write(b, r);
-			}
-			b.writeVarInt(m.max);
-			b.writeVarInt(m.level);
-		}, b -> {
-			int n = b.readVarInt();
-			List<Row> rows = new ArrayList<>();
-			for (int i = 0; i < n; i++) {
-				rows.add(Row.read(b));
-			}
-			return new Menu(rows, b.readVarInt(), b.readVarInt());
-		});
-
-		@Override
-		public Type<? extends CustomPacketPayload> type() {
-			return TYPE;
-		}
-	}
-
-	/** A tether in progress (server memory only). */
-	private static final class Tether {
-		final Mob target;
-		final int duration;
-		final int level;
-		int age;
-		int noSight;
-
-		Tether(Mob target, int duration, int level) {
-			this.target = target;
-			this.duration = duration;
-			this.level = level;
-		}
-	}
-
-	private static final Map<UUID, Tether> TETHERS = new HashMap<>();
 	/** Loaded grasped mobs (added on load or tame, removed on unload). */
 	private static final Set<Mob> LOADED = new HashSet<>();
 	/** Released mobs that ignore their ex-owner for a while: mob uuid to (owner uuid, game time it ends). */
 	private static final Map<UUID, Peace> PEACE = new HashMap<>();
-	private static final Map<UUID, Long> CALL_READY = new HashMap<>();
-	/** D198: calls that wait for a far mob's chunk to load (each holds a temporary chunk ticket). */
-	private static final GraspCalls CALLS = new GraspCalls();
 
 	private record Peace(UUID owner, long until) {}
 
@@ -194,10 +80,7 @@ public final class Grasp {
 
 	public static void init() {
 		GraspedMob.ATTACHMENT.identifier();
-		PayloadTypeRegistry.serverboundPlay().register(Request.TYPE, Request.CODEC);
-		PayloadTypeRegistry.clientboundPlay().register(State.TYPE, State.CODEC);
-		PayloadTypeRegistry.clientboundPlay().register(Menu.TYPE, Menu.CODEC);
-		ServerPlayNetworking.registerGlobalReceiver(Request.TYPE, (payload, ctx) -> handle(ctx.player(), payload.kind(), payload.target(), payload.arg()));
+		GraspNet.register();
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			if (entity instanceof Mob m && m.hasAttached(GraspedMob.ATTACHMENT)) {
 				onLoad(m, level);
@@ -233,16 +116,15 @@ public final class Grasp {
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> sendState(handler.getPlayer(), -1, 0));
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			endTether(handler.getPlayer(), false);
-			cancelCalls(server, handler.getPlayer().getUUID());
+			GraspCallService.cancelCalls(server, handler.getPlayer().getUUID());
 		});
-		ServerLifecycleEvents.SERVER_STOPPING.register(s -> cancelAllCalls(s));
+		ServerLifecycleEvents.SERVER_STOPPING.register(s -> GraspCallService.cancelAllCalls(s));
 		ServerTickEvents.END_SERVER_TICK.register(Grasp::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(s -> {
-			TETHERS.clear();
+			GraspTether.clear();
 			LOADED.clear();
 			PEACE.clear();
-			CALL_READY.clear();
-			CALLS.clear();
+			GraspCallService.clear();
 		});
 	}
 
@@ -351,14 +233,16 @@ public final class Grasp {
 	}
 
 	public static boolean tethering(ServerPlayer p) {
-		return TETHERS.containsKey(p.getUUID());
+		return GraspTether.tethering(p);
 	}
 
 	// ---- requests ----
 
 	public static void handle(ServerPlayer p, int kind, String target, int arg) {
 		MinecraftServer server = p.level().getServer();
-		if (!ImmortalCultivation.enabled(server) || !p.isAlive() || p.isSpectator() || level(p) < 1) {
+		// B15: a player who reset the technique to level 0 can still look at the list and let mobs go
+		boolean keepsWorking = kind == LIST || kind == RELEASE || kind == ALL_RELEASE;
+		if (!ImmortalCultivation.enabled(server) || !p.isAlive() || p.isSpectator() || (level(p) < 1 && !keepsWorking)) {
 			endTether(p, true);
 			return;
 		}
@@ -367,101 +251,29 @@ public final class Grasp {
 			case CANCEL -> endTether(p, true);
 			case LIST -> sendMenu(p);
 			case MODE -> setMode(p, target, arg);
-			case CALL -> call(p, target);
+			case CALL -> GraspCallService.call(p, target);
 			case RELEASE -> releaseRequest(p, target);
 			case ALL_MODE -> allMode(p, arg);
-			case ALL_CALL -> allCall(p);
+			case ALL_CALL -> GraspCallService.allCall(p);
 			case ALL_RELEASE -> allRelease(p);
 			default -> {}
 		}
 	}
 
-	private static void sendState(ServerPlayer p, int targetId, int duration) {
+	static void sendState(ServerPlayer p, int targetId, int duration) {
 		ServerPlayNetworking.send(p, new State(held(p), targetId, duration));
 	}
 
-	// ---- the tether ----
+	// ---- the tether (GraspTether) ----
 
 	/** Starts a tether to the entity with this id. Refusals go to the overlay. Public for the game tests. */
 	public static boolean startTether(ServerPlayer p, int entityId) {
-		MinecraftServer server = p.level().getServer();
-		TechniqueData d = TechniqueAttachment.get(p);
-		long now = server.overworld().getGameTime();
-		if (TETHERS.containsKey(p.getUUID())) {
-			return false;
-		}
-		if (d.onCooldown(Technique.GRASP, now)) {
-			p.sendOverlayMessage(Component.literal("On cooldown: " + (d.cooldownLeft(Technique.GRASP, now) + 19) / 20 + " s"));
-			return false;
-		}
-		Entity e = p.level().getEntity(entityId);
-		if (!(e instanceof Mob mob) || !mob.isAlive() || mob.distanceTo(p) > GraspRules.SELECT_RANGE + 2 || !p.hasLineOfSight(mob)) {
-			p.sendOverlayMessage(Component.literal("Look at a mob within " + (int) GraspRules.SELECT_RANGE + " blocks"));
-			return false;
-		}
-		int lvl = d.level(Technique.GRASP);
-		GraspRules.Check c = GraspRules.check(facts(mob), mob.getMaxHealth(), lvl, held(p));
-		if (!c.ok()) {
-			p.sendOverlayMessage(Component.literal(GraspRules.message(c, lvl, held(p))));
-			return false;
-		}
-		int duration = GraspRules.chargeTicks(mob.getMaxHealth());
-		TETHERS.put(p.getUUID(), new Tether(mob, duration, lvl));
-		AttributeInstance speed = p.getAttribute(Attributes.MOVEMENT_SPEED);
-		if (speed != null) {
-			speed.addOrUpdateTransientModifier(new AttributeModifier(SLOW_ID, -0.6, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
-		}
-		sendState(p, mob.getId(), duration);
-		p.level().playSound(null, p.blockPosition(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 0.6f, 0.6f);
-		return true;
+		return GraspTether.start(p, entityId);
 	}
 
 	/** Ends the tether of a player without a cooldown. */
 	public static void endTether(ServerPlayer p, boolean notify) {
-		Tether t = TETHERS.remove(p.getUUID());
-		AttributeInstance speed = p.getAttribute(Attributes.MOVEMENT_SPEED);
-		if (speed != null) {
-			speed.removeModifier(SLOW_ID);
-		}
-		if (t != null && notify && p.connection != null) {
-			sendState(p, -1, 0);
-		}
-	}
-
-	private static void tickTether(ServerPlayer p, Tether t) {
-		Mob m = t.target;
-		if (!p.isAlive() || p.isSpectator() || level(p) < 1 || m.isRemoved() || !m.isAlive() || m.level() != p.level()
-			|| m.distanceTo(p) > GraspRules.BREAK_RANGE) {
-			endTether(p, true);
-			return;
-		}
-		if (p.hasLineOfSight(m)) {
-			t.noSight = 0;
-		} else if (++t.noSight > GraspRules.NO_SIGHT_TICKS) {
-			endTether(p, true);
-			return;
-		}
-		t.age++;
-		if (t.age % 4 == 0 && p.level() instanceof ServerLevel sl) {
-			sl.sendParticles(ParticleTypes.END_ROD, m.getX(), m.getY() + m.getBbHeight() / 2, m.getZ(), 1, 0.3, 0.3, 0.3, 0.01);
-		}
-		if (t.age >= t.duration) {
-			complete(p, t);
-		}
-	}
-
-	private static void complete(ServerPlayer p, Tether t) {
-		Mob m = t.target;
-		int lvl = level(p);
-		GraspRules.Check c = GraspRules.check(facts(m), m.getMaxHealth(), lvl, held(p));
-		endTether(p, true);
-		if (!c.ok()) {
-			p.sendOverlayMessage(Component.literal(GraspRules.message(c, lvl, held(p))));
-			return;
-		}
-		tame(p, m, lvl);
-		long now = p.level().getServer().overworld().getGameTime();
-		TechniqueAttachment.set(p, TechniqueAttachment.get(p).withCooldown(Technique.GRASP, now + io.github.huydangtruong.immortalcultivation.passive.Passives.cooldown(p, GraspRules.COOLDOWN_SECONDS * 20L)));
+		GraspTether.end(p, notify);
 	}
 
 	// ---- tame ----
@@ -582,7 +394,7 @@ public final class Grasp {
 	// ---- release ----
 
 	private static void releaseRequest(ServerPlayer p, String target) {
-		UUID id = parse(target);
+		UUID id = Uuids.parseOrNull(target);
 		if (id != null && releaseOne(p, id)) {
 			sendState(p, -1, 0);
 			sendMenu(p);
@@ -642,16 +454,8 @@ public final class Grasp {
 
 	// ---- mode, call ----
 
-	private static UUID parse(String s) {
-		try {
-			return UUID.fromString(s);
-		} catch (IllegalArgumentException e) {
-			return null;
-		}
-	}
-
 	private static void setMode(ServerPlayer p, String target, int mode) {
-		if (setModeOne(p, parse(target), mode)) {
+		if (setModeOne(p, Uuids.parseOrNull(target), mode)) {
 			sendMenu(p);
 		}
 	}
@@ -681,169 +485,6 @@ public final class Grasp {
 		return true;
 	}
 
-	private static void call(ServerPlayer p, String target) {
-		UUID id = parse(target);
-		GraspData.Entry e = id == null ? null : GraspData.of(p.level().getServer()).find(p.getUUID(), id);
-		if (e == null) {
-			return;
-		}
-		long now = p.level().getGameTime();
-		if (CALL_READY.getOrDefault(id, 0L) > now) {
-			p.sendOverlayMessage(Component.literal("Call again in " + (CALL_READY.get(id) - now + 19) / 20 + " s"));
-			return;
-		}
-		if (CALLS.has(id)) {
-			p.sendOverlayMessage(Component.literal("Calling..."));
-			return;
-		}
-		Mob m = loadedMob(p.level().getServer(), id);
-		if (m != null) {
-			arrive(p, m, false, now);
-			sendMenu(p);
-		} else if (startLoad(p, e, false, now)) {
-			p.sendOverlayMessage(Component.literal("Calling..."));
-		} else {
-			p.sendOverlayMessage(Component.literal(NOT_FOUND));
-		}
-	}
-
-	/** How long a call waits for a far mob (ticks); only the game tests change it. */
-	private static int callTimeout = GraspCalls.TIMEOUT_TICKS;
-
-	private static final String NOT_FOUND = "Could not find it where it was last seen";
-
-	/** D198: the grasped mob with this uuid when it is loaded in any dimension (and alive), else null. */
-	private static Mob loadedMob(MinecraftServer server, UUID id) {
-		return server.overworld().getEntityInAnyDimension(id) instanceof Mob m && m.isAlive() && m.hasAttached(GraspedMob.ATTACHMENT) ? m : null;
-	}
-
-	/**
-	 * D198: brings a loaded mob to the player: another dimension first (the entity is recreated there: same uuid, attachment
-	 * and stats), then the arrival spot (Call: 2 blocks ahead; Call all: the mob's ring spot) and the cooldown.
-	 */
-	private static void arrive(ServerPlayer p, Mob m, boolean all, long now) {
-		Mob mob = m;
-		ServerLevel to = p.level();
-		if (m.level() != to) {
-			Entity moved = m.teleport(new TeleportTransition(to, p.position(), Vec3.ZERO, m.getYRot(), m.getXRot(), TeleportTransition.DO_NOTHING));
-			if (!(moved instanceof Mob nm)) {
-				return;
-			}
-			mob = nm;
-		}
-		Vec3 want = all ? GraspGoals.followSpot(mob, p) : p.position().add(p.getLookAngle().multiply(2, 0, 2));
-		callTo(p, mob, want, now);
-	}
-
-	/** Teleports a mob to a spot near a point and starts its Call cooldown. */
-	private static void callTo(ServerPlayer p, Mob m, Vec3 want, long now) {
-		Vec3 at = GraspGoals.freeSpotNear(p.level(), m, want);
-		m.getNavigation().stop();
-		m.snapTo(at.x, at.y, at.z);
-		m.setTarget(null);
-		CALL_READY.put(m.getUUID(), now + GraspRules.CALL_COOLDOWN_TICKS);
-		p.level().sendParticles(ParticleTypes.END_ROD, at.x, at.y + m.getBbHeight() / 2, at.z, 12, 0.4, 0.4, 0.4, 0.05);
-	}
-
-	/** D198: D168's Call all: every ready mob comes, loaded ones now, the others after their chunk loads; says how many. */
-	private static void allCall(ServerPlayer p) {
-		long now = p.level().getGameTime();
-		MinecraftServer server = p.level().getServer();
-		int came = 0, waiting = 0, calling = 0, lost = 0;
-		for (GraspData.Entry e : new ArrayList<>(GraspData.of(server).get(p.getUUID()).mobs())) {
-			if (CALL_READY.getOrDefault(e.mob(), 0L) > now) {
-				waiting++;
-			} else if (CALLS.has(e.mob())) {
-				calling++;
-			} else if (loadedMob(server, e.mob()) instanceof Mob m) {
-				arrive(p, m, true, now);
-				came++;
-			} else if (startLoad(p, e, true, now)) {
-				calling++;
-			} else {
-				lost++;
-			}
-		}
-		String msg = came + (came == 1 ? " mob came" : " mobs came");
-		if (calling > 0) {
-			msg += ", " + calling + " calling...";
-		}
-		if (waiting > 0) {
-			msg += ", " + waiting + " still waiting";
-		}
-		if (lost > 0) {
-			msg += ", " + lost + " not found";
-		}
-		p.sendOverlayMessage(Component.literal(msg));
-		sendMenu(p);
-	}
-
-	// ---- D198: calling a mob that is not loaded ----
-
-	private static ServerLevel levelOf(MinecraftServer server, String dim) {
-		Identifier id = Identifier.tryParse(dim);
-		return id == null ? null : server.getLevel(ResourceKey.create(Registries.DIMENSION, id));
-	}
-
-	/** Loads the chunk where the mob was last seen (temporary ticket) and waits for it. False when that place does not exist. */
-	private static boolean startLoad(ServerPlayer p, GraspData.Entry e, boolean all, long now) {
-		MinecraftServer server = p.level().getServer();
-		ServerLevel lv = levelOf(server, e.dim());
-		if (lv == null) {
-			return false;
-		}
-		ChunkPos cp = ChunkPos.containing(BlockPos.containing(e.x(), e.y(), e.z()));
-		if (!CALLS.start(new GraspCalls.Pending(e.mob(), p.getUUID(), e.dim(), cp.x(), cp.z(), all, now + callTimeout))) {
-			return false;
-		}
-		lv.getChunkSource().addTicketWithRadius(TicketType.PORTAL, cp, GraspCalls.TICKET_RADIUS);
-		return true;
-	}
-
-	/** Ends a waiting call and gives back its chunk ticket (kept while another waiting call needs the same chunk). */
-	private static void endCall(MinecraftServer server, GraspCalls.Pending pd) {
-		CALLS.finish(pd.mob());
-		if (!CALLS.chunkStillNeeded(pd) && levelOf(server, pd.dim()) instanceof ServerLevel lv) {
-			lv.getChunkSource().removeTicketWithRadius(TicketType.PORTAL, new ChunkPos(pd.chunkX(), pd.chunkZ()), GraspCalls.TICKET_RADIUS);
-		}
-	}
-
-	private static void cancelCalls(MinecraftServer server, UUID owner) {
-		for (GraspCalls.Pending pd : CALLS.of(owner)) {
-			endCall(server, pd);
-		}
-	}
-
-	private static void cancelAllCalls(MinecraftServer server) {
-		for (GraspCalls.Pending pd : CALLS.all()) {
-			endCall(server, pd);
-		}
-	}
-
-	/** Every tick: a waiting call whose mob has loaded brings it; one that ran out of time (or lost its owner) lets go. */
-	private static void tickCalls(MinecraftServer server) {
-		long now = server.overworld().getGameTime();
-		for (GraspCalls.Pending pd : CALLS.all()) {
-			ServerPlayer p = server.getPlayerList().getPlayer(pd.owner());
-			GraspData.Entry e = p == null ? null : GraspData.of(server).find(pd.owner(), pd.mob());
-			if (p == null || !p.isAlive() || e == null) {
-				endCall(server, pd); // owner left or died, or the mob was released or died while we waited
-				continue;
-			}
-			Mob m = loadedMob(server, pd.mob());
-			if (m != null) {
-				endCall(server, pd);
-				arrive(p, m, pd.all(), p.level().getGameTime());
-				sendMenu(p);
-			} else if (now >= pd.deadline()) {
-				endCall(server, pd);
-				p.sendOverlayMessage(Component.literal("Could not find ").append(nameOf(BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.parse(e.type())), e.number()))
-					.append(" where it was last seen"));
-				sendMenu(p);
-			}
-		}
-	}
-
 	// ---- snapshot ----
 
 	private static GraspData.Entry snapshot(Mob m, GraspedMob ga) {
@@ -853,7 +494,7 @@ public final class Grasp {
 			m.getHealth(), m.getMaxHealth(), bonus, (float) m.getArmorValue(), (float) GraspGoals.damageOf(m), GraspGear.armorLines(m), GraspGear.heldLines(m));
 	}
 
-	private static void sendMenu(ServerPlayer p) {
+	static void sendMenu(ServerPlayer p) {
 		MinecraftServer server = p.level().getServer();
 		GraspData data = GraspData.of(server);
 		long now = p.level().getGameTime();
@@ -863,7 +504,7 @@ public final class Grasp {
 			boolean loaded = live instanceof Mob m && m.isAlive() && m.hasAttached(GraspedMob.ATTACHMENT);
 			GraspData.Entry v = loaded ? snapshot((Mob) live, ((Mob) live).getAttached(GraspedMob.ATTACHMENT)) : e;
 			float dist = loaded && live.level() == p.level() ? (float) live.distanceTo(p) : -1f;
-			int callLeft = (int) Math.max(0, CALL_READY.getOrDefault(e.mob(), 0L) - now);
+			int callLeft = (int) Math.max(0, GraspCallService.readyAt(e.mob()) - now);
 			rows.add(new Row(e.mob().toString(), v.type(), v.number(), e.mode(), loaded, v.dim(), dist, v.hp(), v.maxHp(), v.bonus(), v.armor(),
 				v.damage(), v.armorGear(), v.weaponGear(), callLeft));
 		}
@@ -874,18 +515,10 @@ public final class Grasp {
 	// ---- tick ----
 
 	private static void tick(MinecraftServer server) {
-		if (CALLS.size() > 0) {
-			tickCalls(server);
+		if (GraspCallService.pending() > 0) {
+			GraspCallService.tickCalls(server);
 		}
-		for (var it = new ArrayList<>(TETHERS.entrySet()).iterator(); it.hasNext();) {
-			var en = it.next();
-			ServerPlayer p = server.getPlayerList().getPlayer(en.getKey());
-			if (p == null) {
-				TETHERS.remove(en.getKey());
-			} else if (TETHERS.get(en.getKey()) == en.getValue()) {
-				tickTether(p, en.getValue());
-			}
-		}
+		GraspTether.tickAll(server);
 		long now = server.overworld().getGameTime();
 		if (!PEACE.isEmpty() && now % 20 == 0) {
 			PEACE.values().removeIf(pe -> pe.until < now);
@@ -966,16 +599,7 @@ public final class Grasp {
 
 	/** Test helper: how many ticks a call waits for a far mob (the default is {@link GraspCalls#TIMEOUT_TICKS}). */
 	public static void setCallTimeout(int ticks) {
-		callTimeout = ticks;
-	}
-
-	/** Test helper: forgets everything held in memory. */
-	public static void clearMemory() {
-		TETHERS.clear();
-		LOADED.clear();
-		PEACE.clear();
-		CALL_READY.clear();
-		CALLS.clear();
+		GraspCallService.setCallTimeout(ticks);
 	}
 
 	/** The mob's label text for chat and tests: "Skeleton 7". */

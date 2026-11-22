@@ -28,7 +28,7 @@ public class ElixirItem extends Item {
 	public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entity) {
 		if (entity instanceof ServerPlayer sp) {
 			if (!ImmortalCultivation.enabled(sp.level().getServer())) {
-				sp.sendSystemMessage(Messages.elixirDisabled());
+				sp.sendSystemMessage(HeartMessages.elixirDisabled());
 				return stack;
 			}
 			drink(sp);
@@ -42,12 +42,12 @@ public class ElixirItem extends Item {
 		HeartsAttachment.setCultivation(sp, next);
 		StatApplier.apply(sp);
 		sp.level().playSound(null, sp.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1f, 1f);
-		sp.sendSystemMessage(Messages.elixirDrunk(stat, next.level(stat)));
+		sp.sendSystemMessage(HeartMessages.elixirDrunk(stat, next.level(stat)));
 	}
 
 	@Override
 	public void appendHoverText(ItemStack stack, Item.TooltipContext context, TooltipDisplay display,
 		Consumer<Component> builder, TooltipFlag flag) {
-		builder.accept(Messages.elixirTooltip(stat));
+		builder.accept(HeartMessages.elixirTooltip(stat));
 	}
 }

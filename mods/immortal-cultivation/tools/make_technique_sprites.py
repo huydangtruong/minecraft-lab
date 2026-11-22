@@ -2,17 +2,13 @@
 
 - technique/{fire,ice,healing,phase,repulse,sacrifice,flight,blade,teleport,golem,angel,aqua,illusion,warp,thunder}.png, technique/lock.png, technique/check.png, technique/cross.png
 Each icon is drawn as a body; a dark outline is added automatically around it.
-Run: python3 -I mods/immortal-cultivation/tools/make_technique_sprites.py
+Run: python3 mods/immortal-cultivation/tools/make_technique_sprites.py
 """
-import importlib.util
 import math
 import os
 
 HERE = os.path.dirname(__file__)
-spec = importlib.util.spec_from_file_location("hearts", os.path.join(HERE, "make_heart_sprites.py"))
-hearts = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(hearts)
-write_png, rgba, CLEAR = hearts.write_png, hearts.rgba, hearts.CLEAR
+from pngkit import write_png, rgba, CLEAR
 
 OUT = os.path.join(HERE, "..", "src", "main", "resources", "assets", "permahearts", "textures", "gui", "sprites", "technique")
 
@@ -492,6 +488,12 @@ CRYSTAL_PAL = {"c": "58e6d8", "h": "d8fffa", "w": "ffffff", "d": "1f8f95", "p": 
 
 
 # "grasp" (Soul Grasp) is drawn by tools/make_grasp_sprite.py (D205).
+# Hand-made icons, not drawn here: "lance" (Solar Lance), "mayhem" (Crystal Mayhem) and "blade" (Life Stealer, P-061).
+# blade_art() is the old Life Steal Blade art; it is kept for reference but never written, so a rerun cannot
+# overwrite the Life Stealer icon.
+HAND_MADE = {"blade"}
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     icons = {
@@ -519,6 +521,8 @@ def main():
     }
     items = os.path.join(OUT, "..", "..", "..", "item")  # focus item textures = the technique icons (P-011 B)
     for name, (body, edge) in icons.items():
+        if name in HAND_MADE:
+            continue
         img = outline(body, edge)
         write_png(os.path.join(OUT, name + ".png"), img)
         if name in ("fire", "ice", "healing", "phase", "repulse", "sacrifice", "flight", "blade", "teleport", "golem", "angel", "aqua", "illusion", "warp", "thunder", "seism", "crystal"):

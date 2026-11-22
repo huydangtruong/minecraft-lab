@@ -1,6 +1,6 @@
 package io.github.huydangtruong.immortalcultivation.wanderer;
 
-import io.github.huydangtruong.immortalcultivation.Messages;
+import io.github.huydangtruong.immortalcultivation.WandererMessages;
 import io.github.huydangtruong.immortalcultivation.ImmortalCultivation;
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +23,11 @@ public final class WandererScheduler {
 	private WandererScheduler() {}
 
 	public static void register() {
-		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(s -> WandererBar.forget());
+		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(s -> {
+			WandererBar.forget();
+			BloodMoon.forget(); // B6
+			QuestBoss.forget();
+		});
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			int t = server.getTickCount();
 			if (t % 20 == 0 && !ImmortalCultivation.enabled(server)) {
@@ -106,11 +110,11 @@ public final class WandererScheduler {
 		}
 		if (!d.warned() && clock >= d.leaveAt() - Wanderer.WARN_TICKS) {
 			Wanderer.save(server, d.withWarned(true));
-			server.getPlayerList().broadcastSystemMessage(Messages.leavingSoon(), false);
+			server.getPlayerList().broadcastSystemMessage(WandererMessages.leavingSoon(), false);
 			WandererBar.announceLeavingSoon(server, d.x(), d.z());
 		}
 		if (clock >= d.leaveAt() && !BloodMoon.running(server) && !QuestBoss.bossAlive(server)) {
-			Wanderer.leave(server, Messages.leftAfterStay());
+			Wanderer.leave(server, WandererMessages.leftAfterStay());
 			return true;
 		}
 		return false;

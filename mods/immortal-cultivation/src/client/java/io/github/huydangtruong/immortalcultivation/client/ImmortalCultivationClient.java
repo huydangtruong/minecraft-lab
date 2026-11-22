@@ -37,6 +37,13 @@ public class ImmortalCultivationClient implements ClientModInitializer {
 		ClientLance.register(); // Solar Lance (P-061)
 		LanceBeamHud.register(); // Solar Lance beam over the HUD (D163)
 		ClientSeism.register(); // Seism camera shake (P-056)
+		net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+			ClientGrasp.reset(); // B5: nothing of the old world survives into the next one
+			GodSlayerWarningHud.reset();
+			ClientSkills.resetOnDisconnect();
+			TechniquesTab.reset();
+			PassivesTab.reset();
+		});
 		QuitClient.register(); // D218: /quit closes the host's game
 		net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.registerGlobalReceiver(
 			io.github.huydangtruong.immortalcultivation.admin.AdminNetworking.Open.TYPE,

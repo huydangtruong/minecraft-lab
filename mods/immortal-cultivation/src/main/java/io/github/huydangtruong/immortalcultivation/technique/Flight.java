@@ -84,11 +84,6 @@ public final class Flight {
 		p.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, TechniqueRules.FLIGHT_SLOW_FALL_TICKS, 0, false, true, true));
 	}
 
-	/** Remaining flight ticks given the saved end tick (null = no flight) and the game time; never negative. */
-	public static long remaining(Long end, long now) {
-		return end == null ? 0 : Math.max(0, end - now);
-	}
-
 	/** Every server tick for every player. */
 	static void tick(ServerPlayer p, long serverTick) {
 		Long end = p.getAttached(END);

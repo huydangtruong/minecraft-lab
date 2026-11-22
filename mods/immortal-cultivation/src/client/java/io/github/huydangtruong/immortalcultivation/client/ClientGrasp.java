@@ -1,8 +1,9 @@
 package io.github.huydangtruong.immortalcultivation.client;
 
-import io.github.huydangtruong.immortalcultivation.technique.GraspRules;
+import io.github.huydangtruong.immortalcultivation.technique.grasp.GraspRules;
 import io.github.huydangtruong.immortalcultivation.technique.Technique;
 import io.github.huydangtruong.immortalcultivation.technique.grasp.Grasp;
+import io.github.huydangtruong.immortalcultivation.technique.grasp.GraspNet;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -29,7 +30,7 @@ public final class ClientGrasp {
 
 	public static void register() {
 		net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents.COLLECT_SUBMITS.register(ClientGrasp::submitBeam);
-		ClientPlayNetworking.registerGlobalReceiver(Grasp.State.TYPE, (payload, ctx) -> {
+		ClientPlayNetworking.registerGlobalReceiver(GraspNet.State.TYPE, (payload, ctx) -> {
 			held = payload.held();
 			if (payload.targetId() >= 0) {
 				targetId = payload.targetId();
@@ -39,7 +40,7 @@ public final class ClientGrasp {
 				targetId = -1;
 			}
 		});
-		ClientPlayNetworking.registerGlobalReceiver(Grasp.Menu.TYPE, (payload, ctx) -> {
+		ClientPlayNetworking.registerGlobalReceiver(GraspNet.Menu.TYPE, (payload, ctx) -> {
 			Minecraft mc = Minecraft.getInstance();
 			if (mc.gui.screen() instanceof GraspScreen open) {
 				open.update(payload);
@@ -59,7 +60,7 @@ public final class ClientGrasp {
 
 	/** Left click with the technique selected: asks for the list. */
 	public static void openList() {
-		ClientPlayNetworking.send(new Grasp.Request(Grasp.LIST, "", 0));
+		ClientPlayNetworking.send(new GraspNet.Request(Grasp.LIST, "", 0));
 	}
 
 	/** The mob under the crosshair within the select range, or null. */
@@ -92,18 +93,27 @@ public final class ClientGrasp {
 			if (m == null) {
 				mc.player.sendOverlayMessage(Component.literal("Look at a mob within " + (int) GraspRules.SELECT_RANGE + " blocks"));
 			} else {
-				ClientPlayNetworking.send(new Grasp.Request(Grasp.START, "", m.getId()));
+				ClientPlayNetworking.send(new GraspNet.Request(Grasp.START, "", m.getId()));
 			}
 		} else if (!down && wasDown && tethering()) {
-			ClientPlayNetworking.send(new Grasp.Request(Grasp.CANCEL, "", 0));
+			ClientPlayNetworking.send(new GraspNet.Request(Grasp.CANCEL, "", 0));
 			targetId = -1;
 		}
+	}
+
+	/** Forgets everything of the old world (B5): called when the client disconnects. */
+	static void reset() {
+		held = 0;
+		targetId = -1;
+		duration = 0;
+		elapsed = 0;
+		aimId = -1;
 	}
 
 	/** Stops a running tether on the client when the technique is deselected. */
 	public static void cancelIfRunning() {
 		if (tethering()) {
-			ClientPlayNetworking.send(new Grasp.Request(Grasp.CANCEL, "", 0));
+			ClientPlayNetworking.send(new GraspNet.Request(Grasp.CANCEL, "", 0));
 			targetId = -1;
 		}
 	}

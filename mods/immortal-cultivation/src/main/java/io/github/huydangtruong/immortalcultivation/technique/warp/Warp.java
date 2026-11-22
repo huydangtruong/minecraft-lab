@@ -1,5 +1,6 @@
 package io.github.huydangtruong.immortalcultivation.technique.warp;
 
+import io.github.huydangtruong.immortalcultivation.Uuids;
 import io.github.huydangtruong.immortalcultivation.ImmortalCultivation;
 import io.github.huydangtruong.immortalcultivation.technique.Technique;
 import io.github.huydangtruong.immortalcultivation.technique.TechniqueAttachment;
@@ -119,12 +120,12 @@ public final class Warp {
 					openMenu(p);
 				}
 			}
-			case GO_PORTAL -> error = warpToPortal(p, parse(target));
-			case GO_PLAYER -> error = warpToPlayer(p, parse(target));
+			case GO_PORTAL -> error = warpToPortal(p, Uuids.parseOrNull(target));
+			case GO_PLAYER -> error = warpToPlayer(p, Uuids.parseOrNull(target));
 			case DELETE -> {
 				error = checkReady(p);
 				if (error == null) {
-					error = remove(p, parse(target)) ? null : "That portal is not yours";
+					error = remove(p, Uuids.parseOrNull(target)) ? null : "That portal is not yours";
 					if (error == null) {
 						openMenu(p); // refresh the list
 					}
@@ -134,14 +135,6 @@ public final class Warp {
 		}
 		if (error != null) {
 			p.sendOverlayMessage(Component.literal(error).withStyle(ChatFormatting.RED));
-		}
-	}
-
-	private static UUID parse(String s) {
-		try {
-			return UUID.fromString(s);
-		} catch (IllegalArgumentException e) {
-			return null;
 		}
 	}
 
@@ -302,7 +295,7 @@ public final class Warp {
 		ServerLevel from = p.level();
 		Vec3 start = p.position();
 		p.stopRiding();
-		if (!p.teleportTo(target, spot.x, spot.y, spot.z, Set.of(), p.getYRot(), p.getXRot(), false)) {
+		if (!p.teleportTo(target, spot.x, spot.y, spot.z, Set.of(), yaw, p.getXRot(), false)) { // B12: face the way the portal faces
 			return "You cannot warp now";
 		}
 		p.resetFallDistance();
@@ -332,7 +325,7 @@ public final class Warp {
 					for (int dy = 0; dy <= 2; dy++) {
 						double x = at.x + dx, y = at.y + dy, z = at.z + dz;
 						AABB box = new AABB(x - 0.3, y, z - 0.3, x + 0.3, y + 1.8, z + 0.3);
-						if (sl.noCollision(box)) {
+						if (sl.noCollision(box) && !sl.getBlockStatesIfLoaded(box.expandTowards(0, -1, 0)).anyMatch(s -> s.is(net.minecraft.world.level.block.Blocks.LAVA))) { // B12: never into or onto lava
 							return new Vec3(x, y, z);
 						}
 					}

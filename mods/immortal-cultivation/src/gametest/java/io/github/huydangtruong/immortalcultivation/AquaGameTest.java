@@ -21,8 +21,8 @@ import net.minecraft.world.phys.Vec3;
 public class AquaGameTest {
 	/** A pool of water (still source blocks) around the player's spot, with a stone floor. */
 	private static ServerPlayer diver(GameTestHelper c) {
-		FlightBladeGameTest.enable(c);
-		FlightBladeGameTest.floor(c);
+		GameTestKit.enable(c);
+		GameTestKit.floor(c);
 		for (int x = 0; x < 12; x++) {
 			for (int y = 1; y <= 7; y++) {
 				for (int z = 0; z < 12; z++) {
@@ -30,8 +30,8 @@ public class AquaGameTest {
 				}
 			}
 		}
-		ServerPlayer p = FlightBladeGameTest.survivor(c);
-		FlightBladeGameTest.place(c, p, 5.5, 3, 5.5, 0f, 0f);
+		ServerPlayer p = GameTestKit.survivor(c);
+		GameTestKit.place(c, p, 5.5, 3, 5.5, 0f, 0f);
 		p.baseTick(); // notice the water (twice: the eye flag follows the water flag)
 		p.baseTick();
 		return p;
@@ -79,7 +79,7 @@ public class AquaGameTest {
 					c.assertTrue(p.getAttribute(Attributes.WATER_MOVEMENT_EFFICIENCY).getModifier(AquaMarine.SWIM_ID) == null, "swim modifier removed");
 					c.runAfterDelay(30, () -> {
 						c.assertTrue(p.getAirSupply() < max - 10, "after the end the air goes down again, was " + p.getAirSupply());
-						FlightBladeGameTest.drop(c, p);
+						GameTestKit.drop(c, p);
 						c.succeed();
 					});
 				});
@@ -92,7 +92,7 @@ public class AquaGameTest {
 		ServerPlayer p = diver(c);
 		c.assertTrue(p.isInWater(), "the diver is in water");
 		for (double y : new double[] {3, 1}) { // open water, then near the floor
-			FlightBladeGameTest.place(c, p, 5.5, y, 5.5, 0f, 0f);
+			GameTestKit.place(c, p, 5.5, y, 5.5, 0f, 0f);
 			p.baseTick();
 			p.baseTick();
 			for (boolean sprint : new boolean[] {true, false}) {
@@ -116,7 +116,7 @@ public class AquaGameTest {
 				c.assertTrue(Math.abs(lv20 - want) < 0.02 * want, "level 20 steady speed " + want + ": " + lv20 + label);
 			}
 		}
-		FlightBladeGameTest.drop(c, p);
+		GameTestKit.drop(c, p);
 		c.succeed();
 	}
 
@@ -133,7 +133,7 @@ public class AquaGameTest {
 			c.assertTrue(Math.abs(mining.getValue() - 2.0) < 1e-9, "still 2.0 while it lasts, was " + mining.getValue());
 			AquaMarine.end(p);
 			c.assertTrue(Math.abs(mining.getValue() - 0.2) < 1e-9, "back to 0.2, was " + mining.getValue());
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 			c.succeed();
 		});
 	}
@@ -145,7 +145,7 @@ public class AquaGameTest {
 		p.kill(c.getLevel());
 		c.runAfterDelay(3, () -> {
 			c.assertTrue(p.getAttached(AquaMarine.END) == null, "state cleared on death");
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 			c.succeed();
 		});
 	}

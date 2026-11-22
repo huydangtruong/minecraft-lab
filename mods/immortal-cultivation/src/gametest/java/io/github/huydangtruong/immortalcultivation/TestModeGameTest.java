@@ -36,7 +36,7 @@ public class TestModeGameTest {
 
 	@GameTest(maxTicks = 100)
 	public void fullAndResetRoundTrip(GameTestHelper c) {
-		FlightBladeGameTest.enable(c);
+		GameTestKit.enable(c);
 		ServerPlayer p = c.makeMockServerPlayerInLevel();
 		MinecraftServer server = c.getLevel().getServer();
 		CommandSourceStack admin = server.createCommandSourceStack().withEntity(p);
@@ -102,7 +102,7 @@ public class TestModeGameTest {
 
 	@GameTest(maxTicks = 100)
 	public void nonOpCannotRunIt(GameTestHelper c) {
-		FlightBladeGameTest.enable(c);
+		GameTestKit.enable(c);
 		ServerPlayer p = c.makeMockServerPlayerInLevel();
 		boolean rejected = false;
 		try {

@@ -65,6 +65,33 @@ public class WandererGameTest {
 		e.hurtServer(level, level.damageSources().playerAttack(p), 1000f);
 	}
 
+	/** P-077 B1: shift-clicking a done line's reward gives the rolled box, not the "?" mystery box. */
+	@GameTest(maxTicks = 100)
+	public void shiftClickOnRewardGivesTheRealBox(GameTestHelper context) {
+		MinecraftServer s = context.getLevel().getServer();
+		try {
+			enable(context, true);
+			start(context);
+			Wanderer.accept(s);
+			ServerPlayer p = testPlayer(context);
+			context.assertTrue(Wanderer.complete(s, 0), "line 0 should complete");
+			var snap = io.github.huydangtruong.immortalcultivation.wanderer.QuestSnapshot.of(Wanderer.quest(s).orElseThrow());
+			var menu = new io.github.huydangtruong.immortalcultivation.wanderer.WandererMenu(1, p.getInventory(), snap, s, null);
+			menu.quickMoveStack(p, 4);
+			boolean real = false;
+			for (int i = 0; i < p.getInventory().getContainerSize(); i++) {
+				ItemStack st = p.getInventory().getItem(i);
+				context.assertTrue(!st.is(io.github.huydangtruong.immortalcultivation.reward.RewardBoxes.MYSTERY), "no mystery box may reach the inventory, slot " + i + " " + st);
+				real |= io.github.huydangtruong.immortalcultivation.reward.RewardBoxes.tierOf(st).isPresent();
+			}
+			context.assertTrue(real, "the inventory should hold a rolled reward box");
+			context.assertTrue(Wanderer.data(s).quest().orElseThrow().lines().get(0).claimed(), "line 0 should be claimed");
+			context.succeed();
+		} finally {
+			Wanderer.reset(s);
+		}
+	}
+
 	/** D65: a chieftain drops 10 times the XP of the same mob without the boss tag. */
 	@GameTest(maxTicks = 100)
 	public void chieftainDropsTenTimesXp(GameTestHelper context) {
@@ -822,11 +849,11 @@ public class WandererGameTest {
 	public void deathMatchSummonsTargetTheOpponent(GameTestHelper context) {
 		MinecraftServer s = context.getLevel().getServer();
 		enable(context, true);
-		FlightBladeGameTest.floor(context);
-		ServerPlayer owner = FlightBladeGameTest.survivor(context);
-		ServerPlayer foe = FlightBladeGameTest.survivor(context);
-		FlightBladeGameTest.place(context, owner, 3.5, 1, 3.5, 0f, 0f);
-		FlightBladeGameTest.place(context, foe, 9.5, 1, 9.5, 0f, 0f);
+		GameTestKit.floor(context);
+		ServerPlayer owner = GameTestKit.survivor(context);
+		ServerPlayer foe = GameTestKit.survivor(context);
+		GameTestKit.place(context, owner, 3.5, 1, 3.5, 0f, 0f);
+		GameTestKit.place(context, foe, 9.5, 1, 9.5, 0f, 0f);
 		owner.setHealth(20f);
 		foe.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(100000); // the summons hit it: it must outlast the test
 		foe.setHealth(100000f);
@@ -872,8 +899,8 @@ public class WandererGameTest {
 				io.github.huydangtruong.immortalcultivation.technique.VioletGuardian.dismissAll(owner);
 				io.github.huydangtruong.immortalcultivation.technique.Illusion.dismissAll(owner);
 				endMatchTest(s);
-				FlightBladeGameTest.drop(context, owner);
-				FlightBladeGameTest.drop(context, foe);
+				GameTestKit.drop(context, owner);
+				GameTestKit.drop(context, foe);
 			}
 		});
 	}

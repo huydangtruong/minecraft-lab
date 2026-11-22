@@ -1,7 +1,7 @@
 package io.github.huydangtruong.immortalcultivation.wanderer;
 
 import io.github.huydangtruong.immortalcultivation.HeartsAttachment;
-import io.github.huydangtruong.immortalcultivation.Messages;
+import io.github.huydangtruong.immortalcultivation.WandererMessages;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -24,7 +24,7 @@ public final class WandererNpc {
 		npc.setPermanentlyInvulnerable(true); // mobs never target an invulnerable entity (canBeSeenAsEnemy)
 		npc.setPersistenceRequired();
 		npc.setDespawnDelay(0);
-		npc.setCustomName(Messages.wandererName());
+		npc.setCustomName(WandererMessages.wandererName());
 		npc.setCustomNameVisible(true);
 		npc.setAttached(HeartsAttachment.WANDERER, true);
 		return npc;

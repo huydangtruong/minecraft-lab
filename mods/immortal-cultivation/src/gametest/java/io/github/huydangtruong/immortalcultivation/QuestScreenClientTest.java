@@ -215,7 +215,8 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 		clickGui(context, hotspots(context).get(HS_UPGRADE), LEFT);
 		check(techniqueData(server).level(t.getEnumConstants()[0]) == 2, "two Upgrade clicks should give fire level 2");
 		int levelsLeft = server.computeOnServer(s -> s.getPlayerList().getPlayers().get(0).experienceLevel);
-		check(levelsLeft == 40 - 6 - 7, "levels left should be 27, was " + levelsLeft);
+		int expectedLeft = 40 - io.github.huydangtruong.immortalcultivation.technique.TechniqueRules.totalCost(2); // D178: flat cost
+		check(levelsLeft == expectedLeft, "levels left should be " + expectedLeft + ", was " + levelsLeft);
 		context.takeScreenshot("09e-technique-detail-level2");
 		clickGui(context, hotspots(context).get(HS_BACK), LEFT);
 		// learn ice, Heaven Blast and healing with the command, then assign with real clicks
@@ -253,7 +254,7 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 		scrollList(context, 1);
 		check(techniqueData(server).inSlot(1) == ice, "the ice row with slot 2 in edit mode should slot it");
 		check(techniqueData(server).inSlot(0) == fire, "slot 1 keeps fire");
-		// move: edit slot 1, + on ice -> slot 1 ice, slot 2 empty
+		// D188 swap: edit slot 1, pick ice -> slot 1 ice, slot 2 fire
 		clickGui(context, hotspots(context).get(HS_SLOT), LEFT);
 		context.takeScreenshot("09f-move-before"); // fire + ice slotted, editing slot 1
 		scrollList(context, -1);
@@ -266,8 +267,10 @@ public class QuestScreenClientTest implements FabricClientGameTest {
 		scrollList(context, 1);
 		scrollList(context, 1);
 		check(techniqueData(server).inSlot(0) == ice, "slot 1 should hold ice after the move");
-		check(techniqueData(server).inSlot(1) == null, "slot 2 should be empty after ice moved out of it");
+		check(techniqueData(server).inSlot(1) == fire, "slot 2 should get fire when ice swaps out of it (D188)");
 		context.takeScreenshot("09f2-after-move");
+		clickGui(context, hotspots(context).get(HS_SLOT + 1), RIGHT); // empty slot 2 again for the steps below
+		check(techniqueData(server).inSlot(1) == null, "right click clears slot 2");
 		// P-028 technique first: pick fire's row, the row and the slots it can go to are outlined, the emerald box is a red Cancel
 		clickGui(context, hotspots(context).get(HS_ROW), LEFT);
 		context.takeScreenshot("97-technique-picked");

@@ -6,17 +6,13 @@
 - textures/item/katana.png             16x16, a diagonal katana for the item model (handheld)
 
 Only the UV layout of the vanilla humanoid model is followed (box faces at the same places); no Mojang texture is
-copied or recoloured. Run: python3 -I mods/immortal-cultivation/tools/make_god_slayer_texture.py
+copied or recoloured. Run: python3 mods/immortal-cultivation/tools/make_god_slayer_texture.py
 """
-import importlib.util
 import os
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-spec = importlib.util.spec_from_file_location("hearts", os.path.join(HERE, "make_heart_sprites.py"))
-hearts = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(hearts)
-write_png, rgba, CLEAR = hearts.write_png, hearts.rgba, hearts.CLEAR
+from pngkit import write_png, rgba, CLEAR
 
 ASSETS = os.path.join(HERE, "..", "src", "main", "resources", "assets", "permahearts", "textures")
 

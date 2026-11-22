@@ -147,12 +147,6 @@ public final class Lance {
 		return p.level().clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, p));
 	}
 
-	/** Where the beam ends: the first block on the look ray, or 256 blocks out. */
-	public static Vec3 beamEnd(ServerPlayer p) {
-		BlockHitResult block = beamHit(p);
-		return block.getType() == HitResult.Type.MISS ? p.getEyePosition().add(p.getViewVector(1f).scale(LanceRules.RANGE)) : block.getLocation();
-	}
-
 	private static void clearCrack(ServerPlayer p, Active a) {
 		if (a.mining != null) {
 			a.level.destroyBlockProgress(p.getId(), a.mining, -1);

@@ -94,7 +94,7 @@ public final class IllusionTargets {
 	}
 
 	/** True when the owner's clones may fight this entity: never the owner, their clones, guardians, angels, tamed animals or Soul Grasp mobs. */
-	static boolean eligible(Player owner, Entity e) {
+	public static boolean eligible(Player owner, Entity e) {
 		if (!(e instanceof LivingEntity le) || !le.isAlive() || le.isSpectator() || e == owner) {
 			return false;
 		}
@@ -108,7 +108,7 @@ public final class IllusionTargets {
 	}
 
 	/** The living entities on the owner's list, found in the level; dead and gone ones drop off the list. */
-	static List<LivingEntity> of(ServerLevel level, UUID owner) {
+	public static List<LivingEntity> of(ServerLevel level, UUID owner) {
 		Set<UUID> ids = LISTS.get(owner);
 		List<LivingEntity> out = new ArrayList<>();
 		if (ids == null) {

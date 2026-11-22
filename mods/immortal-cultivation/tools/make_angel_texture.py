@@ -6,16 +6,12 @@
 Only the UV layout of the Vex model is followed (box faces at the same places); no Mojang texture is copied or recoloured.
 Layout (u, v, w, h, d): head (0,0,5,5,5), body (0,10,3,4,2), robe (0,16,3,5,2), right arm (23,0,2,4,2),
 left arm (23,6,2,4,2), wing (16,14,0,5,8): its two flat faces are at (16,22) and (24,22), each 8x5.
-Run: python3 -I mods/immortal-cultivation/tools/make_angel_texture.py
+Run: python3 mods/immortal-cultivation/tools/make_angel_texture.py
 """
-import importlib.util
 import os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-spec = importlib.util.spec_from_file_location("hearts", os.path.join(HERE, "make_heart_sprites.py"))
-hearts = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(hearts)
-write_png, rgba, CLEAR = hearts.write_png, hearts.rgba, hearts.CLEAR
+from pngkit import write_png, rgba, CLEAR
 
 OUT = os.path.join(HERE, "..", "src", "main", "resources", "assets", "permahearts", "textures", "entity")
 

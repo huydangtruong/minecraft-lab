@@ -33,7 +33,7 @@ public class ItemGuardGameTest {
 	private static ServerPlayer player(GameTestHelper c, int level) {
 		MinecraftServer s = c.getLevel().getServer();
 		s.getGameRules().set(ImmortalCultivation.ENABLED, true, s);
-		ServerPlayer p = FlightBladeGameTest.survivor(c); // Creative never loses durability
+		ServerPlayer p = GameTestKit.survivor(c); // Creative never loses durability
 		PassiveAttachment.set(p, PassiveData.DEFAULT.withLevel(Passive.GUARD, level));
 		return p;
 	}
@@ -76,7 +76,7 @@ public class ItemGuardGameTest {
 		c.assertTrue(ItemGuard.debt(s) == 501 && s.getDamageValue() == 1561, "debt 501 at full damage, was " + ItemGuard.debt(s));
 		wearMore(p, s, 5000);
 		c.assertTrue(ItemGuard.debt(s) == 1561 && s.getCount() == 1, "Lv 1 cap 100% = 1561, never destroyed, was " + ItemGuard.debt(s));
-		FlightBladeGameTest.drop(c, p);
+		GameTestKit.drop(c, p);
 		c.succeed();
 	}
 
@@ -88,7 +88,7 @@ public class ItemGuardGameTest {
 		PassiveAttachment.set(p, PassiveAttachment.get(p).withOn(Passive.GUARD, false));
 		wearMore(p, s, 50);
 		c.assertTrue(ItemGuard.debt(s) == 157 && s.getCount() == 1, "switched off: a broken item gains no debt and is not destroyed");
-		FlightBladeGameTest.drop(c, p);
+		GameTestKit.drop(c, p);
 		c.succeed();
 	}
 
@@ -106,7 +106,7 @@ public class ItemGuardGameTest {
 		s = nearlyBroken(Items.DIAMOND_PICKAXE);
 		c.assertTrue(wear(p, s) == 1 && s.isEmpty(), "mod off in this world: vanilla break");
 		srv.getGameRules().set(ImmortalCultivation.ENABLED, true, srv);
-		FlightBladeGameTest.drop(c, p);
+		GameTestKit.drop(c, p);
 		c.succeed();
 	}
 
@@ -127,7 +127,7 @@ public class ItemGuardGameTest {
 		AtomicInteger whole = new AtomicInteger();
 		new ItemStack(Items.DIAMOND_SWORD).forEachModifier(EquipmentSlot.MAINHAND, (a, m) -> whole.incrementAndGet());
 		c.assertTrue(whole.get() > 0, "a whole sword does");
-		FlightBladeGameTest.drop(c, p);
+		GameTestKit.drop(c, p);
 		c.succeed();
 	}
 
@@ -148,7 +148,7 @@ public class ItemGuardGameTest {
 		c.assertTrue(bow.use(c.getLevel(), p, InteractionHand.MAIN_HAND) == InteractionResult.PASS, "broken bow cannot be drawn");
 		ItemStack flint = broken(p, Items.FLINT_AND_STEEL);
 		c.assertTrue(flint.use(c.getLevel(), p, InteractionHand.MAIN_HAND) == InteractionResult.PASS, "broken flint and steel does nothing");
-		FlightBladeGameTest.drop(c, p);
+		GameTestKit.drop(c, p);
 		c.succeed();
 	}
 
@@ -160,7 +160,7 @@ public class ItemGuardGameTest {
 		boolean found = lines.stream().anyMatch(l -> l.getString().equals("Broken: -1561 durability"));
 		c.assertTrue(found, "red tooltip line, lines were " + lines);
 		c.assertTrue(s.isBarVisible() && s.getBarColor() == 0xFFE02020, "the bar is red");
-		FlightBladeGameTest.drop(c, p);
+		GameTestKit.drop(c, p);
 		c.succeed();
 	}
 
@@ -173,7 +173,7 @@ public class ItemGuardGameTest {
 		var json = ItemStack.CODEC.encodeStart(ops, s).getOrThrow();
 		ItemStack back = ItemStack.CODEC.parse(ops, json).getOrThrow();
 		c.assertTrue(ItemGuard.isBroken(back) && ItemGuard.debt(back) == debt && debt == 200, "Lv 3 iron pickaxe: 80% of 250 = 200, was " + debt);
-		FlightBladeGameTest.drop(c, p);
+		GameTestKit.drop(c, p);
 		c.succeed();
 	}
 
@@ -211,7 +211,7 @@ public class ItemGuardGameTest {
 		menu3.getSlot(1).set(new ItemStack(Items.DIAMOND_PICKAXE));
 		ItemStack out3 = menu3.getSlot(2).getItem();
 		c.assertTrue(!out3.isEmpty() && !ItemGuard.isBroken(out3) && out3.getDamageValue() == 157, "Lv 10 combine repairs it: " + out3.getDamageValue());
-		FlightBladeGameTest.drop(c, p);
+		GameTestKit.drop(c, p);
 		c.succeed();
 	}
 
@@ -232,7 +232,7 @@ public class ItemGuardGameTest {
 		c.assertTrue(!ItemGuard.isBroken(now), "mending paid the debt and gave durability");
 		c.assertTrue(now.getDamageValue() == 1561 - 43, "damage 1518, was " + now.getDamageValue());
 		c.assertTrue(now.getOrDefault(DataComponents.DAMAGE, 0) == now.getDamageValue(), "component in sync");
-		FlightBladeGameTest.drop(c, p);
+		GameTestKit.drop(c, p);
 		c.succeed();
 	}
 }

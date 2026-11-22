@@ -24,11 +24,6 @@ public class ThousandMileStepGameTest {
 	private static final int START_X = 12; // outside the barrier walls of the test structure
 	private static final int REACH = 150; // teleportRange(1)
 
-	private static void enable(GameTestHelper c) {
-		MinecraftServer s = c.getLevel().getServer();
-		s.getGameRules().set(ImmortalCultivation.ENABLED, true, s);
-	}
-
 	/** A strip 5 wide (z 0..4) along +x at y 0. */
 	private static void strip(GameTestHelper c, int from, int to, Block b) {
 		for (int x = from; x <= to; x++) {
@@ -57,7 +52,7 @@ public class ThousandMileStepGameTest {
 
 	@GameTest(maxTicks = 60, padding = 128)
 	public void fullChargeLandsAboutTheRangeAwayAndStartsTheCooldown(GameTestHelper c) {
-		enable(c);
+		GameTestKit.enable(c);
 		strip(c, START_X - 2, START_X + REACH + 10, Blocks.STONE);
 		ServerPlayer p = start(c);
 		p.fallDistance = 40;
@@ -73,9 +68,26 @@ public class ThousandMileStepGameTest {
 		c.succeed();
 	}
 
+	/** P-077 B9: a rider is dismounted by a cast that works (the dismount now comes from the teleport itself). */
+	@GameTest(maxTicks = 60, padding = 128)
+	public void aRiderLandsOnTheirOwnFeetAfterTheStep(GameTestHelper c) {
+		GameTestKit.enable(c);
+		strip(c, START_X - 2, START_X + 50, Blocks.STONE);
+		ServerPlayer p = start(c);
+		net.minecraft.world.entity.animal.pig.Pig pig = c.spawn(net.minecraft.world.entity.EntityTypes.PIG, new Vec3(START_X + 0.5, 1, 2.5));
+		p.startRiding(pig, true, false);
+		c.assertTrue(p.isPassenger(), "the player starts mounted");
+		c.assertTrue(TechniqueCasts.cast(p, Technique.TELEPORT, 1, 0f), "cast works");
+		c.assertTrue(!p.isPassenger(), "the player is off the mount after the step");
+		c.assertTrue(relX(c, p) - (START_X + 0.5) > 10, "and has moved");
+		pig.discard();
+		clean(c, START_X - 2, START_X + 50);
+		c.succeed();
+	}
+
 	@GameTest(maxTicks = 60, padding = 128)
 	public void lowChargeKeepsTheTwentyPercentFloor(GameTestHelper c) {
-		enable(c);
+		GameTestKit.enable(c);
 		strip(c, START_X - 2, START_X + 50, Blocks.STONE);
 		ServerPlayer p = start(c);
 		c.assertTrue(TechniqueCasts.cast(p, Technique.TELEPORT, 1, 0f), "cast works at charge 0");
@@ -87,7 +99,7 @@ public class ThousandMileStepGameTest {
 
 	@GameTest(maxTicks = 60, padding = 128)
 	public void aWallStopsTheStep(GameTestHelper c) {
-		enable(c);
+		GameTestKit.enable(c);
 		strip(c, START_X - 2, START_X + 80, Blocks.STONE);
 		for (int y = 1; y <= 6; y++) {
 			for (int z = 0; z <= 4; z++) {
@@ -126,7 +138,7 @@ public class ThousandMileStepGameTest {
 
 	@GameTest(maxTicks = 60, padding = 128)
 	public void lavaMeansNoCastAndNoCooldown(GameTestHelper c) {
-		enable(c);
+		GameTestKit.enable(c);
 		strip(c, START_X - 2, START_X + 5, Blocks.STONE);
 		lavaPool(c);
 		ServerPlayer p = start(c);

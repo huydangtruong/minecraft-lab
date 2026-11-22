@@ -29,7 +29,7 @@ import net.minecraft.world.phys.Vec3;
  */
 public class DangerGameTest {
 	private static void enable(GameTestHelper c) {
-		FlightBladeGameTest.enable(c);
+		GameTestKit.enable(c);
 		MinecraftServer s = c.getLevel().getServer();
 		s.getGameRules().set(Danger.ENABLED, true, s);
 	}

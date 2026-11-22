@@ -304,7 +304,7 @@ public final class Seism {
 		Vec3 c = caster.position();
 		double r = SeismRules.waveRadius(index);
 		for (LivingEntity e : sl.getEntitiesOfClass(LivingEntity.class, new AABB(c, c).inflate(r + 1),
-			e -> TechniqueDamage.affectable(e, caster) && !(e instanceof Player pl && pl.isCreative()) && distance(e, c) <= r)) {
+			e -> TechniqueDamage.foe(e, caster) && !(e instanceof Player pl && pl.isCreative()) && distance(e, c) <= r)) {
 			if (!e.onGround() && !e.isInWater()) {
 				continue; // already airborne (for instance launched by an earlier pulse)
 			}
@@ -411,10 +411,5 @@ public final class Seism {
 		double dy = Math.max(Math.max(b.minY - c.y, 0), c.y - b.maxY);
 		double dz = Math.max(Math.max(b.minZ - c.z, 0), c.z - b.maxZ);
 		return Math.sqrt(dx * dx + dy * dy + dz * dz);
-	}
-
-	/** Number of boulders still falling and spikes still alive (tests). */
-	public static int activeVisuals() {
-		return FALLS.size() + SPIKES.size();
 	}
 }

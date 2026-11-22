@@ -1,23 +1,15 @@
 """Writes the translucent turquoise crystal block texture (D143) and the Crystal Disarm effect icon. Stdlib only, original art."""
 import os
 import random
-import struct
-import zlib
+
+import pngkit
 
 ROOT = os.path.join(os.path.dirname(__file__), "..", "src", "main", "resources", "assets", "permahearts", "textures")
 
 
 def write_png(path, w, h, pixels):
-    raw = b"".join(b"\x00" + bytes([c for px in pixels[y * w:(y + 1) * w] for c in px]) for y in range(h))
-
-    def chunk(tag, data):
-        body = tag + data
-        return struct.pack(">I", len(data)) + body + struct.pack(">I", zlib.crc32(body) & 0xFFFFFFFF)
-
-    png = b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", struct.pack(">IIBBBBB", w, h, 8, 6, 0, 0, 0)) + chunk(b"IDAT", zlib.compress(raw, 9)) + chunk(b"IEND", b"")
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, "wb") as f:
-        f.write(png)
+    """pixels is a flat list of w*h RGBA tuples."""
+    pngkit.write_png(path, [pixels[y * w:(y + 1) * w] for y in range(h)])
 
 
 def block():

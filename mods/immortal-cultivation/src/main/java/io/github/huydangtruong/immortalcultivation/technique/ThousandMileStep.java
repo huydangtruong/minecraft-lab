@@ -63,7 +63,8 @@ public final class ThousandMileStep {
 			return false;
 		}
 		Vec3 from = p.position();
-		p.stopRiding();
+		// No stopRiding() first (B9): Entity.teleport dismounts a player when the teleport really happens, so a failed
+		// teleport keeps the rider on the mount.
 		if (!p.teleportTo(sl, dest.x, dest.y, dest.z, Set.of(), p.getYRot(), p.getXRot(), false)) {
 			return false;
 		}

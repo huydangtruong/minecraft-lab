@@ -4,6 +4,7 @@ import io.github.huydangtruong.immortalcultivation.technique.Technique;
 import io.github.huydangtruong.immortalcultivation.technique.TechniqueAttachment;
 import io.github.huydangtruong.immortalcultivation.technique.TechniqueData;
 import io.github.huydangtruong.immortalcultivation.technique.TechniqueNet;
+import io.github.huydangtruong.immortalcultivation.technique.StatDiff;
 import io.github.huydangtruong.immortalcultivation.technique.TechniqueRules;
 import java.util.ArrayList;
 import java.util.List;
@@ -61,6 +62,15 @@ public final class TechniquesTab {
 	private static int scroll;
 
 	private TechniquesTab() {}
+
+	/** Back to the list with nothing selected (B5): called when the client disconnects. */
+	static void reset() {
+		selectedSlot = -1;
+		selectedTechnique = null;
+		detail = null;
+		scroll = 0;
+		detailScroll = 0;
+	}
 
 	public static int selectedSlot() {
 		return selectedSlot;
@@ -171,7 +181,7 @@ public final class TechniquesTab {
 	}
 
 	/** Back is the first thing of the header line (Back, icon, name). */
-	private static int[] backRect(int tx, int right, int y0, int h) {
+	private static int[] backRect(int tx, int y0) {
 		return new int[] {tx, y0 + 19, 36, 16};
 	}
 
@@ -256,8 +266,6 @@ public final class TechniquesTab {
 
 	private static void drawList(GuiGraphicsExtractor g, Font font, TechniqueData d, int tx, int right, int y0, int h, int mx, int my) {
 		Technique[] all = Technique.values();
-		int open = d.slotsOpen();
-		boolean assign = selectedSlot >= 0 && selectedSlot < open;
 		int viewTop = y0 + LIST_TOP;
 		int viewH = listH(h);
 		scroll = Math.max(0, Math.min(maxScroll(h), scroll));
@@ -336,7 +344,7 @@ public final class TechniquesTab {
 
 	private static void drawDetail(GuiGraphicsExtractor g, Font font, TechniqueData d, long now, Technique t, int tx, int right, int y0, int h, int mx, int my) {
 		int level = d.level(t);
-		int[] bk = backRect(tx, right, y0, h);
+		int[] bk = backRect(tx, y0);
 		g.blitSprite(RenderPipelines.GUI_TEXTURED, icon(t), tx + 40, bk[1], 16, 16);
 		Component name = Component.literal(t.displayName()).withStyle(ChatFormatting.BOLD);
 		g.text(font, name, tx + 60, bk[1], TOTAL, false);
@@ -394,16 +402,10 @@ public final class TechniquesTab {
 				}
 			} else {
 				// "16 blocks" -> "18 blocks" reads better as "16 > 18 blocks": the words they share go once, at the end
-				String[] a = cur.split(" ");
-				String[] b = nxt.split(" ");
-				int common = 0;
-				while (common < a.length - 1 && common < b.length - 1 && a[a.length - 1 - common].equals(b[b.length - 1 - common])
-					&& !Character.isDigit(a[a.length - 1 - common].charAt(0))) {
-					common++;
-				}
-				String curShort = String.join(" ", java.util.Arrays.copyOfRange(a, 0, a.length - common));
-				String nxtShort = String.join(" ", java.util.Arrays.copyOfRange(b, 0, b.length - common));
-				String tail = common == 0 ? "" : " " + String.join(" ", java.util.Arrays.copyOfRange(a, a.length - common, a.length));
+				StatDiff.Result diff = StatDiff.compare(cur, nxt);
+				String curShort = diff.from();
+				String nxtShort = diff.to();
+				String tail = diff.tail();
 				int arrow = font.width("\u2192") + 6;
 				if (font.width(curShort) + arrow + font.width(nxtShort + tail) <= avail) {
 					int x = vx;
@@ -466,7 +468,7 @@ public final class TechniquesTab {
 		int right = x0 + w - 7;
 		TechniqueData d = data();
 		if (detail != null) {
-			return clickDetail(d, detail, tx, right, y0, h, mx, my);
+			return clickDetail(d, detail, tx, right, y0, h, mx, my, button == com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT);
 		}
 		int slotY = y0 + 19;
 		long now = now();
@@ -540,20 +542,20 @@ public final class TechniquesTab {
 		return false;
 	}
 
-	private static boolean clickDetail(TechniqueData d, Technique t, int tx, int right, int y0, int h, double mx, double my) {
+	private static boolean clickDetail(TechniqueData d, Technique t, int tx, int right, int y0, int h, double mx, double my, boolean left) {
 		int[] up = lastUp;
 		int[] re = lastRe;
-		int[] bk = backRect(tx, right, y0, h);
+		int[] bk = backRect(tx, y0);
 		int level = d.level(t);
 		boolean inBody = my >= detailTop(y0) && my < detailBottom(y0, h);
 		if (inBody && in(mx, my, up[0], up[1], up[2], up[3])) {
-			if (level < TechniqueRules.MAX_LEVEL && xpLevels() >= TechniqueRules.upgradeCost(level + 1)) {
+			if (left && level < TechniqueRules.MAX_LEVEL && xpLevels() >= TechniqueRules.upgradeCost(level + 1)) {
 				send(TechniqueNet.UPGRADE, t.id(), 0);
 			}
 			return true;
 		}
 		if (inBody && in(mx, my, re[0], re[1], re[2], re[3])) {
-			if (level > 0 && !d.onCooldown(t, now())) {
+			if (left && level > 0 && !d.onCooldown(t, now())) {
 				send(TechniqueNet.RESET, t.id(), 0);
 			}
 			return true;
@@ -597,7 +599,7 @@ public final class TechniquesTab {
 		}
 		int[] up = lastUp; // where the detail page last drew them
 		int[] re = lastRe;
-		int[] bk = backRect(tx, right, y0, h);
+		int[] bk = backRect(tx, y0);
 		out.add(new int[] {up[0] + up[2] / 2, up[1] + up[3] / 2});
 		out.add(new int[] {re[0] + re[2] / 2, re[1] + re[3] / 2});
 		out.add(new int[] {bk[0] + bk[2] / 2, bk[1] + bk[3] / 2});

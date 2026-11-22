@@ -73,6 +73,7 @@ public final class DangerMobs {
 
 	public static void init() {
 		AFFIXES.identifier();
+		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(s -> ELITES.clear()); // B6: stale Mob refs
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			if (!(entity instanceof Mob m) || !(entity instanceof Enemy)) {
 				return;
@@ -249,11 +250,6 @@ public final class DangerMobs {
 			}
 			sl.sendParticles(ORANGE, m.getX(), m.getY() + m.getBbHeight() / 2, m.getZ(), 6, 0.3, 0.5, 0.3, 0.0);
 		}
-	}
-
-	/** For tests: how many elites are tracked. */
-	public static int trackedElites() {
-		return ELITES.size();
 	}
 
 	/** Hook of the hurt mixin: damage an elite takes after Ironhide. */

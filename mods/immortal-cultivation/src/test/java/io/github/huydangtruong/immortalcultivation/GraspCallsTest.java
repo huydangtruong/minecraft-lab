@@ -6,8 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.github.huydangtruong.immortalcultivation.technique.GraspCalls;
-import io.github.huydangtruong.immortalcultivation.technique.GraspCalls.Pending;
+import io.github.huydangtruong.immortalcultivation.technique.grasp.GraspCalls;
+import io.github.huydangtruong.immortalcultivation.technique.grasp.GraspCalls.Pending;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 

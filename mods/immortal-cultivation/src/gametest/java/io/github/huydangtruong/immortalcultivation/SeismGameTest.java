@@ -6,6 +6,7 @@ import io.github.huydangtruong.immortalcultivation.technique.TechniqueAttachment
 import io.github.huydangtruong.immortalcultivation.technique.TechniqueData;
 import io.github.huydangtruong.immortalcultivation.technique.TechniqueNet;
 import io.github.huydangtruong.immortalcultivation.technique.TechniqueRules;
+import io.github.huydangtruong.immortalcultivation.technique.VioletGuardian;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -23,11 +24,11 @@ import net.minecraft.world.phys.Vec3;
 /** P-056 / D142: Seism on the server: Impact damage rules, the Wave (damage, lift, height rule, airborne skip, bosses), cooldown. */
 public class SeismGameTest {
 	private static ServerPlayer caster(GameTestHelper c, int level) {
-		FlightBladeGameTest.enable(c);
-		FlightBladeGameTest.floor(c);
+		GameTestKit.enable(c);
+		GameTestKit.floor(c);
 		c.getLevel().getServer().setDifficulty(Difficulty.NORMAL, true);
-		ServerPlayer p = FlightBladeGameTest.survivor(c);
-		FlightBladeGameTest.place(c, p, 5.5, 1, 5.5, 0f, 0f);
+		ServerPlayer p = GameTestKit.survivor(c);
+		GameTestKit.place(c, p, 5.5, 1, 5.5, 0f, 0f);
 		TechniqueAttachment.set(p, TechniqueData.DEFAULT.withLevel(Technique.SEISM, level, 10)
 			.withEmeralds(TechniqueRules.MAX_EMERALDS).withSlot(0, Technique.SEISM));
 		return p;
@@ -39,6 +40,8 @@ public class SeismGameTest {
 
 	private static Zombie zombie(GameTestHelper c, double x, double y, double z) {
 		Zombie z1 = c.spawn(EntityTypes.ZOMBIE, new Vec3(x, y, z));
+		z1.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(20.0); // a spawned zombie may roll a max-health bonus (20.9)
+		z1.setHealth(20f);
 		still(z1);
 		z1.setOnGround(true); // a no-AI mob never lands by itself
 		return z1;
@@ -72,7 +75,7 @@ public class SeismGameTest {
 			c.assertTrue(near(z.getHealth(), 10f), "zombie lost 10 HP at Lv 1, health " + z.getHealth());
 			c.assertTrue(cow.getHealth() == 10f, "the cow is not hurt, health " + cow.getHealth());
 			c.assertTrue(p.getHealth() == p.getMaxHealth(), "the caster is not hurt");
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 			c.succeed();
 		});
 	}
@@ -103,7 +106,7 @@ public class SeismGameTest {
 		});
 		c.runAfterDelay(80, () -> {
 			c.assertTrue(!Seism.slowed(p), "the slow is gone after 3 s");
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 			c.succeed();
 		});
 	}
@@ -124,7 +127,7 @@ public class SeismGameTest {
 			c.assertTrue(Math.abs(b.getX() - v.x) < 0.3 && Math.abs(b.getZ() - v.z) < 0.3, "no knockback");
 			c.assertTrue(b.getY() < v.y + 0.3, "no lift, y " + b.getY() + " from " + v.y);
 			b.discard();
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 			c.succeed();
 		});
 	}
@@ -137,7 +140,7 @@ public class SeismGameTest {
 		c.assertTrue(!Seism.slowed(p), "no Wave: the caster is not slowed");
 		c.runAfterDelay(10, () -> {
 			c.assertTrue(cow.getHealth() == 10f, "no wave damage near the caster, health " + cow.getHealth());
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 			c.succeed();
 		});
 	}
@@ -154,7 +157,36 @@ public class SeismGameTest {
 		c.assertTrue(TechniqueAttachment.get(p).cooldownLeft(Technique.SEISM, now) >= 28 * 20 - 1, "Wave cooldown is 28 s");
 		c.assertTrue(TechniqueNet.cast(p, 0, 0f) != null, "on cooldown now");
 		c.runAfterDelay(50, () -> {
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
+			c.succeed();
+		});
+	}
+
+	@GameTest(maxTicks = 100) // P-077 B11
+	public void theWaveSparesTheCastersGuardianAndOtherPlayersWithPvpOff(GameTestHelper c) {
+		ServerPlayer p = caster(c, 3);
+		ServerPlayer other = GameTestKit.survivor(c);
+		GameTestKit.place(c, other, 7.5, 1, 5.5, 0f, 0f);
+		var guardians = VioletGuardian.summon(p, 1);
+		Vec3 gp = abs(c, 3.5, 1, 5.5);
+		guardians.forEach(g -> g.teleportTo(gp.x, gp.y, gp.z));
+		Zombie z = zombie(c, 5.5, 1, 7.5);
+		net.minecraft.server.MinecraftServer server = c.getLevel().getServer();
+		boolean pvp = server.getGameRules().get(net.minecraft.world.level.gamerules.GameRules.PVP);
+		server.getGameRules().set(net.minecraft.world.level.gamerules.GameRules.PVP, false, server);
+		c.runAfterDelay(6, () -> {
+			other.setOnGround(true); // a player nobody moves never lands by itself
+			c.assertTrue(other.onGround() && guardians.get(0).onGround() && z.onGround(), "all stand on the ground: other=" + other.onGround() + " guardian=" + guardians.get(0).onGround());
+			c.assertTrue(TechniqueNet.cast(p, 0, 1f) == null, "the Wave cast is accepted");
+		});
+		c.runAfterDelay(12, () -> {
+			server.getGameRules().set(net.minecraft.world.level.gamerules.GameRules.PVP, pvp, server);
+			c.assertTrue(near(z.getHealth(), 16f), "control: the zombie took 4 HP, health " + z.getHealth());
+			c.assertTrue(other.getHealth() == other.getMaxHealth(), "another player is spared with PvP off, health " + other.getHealth());
+			c.assertTrue(guardians.get(0).getHealth() == guardians.get(0).getMaxHealth(), "the caster's guardian is spared, health " + guardians.get(0).getHealth());
+			guardians.forEach(g -> g.discard());
+			GameTestKit.drop(c, other);
+			GameTestKit.drop(c, p);
 			c.succeed();
 		});
 	}

@@ -163,6 +163,12 @@ public final class PassivesTab {
 
 	private PassivesTab() {}
 
+	/** Back to the top of the list (B5): called when the client disconnects. */
+	static void reset() {
+		detail = null;
+		scroll = 0;
+	}
+
 	public static Passive detail() {
 		return detail;
 	}
@@ -434,7 +440,7 @@ public final class PassivesTab {
 				continue;
 			}
 			if (in(mx, my, plusRect(right, y))) {
-				if (canUpgrade(d, p)) {
+				if (button == com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT && canUpgrade(d, p)) {
 					send(PassiveNet.UPGRADE, p); // one click spends 5 levels, no confirm (D148)
 				}
 			} else if (toggleable(p) && in(mx, my, switchRect(right, y))) {

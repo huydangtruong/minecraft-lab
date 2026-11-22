@@ -24,11 +24,11 @@ import net.minecraft.world.phys.Vec3;
 /** P-029: Thunder Strike on the server (D86): the 1 s warning, the strike, the damage rules, mobGriefing, the sky aim. */
 public class ThunderGameTest {
 	private static ServerPlayer caster(GameTestHelper c, int level) {
-		FlightBladeGameTest.enable(c);
-		FlightBladeGameTest.floor(c);
+		GameTestKit.enable(c);
+		GameTestKit.floor(c);
 		c.getLevel().getServer().setDifficulty(Difficulty.NORMAL, true);
-		ServerPlayer p = FlightBladeGameTest.survivor(c);
-		FlightBladeGameTest.place(c, p, 5.5, 1, 0.5, 0f, 0f);
+		ServerPlayer p = GameTestKit.survivor(c);
+		GameTestKit.place(c, p, 5.5, 1, 0.5, 0f, 0f);
 		TechniqueAttachment.set(p, TechniqueData.DEFAULT.withLevel(Technique.THUNDER, level, 10)
 			.withEmeralds(TechniqueRules.MAX_EMERALDS).withSlot(0, Technique.THUNDER));
 		return p;
@@ -67,7 +67,7 @@ public class ThunderGameTest {
 			c.runAfterDelay(24, () -> {
 				griefing(c, true);
 				c.assertTrue(c.getBlockState(new BlockPos(5, 1, 9)).is(Blocks.DIRT), "no block breaks with mobGriefing off");
-				FlightBladeGameTest.drop(c, p);
+				GameTestKit.drop(c, p);
 				c.succeed();
 			});
 		});
@@ -76,7 +76,7 @@ public class ThunderGameTest {
 	@GameTest(maxTicks = 60)
 	public void theCasterAtTheEdgeAndTheirGuardianAreNotHurt(GameTestHelper c) {
 		ServerPlayer p = caster(c, 1);
-		FlightBladeGameTest.place(c, p, 5.5, 1, 5.5, 0f, 0f);
+		GameTestKit.place(c, p, 5.5, 1, 5.5, 0f, 0f);
 		var guardians = VioletGuardian.summon(p, 1);
 		for (var g : guardians) {
 			g.teleportTo(abs(c, 7.5, 1, 5.5).x, abs(c, 7.5, 1, 5.5).y, abs(c, 7.5, 1, 5.5).z);
@@ -94,24 +94,30 @@ public class ThunderGameTest {
 			c.assertTrue(guardians.get(0).getHealth() >= atStrike[0] - 4f, "the caster's guardian is never hurt, health " + guardians.get(0).getHealth());
 			c.assertTrue(z.getHealth() < zBefore || !z.isAlive(), "control: the zombie in the blast is hurt");
 			guardians.forEach(g -> g.discard());
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 			c.succeed();
 		});
 	}
 
-	@GameTest(maxTicks = 80)
+	@GameTest(maxTicks = 100)
 	public void aPigInTheBlastBecomesAZombifiedPiglin(GameTestHelper c) {
 		ServerPlayer p = caster(c, 1);
 		Pig pig = c.spawn(EntityTypes.PIG, new Vec3(5.5, 1, 9.5));
 		pig.setPersistenceRequired();
 		Thunder.cast(p, 1, abs(c, 5.5, 1, 11.0)); // 1.5 blocks from the pig, not under the bolt
-		c.runAfterDelay(30, () -> {
-			c.assertTrue(!pig.isAlive(), "the pig is gone");
-			var piglins = c.getLevel().getEntitiesOfClass(ZombifiedPiglin.class, c.getBounds().inflate(4));
-			c.assertTrue(!piglins.isEmpty(), "a zombified piglin took its place");
-			piglins.forEach(e -> e.discard());
-			FlightBladeGameTest.drop(c, p);
-			c.succeed();
+		// Polled every tick: the strike lands about 20 ticks after the cast, and the converted piglin can be hurt by the
+		// blast and leave the world again before any single fixed tick. Seeing it once, with the pig gone, proves the conversion.
+		int[] ticks = {0};
+		c.onEachTick(() -> {
+			ticks[0]++;
+			var piglins = c.getLevel().getEntitiesOfClass(ZombifiedPiglin.class, c.getBounds().inflate(8));
+			if (!pig.isAlive() && !piglins.isEmpty()) {
+				piglins.forEach(e -> e.discard());
+				GameTestKit.drop(c, p);
+				c.succeed();
+			} else if (ticks[0] > 60) {
+				c.fail("the pig did not become a zombified piglin: pig alive=" + pig.isAlive() + " removed=" + pig.isRemoved() + " health=" + pig.getHealth() + " piglins=" + piglins.size());
+			}
 		});
 	}
 
@@ -130,7 +136,7 @@ public class ThunderGameTest {
 				int big = air(c);
 				c.assertTrue(small[0] > 5, "level 1 breaks blocks, was " + small[0]);
 				c.assertTrue(big > small[0], "level 20 breaks more than level 1: " + big + " vs " + small[0]);
-				FlightBladeGameTest.drop(c, p);
+				GameTestKit.drop(c, p);
 				c.succeed();
 			});
 		});
@@ -163,11 +169,35 @@ public class ThunderGameTest {
 	@GameTest(maxTicks = 40)
 	public void aCastAlwaysWorksAndStartsTheCooldown(GameTestHelper c) {
 		ServerPlayer p = caster(c, 1);
-		FlightBladeGameTest.place(c, p, 5.5, 1, 0.5, 0f, -5f);
+		GameTestKit.place(c, p, 5.5, 1, 0.5, 0f, -5f);
 		c.assertTrue(TechniqueNet.cast(p, 0, 1f) == null, "the cast is accepted, never refused");
 		c.assertTrue(TechniqueAttachment.get(p).onCooldown(Technique.THUNDER, c.getLevel().getServer().overworld().getGameTime()), "the cooldown started at the cast");
 		c.assertTrue(TechniqueNet.cast(p, 0, 1f) != null, "a second cast is on cooldown");
-		FlightBladeGameTest.drop(c, p);
+		GameTestKit.drop(c, p);
 		c.succeed();
+	}
+
+	@GameTest(maxTicks = 60) // P-077 B11
+	public void aStrikeSparesAnotherPlayerWithPvpOffButHurtsAZombie(GameTestHelper c) {
+		ServerPlayer p = caster(c, 1);
+		GameTestKit.place(c, p, 5.5, 1, 0.5, 0f, 0f);
+		ServerPlayer other = GameTestKit.survivor(c);
+		GameTestKit.place(c, other, 5.5, 1, 7.5, 0f, 0f);
+		Zombie z = c.spawn(EntityTypes.ZOMBIE, new Vec3(6.5, 1, 6.5));
+		z.setPersistenceRequired();
+		z.setNoAi(true);
+		float zBefore = z.getHealth();
+		MinecraftServer server = c.getLevel().getServer();
+		boolean pvp = server.getGameRules().get(GameRules.PVP);
+		server.getGameRules().set(GameRules.PVP, false, server);
+		Thunder.cast(p, 1, abs(c, 5.5, 1, 6.5));
+		c.runAfterDelay(30, () -> {
+			server.getGameRules().set(GameRules.PVP, pvp, server);
+			c.assertTrue(z.getHealth() < zBefore || !z.isAlive(), "control: the zombie in the blast is hurt");
+			c.assertTrue(other.getHealth() == other.getMaxHealth(), "another player in the blast is spared with PvP off, health " + other.getHealth());
+			GameTestKit.drop(c, other);
+			GameTestKit.drop(c, p);
+			c.succeed();
+		});
 	}
 }

@@ -360,3 +360,26 @@ Tên và chữ ký dưới đây lấy từ `javap` jar 26.3 và mã Fabric API 
 - **Trash slot (P-074, D217, verified on 26.3):** vanilla sprite `minecraft:container/slot` (18x18) draws the slot look; custom widget = `AbstractWidget` with `extractWidgetRenderState(GuiGraphicsExtractor, mx, my, delta)`, `updateWidgetNarration(NarrationElementOutput)` + `defaultButtonNarrationText`, `onClick(MouseButtonEvent, boolean)`; override `isValidClickButton(MouseButtonInfo)` (`info.button()`) to accept right click too. Cursor stack: `Player.containerMenu.getCarried()` / `setCarried(ItemStack.EMPTY)` / `broadcastChanges()`. Private sound: `serverPlayer.connection.send(new ClientboundSoundPacket(Holder<SoundEvent>, SoundSource, x, y, z, volume, pitch, seed))` (use `Holder.direct(SoundEvents.LAVA_EXTINGUISH)`); `Level.playSound(null, ...)` would reach everyone nearby. Payload without data: `StreamCodec.unit(new Record())`. Game tests: `makeMockServerPlayerInLevel()` reports CREATIVE even after `setGameMode(SPECTATOR)`, so spectator rules go in JUnit.
 
 - **/quit (P-075, D218, checked with javap on 26.3):** `MinecraftServer#isDedicatedServer()`, `#isSingleplayerOwner(NameAndId)` (integrated: compares the name with the single-player profile, ignoring case), `#saveEverything(boolean suppressLogs, boolean flush, boolean force)`, `#halt(boolean waitForShutdown)`, `ServerPlayer#nameAndId()`, `ServerPlayer.connection.disconnect(Component)`, `CommandSourceStack#getTextName()`. Pure-S2C payload: `PayloadTypeRegistry.clientboundPlay().register`, `ServerPlayNetworking.send(player, payload)`, client `ClientPlayNetworking.registerGlobalReceiver`. Save order, safe: `PauseScreen`'s disconnect button calls `Minecraft#disconnectFromWorld(Component)`; for a local server that is `disconnectWithSavingScreen()` -> `disconnect(Screen, boolean)` -> `IntegratedServer#halt(true)`, which runs `executeBlocking` then `MinecraftServer#halt(true)` that `Thread.join`s the server thread. `MinecraftServer#stopServer` (on that thread) does `PlayerList#saveAll`, `removeAll`, `saveAllChunks(..)`, closes the levels and the saved-data storage. The client renders "Saving world" frames until `isShutdown()`, so when `disconnectFromWorld` returns the world is fully on disk. Only then call `Minecraft#stop()` (just sets `running = false`; the main loop ends and the game closes). Server game tests run on a dedicated server, so `/quit` must stay behind the replaceable `Quit.hosted` / `Quit.finalStep` hooks.
+
+## Code names vs display names (P-076)
+
+Java names and ids predate many renames. Ids, `Identifier`s, lang keys and saved fields stay as they are (D132); only this table maps them.
+
+| Display name | Technique id | Main classes |
+|---|---|---|
+| Quantum Leap | `teleport` | `ThousandMileStep` |
+| Life Stealer | `blade` | `LifeStealer`, `StealerRules`, `StealerSlow` |
+| Solar Lance | `lance` | `Lance`, `LanceRules` |
+| Crystal Mayhem | `mayhem` | `Mayhem` |
+| Crystal Prison | `crystal` | `Crystal`, `CrystalBlock`, `CrystalSavedData`, `CrystalDisarm` |
+| Violet Guardian | `golem` | `VioletGuardian` |
+| Warrior Angel | `angel` | `WarriorAngel` |
+| Spirit Walk (was Shadow Walk, Spirit Phase) | `phase` | `TechniqueTimers.SHADOW`, effect `shadow_walk` |
+| Undying Jutsu | `sacrifice` | `TechniqueCasts.bloodOath` |
+| Heaven Blast | `repulse` | `TechniqueCasts.repulse` |
+| Cloud Travel | `flight` | `Flight` |
+| Soul Grasp | `grasp` | `technique/grasp/*` (`Grasp`, `GraspNet`, `GraspCallService`, `GraspTether`, `GraspRules`, `GraspCalls`) |
+| Crimson Master | – | `wanderer/*` (`Wanderer`, `WandererNpc`, `WandererData`) |
+
+- Sprite scripts (`tools/`) share `pngkit.py`; run them as `python3 tools/<script>.py` (not `-I`, which hides `pngkit`). `blade.png`, `lance.png`, `mayhem.png` are hand-made: no script writes them.
+- `Grasp.setCallTimeout` is static: a game test that changes it must restore `GraspCalls.TIMEOUT_TICKS` (P-076 R3).

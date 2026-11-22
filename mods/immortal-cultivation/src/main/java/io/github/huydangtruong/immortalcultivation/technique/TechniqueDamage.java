@@ -21,6 +21,22 @@ final class TechniqueDamage {
 	}
 
 	/**
+	 * True for entities an area technique may hurt or slow (P-077 B11): affectable, not the caster's friends (summons,
+	 * grasped mobs), and other players only when the PvP game rule is on (D182). An owner that is not a player (an orb
+	 * of a mob, a caster who logged out) has no friends to spare and no PvP rule to follow.
+	 */
+	static boolean foe(LivingEntity e, Entity caster) {
+		if (!affectable(e, caster)) {
+			return false;
+		}
+		if (!(caster instanceof ServerPlayer p)) {
+			return true;
+		}
+		return !Lance.isFriend(e, p)
+			&& (!(e instanceof Player) || io.github.huydangtruong.immortalcultivation.wanderer.DeathMatch.pvpAllowed(p.level().getServer()));
+	}
+
+	/**
 	 * Hurts target. ServerPlayer#hurtServer refuses any damage whose causing entity is a Player when PvP is off (or the
 	 * players share a team), so for player targets the causing entity is left empty: the damage then counts as magic
 	 * from the technique (direct entity = the orb or nothing). Trade-off: a player killed this way credits nobody and

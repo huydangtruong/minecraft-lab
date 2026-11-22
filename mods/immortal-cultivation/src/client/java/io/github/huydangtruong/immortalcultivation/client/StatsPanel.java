@@ -400,7 +400,8 @@ public final class StatsPanel {
 
 		@Override
 		protected boolean isValidClickButton(net.minecraft.client.input.MouseButtonInfo info) {
-			return info.button() == 0 || info.button() == 1; // left or right
+			return info.button() == com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT
+				|| info.button() == com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_RIGHT; // 26.3: left 1, right 3
 		}
 
 		@Override

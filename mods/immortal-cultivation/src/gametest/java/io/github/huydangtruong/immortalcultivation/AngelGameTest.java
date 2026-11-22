@@ -23,10 +23,10 @@ public class AngelGameTest {
 	}
 
 	private static ServerPlayer owner(GameTestHelper c) {
-		FlightBladeGameTest.enable(c);
-		FlightBladeGameTest.floor(c);
-		ServerPlayer p = FlightBladeGameTest.survivor(c);
-		FlightBladeGameTest.place(c, p, 5.5, 1, 5.5, 0f, 0f);
+		GameTestKit.enable(c);
+		GameTestKit.floor(c);
+		ServerPlayer p = GameTestKit.survivor(c);
+		GameTestKit.place(c, p, 5.5, 1, 5.5, 0f, 0f);
 		return p;
 	}
 
@@ -50,7 +50,7 @@ public class AngelGameTest {
 		var lv1 = TechniqueCasts.cast(p, Technique.ANGEL, 1, 1f);
 		var a = WarriorAngel.angelsOf(c.getLevel(), p.getUUID()).get(0);
 		c.assertTrue(lv1 && a.getMaxHealth() == 16 && a.getAttributeValue(Attributes.ATTACK_DAMAGE) == 4, "level 1: 16 health, 4 damage");
-		FlightBladeGameTest.drop(c, p);
+		GameTestKit.drop(c, p);
 		c.succeed();
 	}
 
@@ -69,7 +69,7 @@ public class AngelGameTest {
 			c.assertTrue(a.getTarget() == null, "no target, was " + a.getTarget());
 			c.assertTrue(p.getHealth() == php, "the owner is not hurt");
 			c.assertTrue(a.getHealth() == hp, "not retaliating, health " + a.getHealth());
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 			c.succeed();
 		});
 	}
@@ -77,7 +77,7 @@ public class AngelGameTest {
 	@GameTest(maxTicks = 400)
 	public void angelsFlyToAMonsterAndHurtIt(GameTestHelper c) {
 		ServerPlayer p = owner(c);
-		FlightBladeGameTest.place(c, p, 5.5, 1, 2.5, 0f, 0f);
+		GameTestKit.place(c, p, 5.5, 1, 2.5, 0f, 0f);
 		arm(p, Technique.ANGEL, 20);
 		Husk h = c.spawn(EntityTypes.HUSK, new Vec3(5.5, 1, 9.5));
 		h.setNoAi(true);
@@ -85,7 +85,7 @@ public class AngelGameTest {
 		// Vex flight is random: wait for the first hit instead of checking once at a fixed tick
 		c.succeedWhen(() -> {
 			c.assertTrue(!h.isAlive() || h.getHealth() < h.getMaxHealth(), "an angel hurt the husk, health " + h.getHealth());
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 		});
 	}
 
@@ -103,7 +103,7 @@ public class AngelGameTest {
 		c.assertTrue(!z.isAlive(), "the angel killed the zombie");
 		int now = HeartsAttachment.get(p).totalHostileKills();
 		c.assertTrue(now == kills + 1, "the owner's kill count went " + kills + " -> " + now);
-		FlightBladeGameTest.drop(c, p);
+		GameTestKit.drop(c, p);
 		c.succeed();
 	}
 
@@ -121,7 +121,7 @@ public class AngelGameTest {
 		c.assertTrue(!z.isAlive(), "the guardian killed the zombie");
 		int now = HeartsAttachment.get(p).totalHostileKills();
 		c.assertTrue(now == kills + 1, "the owner's kill count went " + kills + " -> " + now);
-		FlightBladeGameTest.drop(c, p);
+		GameTestKit.drop(c, p);
 		c.succeed();
 	}
 
@@ -139,7 +139,7 @@ public class AngelGameTest {
 		c.runAfterDelay(8, () -> {
 			c.assertTrue(!a.isAlive(), "the first angel vanished after its time");
 			c.assertTrue(b.isAlive() && d.isAlive(), "the others stay");
-			FlightBladeGameTest.drop(c, p); // the owner leaves
+			GameTestKit.drop(c, p); // the owner leaves
 			c.runAfterDelay(8, () -> {
 				c.assertTrue(!b.isAlive() && !d.isAlive(), "the angels vanish with their owner");
 				c.succeed();

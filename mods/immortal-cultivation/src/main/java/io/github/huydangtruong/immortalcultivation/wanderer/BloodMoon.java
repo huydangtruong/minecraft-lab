@@ -1,6 +1,6 @@
 package io.github.huydangtruong.immortalcultivation.wanderer;
 
-import io.github.huydangtruong.immortalcultivation.Messages;
+import io.github.huydangtruong.immortalcultivation.QuestEventMessages;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -74,7 +74,7 @@ public final class BloodMoon {
 
 	/** Display name of a Blood Moon mob: "Zombie Horseman" for horsemen, else the entity name. */
 	public static net.minecraft.network.chat.Component mobName(String target) {
-		return QuestGenerator.HORSEMAN.equals(QuestGenerator.bloodMoonMob(target)) ? Messages.zombieHorseman() : mobType(target).getDescription();
+		return QuestGenerator.HORSEMAN.equals(QuestGenerator.bloodMoonMob(target)) ? QuestEventMessages.zombieHorseman() : mobType(target).getDescription();
 	}
 
 	/** The mob name of the running event. */
@@ -114,7 +114,7 @@ public final class BloodMoon {
 		}
 		ServerLevel ow = server.overworld();
 		if (starter.level() != ow) {
-			starter.sendOverlayMessage(Messages.eventNotHere());
+			starter.sendOverlayMessage(QuestEventMessages.eventNotHere());
 			return false;
 		}
 		moveClock(server, true);
@@ -124,7 +124,7 @@ public final class BloodMoon {
 		for (ServerPlayer p : ow.players()) {
 			bar.addPlayer(p);
 		}
-		server.getPlayerList().broadcastSystemMessage(Messages.bloodMoonStarted(runningName(server)), false);
+		server.getPlayerList().broadcastSystemMessage(QuestEventMessages.bloodMoonStarted(runningName(server)), false);
 		return true;
 	}
 
@@ -142,7 +142,7 @@ public final class BloodMoon {
 
 	private static void ensureBar(MinecraftServer server) {
 		if (bar == null) {
-			bar = new ServerBossEvent(UUID.randomUUID(), Messages.bloodMoonBar(runningName(server)), BossEvent.BossBarColor.RED,
+			bar = new ServerBossEvent(UUID.randomUUID(), QuestEventMessages.bloodMoonBar(runningName(server)), BossEvent.BossBarColor.RED,
 				BossEvent.BossBarOverlay.PROGRESS);
 			bar.setDarkenScreen(true);
 			bar.setCreateWorldFog(true);
@@ -154,6 +154,13 @@ public final class BloodMoon {
 			bar.removeAllPlayers();
 			bar = null;
 		}
+		lastWave = -1;
+		SIDES.clear();
+	}
+
+	/** The server stopped (B6): drop the runtime state so a second world in the same session starts clean. */
+	static void forget() {
+		bar = null;
 		lastWave = -1;
 		SIDES.clear();
 	}
@@ -250,7 +257,7 @@ public final class BloodMoon {
 			p.stopRiding();
 			p.teleportTo(ow, side.x(), side.y(), side.z(), java.util.Set.of(), p.getYRot(), p.getXRot(), false);
 			p.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
-			p.sendOverlayMessage(side.inside() ? Messages.bloodMoonHeldIn() : Messages.bloodMoonKeptOut());
+			p.sendOverlayMessage(side.inside() ? QuestEventMessages.bloodMoonHeldIn() : QuestEventMessages.bloodMoonKeptOut());
 		}
 	}
 
@@ -366,7 +373,7 @@ public final class BloodMoon {
 
 	private static void fail(MinecraftServer server, ServerPlayer starter) {
 		end(server);
-		server.getPlayerList().broadcastSystemMessage(Messages.bloodMoonFailed(starter.getDisplayName()), false);
+		server.getPlayerList().broadcastSystemMessage(QuestEventMessages.bloodMoonFailed(starter.getDisplayName()), false);
 	}
 
 	public static void onJoin(ServerPlayer p) {

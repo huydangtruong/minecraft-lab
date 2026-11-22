@@ -1,6 +1,7 @@
 """D205: the Soul Grasp icon (technique sprite and focus item): a front-facing sheep with two tan ram horns and two
 hypnotic swirl eyes, light sand skin, faint purple glow. Run: python3 tools/make_grasp_sprite.py"""
-import zlib, struct, math, os
+import math, os
+import pngkit
 C = {
  'K': (38,28,48,255), 'W': (246,246,250,255), 'w': (206,210,222,255),
  'F': (252,240,232,255), 'f': (226,206,196,255),
@@ -10,16 +11,8 @@ C = {
  'P': (150,60,210,255), 'M': (236,70,196,255), 'B': (16,10,24,255), 'E': (255,255,255,255),
  'L': (255,170,230,255), 'v': (178,184,204,255), 'Q': (250,226,170,255), 'j': (92,54,22,255), 'D': (120,40,170,255), 'Y':(90,200,255,255), 'Z':(70,36,110,255),
 }
-def png(path, img, scale=1):
-    h=len(img); w=len(img[0])
-    raw=b''
-    for row in img:
-        r=b''.join(bytes(p) for p in row)
-        raw+=b'\0'+r
-    def ch(t,d):
-        c=struct.pack('>I',len(d))+t+d
-        return c+struct.pack('>I',zlib.crc32(t+d)&0xffffffff)
-    open(path,'wb').write(b'\x89PNG\r\n\x1a\n'+ch(b'IHDR',struct.pack('>IIBBBBB',w,h,8,6,0,0,0))+ch(b'IDAT',zlib.compress(raw,9))+ch(b'IEND',b''))
+def png(path, img):
+    pngkit.write_png(path, img)
 CLEAR=(0,0,0,0)
 class Cv:
     def __init__(s): s.p=[[CLEAR]*16 for _ in range(16)]

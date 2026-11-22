@@ -101,13 +101,13 @@ public class PassiveGameTest {
 	@GameTest(maxTicks = 100)
 	public void cropHarvestXpGetsTheBonus(GameTestHelper c) {
 		player(c); // switches the mod on
-		FlightBladeGameTest.floor(c);
-		ServerPlayer p = FlightBladeGameTest.survivor(c); // harvest XP skips Creative
-		FlightBladeGameTest.place(c, p, 5.5, 1, 5.5, 0f, 0f);
+		GameTestKit.floor(c);
+		ServerPlayer p = GameTestKit.survivor(c); // harvest XP skips Creative
+		GameTestKit.place(c, p, 5.5, 1, 5.5, 0f, 0f);
 		set(p, Passive.XP, 10);
 		ImmortalCultivation.onCropHarvest(p, 100);
 		c.assertTrue(p.totalExperience == 130, "100 crops x 1 XP +30% = 130, was " + p.totalExperience);
-		FlightBladeGameTest.drop(c, p);
+		GameTestKit.drop(c, p);
 		c.succeed();
 	}
 
@@ -156,6 +156,27 @@ public class PassiveGameTest {
 		c.assertTrue(CropGrowth.extraTicks(c.getLevel(), soil, r) == 0, "farmland is not a crop");
 		p.gameMode.destroyBlock(crop);
 		c.assertTrue(CropGrowth.extraTicks(c.getLevel(), crop, r) == 0, "breaking the crop forgets the owner");
+		c.succeed();
+	}
+
+	/** P-077 B7: a crop that vanished without a player breaking it loses its owner, so a later crop there gets no bonus. */
+	@GameTest(maxTicks = 100)
+	public void aVanishedCropForgetsItsOwner(GameTestHelper c) {
+		ServerPlayer p = player(c);
+		BlockPos soil = c.absolutePos(new BlockPos(1, 1, 1));
+		BlockPos crop = soil.above();
+		c.getLevel().setBlockAndUpdate(soil, Blocks.FARMLAND.defaultBlockState());
+		c.getLevel().setBlockAndUpdate(crop, Blocks.WHEAT.defaultBlockState());
+		set(p, Passive.GROWTH, 10);
+		CropGrowth.remember(p);
+		CropGrowth.planted(c.getLevel(), crop, p.getUUID());
+		CropGrowth.prune(c.getLevel());
+		c.assertTrue(CropGrowth.extraTicks(c.getLevel(), crop, RandomSource.create(1)) == 2, "the owner's crop gets the bonus");
+		c.getLevel().setBlockAndUpdate(crop, Blocks.AIR.defaultBlockState()); // washed away: no player event
+		int dropped = CropGrowth.prune(c.getLevel());
+		c.assertTrue(dropped >= 1, "the sweep should drop the owner of the vanished crop, dropped " + dropped);
+		c.getLevel().setBlockAndUpdate(crop, Blocks.WHEAT.defaultBlockState()); // a villager replants it
+		c.assertTrue(CropGrowth.extraTicks(c.getLevel(), crop, RandomSource.create(1)) == 0, "the new crop has no owner and no bonus");
 		c.succeed();
 	}
 

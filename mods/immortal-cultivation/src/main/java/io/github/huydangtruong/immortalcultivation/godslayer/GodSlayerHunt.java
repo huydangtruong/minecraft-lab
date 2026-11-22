@@ -1,9 +1,10 @@
 package io.github.huydangtruong.immortalcultivation.godslayer;
 
+import io.github.huydangtruong.immortalcultivation.Uuids;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import io.github.huydangtruong.immortalcultivation.HeartRules;
 import io.github.huydangtruong.immortalcultivation.HeartsAttachment;
-import io.github.huydangtruong.immortalcultivation.Messages;
+import io.github.huydangtruong.immortalcultivation.GodSlayerMessages;
 import io.github.huydangtruong.immortalcultivation.godslayer.GodSlayerSavedData.Phase;
 import io.github.huydangtruong.immortalcultivation.reward.RewardBoxes;
 import io.github.huydangtruong.immortalcultivation.reward.RewardTier;
@@ -49,12 +50,14 @@ public final class GodSlayerHunt {
 	private static ServerBossEvent bar;
 	private static int missingChecks;
 	private static int lastCountdown = -1;
+	/** tick() runs every this many server ticks, so a frozen hunt must add this many to its end tick (B4). */
+	static final int TICK_INTERVAL = 5;
 
 	private GodSlayerHunt() {}
 
 	public static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
-			if (server.getTickCount() % 5 == 0) {
+			if (server.getTickCount() % TICK_INTERVAL == 0) {
 				tick(server);
 			}
 		});
@@ -129,7 +132,7 @@ public final class GodSlayerHunt {
 			}
 		}
 		if (strong.isEmpty()) {
-			server.getPlayerList().broadcastSystemMessage(Messages.godSlayerWeaklings(), false);
+			server.getPlayerList().broadcastSystemMessage(GodSlayerMessages.godSlayerWeaklings(), false);
 			return;
 		}
 		start(server, strong.get(RNG.nextInt(strong.size())));
@@ -153,11 +156,11 @@ public final class GodSlayerHunt {
 		d.setDirty();
 		lastCountdown = -1;
 		missingChecks = 0;
-		server.getPlayerList().broadcastSystemMessage(Messages.godSlayerWarningChat(name(target)), false);
+		server.getPlayerList().broadcastSystemMessage(GodSlayerMessages.godSlayerWarningChat(name(target)), false);
 		for (ServerPlayer p : server.getPlayerList().getPlayers()) {
 			p.connection.send(new ClientboundSetTitlesAnimationPacket(10, 100, 20));
-			p.connection.send(new ClientboundSetSubtitleTextPacket(Messages.godSlayerSubtitle(name(target), 60)));
-			p.connection.send(new ClientboundSetTitleTextPacket(Messages.godSlayerTitle()));
+			p.connection.send(new ClientboundSetSubtitleTextPacket(GodSlayerMessages.godSlayerSubtitle(name(target), 60)));
+			p.connection.send(new ClientboundSetTitleTextPacket(GodSlayerMessages.godSlayerTitle()));
 		}
 		return true;
 	}
@@ -202,7 +205,7 @@ public final class GodSlayerHunt {
 		d.setDirty();
 		missingChecks = 0;
 		hideBar();
-		bar = new ServerBossEvent(UUID.randomUUID(), Messages.godSlayerName(d.level), BossEvent.BossBarColor.RED,
+		bar = new ServerBossEvent(UUID.randomUUID(), GodSlayerMessages.godSlayerName(d.level), BossEvent.BossBarColor.RED,
 			BossEvent.BossBarOverlay.NOTCHED_10);
 		bar.setDarkenScreen(true);
 	}
@@ -233,7 +236,7 @@ public final class GodSlayerHunt {
 			for (ServerPlayer p : server.getPlayerList().getPlayers()) {
 				// a drum tick once per second for the whole countdown (P-037)
 				p.level().playSound(null, p.blockPosition(), SoundEvents.NOTE_BLOCK_BASEDRUM.value(), SoundSource.HOSTILE, 2f, 0.7f);
-				p.sendOverlayMessage(Messages.godSlayerCountdown(secs)); // red number for the whole 60 s
+				p.sendOverlayMessage(GodSlayerMessages.godSlayerCountdown(secs)); // red number for the whole 60 s
 				ServerPlayNetworking.send(p, new GodSlayerNet.Warning((int) left)); // client interpolates the edge
 			}
 		}
@@ -252,7 +255,7 @@ public final class GodSlayerHunt {
 			return; // onDeath settles it
 		}
 		if (boss.isFrozen()) {
-			d.huntEndTick++; // /boss freeze pauses the hunt timer (D104)
+			d.huntEndTick += TICK_INTERVAL; // /boss freeze pauses the hunt timer (D104)
 			d.setDirty();
 			return;
 		}
@@ -289,7 +292,7 @@ public final class GodSlayerHunt {
 			return;
 		}
 		bar.setProgress(Math.max(0f, Math.min(1f, boss.getHealth() / boss.getMaxHealth())));
-		bar.setName(Messages.godSlayerName(boss.bossLevel()));
+		bar.setName(GodSlayerMessages.godSlayerName(boss.bossLevel()));
 		for (ServerPlayer p : server.getPlayerList().getPlayers()) {
 			if (p.level() == boss.level() && p.distanceTo(boss) <= BAR_RANGE) {
 				bar.addPlayer(p);
@@ -317,7 +320,7 @@ public final class GodSlayerHunt {
 		}
 		d.currentTarget = n.getUUID().toString();
 		d.setDirty();
-		server.getPlayerList().broadcastSystemMessage(Messages.godSlayerNext(name(n)), false);
+		server.getPlayerList().broadcastSystemMessage(GodSlayerMessages.godSlayerNext(name(n)), false);
 		if (boss.level() != n.level()) {
 			relocate(server, d, boss, n);
 		} else {
@@ -383,8 +386,8 @@ public final class GodSlayerHunt {
 			d.level = Math.min(GodSlayerRules.MAX_LEVEL, d.level + 1);
 			d.clearHunt();
 			reward(killer, boss, server);
-			server.getPlayerList().broadcastSystemMessage(Messages.godSlayerLost(), false);
-			server.getPlayerList().broadcastSystemMessage(Messages.godSlayerFallen(d.level), false);
+			server.getPlayerList().broadcastSystemMessage(GodSlayerMessages.godSlayerLost(), false);
+			server.getPlayerList().broadcastSystemMessage(GodSlayerMessages.godSlayerFallen(d.level), false);
 		} else {
 			d.clearHunt(); // killed by something else (a command): no reward, the level stays
 		}
@@ -399,7 +402,7 @@ public final class GodSlayerHunt {
 			ServerPlayer p = server.getPlayerList().getPlayer(e.getKey());
 			if (p != null && e.getValue() > 0) {
 				p.giveExperienceLevels(e.getValue());
-				p.sendSystemMessage(Messages.godSlayerReward(e.getValue(), p == killer ? GodSlayerRules.REWARD_BOXES : 0));
+				p.sendSystemMessage(GodSlayerMessages.godSlayerReward(e.getValue(), p == killer ? GodSlayerRules.REWARD_BOXES : 0));
 			}
 		}
 		for (RewardTier tier : GodSlayerRules.rewardBoxes(RNG)) {
@@ -431,7 +434,7 @@ public final class GodSlayerHunt {
 
 	/** Time is up or nobody is left: the boss taunts, leaves in smoke; the level stays. */
 	private static void won(MinecraftServer server, GodSlayerSavedData d, GodSlayer boss) {
-		server.getPlayerList().broadcastSystemMessage(Messages.godSlayerWon(), false);
+		server.getPlayerList().broadcastSystemMessage(GodSlayerMessages.godSlayerWon(), false);
 		if (boss != null) {
 			if (boss.level() instanceof ServerLevel sl) {
 				boss.poof(sl);
@@ -461,7 +464,7 @@ public final class GodSlayerHunt {
 			return removeFrozenStray(server);
 		}
 		endQuiet(server, d);
-		server.getPlayerList().broadcastSystemMessage(Messages.godSlayerGaveUp(), false);
+		server.getPlayerList().broadcastSystemMessage(GodSlayerMessages.godSlayerGaveUp(), false);
 		return true;
 	}
 
@@ -478,10 +481,8 @@ public final class GodSlayerHunt {
 		if (uuid == null || uuid.isEmpty()) {
 			return null;
 		}
-		UUID id;
-		try {
-			id = UUID.fromString(uuid);
-		} catch (IllegalArgumentException e) {
+		UUID id = Uuids.parseOrNull(uuid);
+		if (id == null) {
 			return null;
 		}
 		for (ServerLevel level : server.getAllLevels()) {
@@ -571,10 +572,7 @@ public final class GodSlayerHunt {
 		if (uuid == null || uuid.isEmpty()) {
 			return null;
 		}
-		try {
-			return server.getPlayerList().getPlayer(UUID.fromString(uuid));
-		} catch (IllegalArgumentException e) {
-			return null;
-		}
+		UUID id = Uuids.parseOrNull(uuid);
+		return id == null ? null : server.getPlayerList().getPlayer(id);
 	}
 }

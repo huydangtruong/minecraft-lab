@@ -2,16 +2,12 @@
 18x18 canvas. Original art.
 
 - textures/mob_effect/frostbite.png
-Run: python3 -I mods/immortal-cultivation/tools/make_frostbite_icon.py
+Run: python3 mods/immortal-cultivation/tools/make_frostbite_icon.py
 """
-import importlib.util
 import os
 
 HERE = os.path.dirname(__file__)
-spec = importlib.util.spec_from_file_location("hearts", os.path.join(HERE, "make_heart_sprites.py"))
-hearts = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(hearts)
-write_png, rgba, CLEAR = hearts.write_png, hearts.rgba, hearts.CLEAR
+from pngkit import write_png, rgba, CLEAR
 
 OUT = os.path.join(HERE, "..", "src", "main", "resources", "assets", "permahearts", "textures", "mob_effect")
 

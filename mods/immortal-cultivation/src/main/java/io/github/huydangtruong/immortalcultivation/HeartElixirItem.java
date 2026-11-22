@@ -19,7 +19,7 @@ public class HeartElixirItem extends Item {
 	public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entity) {
 		if (entity instanceof ServerPlayer sp) {
 			if (!ImmortalCultivation.enabled(sp.level().getServer())) {
-				sp.sendSystemMessage(Messages.elixirDisabled());
+				sp.sendSystemMessage(HeartMessages.elixirDisabled());
 				return stack;
 			}
 			if (HeartRules.maxHearts(HeartsAttachment.get(sp)) >= HeartRules.MAX) {
@@ -38,6 +38,6 @@ public class HeartElixirItem extends Item {
 		HealthApplier.apply(sp, false);
 		sp.setHealth(Math.min(sp.getMaxHealth(), sp.getHealth() + 2f));
 		sp.level().playSound(null, sp.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1f, 1f);
-		sp.sendSystemMessage(Messages.gained(1, HeartRules.maxHearts(next)));
+		sp.sendSystemMessage(HeartMessages.gained(1, HeartRules.maxHearts(next)));
 	}
 }

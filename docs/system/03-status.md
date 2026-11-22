@@ -2,7 +2,7 @@
 
 > Tóm tắt cho Huy: file này ghi việc đang làm dở và bước tiếp theo, để một phiên Claude mới đọc là làm tiếp được.
 > Manager cập nhật file này cuối mỗi đợt việc (merge, phát hành, quyết định mới).
-> Snapshot: 2026-11-22, after release 0.44.0.
+> Snapshot: 2026-11-23, after release 0.44.0; P-076 refactor and P-077 bug fixes on branches.
 
 A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [workflow/team.md](../workflow/team.md) → the plan of the work in flight. Do not read the whole repo.
 
@@ -56,27 +56,16 @@ Release steps: [workflow/release.md](../workflow/release.md). Release **only whe
 
 ## In flight
 
-- **P-061 Solar Lance, Life Stealer, Soul Grasp cột sáng (D156-D159)** on `feat/P-061-lance-stealer` (dev branch `feat/P-061-dev`): built, `build` and client test green, not merged, not playtested by hand. Solar Lance (19th technique) bắn khi giữ chuột, thả là dừng (D159); Life Stealer thay Life Steal Blade, để lại chảy máu + chậm 80% trong 2 giây (custom effect `permahearts:drained`); Soul Grasp tether thay bằng cột sáng từ trời. New `RELEASE` packet kind. Screenshots in `docs/playtest/`.
-- **P-060 `/admin` panel (D155)** on `feat/P-060-admin-panel`: built, `build` and client test green, not merged, not playtested by hand. `/admin` (OP level 2) opens a two-panel screen; Confirm runs the lines as the player. Confirm clears the draft; Esc keeps it.
-- **P-058 Crop growth and P-059 Deadly Treasure released in 0.33.0** (D149–D153), not playtested by hand. Admin command `/treasure status|start|here [group]|lineup <0-3>|giveup`.
-- **P-057 Passives tab released in 0.32.0** (D148): third Cultivation tab; Reduce cooldown, Increase vision (client lightmap, on/off switch left of "+", on main after 0.32.0), Hunger sustain, XP gain bonus (orbs only), Inventory protect (kept slots ride on the dead player to COPY_FROM). Not playtested by hand. Flaky seen once during P-057 runs (all passed on rerun): `danger_game_test_zombie_at_twenty...` (max health 100), `grasp_game_test_a_grasped_zombie_does_not_burn_in_the_sun`, God Slayer hunt flow, golem guardian.
-- **P-056 Seism + Crystal Prison released in 0.31.0** (D142–D146), not playtested by hand. Bosses can be caged; a disarmed Death Match opponent keeps techniques (D146). Client screenshots of the Techniques tab do not show the two new rows (test scroll only).
-- **P-054 Danger level + elites released in 0.30.0** (D137–D139), not released, not playtested. Spawn mixins (cap raise, day spawns) only load-tested: no mob-count measurement at L25. Gamerules `permahearts:danger_level` (on), `permahearts:danger_spawn_ceiling` (4). Gear is armor only; Venomous does nothing to undead; pre-update mobs get the buff on first load. Day events, formation block, other affixes: BL-025..027.
-
-- **P-053 Soul Grasp released in 0.30.0** (D134–D136), not released, not playtested by hand. Gaps vs. D134: no open-hand render around the mob (particles only), no mob icon in the list rows; game tests do not cover Guard mode, gear pickup, brain mobs (villager, piglin…) or Death Match. Records in `GraspData` (SavedData). Next idea in discussion: world danger tiers, day spawns, elite mobs.
-
-- **P-052 merged into main** (D132): mod id, folder `mods/immortal-cultivation`, Gradle `:immortal-cultivation`, package `io.github.huydangtruong.immortalcultivation`, release tags renamed. Data namespace stays `permahearts` (`ImmortalCultivation.NAMESPACE`, never change). Huy's dev run folder (saves) moved to `mods/immortal-cultivation/run`. Flaky seen once: `SkillBarClientTest` "the focus item should be phase", FlightBlade "the husk bleeds"
-
-- **0.24.0 / 0.24.1 released.** Waiting for Huy to play it.
-- **0.25.0 released** (P-041, P-042, D118). Waiting for Huy to play it.
-- **Next:** BL-024/D112 (God Slayer arrives 2–5 days after the 4th Crimson Master leaves; Master pauses until the fight ends). P-040 leftovers: Katana → teleport behind → Flame breath chain, `/boss skill` command, a real blade model and guardian-style beam. Then the rest of D97's skills (minions, blind, arena, self-destruct).
-- **BL-014** (player technique fire burns the God Slayer) is next in line with P-033.
-
+- **P-076 audit + refactor** on `feat/P-076-audit-refactor` (worktree `.claude/worktrees/P-076`), pushed, not merged. Plan [P-076](../plans/P-076-audit-refactor.md): R1-R10 + R13 done, behaviour identical (R11 UI helpers and R12 Notes switch deferred by the manager). Shared `pngkit` for sprite scripts, `GameTestKit`, deflaked Grasp/Golem/Thunder tests, dead code removed, `Uuids`, `StatDiff`, `WheelGroups`, `onInitialize` split into `WandererEvents`/`DeathRespawnHandlers`/`KillXpHandler`, `Grasp` split into `GraspNet`/`GraspCallService`/`GraspTether`, Illusion goals top-level, `Messages` split into `HeartMessages`/`WandererMessages`/`QuestEventMessages`/`GodSlayerMessages`. Next: Huy reviews, then merge into `main`.
+- **P-077 bug fixes** (B1-B15 of the P-076 audit, D219+) on `feat/P-077-bug-fixes`, cut from the P-076 tip. See [P-077](../plans/P-077-bug-fixes.md). Status: review, B1-B15 done (D219-D233), full build green (290 JUnit, 292 game tests), client suite green, pushed, not merged. Merge P-076 first, then P-077. Found, not fixed: `Warp.go` still calls `stopRiding()` before `teleportTo` (same pattern as B9).
+- **All plans up to P-075 are released** (last: 0.44.0). Released but not playtested by hand: everything from 0.13.0 on unless the release row says otherwise.
+- **Next ideas:** BL-024/D112 (God Slayer arrives 2–5 days after the 4th Crimson Master leaves; Master pauses until the fight ends). P-040 leftovers: Katana → teleport behind → Flame breath chain, `/boss skill` command, a real blade model and guardian-style beam. Then the rest of D97's skills (minions, blind, arena, self-destruct). BL-014 (player technique fire burns the God Slayer).
 - **Windows installer bug** (reported by Huy's friend): picking a profile other than "26.3 Fabric Essential" says SUCCESS, but that profile's mods folder still has the old jar. Reading `minecraft-lab.ps1` (`Find-Profiles` / `Select-Profile`) found nothing yet. Waiting for the friend's `Mods folder:` line and that profile's Game directory.
 
 ## Open, not scheduled
 
-- **Flaky game tests left:** `golem_game_test_guardian_attacks_amonster_near_the_owner` and `thunder_game_test_a_pig_in_the_blast_becomes_azombified_piglin` failed once each in 10 runs. Not investigated. (Chop and afterburn flakes fixed.)
+- **Flaky game tests left:** `IllusionWorkGameTest.farmTakesSeedsFromTheChestAndPlantsEmptyFarmland` (the clone sometimes dies; failed 2 of 4 full runs during P-076). Golem guardian and Thunder pig were deflaked in P-076 R3. Grasp "not where it was seen" and "unloaded chunk comes when called" still fail now and then in full runs (pass alone, also on the P-076 base). A spawned zombie sometimes has 20.9 max health; P-077 pins it in the Lance and Seism helpers, `hostile_kill_gives_xp` may still see 21 XP.
+- **Client suite** had been red on main since D178/D180/D188 (stale expectations); fixed in P-076, now green.
 
 - **BL-004**: a command to summon the Crimson Master with a chosen quest ([backlog/BACKLOG.md](../backlog/BACKLOG.md)).
 - **Not playtested by hand yet:**
