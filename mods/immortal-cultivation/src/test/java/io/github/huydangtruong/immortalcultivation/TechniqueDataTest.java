@@ -62,6 +62,37 @@ class TechniqueDataTest {
 	}
 
 	@Test
+	void swapIntoEmptySlotMovesIt() {
+		TechniqueData d = TechniqueData.DEFAULT.withSlot(0, Technique.FIRE).withSlotSwapped(2, Technique.ICE);
+		assertEquals(Technique.ICE, d.inSlot(2));
+		assertEquals(Technique.FIRE, d.inSlot(0));
+		TechniqueData m = d.withSlotSwapped(1, Technique.FIRE);
+		assertNull(m.inSlot(0));
+		assertEquals(Technique.FIRE, m.inSlot(1));
+	}
+
+	@Test
+	void swapWithAnotherSlotExchangesThem() {
+		TechniqueData d = TechniqueData.DEFAULT.withSlot(0, Technique.FIRE).withSlot(1, Technique.ICE).withSlotSwapped(0, Technique.ICE);
+		assertEquals(Technique.ICE, d.inSlot(0));
+		assertEquals(Technique.FIRE, d.inSlot(1));
+	}
+
+	@Test
+	void swapWithEmptySelectedSlotLeavesTheOldSlotEmpty() {
+		TechniqueData d = TechniqueData.DEFAULT.withSlot(1, Technique.ICE).withSlotSwapped(0, Technique.ICE);
+		assertEquals(Technique.ICE, d.inSlot(0));
+		assertNull(d.inSlot(1));
+	}
+
+	@Test
+	void swapSameTechniqueIsANoOpAndNullClears() {
+		TechniqueData d = TechniqueData.DEFAULT.withSlot(0, Technique.FIRE);
+		assertEquals(d, d.withSlotSwapped(0, Technique.FIRE));
+		assertNull(d.withSlotSwapped(0, null).inSlot(0));
+	}
+
+	@Test
 	void cooldowns() {
 		TechniqueData d = TechniqueData.DEFAULT.withSlot(1, Technique.HEALING).withCooldown(Technique.HEALING, 1000);
 		assertTrue(d.onCooldown(Technique.HEALING, 999));

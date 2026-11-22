@@ -127,6 +127,27 @@ public record TechniqueData(Map<String, Integer> levels, Map<String, Integer> sp
 		return new TechniqueData(levels, spentPoints, emeralds, s, cooldownUntil, noCooldown);
 	}
 
+	/**
+	 * D188: puts the technique in the slot; when it already sits in another slot, the two slots swap (the technique that was in
+	 * {@code slot} goes there). The technique already in {@code slot} changes nothing. A null technique clears the slot.
+	 */
+	public TechniqueData withSlotSwapped(int slot, Technique t) {
+		if (t == null) {
+			return withSlot(slot, null);
+		}
+		int other = slotOf(t);
+		if (other == slot) {
+			return this;
+		}
+		if (other < 0) {
+			return withSlot(slot, t);
+		}
+		List<String> s = new ArrayList<>(slots);
+		s.set(other, s.get(slot));
+		s.set(slot, t.id());
+		return new TechniqueData(levels, spentPoints, emeralds, s, cooldownUntil, noCooldown);
+	}
+
 	public TechniqueData withoutFromSlots(Technique t) {
 		List<String> s = new ArrayList<>(slots);
 		s.replaceAll(id -> id.equals(t.id()) ? "" : id);

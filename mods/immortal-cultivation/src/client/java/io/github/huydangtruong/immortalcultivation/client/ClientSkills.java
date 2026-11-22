@@ -38,6 +38,10 @@ public final class ClientSkills {
 		slotKey(4, com.mojang.blaze3d.platform.InputConstants.KEY_V)
 	};
 
+	/** D188: hold to open the technique wheel while a technique slot is selected. */
+	public static final KeyMapping WHEEL = KeyMappingHelper.registerKeyMapping(
+		new KeyMapping("key.permahearts.wheel", com.mojang.blaze3d.platform.InputConstants.KEY_R, CATEGORY));
+
 	/** Selected technique slot of the local player: -1 = the hotbar (a real item), 0..3 = a technique slot. */
 	private static int selected = -1;
 	private static LocalPlayer lastPlayer;
@@ -67,6 +71,19 @@ public final class ClientSkills {
 		LocalPlayer p = mc.player;
 		return p != null && mc.level != null && !p.isCreative() && !p.isSpectator()
 			&& p.getAttachedOrElse(HeartsAttachment.ACTIVE, false);
+	}
+
+	/** Client game tests cannot press a real key: they set this to keep the wheel open. */
+	public static boolean testWheelHeld;
+
+	/** True while the wheel key is physically held (read from the window state: an open screen swallows key events). */
+	public static boolean wheelKeyDown() {
+		if (testWheelHeld) {
+			return true;
+		}
+		var key = com.mojang.blaze3d.platform.InputConstants.getKey(WHEEL.saveString());
+		return key.getType() != com.mojang.blaze3d.platform.InputConstants.Type.MOUSE && key.getValue() >= 0
+			&& com.mojang.blaze3d.platform.InputConstants.isKeyDown(key.getValue());
 	}
 
 	public static int selected() {
@@ -228,7 +245,7 @@ public final class ClientSkills {
 			lastPlayer = p;
 			reset();
 		}
-		if (selected >= 0 && (mc.gui.screen() != null || !available(mc) || SkillBarLogic.slotForKey(selected, usableFlags(mc)) < 0)) {
+		if (selected >= 0 && ((mc.gui.screen() != null && !(mc.gui.screen() instanceof TechniqueWheelScreen)) || !available(mc) || SkillBarLogic.slotForKey(selected, usableFlags(mc)) < 0)) {
 			select(-1); // a screen opened, world switch off, creative, or the slot was cleared
 		}
 
@@ -246,6 +263,13 @@ public final class ClientSkills {
 	}
 
 	private static void tickKey(Minecraft mc, boolean inGame) {
+		boolean wheel = false;
+		while (WHEEL.consumeClick()) {
+			wheel = true;
+		}
+		if (wheel && inGame && selected >= 0 && selectedTechnique(mc) != null) {
+			mc.gui.setScreen(new TechniqueWheelScreen(selected)); // D188
+		}
 		for (int i = 0; i < KEYS.length; i++) {
 			boolean click = false;
 			while (KEYS[i].consumeClick()) {

@@ -210,7 +210,7 @@ public final class TechniqueNet {
 				if (d.slotOnCooldown(slot, now)) {
 					return d.inSlot(slot).displayName() + " is on cooldown";
 				}
-				TechniqueAttachment.set(p, d.withSlot(slot, t));
+				TechniqueAttachment.set(p, d.withSlotSwapped(slot, t)); // D188: a technique sitting in another slot swaps places
 				return null;
 			}
 			case CLEAR_SLOT -> {
