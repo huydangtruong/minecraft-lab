@@ -277,6 +277,12 @@ public final class Grasp {
 		return false;
 	}
 
+	/** D195: a grasped mob (or a grasped evoker's vex) never keeps its owner, nor any player outside a Death Match against them, from sleeping. */
+	public static boolean sparesSleep(Mob mob, net.minecraft.world.entity.player.Player sleeper) {
+		GraspedMob g = graspOf(mob);
+		return g != null && (sleeper.getUUID().equals(g.owner()) || !isMatchOpponentOf(mob, g, sleeper));
+	}
+
 	private static boolean isMatchOpponentOf(Mob attacker, GraspedMob g, LivingEntity target) {
 		ServerPlayer o = attacker.level() instanceof ServerLevel sl ? sl.getServer().getPlayerList().getPlayer(g.owner()) : null;
 		return o != null && isMatchOpponent(o, target);

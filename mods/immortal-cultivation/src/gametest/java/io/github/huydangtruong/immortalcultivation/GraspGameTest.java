@@ -172,6 +172,31 @@ public class GraspGameTest {
 		c.succeed();
 	}
 
+	@GameTest(maxTicks = 40)
+	public void graspedMobsDoNotKeepTheOwnerFromSleeping(GameTestHelper c) { // D195
+		ServerPlayer p = grasper(c, 10);
+		Zombie mine = c.spawn(EntityTypes.ZOMBIE, new Vec3(5.5, 1, 5.5));
+		mine.setNoAi(true);
+		Grasp.tame(p, mine, 10);
+		net.minecraft.world.entity.monster.zombie.ZombifiedPiglin piglin = c.spawn(EntityTypes.ZOMBIFIED_PIGLIN, new Vec3(5.5, 1, 3.5));
+		piglin.setNoAi(true);
+		Grasp.tame(p, piglin, 10);
+		Zombie wild = c.spawn(EntityTypes.ZOMBIE, new Vec3(3.5, 1, 3.5));
+		wild.setNoAi(true);
+		ServerPlayer other = FlightBladeGameTest.survivor(c);
+		piglin.setPersistentAngerTarget(net.minecraft.world.entity.EntityReference.of(other)); // angry at another player: its own override of the check
+		piglin.startPersistentAngerTimer();
+		c.assertTrue(!mine.isPreventingPlayerRest(c.getLevel(), p), "a grasped zombie lets its owner sleep");
+		c.assertTrue(!piglin.isPreventingPlayerRest(c.getLevel(), p), "a grasped zombified piglin lets its owner sleep");
+		c.assertTrue(!mine.isPreventingPlayerRest(c.getLevel(), other), "it lets another player sleep outside a Death Match");
+		c.assertTrue(!piglin.isPreventingPlayerRest(c.getLevel(), other), "a grasped zombified piglin angry at another player lets them sleep outside a Death Match");
+		c.assertTrue(wild.isPreventingPlayerRest(c.getLevel(), p), "a wild zombie still keeps the player awake");
+		wild.discard();
+		FlightBladeGameTest.drop(c, other);
+		cleanUp(c, p);
+		c.succeed();
+	}
+
 	/** D165 (Huy's bug: 11 followers crowded onto him): following mobs that start on the owner step out to 2 blocks or more. */
 	@GameTest(maxTicks = 140)
 	public void followersKeepTwoBlocksFromTheOwner(GameTestHelper c) {
