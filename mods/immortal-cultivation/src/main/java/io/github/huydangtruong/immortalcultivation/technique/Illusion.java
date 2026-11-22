@@ -1,7 +1,10 @@
 package io.github.huydangtruong.immortalcultivation.technique;
 
 import io.github.huydangtruong.immortalcultivation.ImmortalCultivation;
+import io.github.huydangtruong.immortalcultivation.technique.illusion.FightGoal;
+import io.github.huydangtruong.immortalcultivation.technique.illusion.IdleGoal;
 import io.github.huydangtruong.immortalcultivation.technique.illusion.IllusionCarry;
+import io.github.huydangtruong.immortalcultivation.technique.illusion.IllusionTargetGoal;
 import io.github.huydangtruong.immortalcultivation.technique.illusion.IllusionJob;
 import io.github.huydangtruong.immortalcultivation.technique.illusion.WorkGoal;
 import io.github.huydangtruong.immortalcultivation.wanderer.SpawnSpots;
@@ -75,7 +78,7 @@ public final class Illusion extends PathfinderMob implements OwnedSummon {
 		EquipmentSlot.MAINHAND, EquipmentSlot.OFFHAND};
 	private static final EntityDimensions CROUCHING = EntityDimensions.scalable(0.6f, 1.5f).withEyeHeight(1.27f);
 	/** Distance beyond which an idle clone runs to its owner, and the distance at which it teleports instead. */
-	private static final double FOLLOW_FROM = 6, TELEPORT_FROM = 24;
+	public static final double FOLLOW_FROM = 6, TELEPORT_FROM = 24;
 
 	private UUID owner;
 	private String parsedFrom = "";
@@ -83,7 +86,7 @@ public final class Illusion extends PathfinderMob implements OwnedSummon {
 	private long endTick;
 	private double factor = 0.2;
 	private double fallbackDamage = 1.0;
-	private IllusionJob job = IllusionJob.FIGHT;
+	public IllusionJob job = IllusionJob.FIGHT;
 	private BlockPos workCenter = BlockPos.ZERO;
 	private double workRadius;
 	private int workTicks = 20;
@@ -439,7 +442,7 @@ public final class Illusion extends PathfinderMob implements OwnedSummon {
 	}
 
 	/** Sneaks like a player: the pose and the shorter hitbox. */
-	void setCrouching(boolean on) {
+	public void setCrouching(boolean on) {
 		setShiftKeyDown(on);
 		setPose(on ? Pose.CROUCHING : Pose.STANDING);
 	}
@@ -449,13 +452,13 @@ public final class Illusion extends PathfinderMob implements OwnedSummon {
 		return pose == Pose.CROUCHING ? CROUCHING : super.getDefaultDimensions(pose);
 	}
 
-	private boolean holdsRanged() {
+	public boolean holdsRanged() {
 		ItemStack s = getMainHandItem();
 		return s.is(Items.BOW) || s.is(Items.CROSSBOW);
 	}
 
 	/** Shoots one arrow at the target: damage is two (a vanilla arrow's base) times the clone's share. */
-	private void shoot(ServerLevel sl, LivingEntity t) {
+	public void shoot(ServerLevel sl, LivingEntity t) {
 		Arrow arrow = new Arrow(sl, this, new ItemStack(Items.ARROW), getMainHandItem());
 		arrow.pickup = AbstractArrow.Pickup.DISALLOWED;
 		arrow.setBaseDamage(2.0 * factor);
@@ -466,319 +469,5 @@ public final class Illusion extends PathfinderMob implements OwnedSummon {
 		swingForAttack(InteractionHand.MAIN_HAND);
 		playSound(SoundEvents.ARROW_SHOOT, 1.0f, 1.0f / (getRandom().nextFloat() * 0.4f + 0.8f));
 		sl.addFreshEntity(arrow);
-	}
-
-	// ---- targets ----
-
-	/** Picks the nearest entity on the owner's list, else the nearest hostile mob near the owner (creepers included). */
-	private static final class IllusionTargetGoal extends TargetGoal {
-		private final Illusion c;
-		private int wait;
-
-		IllusionTargetGoal(Illusion c) {
-			super(c, false);
-			this.c = c;
-			setFlags(EnumSet.of(Flag.TARGET));
-		}
-
-		@Override
-		public boolean canUse() {
-			if (--wait > 0) {
-				return false;
-			}
-			wait = 6;
-			Player o = OwnedSummon.ownerOf(c);
-			if (o == null || !(c.level() instanceof ServerLevel sl)) {
-				return false;
-			}
-			LivingEntity t = pick(sl, o);
-			if (t == null) {
-				return false;
-			}
-			targetMob = t;
-			return true;
-		}
-
-		/** Keeps its target while valid, but switches when the list has someone the clone is not fighting yet. */
-		@Override
-		public boolean canContinueToUse() {
-			if (!super.canContinueToUse()) {
-				return false;
-			}
-			LivingEntity cur = c.getTarget();
-			if (cur != null && !OwnedSummon.isMatchOpponent(c, cur) && c.tickCount % 10 == 0 && c.level() instanceof ServerLevel sl && c.owner() != null) {
-				Set<UUID> ids = IllusionTargets.idsOf(c.owner());
-				if (!ids.isEmpty() && !ids.contains(cur.getUUID()) && !IllusionTargets.of(sl, c.owner()).isEmpty()) {
-					return false;
-				}
-			}
-			return true;
-		}
-
-		private LivingEntity pick(ServerLevel sl, Player o) {
-			LivingEntity opp = OwnedSummon.nearestMatchOpponent(c, 40); // P-043: the Death Match opponent
-			if (opp != null && c.canAttack(opp)) {
-				return opp;
-			}
-			LivingEntity best = null;
-			for (LivingEntity e : IllusionTargets.of(sl, o.getUUID())) {
-				if (e.distanceToSqr(c) < 40 * 40 && c.canAttack(e) && (best == null || e.distanceToSqr(c) < best.distanceToSqr(c))) {
-					best = e;
-				}
-			}
-			if (best != null) {
-				return best;
-			}
-			boolean works = c.job.works(); // a working clone only fights hostile mobs that come within 6 blocks of it or the owner
-			double near = TechniqueRules.ILLUSION_WORK_FIGHT_RANGE;
-			AABB box = o.getBoundingBox().inflate(12, 6, 12);
-			for (Mob m : sl.getEntitiesOfClass(Mob.class, box, m -> m instanceof Enemy && IllusionTargets.eligible(o, m) && c.canAttack(m)
-				&& (!works || m.distanceTo(c) <= near || m.distanceTo(o) <= near))) {
-				if (best == null || m.distanceToSqr(c) < best.distanceToSqr(c)) {
-					best = m;
-				}
-			}
-			return best;
-		}
-	}
-
-	// ---- fighting ----
-
-	private enum Mood { CHASE, BACK_OFF, RANGED }
-
-	/** Fights the target with a mood that changes every 2-5 s: chase and strafe, back off, or shoot from a distance. */
-	private static final class FightGoal extends Goal {
-		private final Illusion a;
-		private Mood mood = Mood.CHASE;
-		private int moodEnd;
-		private int cooldown;
-		private int strafeDir = 1;
-		private int strafeEnd;
-
-		FightGoal(Illusion a) {
-			this.a = a;
-			setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
-		}
-
-		@Override
-		public boolean canUse() {
-			LivingEntity t = a.getTarget();
-			return t != null && t.isAlive();
-		}
-
-		@Override
-		public boolean canContinueToUse() {
-			return canUse();
-		}
-
-		@Override
-		public boolean requiresUpdateEveryTick() {
-			return true;
-		}
-
-		@Override
-		public void start() {
-			a.setCrouching(false);
-			cooldown = 10 + a.getRandom().nextInt(10);
-			pickMood(a.getTarget());
-		}
-
-		@Override
-		public void stop() {
-			a.setSprinting(false);
-			a.getNavigation().stop();
-		}
-
-		private void pickMood(LivingEntity t) {
-			double hp = a.getHealth() / Math.max(1.0f, a.getMaxHealth());
-			if (a.getRandom().nextDouble() < TechniqueRules.illusionBackOffChance(hp)) {
-				mood = Mood.BACK_OFF;
-				Vec3 away = a.position().subtract(t.position()).multiply(1, 0, 1);
-				if (away.lengthSqr() < 0.01) {
-					away = new Vec3(a.getRandom().nextDouble() - 0.5, 0, a.getRandom().nextDouble() - 0.5);
-				}
-				away = away.normalize().scale(5 + a.getRandom().nextDouble() * 3);
-				Vec3 p = a.position().add(away);
-				a.setSprinting(true);
-				if (!a.getNavigation().moveTo(p.x, p.y, p.z, 1.0)) {
-					mood = Mood.CHASE;
-				}
-			} else {
-				mood = a.holdsRanged() ? Mood.RANGED : Mood.CHASE;
-			}
-			moodEnd = a.tickCount + TechniqueRules.illusionMoodTicks(a.getRandom().nextDouble());
-		}
-
-		@Override
-		public void tick() {
-			LivingEntity t = a.getTarget();
-			if (t == null || !(a.level() instanceof ServerLevel sl)) {
-				return;
-			}
-			cooldown--;
-			a.getLookControl().setLookAt(t, 30f, 30f);
-			if (a.tickCount >= moodEnd) {
-				pickMood(t);
-			}
-			double d = Math.sqrt(a.distanceToSqr(t));
-			switch (mood) {
-				case CHASE -> chase(sl, t, d);
-				case BACK_OFF -> {
-					if (a.getNavigation().isDone()) {
-						mood = Mood.CHASE;
-						moodEnd = a.tickCount + TechniqueRules.illusionMoodTicks(a.getRandom().nextDouble());
-					}
-				}
-				case RANGED -> ranged(sl, t, d);
-			}
-		}
-
-		/** Sprints at the target, jumps into the hit, circles around it and hits at the owner's attack-cooldown rhythm. */
-		private void chase(ServerLevel sl, LivingEntity t, double d) {
-			a.setSprinting(true);
-			boolean close = a.isWithinMeleeAttackRange(t);
-			if (d > 3.5) {
-				if (a.tickCount % 5 == 0) {
-					a.getNavigation().moveTo(t, 1.0);
-				}
-			} else if (a.tickCount % 4 == 0) {
-				if (a.tickCount >= strafeEnd) {
-					strafeDir = a.getRandom().nextBoolean() ? 1 : -1;
-					strafeEnd = a.tickCount + 30 + a.getRandom().nextInt(40);
-				}
-				Vec3 rel = a.position().subtract(t.position()).multiply(1, 0, 1);
-				rel = rel.lengthSqr() < 0.01 ? new Vec3(1, 0, 0) : rel.normalize();
-				double ang = strafeDir * 0.6;
-				double cos = Math.cos(ang), sin = Math.sin(ang);
-				Vec3 p = t.position().add(rel.x * cos - rel.z * sin, 0, rel.x * sin + rel.z * cos).add(rel.scale(1.6));
-				a.getNavigation().moveTo(p.x, t.getY(), p.z, 1.0);
-			}
-			if (cooldown == 7 && a.onGround() && d < 3.5) {
-				a.getJumpControl().jump(); // lands as a falling hit, like a crit
-			}
-			if (cooldown <= 0 && close && a.hasLineOfSight(t)) {
-				a.doHurtTarget(sl, t);
-				Player o = OwnedSummon.ownerOf(a);
-				cooldown = TechniqueRules.illusionAttackTicks(o != null ? o.getAttributeValue(Attributes.ATTACK_SPEED) : 4.0);
-			}
-		}
-
-		/** Keeps 6-12 blocks from the target and shoots. */
-		private void ranged(ServerLevel sl, LivingEntity t, double d) {
-			a.setSprinting(false);
-			if (d < 6) {
-				Vec3 away = a.position().subtract(t.position()).multiply(1, 0, 1).normalize().scale(4);
-				if (a.tickCount % 5 == 0) {
-					a.getNavigation().moveTo(a.getX() + away.x, a.getY(), a.getZ() + away.z, 1.0);
-				}
-			} else if (d > 12) {
-				if (a.tickCount % 5 == 0) {
-					a.getNavigation().moveTo(t, 1.0);
-				}
-			} else {
-				a.getNavigation().stop();
-			}
-			if (cooldown <= 0 && d <= 16 && a.hasLineOfSight(t)) {
-				a.shoot(sl, t);
-				cooldown = 25 + a.getRandom().nextInt(10);
-			}
-		}
-	}
-
-	// ---- idling ----
-
-	/** Without a target: follows the owner (within about 6 blocks), wanders, looks around, sometimes jumps or sneaks, sometimes looks at a player. */
-	private static final class IdleGoal extends Goal {
-		private final Illusion a;
-		private int timer;
-		private int crouchLeft;
-		private int lookLeft;
-		private Vec3 lookAt = Vec3.ZERO;
-
-		IdleGoal(Illusion a) {
-			this.a = a;
-			setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
-		}
-
-		@Override
-		public boolean canUse() {
-			return a.getTarget() == null && !a.job.works() && OwnedSummon.ownerOf(a) != null;
-		}
-
-		@Override
-		public boolean requiresUpdateEveryTick() {
-			return true;
-		}
-
-		@Override
-		public void stop() {
-			a.setCrouching(false);
-			a.setSprinting(false);
-		}
-
-		@Override
-		public void tick() {
-			Player o = OwnedSummon.ownerOf(a);
-			if (o == null || !(a.level() instanceof ServerLevel sl)) {
-				return;
-			}
-			double d2 = a.distanceToSqr(o);
-			if (d2 > TELEPORT_FROM * TELEPORT_FROM) {
-				if (PhaseState.phasing(o)) { // D169: wait while the owner is in the walls
-					return;
-				}
-				Vec3 p = SafeTeleport.spotOrNull(sl, a, o.position().add(a.getRandom().nextInt(5) - 2, 0, a.getRandom().nextInt(5) - 2)); // D170
-				if (p != null) { // D170: not into the air or water while the owner flies or swims
-					a.snapTo(p.x, p.y, p.z);
-					a.getNavigation().stop();
-				}
-				return;
-			}
-			if (lookLeft > 0) {
-				lookLeft--;
-				a.getLookControl().setLookAt(lookAt.x, lookAt.y, lookAt.z);
-			}
-			if (crouchLeft > 0 && --crouchLeft == 0) {
-				a.setCrouching(false);
-			}
-			if (d2 > FOLLOW_FROM * FOLLOW_FROM) {
-				a.setCrouching(false);
-				crouchLeft = 0;
-				a.setSprinting(o.isSprinting() || d2 > 12 * 12);
-				if (a.tickCount % 10 == 0) {
-					a.getNavigation().moveTo(o, 1.0);
-				}
-				return;
-			}
-			a.setSprinting(false);
-			if (--timer <= 0) {
-				timer = 20 + a.getRandom().nextInt(60);
-				act(o);
-			}
-		}
-
-		private void act(Player o) {
-			double r = a.getRandom().nextDouble();
-			if (r < 0.40) { // wander near the owner
-				a.getNavigation().moveTo(o.getX() + (a.getRandom().nextDouble() - 0.5) * 8, o.getY(), o.getZ() + (a.getRandom().nextDouble() - 0.5) * 8, 1.0);
-			} else if (r < 0.60) { // look at the nearest player
-				Player p = a.level().getNearestPlayer(a, 16.0);
-				if (p != null) {
-					lookAt = p.getEyePosition();
-					lookLeft = 30 + a.getRandom().nextInt(30);
-				}
-			} else if (r < 0.75) {
-				if (a.onGround()) {
-					a.getJumpControl().jump();
-				}
-			} else if (r < 0.88) { // sneak for a moment
-				a.setCrouching(true);
-				crouchLeft = 20 + a.getRandom().nextInt(30);
-			} else { // look around
-				double ang = a.getRandom().nextDouble() * Math.PI * 2;
-				lookAt = new Vec3(a.getX() + Math.cos(ang) * 6, a.getEyeY() + (a.getRandom().nextDouble() - 0.5) * 3, a.getZ() + Math.sin(ang) * 6);
-				lookLeft = 20 + a.getRandom().nextInt(30);
-			}
-		}
 	}
 }
