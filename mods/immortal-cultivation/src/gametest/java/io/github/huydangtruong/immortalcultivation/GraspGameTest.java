@@ -128,6 +128,21 @@ public class GraspGameTest {
 		c.succeed();
 	}
 
+	@GameTest(maxTicks = 40)
+	public void aGraspedPatrolVindicatorDropsItsHoldGroundAndPatrolGoals(GameTestHelper c) { // D191
+		ServerPlayer p = grasper(c, 10);
+		net.minecraft.world.entity.monster.illager.Vindicator v = c.spawn(EntityTypes.VINDICATOR, new Vec3(6.5, 1, 5.5));
+		v.findPatrolTarget(); // a patrol member, like the ones that spawn at night
+		Grasp.tame(p, v, 10);
+		var left = v.getGoalSelector().getAvailableGoals().stream().map(w -> w.getGoal().getClass().getName())
+			.filter(n -> n.contains("HoldGround") || n.contains("Patrol") || n.contains("PathfindToRaid") || n.contains("Celebration")).toList();
+		c.assertTrue(left.isEmpty(), "no raider goal holds it in place or pulls it away: " + left);
+		c.assertTrue(v.getGoalSelector().getAvailableGoals().stream().anyMatch(w -> w.getGoal().getClass().getName().contains("MeleeAttack")),
+			"it still has its melee attack");
+		cleanUp(c, p);
+		c.succeed();
+	}
+
 	/** D165 (Huy's bug: 11 followers crowded onto him): following mobs that start on the owner step out to 2 blocks or more. */
 	@GameTest(maxTicks = 140)
 	public void followersKeepTwoBlocksFromTheOwner(GameTestHelper c) {

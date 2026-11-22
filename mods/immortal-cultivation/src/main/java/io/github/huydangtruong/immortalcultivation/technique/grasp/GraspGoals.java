@@ -32,7 +32,10 @@ final class GraspGoals {
 	/** Class names (anywhere in the class chain) of goals that would pull the mob away from its owner. */
 	private static final String[] DROP = {"Panic", "AvoidEntity", "Stroll", "RandomFly", "RandomFloat", "RandomSwimming",
 		"RestrictSun", "FleeSun", "MoveThroughVillage", "MoveBackToVillage", "MoveTowardsRestriction", "WanderToPosition",
-		"Flee", "Hide", "Run"};
+		"Flee", "Hide", "Run",
+		// D191: raider goals. A patrol vindicator's HoldGroundAttack stood still staring at a far target (night: always one) and
+		// blocked its melee and the follow; the patrol, raid and banner goals pull it away from the owner too.
+		"HoldGround", "Patrol", "PathfindToRaid", "RaidLeaderBanner", "Celebration"};
 	/** Class names of goals that already attack, so no extra melee goal is needed. */
 	private static final String[] ATTACKS = {"Attack", "Shoot", "Swell", "Spit", "Throw", "Explode", "Bite", "Pounce"};
 
