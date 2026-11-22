@@ -50,12 +50,14 @@ public final class GodSlayerHunt {
 	private static ServerBossEvent bar;
 	private static int missingChecks;
 	private static int lastCountdown = -1;
+	/** tick() runs every this many server ticks, so a frozen hunt must add this many to its end tick (B4). */
+	static final int TICK_INTERVAL = 5;
 
 	private GodSlayerHunt() {}
 
 	public static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
-			if (server.getTickCount() % 5 == 0) {
+			if (server.getTickCount() % TICK_INTERVAL == 0) {
 				tick(server);
 			}
 		});
@@ -253,7 +255,7 @@ public final class GodSlayerHunt {
 			return; // onDeath settles it
 		}
 		if (boss.isFrozen()) {
-			d.huntEndTick++; // /boss freeze pauses the hunt timer (D104)
+			d.huntEndTick += TICK_INTERVAL; // /boss freeze pauses the hunt timer (D104)
 			d.setDirty();
 			return;
 		}

@@ -274,6 +274,8 @@ public class GodSlayerGameTest {
 		ServerPlayer p = strong(c);
 		GameTestKit.place(c, p, 5.5, 1, 5.5, 0f, 0f);
 		GodSlayer[] boss = new GodSlayer[1];
+		long[] frozenTimer = {0};
+		long[] frozenFrom = {0};
 		ServerLevel nether = server.getLevel(Level.NETHER);
 
 		c.startSequence()
@@ -309,6 +311,20 @@ public class GodSlayerGameTest {
 			.thenWaitUntil(() -> {
 				boss[0] = GodSlayerHunt.currentBoss(server);
 				c.assertTrue(boss[0] != null && GodSlayerHunt.phase(server) == GodSlayerSavedData.Phase.HUNTING, "the boss appeared");
+			})
+			// -- P-077 B4: a frozen boss stops the hunt timer completely --
+			.thenExecute(() -> boss[0].setFreezePose(GodSlayer.FREEZE_STAND))
+			.thenIdle(10)
+			.thenExecute(() -> {
+				frozenTimer[0] = GodSlayerHunt.data(server).huntEndTick;
+				frozenFrom[0] = server.getTickCount();
+			})
+			.thenIdle(40)
+			.thenExecute(() -> {
+				long passed = server.getTickCount() - frozenFrom[0];
+				long moved = GodSlayerHunt.data(server).huntEndTick - frozenTimer[0];
+				c.assertTrue(Math.abs(moved - passed) <= 5, "frozen: the end tick should move " + passed + " ticks, moved " + moved);
+				boss[0].setFreezePose(GodSlayer.FREEZE_NONE);
 			})
 			.thenExecute(() -> {
 				c.assertTrue(boss[0].getMaxHealth() == 500f, "level 1 spawn has 500 health, was " + boss[0].getMaxHealth());
