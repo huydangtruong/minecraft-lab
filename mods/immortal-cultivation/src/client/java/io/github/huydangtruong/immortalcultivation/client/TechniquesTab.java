@@ -459,7 +459,7 @@ public final class TechniquesTab {
 		int right = x0 + w - 7;
 		TechniqueData d = data();
 		if (detail != null) {
-			return clickDetail(d, detail, tx, right, y0, h, mx, my);
+			return clickDetail(d, detail, tx, right, y0, h, mx, my, button == com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT);
 		}
 		int slotY = y0 + 19;
 		long now = now();
@@ -533,20 +533,20 @@ public final class TechniquesTab {
 		return false;
 	}
 
-	private static boolean clickDetail(TechniqueData d, Technique t, int tx, int right, int y0, int h, double mx, double my) {
+	private static boolean clickDetail(TechniqueData d, Technique t, int tx, int right, int y0, int h, double mx, double my, boolean left) {
 		int[] up = lastUp;
 		int[] re = lastRe;
 		int[] bk = backRect(tx, y0);
 		int level = d.level(t);
 		boolean inBody = my >= detailTop(y0) && my < detailBottom(y0, h);
 		if (inBody && in(mx, my, up[0], up[1], up[2], up[3])) {
-			if (level < TechniqueRules.MAX_LEVEL && xpLevels() >= TechniqueRules.upgradeCost(level + 1)) {
+			if (left && level < TechniqueRules.MAX_LEVEL && xpLevels() >= TechniqueRules.upgradeCost(level + 1)) {
 				send(TechniqueNet.UPGRADE, t.id(), 0);
 			}
 			return true;
 		}
 		if (inBody && in(mx, my, re[0], re[1], re[2], re[3])) {
-			if (level > 0 && !d.onCooldown(t, now())) {
+			if (left && level > 0 && !d.onCooldown(t, now())) {
 				send(TechniqueNet.RESET, t.id(), 0);
 			}
 			return true;

@@ -271,6 +271,9 @@ public class GraspScreen extends Screen {
 	@Override
 	public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
 		double mx = event.x(), my = event.y();
+		if (event.button() != com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT) {
+			return super.mouseClicked(event, doubleClick); // middle and side buttons do nothing (B3)
+		}
 		if (hasAllRow() && my >= allRowY() && my < allRowY() + ALL_H) {
 			clickAll((int) mx, (int) my);
 			return true;
