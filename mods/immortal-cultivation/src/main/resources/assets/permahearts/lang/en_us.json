@@ -68,6 +68,7 @@
   "permahearts.wanderer.farewell": "The Crimson Master thanks you and moves on",
   "permahearts.wanderer.farewell_levels": "Everyone receives %s levels for %s completed quests",
   "permahearts.wanderer.farewell_levels_one": "Everyone receives %s levels for 1 completed quest",
+  "permahearts.trash.tooltip": "Trash: drop an item here to destroy it",
   "permahearts.notes.shared_added": "%s added a note to the shared notes",
   "permahearts.wanderer.where": "Crimson Master at X %s, Z %s (%s blocks away)",
   "permahearts.wanderer.next": "Next Crimson Master in about %s day(s)",

@@ -7,6 +7,8 @@ import io.github.huydangtruong.immortalcultivation.stats.PlayerStats;
 import io.github.huydangtruong.immortalcultivation.stats.StatMath;
 import io.github.huydangtruong.immortalcultivation.stats.StatsSync;
 import java.util.Map;
+import io.github.huydangtruong.immortalcultivation.trash.TrashNet;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
@@ -79,12 +81,15 @@ public final class StatsPanel {
 	private static boolean open;
 	private static Tab tab = Tab.STATS;
 	private static StatsButton button;
-	private static NotesButton notesButton;
+	private static TrashSlot trash;
+	// D217: Notes disabled
+	// private static NotesButton notesButton;
 
 	private StatsPanel() {}
 
 	public static void register() {
-		NotesTab.register();
+		// D217: Notes disabled
+		// NotesTab.register();
 		ScreenEvents.AFTER_INIT.register((mc, screen, w, h) -> {
 			if (!(screen instanceof InventoryScreen inv)) {
 				return;
@@ -95,11 +100,10 @@ public final class StatsPanel {
 			StatsButton b = new StatsButton(inv);
 			button = b;
 			Screens.getWidgets(inv).add(b);
-			NotesButton nb = new NotesButton(inv);
-			notesButton = nb;
+			// D217: Notes disabled (NotesButton, NotesTab box); the trash slot takes its place
+			TrashSlot nb = new TrashSlot();
+			trash = nb;
 			Screens.getWidgets(inv).add(nb);
-			EditBox noteBox = NotesTab.newBox();
-			Screens.getWidgets(inv).add(noteBox);
 			TabButton[] tabs = new TabButton[TAB_COUNT];
 			for (int i = 0; i < TAB_COUNT; i++) {
 				tabs[i] = new TabButton(Tab.values()[i]);
@@ -111,37 +115,40 @@ public final class StatsPanel {
 					open = false; // the recipe book button was pressed: it moved the inventory already
 				}
 				b.setPosition(left(inv) + 126, inv.height / 2 - 22);
-				nb.setPosition(left(inv) + 148, inv.height / 2 - 22);
+				nb.setPosition(left(inv) + 148, inv.height / 2 - 23); // 18x18 slot, centred on the 18-high buttons
 				int top = ((ContainerScreenAccess) inv).permahearts$topPos();
 				for (TabButton t : tabs) {
 					t.visible = open && tab != Tab.NOTES; // P-043: the Notes page has no edge tabs
 					t.setPosition(panelX(inv) - TAB_OUT + 2, top + 3 + t.tab.ordinal() * TAB_H);
 				}
-				NotesTab.placeBox(panelX(inv), top, W, H, open && tab == Tab.NOTES);
+				// D217: Notes disabled
+				// NotesTab.placeBox(panelX(inv), top, W, H, open && tab == Tab.NOTES);
 				if (open) {
 					draw(inv, g, mx, my);
 				}
 			});
-			ScreenKeyboardEvents.allowKeyPress(inv).register((scr, ev) -> {
-				if (!NotesTab.boxFocused() || ev.key() == 256) {
-					return true;
-				}
-				if (ev.key() == 257 || ev.key() == 335) {
-					NotesTab.send();
-				} else {
-					noteBox.keyPressed(ev); // typing keys like E must not close the inventory
-				}
-				return false;
-			});
+			// D217: Notes disabled
+			// ScreenKeyboardEvents.allowKeyPress(inv).register((scr, ev) -> {
+			// if (!NotesTab.boxFocused() || ev.key() == 256) {
+			// return true;
+			// }
+			// if (ev.key() == 257 || ev.key() == 335) {
+			// NotesTab.send();
+			// } else {
+			// noteBox.keyPressed(ev); // typing keys like E must not close the inventory
+			// }
+			// return false;
+			// });
 			ScreenMouseEvents.allowMouseClick(inv).register((scr, ev) -> {
 				if (!open || tab == Tab.STATS || !contains(inv, ev.x(), ev.y())) {
 					return true;
 				}
 				int x0 = panelX(inv);
 				int y0 = ((ContainerScreenAccess) inv).permahearts$topPos();
-				if (tab == Tab.NOTES) {
-					return !NotesTab.click(x0, y0, W, H, ev.x(), ev.y(), ev.button());
-				}
+				// D217: Notes disabled
+				// if (tab == Tab.NOTES) {
+				// 	return !NotesTab.click(x0, y0, W, H, ev.x(), ev.y(), ev.button());
+				// }
 				if (tab == Tab.PASSIVES) {
 					return !PassivesTab.click(x0, y0, W, H, ev.x(), ev.y(), ev.button());
 				}
@@ -151,9 +158,10 @@ public final class StatsPanel {
 				if (!open || tab == Tab.STATS || !contains(inv, mx, my)) {
 					return true;
 				}
-				if (tab == Tab.NOTES) {
-					return !NotesTab.scroll(panelX(inv), ((ContainerScreenAccess) inv).permahearts$topPos(), W, H, mx, my, sy);
-				}
+				// D217: Notes disabled
+				// if (tab == Tab.NOTES) {
+				// 	return !NotesTab.scroll(panelX(inv), ((ContainerScreenAccess) inv).permahearts$topPos(), W, H, mx, my, sy);
+				// }
 				if (tab == Tab.PASSIVES) {
 					return !PassivesTab.scroll(panelX(inv), ((ContainerScreenAccess) inv).permahearts$topPos(), W, H, mx, my, sy);
 				}
@@ -194,6 +202,11 @@ public final class StatsPanel {
 		return button == null ? new int[] {0, 0} : new int[] {button.getX() + 10, button.getY() + 9};
 	}
 
+	/** GUI centre of the trash slot (tests). */
+	public static int[] trashCenter() {
+		return trash == null ? new int[] {0, 0} : new int[] {trash.getX() + 9, trash.getY() + 9};
+	}
+
 	private static RecipeBookComponent<?> recipeBook(InventoryScreen inv) {
 		return ((RecipeBookScreenAccess) inv).permahearts$recipeBook();
 	}
@@ -211,29 +224,31 @@ public final class StatsPanel {
 		if (!open && rb.isVisible()) {
 			rb.toggleVisibility();
 		}
-		if (open && tab == Tab.NOTES) {
-			tab = Tab.STATS; // the Cultivation button leaves the Notes page instead of closing
-			return;
-		}
+		// D217: Notes disabled
+		// if (open && tab == Tab.NOTES) {
+		// 	tab = Tab.STATS; // the Cultivation button leaves the Notes page instead of closing
+		// 	return;
+		// }
 		open = !open;
 		layout(inv);
 	}
 
-	/** The Notes button (P-042): opens the panel on the Notes page, or closes it when already there. */
-	private static void toggleNotes(InventoryScreen inv) {
-		RecipeBookComponent<?> rb = recipeBook(inv);
-		if (open && tab == Tab.NOTES) {
-			open = false;
-		} else {
-			if (!open && rb.isVisible()) {
-				rb.toggleVisibility();
-			}
-			open = true;
-			tab = Tab.NOTES;
-			NotesTab.opened();
-		}
-		layout(inv);
-	}
+	// D217: Notes disabled
+	// /** The Notes button (P-042): opens the panel on the Notes page, or closes it when already there. */
+	// private static void toggleNotes(InventoryScreen inv) {
+	// RecipeBookComponent<?> rb = recipeBook(inv);
+	// if (open && tab == Tab.NOTES) {
+	// open = false;
+	// } else {
+	// if (!open && rb.isVisible()) {
+	// rb.toggleVisibility();
+	// }
+	// open = true;
+	// tab = Tab.NOTES;
+	// NotesTab.opened();
+	// }
+	// layout(inv);
+	// }
 
 	/** Places the inventory (and the recipe book button) for the current state. */
 	private static void layout(InventoryScreen inv) {
@@ -292,10 +307,11 @@ public final class StatsPanel {
 			PassivesTab.draw(g, font, x0, y0, W, H, mx, my);
 			return;
 		}
-		if (tab == Tab.NOTES) {
-			NotesTab.draw(g, font, x0, y0, W, H, mx, my);
-			return;
-		}
+		// D217: Notes disabled
+		// if (tab == Tab.NOTES) {
+		// 	NotesTab.draw(g, font, x0, y0, W, H, mx, my);
+		// 	return;
+		// }
 		var player = Minecraft.getInstance().player;
 		PlayerStats stats = player == null ? null : player.getAttached(StatsSync.STATS);
 		if (stats == null) {
@@ -363,21 +379,60 @@ public final class StatsPanel {
 		}
 	}
 
-	/** Third button next to Cultivation (P-042): opens the Notes page. A tablet with a book and quill. */
-	private static final class NotesButton extends Button {
-		private static final ItemStack QUILL = new ItemStack(Items.WRITABLE_BOOK);
+	/** D217: trash slot where the Notes button was. Click it with a stack on the cursor and the server destroys that stack. */
+	private static final class TrashSlot extends AbstractWidget {
+		private static final Identifier SLOT = Identifier.withDefaultNamespace("container/slot");
+		private static final Identifier ICON = Identifier.fromNamespaceAndPath("permahearts", "trash/trash");
 
-		NotesButton(InventoryScreen inv) {
-			super(0, 0, 20, 18, Component.literal("Notes"), b -> toggleNotes(inv), DEFAULT_NARRATION);
-			setTooltip(Tooltip.create(Component.literal("Notes")));
+		TrashSlot() {
+			super(0, 0, 18, 18, Component.literal("Trash"));
+			setTooltip(Tooltip.create(Component.translatableWithFallback("permahearts.trash.tooltip", "Trash: drop an item here to destroy it")));
 		}
 
 		@Override
-		protected void extractContents(GuiGraphicsExtractor g, int mouseX, int mouseY, float delta) {
-			g.blitSprite(RenderPipelines.GUI_TEXTURED, isHoveredOrFocused() ? BUTTON_HOVER : BUTTON, getX(), getY(), 20, 18);
-			g.fakeItem(QUILL, getX() + 2, getY() + 1);
+		protected void extractWidgetRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float delta) {
+			g.blitSprite(RenderPipelines.GUI_TEXTURED, SLOT, getX(), getY(), 18, 18);
+			g.blitSprite(RenderPipelines.GUI_TEXTURED, ICON, getX() + 1, getY() + 1, 16, 16);
+			if (isHoveredOrFocused()) {
+				g.fill(getX() + 1, getY() + 1, getX() + 17, getY() + 17, 0x80FFFFFF);
+			}
+		}
+
+		@Override
+		protected boolean isValidClickButton(net.minecraft.client.input.MouseButtonInfo info) {
+			return info.button() == 0 || info.button() == 1; // left or right
+		}
+
+		@Override
+		public void onClick(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+			var player = Minecraft.getInstance().player;
+			if (player != null && !player.containerMenu.getCarried().isEmpty() && !player.isSpectator()) {
+				ClientPlayNetworking.send(new TrashNet.Trash());
+			}
+		}
+
+		@Override
+		protected void updateWidgetNarration(net.minecraft.client.gui.narration.NarrationElementOutput out) {
+			defaultButtonNarrationText(out);
 		}
 	}
+
+	// D217: Notes disabled
+	// /** Third button next to Cultivation (P-042): opens the Notes page. A tablet with a book and quill. */
+	// private static final class NotesButton extends Button {
+	// private static final ItemStack QUILL = new ItemStack(Items.WRITABLE_BOOK);
+
+	// NotesButton(InventoryScreen inv) {
+	// super(0, 0, 20, 18, Component.literal("Notes"), b -> toggleNotes(inv), DEFAULT_NARRATION);
+	// setTooltip(Tooltip.create(Component.literal("Notes")));
+	// }
+
+	// @Override
+	// protected void extractContents(GuiGraphicsExtractor g, int mouseX, int mouseY, float delta) {
+	// g.blitSprite(RenderPipelines.GUI_TEXTURED, isHoveredOrFocused() ? BUTTON_HOVER : BUTTON, getX(), getY(), 20, 18);
+	// g.fakeItem(QUILL, getX() + 2, getY() + 1);
+	// }
+	// }
 
 	/** A tab on the panel's left edge, drawn with the vanilla recipe book tab sprites. */
 	private static final class TabButton extends Button {
