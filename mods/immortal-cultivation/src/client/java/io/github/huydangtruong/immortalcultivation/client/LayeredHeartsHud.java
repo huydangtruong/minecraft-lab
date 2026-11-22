@@ -94,17 +94,48 @@ public final class LayeredHeartsHud {
 		int w = HealthBarRules.BAR_WIDTH;
 		int h = HealthBarRules.BAR_HEIGHT;
 		int innerW = w - 2;
-		g.fill(bx, by, bx + w, by + h, 0xA0000000);
+		Round r = new Round(bx, by, w, h);
+		r.fill(g, bx, bx + w, by, by + h, 0xA0000000);
 		int filled = HealthBarRules.fillPixels(p.getHealth(), max, innerW);
 		if (filled > 0) {
-			g.fill(bx + 1, by + 1, bx + 1 + filled, by + h - 1, color);
-			g.fill(bx + 1, by + 1, bx + 1 + filled, by + 2, lighten(color)); // a light top edge, like a glossy bar
+			r.fill(g, bx + 1, bx + 1 + filled, by + 1, by + h - 1, color);
+			r.fill(g, bx + 1, bx + 1 + filled, by + 1, by + 2, lighten(color)); // a light top edge, like a glossy bar
 		}
 		int gold = HealthBarRules.absorptionPixels(p.getAbsorptionAmount(), max, innerW);
 		if (gold > 0) {
-			g.fill(bx + 1, by + 1, bx + 1 + gold, by + 1 + HealthBarRules.ABSORPTION_ROWS, HealthBarRules.ABSORPTION_COLOR);
+			r.fill(g, bx + 1, bx + 1 + gold, by + 1, by + 1 + HealthBarRules.ABSORPTION_ROWS, HealthBarRules.ABSORPTION_COLOR);
 		}
-		g.outline(bx, by, w, h, 0xFF202020);
+		r.outline(g, 0xFF202020);
+	}
+
+	/** D204: the bar's rounded shape (corner radius 2 px): fills are clipped to it and the outline follows it. */
+	private record Round(int x, int y, int w, int h) {
+		/** How many pixels row yy is cut in on each side (outline included). */
+		private int inset(int yy) {
+			int d = Math.min(yy - y, y + h - 1 - yy);
+			return d <= 0 ? 2 : d == 1 ? 1 : 0;
+		}
+
+		void fill(GuiGraphicsExtractor g, int x0, int x1, int y0, int y1, int color) {
+			for (int yy = y0; yy < y1; yy++) {
+				int in = inset(yy);
+				int a = Math.max(x0, x + in), b = Math.min(x1, x + w - in);
+				if (a < b) {
+					g.fill(a, yy, b, yy + 1, color);
+				}
+			}
+		}
+
+		void outline(GuiGraphicsExtractor g, int color) {
+			g.fill(x + 2, y, x + w - 2, y + 1, color);
+			g.fill(x + 2, y + h - 1, x + w - 2, y + h, color);
+			g.fill(x, y + 2, x + 1, y + h - 2, color);
+			g.fill(x + w - 1, y + 2, x + w, y + h - 2, color);
+			for (int yy : new int[] {y + 1, y + h - 2}) {
+				g.fill(x + 1, yy, x + 2, yy + 1, color);
+				g.fill(x + w - 2, yy, x + w - 1, yy + 1, color);
+			}
+		}
 	}
 
 	/** Layer 0 and every status heart use the vanilla sprites; the other layers our coloured ones. */
