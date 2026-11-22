@@ -175,12 +175,12 @@ public class DangerGameTest {
 		c.succeed();
 	}
 
-	/** D206: an old save (no format field, level on the 0..30 scale) becomes the 0..50 scale once; a new one does not. */
+	/** D206: an old save (no format field, level on the 0..30 scale) becomes the 0..50 scale once (x5/3 minus 5, D209); a new one does not. */
 	@GameTest(maxTicks = 20)
 	public void oldSavedLevelIsConvertedOnce(GameTestHelper c) {
 		DangerSavedData old = DangerSavedData.load(30, 777L, 1);
-		c.assertTrue(old.level == 50 && old.pendingAtTick == 777L, "30 becomes 50 and the timer stays, was " + old.level + "/" + old.pendingAtTick);
-		c.assertTrue(DangerSavedData.load(12, 0L, 1).level == 20, "12 becomes 20");
+		c.assertTrue(old.level == 45 && old.pendingAtTick == 777L, "30 becomes 45 and the timer stays, was " + old.level + "/" + old.pendingAtTick);
+		c.assertTrue(DangerSavedData.load(12, 0L, 1).level == 15, "12 becomes 15");
 		DangerSavedData now = DangerSavedData.load(30, 0L, DangerSavedData.FORMAT);
 		c.assertTrue(now.level == 30, "a format 2 file is not converted again");
 		c.assertTrue(new DangerSavedData().level == 0, "a new world starts at 0");

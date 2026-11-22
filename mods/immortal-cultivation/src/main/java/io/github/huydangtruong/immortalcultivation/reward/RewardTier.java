@@ -3,12 +3,12 @@ package io.github.huydangtruong.immortalcultivation.reward;
 import io.github.huydangtruong.immortalcultivation.wanderer.QuestType;
 import java.util.random.RandomGenerator;
 
-/** Reward box tiers (D76, D89). options = cards on the screen, picks = how many the player takes (1; the diamond box 2, D171; the emerald box 2). */
+/** Reward box tiers (D76, D89). options = cards on the screen, picks = how many the player takes (D210: silver 1 of 3, gold 2 of 4, diamond 3 of 6, emerald 4 of 8). */
 public enum RewardTier {
 	SILVER("silver", 3, 1),
-	GOLD("gold", 4, 1),
-	DIAMOND("diamond", 5, 2), // D171: two picks (was one)
-	EMERALD("emerald", 6, 2);
+	GOLD("gold", 4, 2), // D210: two picks (was one)
+	DIAMOND("diamond", 6, 3), // D210: one more card (was 5) and three picks (D171 had two)
+	EMERALD("emerald", 8, 4); // D210: two more cards (was 6) and four picks (was two)
 
 	private final String id;
 	private final int options;

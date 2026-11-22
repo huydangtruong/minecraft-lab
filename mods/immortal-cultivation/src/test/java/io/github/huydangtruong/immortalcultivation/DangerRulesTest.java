@@ -73,14 +73,15 @@ class DangerRulesTest {
 	}
 
 	@Test
-	void oldLevelsConvertByFiveThirds() {
+	void oldLevelsConvertByFiveThirdsMinusFive() {
 		assertEquals(0, DangerRules.fromOldScale(0));
-		assertEquals(2, DangerRules.fromOldScale(1));
-		assertEquals(7, DangerRules.fromOldScale(4));
-		assertEquals(33, DangerRules.fromOldScale(20));
-		assertEquals(50, DangerRules.fromOldScale(30));
-		assertEquals(50, DangerRules.fromOldScale(99));
-		for (int o = 1; o <= 30; o++) {
+		assertEquals(0, DangerRules.fromOldScale(1));
+		assertEquals(0, DangerRules.fromOldScale(3));
+		assertEquals(2, DangerRules.fromOldScale(4));
+		assertEquals(28, DangerRules.fromOldScale(20));
+		assertEquals(45, DangerRules.fromOldScale(30));
+		assertEquals(45, DangerRules.fromOldScale(99));
+		for (int o = 4; o <= 30; o++) {
 			assertTrue(DangerRules.fromOldScale(o) > DangerRules.fromOldScale(o - 1), "keeps order at " + o);
 		}
 	}

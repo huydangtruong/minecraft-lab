@@ -21,7 +21,9 @@ import java.util.List;
  * then Claim (the emerald box: pick 2 cards, then Claim). Same vanilla-looking panel as the quest screen. Selection lives on the server (menu data slot).
  */
 public class RewardBoxScreen extends AbstractContainerScreen<RewardBoxMenu> {
-	private static final int CARD_W = 50;
+	private static final int MAX_CARD_W = 50;
+	/** Card width: 50, narrower when the row would not fit the screen (D210: the emerald box has 8 cards). */
+	private int CARD_W = MAX_CARD_W;
 	private static final int CARD_H = 80;
 	private static final int GAP = 4;
 	private static final int MARGIN = 8;
@@ -39,7 +41,18 @@ public class RewardBoxScreen extends AbstractContainerScreen<RewardBoxMenu> {
 	private Button claimButton;
 
 	public RewardBoxScreen(RewardBoxMenu menu, Inventory inv, Component title) {
-		super(menu, inv, title, 2 * MARGIN + menu.options().size() * CARD_W + (menu.options().size() - 1) * GAP, PANEL_H);
+		super(menu, inv, title, panelWidth(menu.options().size()), PANEL_H);
+		CARD_W = cardWidth(net.minecraft.client.Minecraft.getInstance().getWindow().getGuiScaledWidth(), menu.options().size());
+	}
+
+	private static int panelWidth(int n) {
+		int w = cardWidth(net.minecraft.client.Minecraft.getInstance().getWindow().getGuiScaledWidth(), n);
+		return 2 * MARGIN + n * w + (n - 1) * GAP;
+	}
+
+	/** Width of one card for n cards on a screen this many GUI pixels wide (also used by the client test to aim clicks). */
+	public static int cardWidth(int screenWidth, int n) {
+		return Math.max(36, Math.min(MAX_CARD_W, (screenWidth - 8 - 2 * MARGIN - (n - 1) * GAP) / n));
 	}
 
 	@Override

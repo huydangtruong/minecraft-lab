@@ -60,8 +60,8 @@ class RewardBoxTest {
 
 	@Test
 	void emeraldBox() {
-		assertEquals(6, RewardTier.EMERALD.options());
-		assertEquals(2, RewardTier.EMERALD.picks());
+		assertEquals(8, RewardTier.EMERALD.options()); // D210
+		assertEquals(4, RewardTier.EMERALD.picks());
 		assertEquals("emerald_reward_box", RewardTier.EMERALD.itemName());
 	}
 
@@ -69,10 +69,12 @@ class RewardBoxTest {
 	void tierSizes() {
 		assertEquals(3, RewardTier.SILVER.options());
 		assertEquals(4, RewardTier.GOLD.options());
-		assertEquals(5, RewardTier.DIAMOND.options());
-		for (RewardTier t : RewardTier.values()) {
-			assertEquals(t == RewardTier.EMERALD || t == RewardTier.DIAMOND ? 2 : 1, t.picks()); // D171
-		}
+		assertEquals(6, RewardTier.DIAMOND.options()); // D210
+		assertEquals(8, RewardTier.EMERALD.options());
+		assertEquals(1, RewardTier.SILVER.picks());
+		assertEquals(2, RewardTier.GOLD.picks());
+		assertEquals(3, RewardTier.DIAMOND.picks());
+		assertEquals(4, RewardTier.EMERALD.picks());
 	}
 
 	@Test
@@ -93,7 +95,7 @@ class RewardBoxTest {
 			boolean allItem = false;
 			boolean elixirSeen = false;
 			boolean itemSeen = false;
-			for (int i = 0; i < 4000; i++) {
+			for (int i = 0; i < 40000; i++) { // D210: an all-item emerald box (8 cards) is 0.4^8, rare
 				List<RewardOption> box = RewardRoll.roll(t, rng);
 				long elixirs = box.stream().filter(RewardBoxTest::isElixir).count();
 				elixirSeen |= elixirs > 0;
@@ -252,14 +254,14 @@ class RewardBoxTest {
 	}
 
 	@Test
-	void emeraldRollSixCardsBooksMayShareAnItemIdButNotAnEnchantment() {
+	void emeraldRollEightCardsBooksMayShareAnItemIdButNotAnEnchantment() {
 		Random rng = new Random(12);
 		boolean twoBooks = false;
 		int specialCards = 0;
 		int itemCards = 0;
 		for (int i = 0; i < 20000; i++) {
 			List<RewardOption> box = RewardRoll.roll(RewardTier.EMERALD, rng);
-			assertEquals(6, box.size());
+			assertEquals(8, box.size());
 			Set<String> keys = new HashSet<>();
 			int books = 0;
 			for (RewardOption o : box) {

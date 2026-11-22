@@ -104,7 +104,7 @@
 ## Hộp thưởng nhiệm vụ (D76, D89, D90, P-027, P-030)
 
 - Mỗi dòng nhiệm vụ trả một hộp thưởng (thay linh dược). **Loại hộp được bốc lúc nhận thưởng, không hiện trước** (D90): ô thưởng ở màn hình nhiệm vụ chỉ hiện hộp xám có dấu "?" (`permahearts:mystery_box`, tên "Random Reward Box", không nhận được). Tỉ lệ: dòng thường (thu thập, giết, khám phá, Death Match) bạc 40 / vàng 30 / kim cương 20 / ngọc lục bảo 10; hạ thủ lĩnh và Blood Moon bạc 20 / vàng 30 / kim cương 30 / ngọc lục bảo 20. Không lưu gì thêm trong save nhiệm vụ.
-- Bốn hộp: `silver_reward_box` (3 thẻ, chọn 1), `gold_reward_box` (4 thẻ, chọn 1), `diamond_reward_box` (5 thẻ, chọn 1), `emerald_reward_box` (**6 thẻ, chọn 2**, màu xanh lá, độ hiếm EPIC).
+- Bốn hộp (D210): `silver_reward_box` (3 thẻ, chọn 1), `gold_reward_box` (4 thẻ, **chọn 2**), `diamond_reward_box` (**6 thẻ, chọn 3**), `emerald_reward_box` (**8 thẻ, chọn 4**, màu xanh lá, độ hiếm EPIC).
 - Mỗi thẻ: 50% một bình linh dược ngẫu nhiên (x1), 50% một món đồ. Món đồ: sắt 64, vàng 64, kim cương 16, ngọc lục bảo 16, redstone 64, lapis 64, ngọc ender 32, thuốc súng 32 (số lượng lấy từ bảng thu thập của QuestGenerator), không trùng nhau. Thẻ đồ có 20% là thẻ đặc biệt: vàng = 4 táo vàng phép hoặc 32 ngọc lục bảo; kim cương = thêm 1 thỏi netherite; bạc không có.
 - **Hộp ngọc lục bảo**: thẻ đồ có **25%** là đặc biệt: 1 Totem of Undying, 1 Bottle of Enlightenment, sách Mending, sách Sharpness V, sách Protection V (hai sách khác phép thì được ra cùng hộp). Chọn đủ 2 thẻ khác nhau rồi bấm Claim: nhận cả hai, hộp biến mất. Đóng màn hình khi mới chọn 1 thẻ thì **không lấy gì**, hộp còn nguyên (lựa chọn chưa lưu).
 - **Bottle of Enlightenment** (`permahearts:enlightenment_bottle`): xếp chồng 16, độ hiếm RARE, có ánh sáng. Uống (chuột phải, 32 tick như bình thuốc) được **+16 level kinh nghiệm**, tiêu 1 bình (không tiêu trong Creative). Không chế được, chỉ ra từ hộp ngọc lục bảo (có trong tab Creative "Food & Drinks" để thử).
@@ -138,7 +138,7 @@ Heaven Blast choáng mọi sinh vật không phải người chơi bị đẩy: 
 
 ## Sát Khí (Danger level) và mob Elite (P-054, D137, D138, D139)
 
-Thế giới có **Danger level 0–50** (D206: giãn từ 0–30 lên 0–50, level 50 = level 30 cũ), bắt đầu từ 0. Mỗi lần Crimson Master rời đi, khoảng 4 phút (4800 tick) sau level +1 (tối đa 50, không giảm; muốn lên tối đa cần 50 lần). Mỗi lần tăng: chữ cam "Danger level X" giữa màn hình, dòng nhỏ bên dưới, một dòng chat và tiếng kèn. Màn hình chỉ số có dòng "Danger level X". Save cũ được đổi một lần: level mới = level cũ × 5/3 (30 → 50).
+Thế giới có **Danger level 0–50** (D206: giãn từ 0–30 lên 0–50, level 50 = level 30 cũ; world cũ đổi một lần bằng ×5/3 rồi trừ 5, D209), bắt đầu từ 0. Mỗi lần Crimson Master rời đi, khoảng 4 phút (4800 tick) sau level +1 (tối đa 50, không giảm; muốn lên tối đa cần 50 lần). Mỗi lần tăng: chữ cam "Danger level X" giữa màn hình, dòng nhỏ bên dưới, một dòng chat và tiếng kèn. Màn hình chỉ số có dòng "Danger level X". Save cũ được đổi một lần: level mới = level cũ × 5/3 (30 → 50).
 
 | Level | Số mob (chỉ Overworld) | Sức mạnh (máu + sát thương, mọi thế giới) | Mở thêm |
 |---|---|---|---|

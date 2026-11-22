@@ -42,10 +42,13 @@ public final class DangerRules {
 		return clamp(level) * 3 / 5.0;
 	}
 
-	/** Converts a level stored on the old 0..30 scale to the new 0..50 scale (30 becomes 50). */
+	/** Levels taken off when an old save is converted (D209: Huy wants old worlds a bit gentler, 30 becomes 45). */
+	public static final int OLD_SCALE_DISCOUNT = 5;
+
+	/** Converts a level stored on the old 0..30 scale to the new 0..50 scale: x5/3, then minus 5, not below 0 (30 becomes 45). */
 	public static int fromOldScale(int oldLevel) {
 		int o = Math.max(0, Math.min(OLD_MAX_LEVEL, oldLevel));
-		return clamp((int) Math.round(o * 5 / 3.0));
+		return clamp((int) Math.round(o * 5 / 3.0) - OLD_SCALE_DISCOUNT);
 	}
 
 	/** Extra hostile mob cap: +6% per level to 33.3 (+200%), then +12% per level, flat at +300% from 41.7 (old curve at L x 3/5). */
