@@ -969,15 +969,6 @@ public final class Grasp {
 		callTimeout = ticks;
 	}
 
-	/** Test helper: forgets everything held in memory. */
-	public static void clearMemory() {
-		TETHERS.clear();
-		LOADED.clear();
-		PEACE.clear();
-		CALL_READY.clear();
-		CALLS.clear();
-	}
-
 	/** The mob's label text for chat and tests: "Skeleton 7". */
 	public static MutableComponent label(Mob m) {
 		GraspedMob ga = m.getAttached(GraspedMob.ATTACHMENT);

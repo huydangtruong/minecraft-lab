@@ -412,9 +412,4 @@ public final class Seism {
 		double dz = Math.max(Math.max(b.minZ - c.z, 0), c.z - b.maxZ);
 		return Math.sqrt(dx * dx + dy * dy + dz * dz);
 	}
-
-	/** Number of boulders still falling and spikes still alive (tests). */
-	public static int activeVisuals() {
-		return FALLS.size() + SPIKES.size();
-	}
 }

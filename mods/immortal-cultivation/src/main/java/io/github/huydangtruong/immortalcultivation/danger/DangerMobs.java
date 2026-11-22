@@ -251,11 +251,6 @@ public final class DangerMobs {
 		}
 	}
 
-	/** For tests: how many elites are tracked. */
-	public static int trackedElites() {
-		return ELITES.size();
-	}
-
 	/** Hook of the hurt mixin: damage an elite takes after Ironhide. */
 	public static float adjustDamage(LivingEntity e, float amount) {
 		return e.hasAttached(AFFIXES) && affixes(e).contains(Affix.IRONHIDE) ? (float) (amount * DangerRules.IRONHIDE_DAMAGE_TAKEN) : amount;

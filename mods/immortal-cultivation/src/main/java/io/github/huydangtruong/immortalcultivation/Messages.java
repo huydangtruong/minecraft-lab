@@ -241,10 +241,6 @@ public final class Messages {
 		return Component.translatableWithFallback("permahearts.wanderer.status_line", "%s. %s", number, text);
 	}
 
-	public static Component questDone() {
-		return Component.translatableWithFallback("permahearts.wanderer.done", "done");
-	}
-
 	public static Component questAdmin(String text) {
 		return Component.literal(text);
 	}

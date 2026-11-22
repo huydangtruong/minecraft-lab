@@ -171,7 +171,7 @@ public final class TechniquesTab {
 	}
 
 	/** Back is the first thing of the header line (Back, icon, name). */
-	private static int[] backRect(int tx, int right, int y0, int h) {
+	private static int[] backRect(int tx, int y0) {
 		return new int[] {tx, y0 + 19, 36, 16};
 	}
 
@@ -256,8 +256,6 @@ public final class TechniquesTab {
 
 	private static void drawList(GuiGraphicsExtractor g, Font font, TechniqueData d, int tx, int right, int y0, int h, int mx, int my) {
 		Technique[] all = Technique.values();
-		int open = d.slotsOpen();
-		boolean assign = selectedSlot >= 0 && selectedSlot < open;
 		int viewTop = y0 + LIST_TOP;
 		int viewH = listH(h);
 		scroll = Math.max(0, Math.min(maxScroll(h), scroll));
@@ -336,7 +334,7 @@ public final class TechniquesTab {
 
 	private static void drawDetail(GuiGraphicsExtractor g, Font font, TechniqueData d, long now, Technique t, int tx, int right, int y0, int h, int mx, int my) {
 		int level = d.level(t);
-		int[] bk = backRect(tx, right, y0, h);
+		int[] bk = backRect(tx, y0);
 		g.blitSprite(RenderPipelines.GUI_TEXTURED, icon(t), tx + 40, bk[1], 16, 16);
 		Component name = Component.literal(t.displayName()).withStyle(ChatFormatting.BOLD);
 		g.text(font, name, tx + 60, bk[1], TOTAL, false);
@@ -543,7 +541,7 @@ public final class TechniquesTab {
 	private static boolean clickDetail(TechniqueData d, Technique t, int tx, int right, int y0, int h, double mx, double my) {
 		int[] up = lastUp;
 		int[] re = lastRe;
-		int[] bk = backRect(tx, right, y0, h);
+		int[] bk = backRect(tx, y0);
 		int level = d.level(t);
 		boolean inBody = my >= detailTop(y0) && my < detailBottom(y0, h);
 		if (inBody && in(mx, my, up[0], up[1], up[2], up[3])) {
@@ -597,7 +595,7 @@ public final class TechniquesTab {
 		}
 		int[] up = lastUp; // where the detail page last drew them
 		int[] re = lastRe;
-		int[] bk = backRect(tx, right, y0, h);
+		int[] bk = backRect(tx, y0);
 		out.add(new int[] {up[0] + up[2] / 2, up[1] + up[3] / 2});
 		out.add(new int[] {re[0] + re[2] / 2, re[1] + re[3] / 2});
 		out.add(new int[] {bk[0] + bk[2] / 2, bk[1] + bk[3] / 2});

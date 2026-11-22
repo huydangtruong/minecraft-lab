@@ -411,8 +411,4 @@ final class GraspGoals {
 		}
 		return want;
 	}
-
-	static BlockPos blockOf(Mob mob) {
-		return mob.blockPosition();
-	}
 }
