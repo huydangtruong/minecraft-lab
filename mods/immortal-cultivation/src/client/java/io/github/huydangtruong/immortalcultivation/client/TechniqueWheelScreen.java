@@ -18,7 +18,7 @@ import net.minecraft.network.chat.Component;
 
 /**
  * D188/D193 technique wheel: opened by holding R (from the cross it first selects the lowest ready slot). A top row shows the
- * technique slots; the mouse wheel moves the target slot. Techniques that already sit in a slot are drawn darkened.
+ * technique slots; the mouse wheel moves the target slot. The technique already in the edited slot is drawn darkened.
  * D188: opened by holding R while a technique slot is selected. Shows the learned techniques by group; a click
  * puts that technique in the selected slot (the server swaps two slots when it already sits in another one). Letting go of R,
  * or Esc, closes it without a change. The world keeps running behind it.
@@ -196,9 +196,8 @@ public class TechniqueWheelScreen extends Screen {
 				if (at >= 0 && at < d.slotsOpen()) {
 					g.text(font, slotKeyName(at), cx + CELL - 1 - font.width(slotKeyName(at)), ry + CELL - 9, 0xFFFFD24A, true);
 				}
-				int listed = d.slotOf(t);
-				if (listed >= 0 && listed < d.slotsOpen()) {
-					g.fill(cx + 1, ry + 1, cx + CELL - 1, ry + CELL - 1, 0xA0000000); // D193: already in a slot
+				if (t == current) {
+					g.fill(cx + 1, ry + 1, cx + CELL - 1, ry + CELL - 1, 0xA0000000); // D193: already in the edited slot (others stay bright: a click swaps)
 				}
 				if (d.onCooldown(t, now)) {
 					g.fill(cx + 1, ry + 1, cx + CELL - 1, ry + CELL - 1, 0x90202020);

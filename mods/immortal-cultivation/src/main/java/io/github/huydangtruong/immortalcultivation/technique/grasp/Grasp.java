@@ -259,6 +259,10 @@ public final class Grasp {
 			if (target.getUUID().equals(mine.owner()) || graspOf(target) != null) {
 				return true; // never its owner, never another grasped mob (nor a vex of a grasped evoker, D192)
 			}
+			if (attacker instanceof net.minecraft.world.entity.monster.Vex && !attacker.hasAttached(GraspedMob.ATTACHMENT)
+				&& (target instanceof net.minecraft.world.entity.npc.villager.AbstractVillager || target instanceof Player && !isMatchOpponentOf(attacker, mine, target))) {
+				return true; // D194: a grasped evoker's vex leaves villagers and other players alone (Death Match opponents excepted)
+			}
 		}
 		if (target.hasAttached(GraspedMob.ATTACHMENT) && (attacker instanceof net.minecraft.world.entity.animal.golem.IronGolem
 			|| attacker instanceof net.minecraft.world.entity.animal.golem.SnowGolem || attacker instanceof net.minecraft.world.entity.animal.wolf.Wolf)) {
@@ -271,6 +275,11 @@ public final class Grasp {
 			}
 		}
 		return false;
+	}
+
+	private static boolean isMatchOpponentOf(Mob attacker, GraspedMob g, LivingEntity target) {
+		ServerPlayer o = attacker.level() instanceof ServerLevel sl ? sl.getServer().getPlayerList().getPlayer(g.owner()) : null;
+		return o != null && isMatchOpponent(o, target);
 	}
 
 	/** Death Match: any other player is an opponent of the owner of a grasped mob. */

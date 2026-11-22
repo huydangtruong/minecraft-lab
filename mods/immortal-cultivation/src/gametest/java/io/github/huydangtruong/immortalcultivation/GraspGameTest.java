@@ -144,7 +144,7 @@ public class GraspGameTest {
 	}
 
 	@GameTest(maxTicks = 40)
-	public void theVexesOfAGraspedEvokerNeverAttackTheOwner(GameTestHelper c) { // D192
+	public void theVexesOfAGraspedEvokerNeverAttackTheOwnerOtherPlayersOrVillagers(GameTestHelper c) { // D192, D194
 		ServerPlayer p = grasper(c, 10);
 		net.minecraft.world.entity.monster.illager.Evoker ev = c.spawn(EntityTypes.EVOKER, new Vec3(6.5, 1, 5.5));
 		ev.setNoAi(true);
@@ -158,8 +158,16 @@ public class GraspGameTest {
 		c.assertTrue(Grasp.isGraspedBy(mine, p.getUUID()), "it counts as the owner's ally (techniques and allies skip it)");
 		c.assertTrue(!ev.canAttack(mine), "the evoker's other followers leave it alone");
 		c.assertTrue(wild.canAttack(p), "a wild vex still attacks the player");
+		ServerPlayer other = FlightBladeGameTest.survivor(c); // D194: no Death Match here
+		net.minecraft.world.entity.npc.villager.Villager villager = c.spawn(EntityTypes.VILLAGER, new Vec3(5.5, 1, 2.5));
+		villager.setNoAi(true);
+		c.assertTrue(!mine.canAttack(other), "a vex of the grasped evoker leaves another player alone outside a Death Match");
+		c.assertTrue(!mine.canAttack(villager), "a vex of the grasped evoker never attacks a villager");
+		c.assertTrue(wild.canAttack(other), "a wild vex still attacks any player");
 		mine.discard();
 		wild.discard();
+		villager.discard();
+		FlightBladeGameTest.drop(c, other);
 		cleanUp(c, p);
 		c.succeed();
 	}
