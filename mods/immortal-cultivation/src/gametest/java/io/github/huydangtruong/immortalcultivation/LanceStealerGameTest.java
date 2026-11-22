@@ -178,6 +178,8 @@ public class LanceStealerGameTest {
 	public void theDrainTakesAPercentOver2sHealsTheCasterAndLeavesBleedingAndSlow(GameTestHelper c) {
 		ServerPlayer p = caster(c, Technique.BLADE);
 		Zombie z = zombie(c, 5.5, 6.5);
+		z.getAttribute(Attributes.MAX_HEALTH).setBaseValue(20.0); // a spawned zombie rolls a small random max-health bonus (20.9)
+		z.setHealth(20f);
 		p.setHealth(10f);
 		double speed = z.getAttributeValue(Attributes.MOVEMENT_SPEED);
 		c.assertTrue(LifeStealer.cast(p, 1), "the cast finds the zombie under the crosshair");
@@ -243,16 +245,33 @@ public class LanceStealerGameTest {
 			c.assertTrue(Math.abs(up(c, z) - 2.0) < 0.05, "held 2 blocks up, height " + up(c, z));
 			c.assertTrue(bats(c).size() == 4, "the bats are still around it");
 			c.assertTrue(z.isNoGravity(), "no gravity while held");
+			c.assertTrue(z.entityTags().contains("permahearts_stealer_lifted"), "a lifted mob is tagged (B13)");
 		});
 		c.runAfterDelay(48, () -> c.assertTrue(Math.abs(up(c, z) - 2.0) < 0.05, "still held just before the end, height " + up(c, z)));
 		c.runAfterDelay(85, () -> {
 			c.assertTrue(up(c, z) < 0.05, "back on the ground, height " + up(c, z));
 			c.assertTrue(!z.isNoGravity(), "gravity is back");
+			c.assertTrue(!z.entityTags().contains("permahearts_stealer_lifted"), "the tag is gone with the lift");
 			c.assertTrue(z.getHealth() > 11.5f, "no fall damage (only a little bleeding): health " + z.getHealth());
 			c.assertTrue(bats(c).isEmpty(), "no bat left: " + bats(c).size());
 			GameTestKit.drop(c, p);
 			c.succeed();
 		});
+	}
+
+	/** P-077 B13: a mob that loads with the lift tag (a crash mid-drain) comes down at once. */
+	@GameTest(maxTicks = 20)
+	public void aTaggedFloatingMobComesDownWhenItLoads(GameTestHelper c) {
+		Zombie z = EntityTypes.ZOMBIE.create(c.getLevel(), net.minecraft.world.entity.EntitySpawnReason.COMMAND);
+		Vec3 v = c.absoluteVec(new Vec3(5.5, 3, 5.5));
+		z.snapTo(v.x, v.y, v.z, 0f, 0f);
+		z.setNoGravity(true);
+		z.addTag("permahearts_stealer_lifted");
+		c.getLevel().addFreshEntity(z); // ENTITY_LOAD fires here
+		c.assertTrue(!z.isNoGravity(), "gravity is back after loading");
+		c.assertTrue(!z.entityTags().contains("permahearts_stealer_lifted"), "the tag is cleared");
+		z.discard();
+		c.succeed();
 	}
 
 	@GameTest(maxTicks = 80) // D180: ceiling

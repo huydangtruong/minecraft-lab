@@ -40,6 +40,8 @@ public final class LifeStealer {
 	private static final DustParticleOptions BLOOD = new DustParticleOptions(0xb01010, 1.0f);
 	/** Tag of the visual bats: discarded when the server stops and when one is ever loaded from disk. */
 	private static final String BAT_TAG = "permahearts_stealer_bat";
+	/** B13: marks a mob whose gravity we switched off, so a crash mid-drain cannot leave it floating (the flag is saved with the mob). */
+	static final String LIFTED_TAG = "permahearts_stealer_lifted";
 
 	private static final class Session {
 		final ServerLevel level;
@@ -74,6 +76,9 @@ public final class LifeStealer {
 		ServerEntityEvents.ENTITY_LOAD.register((e, level) -> {
 			if (e instanceof Bat && e.entityTags().contains(BAT_TAG)) { // a leftover from a crash
 				e.discard();
+			} else if (e.entityTags().contains(LIFTED_TAG) && SESSIONS.stream().noneMatch(s -> s.target == e && s.held)) {
+				e.setNoGravity(false); // B13: loaded with a leftover lift: it comes down
+				e.removeTag(LIFTED_TAG);
 			}
 		});
 	}
@@ -197,6 +202,7 @@ public final class LifeStealer {
 		if (s.held) {
 			s.held = false;
 			s.target.setNoGravity(s.wasNoGravity);
+			s.target.removeTag(LIFTED_TAG);
 			s.target.setDeltaMovement(Vec3.ZERO);
 			s.target.resetFallDistance();
 		}
@@ -270,6 +276,9 @@ public final class LifeStealer {
 				s.held = true;
 				s.wasNoGravity = t.isNoGravity();
 				t.setNoGravity(true);
+				if (!s.wasNoGravity) {
+					t.addTag(LIFTED_TAG); // a mob that never had gravity keeps it off
+				}
 			}
 			s.level.playSound(null, t.blockPosition(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 1f, 0.8f);
 		}
