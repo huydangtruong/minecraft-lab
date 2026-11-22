@@ -8,7 +8,35 @@ public final class LanceRules {
 	public static final int STAGE_TICKS = 60; // damage doubles every 3 s
 	public static final int BREAK_TICKS = 6; // D161: the beam breaks the block it rests on after 0.3 s
 
+	/** D201: every beam hit slows what it crosses: Slowness II for 1.5 s, refreshed by the next hit, so it ends soon after the beam leaves. */
+	public static final int SLOW_AMPLIFIER = 1;
+	public static final int SLOW_TICKS = 30;
+	/** D201: and pushes it a little along the beam, like heat vision pushing a person back: blocks per tick of speed added by one hit (about 1 block of travel on flat ground). */
+	public static final double PUSH = 0.35;
+	/** A tiny lift so ground friction does not eat the push. */
+	public static final double PUSH_LIFT = 0.1;
+
 	private LanceRules() {}
+
+	/** Knockback resistance 0..1 (bosses have 1) scales the push: 1 = nothing left. */
+	public static double pushScale(double knockbackResistance) {
+		return 1 - Math.max(0, Math.min(1, knockbackResistance));
+	}
+
+	/** Horizontal push along (dirX, dirZ), the beam direction; {0, 0} when the direction is flat zero. Result is {x, z}. */
+	public static double[] push(double dirX, double dirZ, double knockbackResistance) {
+		double len = Math.sqrt(dirX * dirX + dirZ * dirZ);
+		if (len < 1e-6) {
+			return new double[] {0, 0};
+		}
+		double k = PUSH * pushScale(knockbackResistance) / len;
+		return new double[] {dirX * k, dirZ * k};
+	}
+
+	/** Lift that goes with the push (zero when the target resists everything). */
+	public static double pushLift(double knockbackResistance) {
+		return PUSH_LIFT * pushScale(knockbackResistance);
+	}
 
 	/** Damage per second before doubling: 1 at Lv 1, +0.5 per level (10.5 at Lv 20). */
 	public static double baseDamagePerSecond(int level) {

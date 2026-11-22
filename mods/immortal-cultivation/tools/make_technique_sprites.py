@@ -447,25 +447,26 @@ THUNDER = [  # a grey cloud with a yellow lightning bolt coming out of it (D86),
 THUNDER_PAL = {"c": "e4e8f0", "g": "aab2c0", "d": "7c8496", "y": "ffd62a", "Y": "f0a000", "h": "fff7a8"}
 
 
-GRASP = [  # an open golden hand with a white spark in the palm (D134), original art
+GRASP = [  # D202: a white sheep's head in profile facing left, only the right half of the face, a light brown horn, a hypnotic spiral eye
     "................",
-    "...g..g..g......",
-    "...Gg.Gg.Gg.g...",
-    "...Gg.Gg.Gg.Gg..",
-    ".g.Gg.Gg.Gg.Gg..",
-    ".Gg.GgGgGgGgGg..",
-    ".GgGGGGGGGGGGg..",
-    "..GGGGGGGGGGGg..",
-    "..GGGGhhGGGGg...",
-    "..GGGGhwhGGGg...",
-    "...GGGGhhGGg....",
-    "....GGGGGGGg....",
-    ".....GGGGGg.....",
-    ".....gGGGGg.....",
-    "......gggg......",
+    "....WWWW.WWW....",
+    "..WWWWWWW.HHHH..",
+    ".WWwWWWWWHhhhhH.",
+    ".WWWWWWWWHhHHhH.",
+    ".WWWWWWWWHhHhhH.",
+    ".WsssppsWHhhhH..",
+    ".WsspkkpW.HHH...",
+    ".WssppkpWWWW....",
+    ".ssssppseEEWWW..",
+    "nssssssssEEWWWW.",
+    "nnssssssssWWWW..",
+    ".nnssssssWWWW...",
+    "..nSsssSS.WWW...",
+    "...SSSSS........",
     "................",
 ]
-GRASP_PAL = {"G": "f2c540", "g": "c48a14", "h": "fff3b0", "w": "ffffff"}
+GRASP_PAL = {"W": "ffffff", "w": "dfe3ee", "s": "d9c8bb", "S": "ab9a8e", "n": "d49a9a", "h": "d9b27a", "H": "b88a4e", "e": "efc9c0", "E": "c8a4a0", "k": "14061f", "p": "8a3fd8"}
+GRASP_EDGE = "3a2a46"
 
 
 SEISM = [  # a grey boulder over cracked brown ground with rock spikes (D142), original art
@@ -528,7 +529,7 @@ def main():
         "illusion": (illusion_art(), "1c2640"),
         "warp": (procedural(warp_color), "2a0a58"),
         "thunder": (from_ascii(THUNDER, THUNDER_PAL), "2a2f3a"),
-        "grasp": (from_ascii(GRASP, GRASP_PAL), "5a3e0c"),
+        "grasp": (from_ascii(GRASP, GRASP_PAL), GRASP_EDGE),
         "seism": (from_ascii(SEISM, SEISM_PAL), "3a2a1a"),
         "crystal": (from_ascii(CRYSTAL, CRYSTAL_PAL), "0c3a40"),
         "lock": (from_ascii(LOCK, LOCK_PAL), "1a1a20"),

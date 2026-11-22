@@ -92,6 +92,24 @@ public class LanceStealerGameTest {
 		});
 	}
 
+	@GameTest(maxTicks = 80)
+	public void theBeamSlowsWhatItCrossesAndPushesItAwayFromTheCaster(GameTestHelper c) { // D201
+		ServerPlayer p = caster(c, Technique.LANCE);
+		Zombie z = faller(c, 5.5, 3.5);
+		Zombie off = faller(c, 7.5, 3.5);
+		double z0 = z.getZ();
+		c.assertTrue(Lance.cast(p, 1), "the beam starts");
+		c.runAfterDelay(25, () -> {
+			c.assertTrue(z.hasEffect(net.minecraft.world.effect.MobEffects.SLOWNESS), "the zombie on the line is slowed");
+			c.assertTrue(z.getEffect(net.minecraft.world.effect.MobEffects.SLOWNESS).getAmplifier() == LanceRules.SLOW_AMPLIFIER, "Slowness II");
+			c.assertTrue(z.getZ() - z0 > 0.5, "the zombie was pushed along the beam, moved " + (z.getZ() - z0));
+			c.assertTrue(!off.hasEffect(net.minecraft.world.effect.MobEffects.SLOWNESS), "the zombie off the line is not slowed");
+			Lance.release(p);
+			FlightBladeGameTest.drop(c, p);
+			c.succeed();
+		});
+	}
+
 	@GameTest(maxTicks = 160)
 	public void theDamageDoublesAfterThreeSeconds(GameTestHelper c) {
 		ServerPlayer p = caster(c, Technique.LANCE);

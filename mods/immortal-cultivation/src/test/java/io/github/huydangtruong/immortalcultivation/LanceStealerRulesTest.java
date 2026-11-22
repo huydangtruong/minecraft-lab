@@ -1,6 +1,7 @@
 package io.github.huydangtruong.immortalcultivation;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.github.huydangtruong.immortalcultivation.technique.LanceRules;
 import io.github.huydangtruong.immortalcultivation.technique.StealerRules;
@@ -79,5 +80,21 @@ class LanceStealerRulesTest {
 		assertEquals(2.5f, LanceRules.widthFactor(0), 1e-6);
 		org.junit.jupiter.api.Assertions.assertTrue(LanceRules.widthFactor(100) < LanceRules.widthFactor(99));
 		assertEquals(2.5f, LanceRules.widthFactor(-5), 1e-6);
+	}
+
+	@Test
+	void lancePushGoesAlongTheBeamAndBossesResistIt() { // D201
+		double[] p = LanceRules.push(0, 5, 0);
+		assertEquals(0, p[0], 1e-9);
+		assertEquals(LanceRules.PUSH, p[1], 1e-9);
+		double[] d = LanceRules.push(3, 4, 0);
+		assertEquals(LanceRules.PUSH, Math.hypot(d[0], d[1]), 1e-9);
+		assertEquals(0.6, d[0] / d[1] * 0.8, 1e-9);
+		double[] half = LanceRules.push(0, 1, 0.5);
+		assertEquals(LanceRules.PUSH / 2, half[1], 1e-9);
+		assertEquals(0, LanceRules.push(0, 1, 1)[1], 1e-9);
+		assertEquals(0, LanceRules.pushLift(1), 1e-9);
+		assertEquals(0, LanceRules.push(0, 0, 0)[0], 1e-9); // looking straight up: no horizontal push
+		assertTrue(LanceRules.PUSH > 0 && LanceRules.PUSH < 0.6 && LanceRules.SLOW_TICKS > LanceRules.DAMAGE_INTERVAL);
 	}
 }

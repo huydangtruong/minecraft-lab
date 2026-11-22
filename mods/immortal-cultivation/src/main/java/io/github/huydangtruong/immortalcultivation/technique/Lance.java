@@ -27,6 +27,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
@@ -218,12 +221,18 @@ public final class Lance {
 		if (a.ticks % LanceRules.DAMAGE_INTERVAL == 0) {
 			float dmg = (float) LanceRules.damagePerHit(a.techLevel, a.ticks);
 			Vec3 end = a.end;
+			Vec3 look = p.getViewVector(1f); // the beam direction, also when the end point is right on top of the caster
 			for (LivingEntity e : sl.getEntitiesOfClass(LivingEntity.class, new AABB(eye, end).inflate(1.0),
 				e -> TechniqueDamage.affectable(e, p) && !isFriend(e, p) && e.getBoundingBox().inflate(0.2).clip(eye, end).isPresent())) {
 				Vec3 velocity = e.getDeltaMovement();
 				TechniqueDamage.hurt(sl, e, p, null, DamageTypes.MAGIC, dmg); // hurtTime restarts: the vanilla red hurt tint stays while hit
 				e.damageCooldownTime = 0; // D183: other damage is never held off by the beam's hits (setInvulnerableTime is another counter)
-				e.setDeltaMovement(velocity); // no knockback from a laser
+				// D201: no vanilla knockback, but the beam slows what it crosses and pushes it a little along the beam (heat vision)
+				e.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, LanceRules.SLOW_TICKS, LanceRules.SLOW_AMPLIFIER, false, true, true));
+				double resist = e.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
+				double[] push = LanceRules.push(look.x, look.z, resist);
+				e.setDeltaMovement(velocity.add(push[0], LanceRules.pushLift(resist), push[1]));
+				e.needsSync = true;
 				Vec3 c = e.position().add(0, e.getBbHeight() * 0.5, 0);
 				sl.sendParticles(SPARK, c.x, c.y, c.z, 6, e.getBbWidth() * 0.3, e.getBbHeight() * 0.25, e.getBbWidth() * 0.3, 0.1);
 				sl.sendParticles(ParticleTypes.FLAME, c.x, c.y, c.z, 2, e.getBbWidth() * 0.25, e.getBbHeight() * 0.2, e.getBbWidth() * 0.25, 0.04);
