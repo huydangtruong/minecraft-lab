@@ -2,6 +2,7 @@ package io.github.huydangtruong.immortalcultivation.technique.grasp;
 
 import io.github.huydangtruong.immortalcultivation.ImmortalCultivation;
 import io.github.huydangtruong.immortalcultivation.godslayer.GodSlayer;
+import io.github.huydangtruong.immortalcultivation.technique.GraspCalls;
 import io.github.huydangtruong.immortalcultivation.technique.GraspRules;
 import io.github.huydangtruong.immortalcultivation.technique.Illusion;
 import io.github.huydangtruong.immortalcultivation.technique.OwnedSummon;
@@ -26,8 +27,10 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -35,9 +38,11 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.TicketType;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
@@ -55,6 +60,9 @@ import net.minecraft.world.entity.monster.Guardian;
 import net.minecraft.world.entity.monster.cubemob.Slime;
 import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -177,6 +185,8 @@ public final class Grasp {
 	/** Released mobs that ignore their ex-owner for a while: mob uuid to (owner uuid, game time it ends). */
 	private static final Map<UUID, Peace> PEACE = new HashMap<>();
 	private static final Map<UUID, Long> CALL_READY = new HashMap<>();
+	/** D198: calls that wait for a far mob's chunk to load (each holds a temporary chunk ticket). */
+	private static final GraspCalls CALLS = new GraspCalls();
 
 	private record Peace(UUID owner, long until) {}
 
@@ -221,13 +231,18 @@ public final class Grasp {
 			return true;
 		});
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> sendState(handler.getPlayer(), -1, 0));
-		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> endTether(handler.getPlayer(), false));
+		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+			endTether(handler.getPlayer(), false);
+			cancelCalls(server, handler.getPlayer().getUUID());
+		});
+		ServerLifecycleEvents.SERVER_STOPPING.register(s -> cancelAllCalls(s));
 		ServerTickEvents.END_SERVER_TICK.register(Grasp::tick);
 		ServerLifecycleEvents.SERVER_STOPPED.register(s -> {
 			TETHERS.clear();
 			LOADED.clear();
 			PEACE.clear();
 			CALL_READY.clear();
+			CALLS.clear();
 		});
 	}
 
@@ -672,12 +687,47 @@ public final class Grasp {
 			p.sendOverlayMessage(Component.literal("Call again in " + (CALL_READY.get(id) - now + 19) / 20 + " s"));
 			return;
 		}
-		if (!(p.level().getEntity(id) instanceof Mob m) || !m.isAlive()) {
-			p.sendOverlayMessage(Component.literal("It is too far away to hear you"));
+		if (CALLS.has(id)) {
+			p.sendOverlayMessage(Component.literal("Calling..."));
 			return;
 		}
-		callTo(p, m, p.position().add(p.getLookAngle().multiply(2, 0, 2)), now);
-		sendMenu(p);
+		Mob m = loadedMob(p.level().getServer(), id);
+		if (m != null) {
+			arrive(p, m, false, now);
+			sendMenu(p);
+		} else if (startLoad(p, e, false, now)) {
+			p.sendOverlayMessage(Component.literal("Calling..."));
+		} else {
+			p.sendOverlayMessage(Component.literal(NOT_FOUND));
+		}
+	}
+
+	/** How long a call waits for a far mob (ticks); only the game tests change it. */
+	private static int callTimeout = GraspCalls.TIMEOUT_TICKS;
+
+	private static final String NOT_FOUND = "Could not find it where it was last seen";
+
+	/** D198: the grasped mob with this uuid when it is loaded in any dimension (and alive), else null. */
+	private static Mob loadedMob(MinecraftServer server, UUID id) {
+		return server.overworld().getEntityInAnyDimension(id) instanceof Mob m && m.isAlive() && m.hasAttached(GraspedMob.ATTACHMENT) ? m : null;
+	}
+
+	/**
+	 * D198: brings a loaded mob to the player: another dimension first (the entity is recreated there: same uuid, attachment
+	 * and stats), then the arrival spot (Call: 2 blocks ahead; Call all: the mob's ring spot) and the cooldown.
+	 */
+	private static void arrive(ServerPlayer p, Mob m, boolean all, long now) {
+		Mob mob = m;
+		ServerLevel to = p.level();
+		if (m.level() != to) {
+			Entity moved = m.teleport(new TeleportTransition(to, p.position(), Vec3.ZERO, m.getYRot(), m.getXRot(), TeleportTransition.DO_NOTHING));
+			if (!(moved instanceof Mob nm)) {
+				return;
+			}
+			mob = nm;
+		}
+		Vec3 want = all ? GraspGoals.followSpot(mob, p) : p.position().add(p.getLookAngle().multiply(2, 0, 2));
+		callTo(p, mob, want, now);
 	}
 
 	/** Teleports a mob to a spot near a point and starts its Call cooldown. */
@@ -690,29 +740,103 @@ public final class Grasp {
 		p.level().sendParticles(ParticleTypes.END_ROD, at.x, at.y + m.getBbHeight() / 2, at.z, 12, 0.4, 0.4, 0.4, 0.05);
 	}
 
-	/** D168: calls every mob whose cooldown is ready, each to its own ring spot (D165); says how many came. */
+	/** D198: D168's Call all: every ready mob comes, loaded ones now, the others after their chunk loads; says how many. */
 	private static void allCall(ServerPlayer p) {
 		long now = p.level().getGameTime();
-		int came = 0, waiting = 0, far = 0;
-		for (GraspData.Entry e : new ArrayList<>(GraspData.of(p.level().getServer()).get(p.getUUID()).mobs())) {
+		MinecraftServer server = p.level().getServer();
+		int came = 0, waiting = 0, calling = 0, lost = 0;
+		for (GraspData.Entry e : new ArrayList<>(GraspData.of(server).get(p.getUUID()).mobs())) {
 			if (CALL_READY.getOrDefault(e.mob(), 0L) > now) {
 				waiting++;
-			} else if (p.level().getEntity(e.mob()) instanceof Mob m && m.isAlive()) {
-				callTo(p, m, GraspGoals.followSpot(m, p), now);
+			} else if (CALLS.has(e.mob())) {
+				calling++;
+			} else if (loadedMob(server, e.mob()) instanceof Mob m) {
+				arrive(p, m, true, now);
 				came++;
+			} else if (startLoad(p, e, true, now)) {
+				calling++;
 			} else {
-				far++;
+				lost++;
 			}
 		}
 		String msg = came + (came == 1 ? " mob came" : " mobs came");
+		if (calling > 0) {
+			msg += ", " + calling + " calling...";
+		}
 		if (waiting > 0) {
 			msg += ", " + waiting + " still waiting";
 		}
-		if (far > 0) {
-			msg += ", " + far + " too far away";
+		if (lost > 0) {
+			msg += ", " + lost + " not found";
 		}
 		p.sendOverlayMessage(Component.literal(msg));
 		sendMenu(p);
+	}
+
+	// ---- D198: calling a mob that is not loaded ----
+
+	private static ServerLevel levelOf(MinecraftServer server, String dim) {
+		Identifier id = Identifier.tryParse(dim);
+		return id == null ? null : server.getLevel(ResourceKey.create(Registries.DIMENSION, id));
+	}
+
+	/** Loads the chunk where the mob was last seen (temporary ticket) and waits for it. False when that place does not exist. */
+	private static boolean startLoad(ServerPlayer p, GraspData.Entry e, boolean all, long now) {
+		MinecraftServer server = p.level().getServer();
+		ServerLevel lv = levelOf(server, e.dim());
+		if (lv == null) {
+			return false;
+		}
+		ChunkPos cp = ChunkPos.containing(BlockPos.containing(e.x(), e.y(), e.z()));
+		if (!CALLS.start(new GraspCalls.Pending(e.mob(), p.getUUID(), e.dim(), cp.x(), cp.z(), all, now + callTimeout))) {
+			return false;
+		}
+		lv.getChunkSource().addTicketWithRadius(TicketType.PORTAL, cp, GraspCalls.TICKET_RADIUS);
+		return true;
+	}
+
+	/** Ends a waiting call and gives back its chunk ticket (kept while another waiting call needs the same chunk). */
+	private static void endCall(MinecraftServer server, GraspCalls.Pending pd) {
+		CALLS.finish(pd.mob());
+		if (!CALLS.chunkStillNeeded(pd) && levelOf(server, pd.dim()) instanceof ServerLevel lv) {
+			lv.getChunkSource().removeTicketWithRadius(TicketType.PORTAL, new ChunkPos(pd.chunkX(), pd.chunkZ()), GraspCalls.TICKET_RADIUS);
+		}
+	}
+
+	private static void cancelCalls(MinecraftServer server, UUID owner) {
+		for (GraspCalls.Pending pd : CALLS.of(owner)) {
+			endCall(server, pd);
+		}
+	}
+
+	private static void cancelAllCalls(MinecraftServer server) {
+		for (GraspCalls.Pending pd : CALLS.all()) {
+			endCall(server, pd);
+		}
+	}
+
+	/** Every tick: a waiting call whose mob has loaded brings it; one that ran out of time (or lost its owner) lets go. */
+	private static void tickCalls(MinecraftServer server) {
+		long now = server.overworld().getGameTime();
+		for (GraspCalls.Pending pd : CALLS.all()) {
+			ServerPlayer p = server.getPlayerList().getPlayer(pd.owner());
+			GraspData.Entry e = p == null ? null : GraspData.of(server).find(pd.owner(), pd.mob());
+			if (p == null || !p.isAlive() || e == null) {
+				endCall(server, pd); // owner left or died, or the mob was released or died while we waited
+				continue;
+			}
+			Mob m = loadedMob(server, pd.mob());
+			if (m != null) {
+				endCall(server, pd);
+				arrive(p, m, pd.all(), p.level().getGameTime());
+				sendMenu(p);
+			} else if (now >= pd.deadline()) {
+				endCall(server, pd);
+				p.sendOverlayMessage(Component.literal("Could not find ").append(nameOf(BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.parse(e.type())), e.number()))
+					.append(" where it was last seen"));
+				sendMenu(p);
+			}
+		}
 	}
 
 	// ---- snapshot ----
@@ -745,6 +869,9 @@ public final class Grasp {
 	// ---- tick ----
 
 	private static void tick(MinecraftServer server) {
+		if (CALLS.size() > 0) {
+			tickCalls(server);
+		}
 		for (var it = new ArrayList<>(TETHERS.entrySet()).iterator(); it.hasNext();) {
 			var en = it.next();
 			ServerPlayer p = server.getPlayerList().getPlayer(en.getKey());
@@ -832,12 +959,18 @@ public final class Grasp {
 		}
 	}
 
+	/** Test helper: how many ticks a call waits for a far mob (the default is {@link GraspCalls#TIMEOUT_TICKS}). */
+	public static void setCallTimeout(int ticks) {
+		callTimeout = ticks;
+	}
+
 	/** Test helper: forgets everything held in memory. */
 	public static void clearMemory() {
 		TETHERS.clear();
 		LOADED.clear();
 		PEACE.clear();
 		CALL_READY.clear();
+		CALLS.clear();
 	}
 
 	/** The mob's label text for chat and tests: "Skeleton 7". */
