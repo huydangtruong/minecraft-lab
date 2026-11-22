@@ -162,4 +162,19 @@ public class TreasureGameTest {
 		c.assertTrue(!d.warned, "warning flag reset for the next event");
 		c.succeed();
 	}
+
+	@GameTest(maxTicks = 100) // P-077 B14
+	public void startingAgainDuringAnEventRemovesTheOldChestAndGuards(GameTestHelper c) {
+		ServerLevel level = c.getLevel();
+		TreasureSavedData d = fresh(c);
+		BlockPos chest = DeadlyTreasure.place(level, d, c.absolutePos(new BlockPos(1, 1, 1)), false, "brutes").chest();
+		List<Mob> g = guards(level, d);
+		c.assertTrue(g.size() == 6 && level.getBlockEntity(chest) instanceof ChestBlockEntity, "6 brute guards and a chest");
+		DeadlyTreasure.start(level.getServer(), c.makeMockServerPlayerInLevel(), false);
+		c.assertTrue(d.phase == TreasureRules.Phase.ACTIVE && !d.placed && d.guards.isEmpty(), "a fresh event is running and nothing is placed yet");
+		c.assertTrue(g.stream().allMatch(Entity::isRemoved), "the old guards are gone");
+		c.assertTrue(!(level.getBlockEntity(chest) instanceof ChestBlockEntity), "the old chest is gone");
+		d.clear();
+		c.succeed();
+	}
 }

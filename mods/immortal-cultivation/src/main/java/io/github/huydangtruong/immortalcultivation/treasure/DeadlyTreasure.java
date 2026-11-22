@@ -177,6 +177,11 @@ public final class DeadlyTreasure {
 	/** Starts the event: far = 1000 blocks from the player in a random direction, else at the player (tests, command). */
 	public static void start(MinecraftServer server, ServerPlayer near, boolean far) {
 		TreasureSavedData d = data(server);
+		if (d.phase == TreasureRules.Phase.ACTIVE) { // P-077 B14: a restart must not leave the old chest and guards behind
+			removePlaced(server.overworld(), d);
+			cleanup(server.overworld(), d);
+			TreasureBar.hide();
+		}
 		double a = RNG.nextDouble() * Math.PI * 2;
 		int dist = far ? TreasureRules.DISTANCE : 0;
 		d.id++;
@@ -421,15 +426,7 @@ public final class DeadlyTreasure {
 	/** Time is up with guards left (or never found): chest and guards vanish. */
 	public static void fail(MinecraftServer server, TreasureSavedData d) {
 		ServerLevel ow = server.overworld();
-		if (d.placed) {
-			d.cleanup.add(d.chest);
-			for (String id : d.guards) {
-				Entity e = ow.getEntity(UUID.fromString(id));
-				if (e != null) {
-					e.discard();
-				}
-			}
-		}
+		removePlaced(ow, d);
 		for (ServerPlayer p : server.getPlayerList().getPlayers()) {
 			title(p, text("has failed"));
 		}
@@ -437,6 +434,20 @@ public final class DeadlyTreasure {
 		d.clear();
 		TreasureBar.hide();
 		cleanup(ow, d);
+	}
+
+	/** Queues the chest of the running event for removal and discards its guards. Nothing happens when nothing was placed. */
+	private static void removePlaced(ServerLevel ow, TreasureSavedData d) {
+		if (!d.placed) {
+			return;
+		}
+		d.cleanup.add(d.chest);
+		for (String id : d.guards) {
+			Entity e = ow.getEntity(UUID.fromString(id));
+			if (e != null) {
+				e.discard();
+			}
+		}
 	}
 
 	/** Removes the chests of failed events once their chunk is loaded. */
