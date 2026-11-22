@@ -5,6 +5,8 @@ import io.github.huydangtruong.immortalcultivation.technique.Technique;
 import io.github.huydangtruong.immortalcultivation.technique.TechniqueData;
 import io.github.huydangtruong.immortalcultivation.technique.SkillBarLogic;
 import io.github.huydangtruong.immortalcultivation.technique.TechniqueNet;
+import io.github.huydangtruong.immortalcultivation.technique.WheelGroups;
+import io.github.huydangtruong.immortalcultivation.technique.WheelGroups.Group;
 import io.github.huydangtruong.immortalcultivation.technique.WheelLogic;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,16 +38,6 @@ public class TechniqueWheelScreen extends Screen {
 	private static final int GOLD = 0xFFFFC800;
 	private static final int PANEL = 0xE0101018;
 	private static final int RED = 0xFFFF5555;
-
-	/** D114 groups, in list order. */
-	private record Group(String label, Technique[] members) {}
-
-	private static final Group[] GROUPS = {
-		new Group("Attack", new Technique[] {Technique.FIRE, Technique.THUNDER, Technique.SEISM, Technique.LANCE, Technique.BLADE, Technique.MAYHEM}),
-		new Group("Defense", new Technique[] {Technique.ICE, Technique.REPULSE, Technique.HEALING, Technique.SACRIFICE, Technique.CRYSTAL}),
-		new Group("Movement", new Technique[] {Technique.PHASE, Technique.FLIGHT, Technique.TELEPORT, Technique.WARP, Technique.AQUA}),
-		new Group("Allies", new Technique[] {Technique.GOLEM, Technique.ANGEL, Technique.ILLUSION, Technique.GRASP})
-	};
 
 	private int slot;
 	/** True after a click on a cooling slot: the red line shows (its seconds stay live). */
@@ -105,7 +97,7 @@ public class TechniqueWheelScreen extends Screen {
 
 	private int rows(TechniqueData d) {
 		int n = 0;
-		for (Group g : GROUPS) {
+		for (Group g : WheelGroups.GROUPS) {
 			if (!learned(g, d).isEmpty()) {
 				n++;
 			}
@@ -175,7 +167,7 @@ public class TechniqueWheelScreen extends Screen {
 		g.fill(x0 + PAD, y0 + HEADER + SLOTS_H - 3, x0 + w - PAD, y0 + HEADER + SLOTS_H - 2, 0xFF3A3A50);
 
 		int row = 0;
-		for (Group grp : GROUPS) {
+		for (Group grp : WheelGroups.GROUPS) {
 			List<Technique> list = learned(grp, d);
 			if (list.isEmpty()) {
 				continue;
@@ -231,7 +223,7 @@ public class TechniqueWheelScreen extends Screen {
 		TechniqueData d = data();
 		int x0 = panelX(), y0 = panelY(d);
 		int row = 0;
-		for (Group grp : GROUPS) {
+		for (Group grp : WheelGroups.GROUPS) {
 			List<Technique> list = learned(grp, d);
 			if (list.isEmpty()) {
 				continue;

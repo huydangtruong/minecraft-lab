@@ -4,6 +4,7 @@ import io.github.huydangtruong.immortalcultivation.technique.Technique;
 import io.github.huydangtruong.immortalcultivation.technique.TechniqueAttachment;
 import io.github.huydangtruong.immortalcultivation.technique.TechniqueData;
 import io.github.huydangtruong.immortalcultivation.technique.TechniqueNet;
+import io.github.huydangtruong.immortalcultivation.technique.StatDiff;
 import io.github.huydangtruong.immortalcultivation.technique.TechniqueRules;
 import java.util.ArrayList;
 import java.util.List;
@@ -392,16 +393,10 @@ public final class TechniquesTab {
 				}
 			} else {
 				// "16 blocks" -> "18 blocks" reads better as "16 > 18 blocks": the words they share go once, at the end
-				String[] a = cur.split(" ");
-				String[] b = nxt.split(" ");
-				int common = 0;
-				while (common < a.length - 1 && common < b.length - 1 && a[a.length - 1 - common].equals(b[b.length - 1 - common])
-					&& !Character.isDigit(a[a.length - 1 - common].charAt(0))) {
-					common++;
-				}
-				String curShort = String.join(" ", java.util.Arrays.copyOfRange(a, 0, a.length - common));
-				String nxtShort = String.join(" ", java.util.Arrays.copyOfRange(b, 0, b.length - common));
-				String tail = common == 0 ? "" : " " + String.join(" ", java.util.Arrays.copyOfRange(a, a.length - common, a.length));
+				StatDiff.Result diff = StatDiff.compare(cur, nxt);
+				String curShort = diff.from();
+				String nxtShort = diff.to();
+				String tail = diff.tail();
 				int arrow = font.width("\u2192") + 6;
 				if (font.width(curShort) + arrow + font.width(nxtShort + tail) <= avail) {
 					int x = vx;
