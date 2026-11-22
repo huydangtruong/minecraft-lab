@@ -29,6 +29,7 @@
 		"GhastMixin",
 		"GhastShootFireballGoalMixin",
 		"GraspCanAttackMixin",
+		"GraspSleepMixin",
 		"ItemGuardMixin",
 		"LivingEntityXpMixin",
 		"MobDisarmMixin",

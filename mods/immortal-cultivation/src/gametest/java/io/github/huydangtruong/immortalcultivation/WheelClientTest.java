@@ -41,6 +41,81 @@ public class WheelClientTest implements FabricClientGameTest {
 			context.waitTicks(5);
 			check(context.computeOnClient(mc -> mc.gui.screen() == null), "letting go of the key closes the wheel");
 			check(ClientSkills.selected() == 0, "slot still selected after the wheel closes");
+
+			// D193: from the cross. Slot 1 (Fire) is cooling, so the lowest ready slot is slot 2 (index 1).
+			context.runOnClient(mc -> ClientSkills.backToHotbar());
+			server.runOnServer(s -> {
+				var p = s.getPlayerList().getPlayers().get(0);
+				long now = s.overworld().getGameTime();
+				TechniqueAttachment.set(p, TechniqueAttachment.get(p).withCooldown(Technique.FIRE, now + 20 * 600));
+			});
+			context.waitTicks(10);
+			check(ClientSkills.selected() == -1, "on the cross");
+			int hotbar = context.computeOnClient(mc -> mc.player.getInventory().getSelectedSlot());
+			ClientSkills.testWheelHeld = true;
+			context.getInput().pressKey(ClientSkills.WHEEL);
+			context.waitTicks(5);
+			check(context.computeOnClient(mc -> mc.gui.screen() instanceof TechniqueWheelScreen), "R on the cross opens the wheel");
+			check(ClientSkills.selected() == 1, "the lowest ready slot is selected (slot 1 is cooling)");
+			check(context.computeOnClient(mc -> ((TechniqueWheelScreen) mc.gui.screen()).slot()) == 1, "the wheel edits slot 2");
+			context.takeScreenshot("41-technique-wheel-cross");
+
+			// scroll: down = next open slot, wraps; the hotbar does not move
+			context.getInput().scroll(-1);
+			context.waitTicks(3);
+			check(ClientSkills.selected() == 2, "scroll down moves to the next slot");
+			context.getInput().scroll(-1);
+			context.waitTicks(3);
+			check(ClientSkills.selected() == 0, "scroll down wraps to the first slot");
+			context.getInput().scroll(1);
+			context.waitTicks(3);
+			check(ClientSkills.selected() == 2, "scroll up wraps to the last open slot");
+			check(context.computeOnClient(mc -> ((TechniqueWheelScreen) mc.gui.screen()).slot()) == 2, "the wheel follows the scroll");
+			check(context.computeOnClient(mc -> mc.player.getInventory().getSelectedSlot()) == hotbar, "the hotbar did not scroll");
+
+			// D196: a pick keeps the wheel open; scroll on and pick again; only letting go of R closes it
+			context.runOnClient(mc -> ((TechniqueWheelScreen) mc.gui.screen()).choose(ClientSkills.data(mc.player), Technique.FLIGHT));
+			context.waitTicks(5);
+			check(context.computeOnClient(mc -> mc.gui.screen() instanceof TechniqueWheelScreen), "the wheel stays open after a pick");
+			check(context.computeOnClient(mc -> ClientSkills.data(mc.player).inSlot(2)) == Technique.FLIGHT, "slot 3 now holds Flight");
+			context.getInput().scroll(1);
+			context.waitTicks(3);
+			check(ClientSkills.selected() == 1, "scroll still works after a pick");
+			context.runOnClient(mc -> ((TechniqueWheelScreen) mc.gui.screen()).choose(ClientSkills.data(mc.player), Technique.GOLEM));
+			context.waitTicks(5);
+			check(context.computeOnClient(mc -> mc.gui.screen() instanceof TechniqueWheelScreen), "still open after a second pick");
+			check(context.computeOnClient(mc -> ClientSkills.data(mc.player).inSlot(1)) == Technique.GOLEM, "slot 2 now holds Golem");
+			context.getInput().scroll(-1);
+			context.waitTicks(3);
+			ClientSkills.testWheelHeld = false;
+			context.waitTicks(5);
+			check(context.computeOnClient(mc -> mc.gui.screen() == null), "the wheel closes on release");
+			check(ClientSkills.selected() == 2, "the scrolled slot stays selected");
+
+			// all ready: R from the cross picks slot 1; nothing open: R does nothing
+			context.runOnClient(mc -> ClientSkills.backToHotbar());
+			server.runOnServer(s -> {
+				var p = s.getPlayerList().getPlayers().get(0);
+				TechniqueAttachment.set(p, TechniqueAttachment.get(p).withoutCooldowns());
+			});
+			context.waitTicks(10);
+			ClientSkills.testWheelHeld = true;
+			context.getInput().pressKey(ClientSkills.WHEEL);
+			context.waitTicks(5);
+			check(ClientSkills.selected() == 0, "with every slot ready the first slot is chosen");
+			ClientSkills.testWheelHeld = false;
+			context.waitTicks(5);
+			context.runOnClient(mc -> ClientSkills.backToHotbar());
+			server.runOnServer(s -> {
+				var p = s.getPlayerList().getPlayers().get(0);
+				TechniqueAttachment.set(p, TechniqueAttachment.get(p).withEmeralds(0));
+			});
+			context.waitTicks(10);
+			ClientSkills.testWheelHeld = true;
+			context.getInput().pressKey(ClientSkills.WHEEL);
+			context.waitTicks(5);
+			check(context.computeOnClient(mc -> mc.gui.screen() == null), "no open slot: the wheel stays shut");
+			ClientSkills.testWheelHeld = false;
 		}
 	}
 

@@ -1,5 +1,6 @@
 package io.github.huydangtruong.immortalcultivation;
 
+import io.github.huydangtruong.immortalcultivation.technique.GraspCalls;
 import io.github.huydangtruong.immortalcultivation.technique.GraspRules;
 import io.github.huydangtruong.immortalcultivation.technique.SafeTeleport;
 import io.github.huydangtruong.immortalcultivation.technique.Technique;
@@ -11,7 +12,15 @@ import io.github.huydangtruong.immortalcultivation.technique.grasp.GraspData;
 import io.github.huydangtruong.immortalcultivation.technique.grasp.GraspedMob;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.TicketType;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import java.util.UUID;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Witch;
@@ -144,7 +153,7 @@ public class GraspGameTest {
 	}
 
 	@GameTest(maxTicks = 40)
-	public void theVexesOfAGraspedEvokerNeverAttackTheOwner(GameTestHelper c) { // D192
+	public void theVexesOfAGraspedEvokerNeverAttackTheOwnerOtherPlayersOrVillagers(GameTestHelper c) { // D192, D194
 		ServerPlayer p = grasper(c, 10);
 		net.minecraft.world.entity.monster.illager.Evoker ev = c.spawn(EntityTypes.EVOKER, new Vec3(6.5, 1, 5.5));
 		ev.setNoAi(true);
@@ -158,8 +167,41 @@ public class GraspGameTest {
 		c.assertTrue(Grasp.isGraspedBy(mine, p.getUUID()), "it counts as the owner's ally (techniques and allies skip it)");
 		c.assertTrue(!ev.canAttack(mine), "the evoker's other followers leave it alone");
 		c.assertTrue(wild.canAttack(p), "a wild vex still attacks the player");
+		ServerPlayer other = FlightBladeGameTest.survivor(c); // D194: no Death Match here
+		net.minecraft.world.entity.npc.villager.Villager villager = c.spawn(EntityTypes.VILLAGER, new Vec3(5.5, 1, 2.5));
+		villager.setNoAi(true);
+		c.assertTrue(!mine.canAttack(other), "a vex of the grasped evoker leaves another player alone outside a Death Match");
+		c.assertTrue(!mine.canAttack(villager), "a vex of the grasped evoker never attacks a villager");
+		c.assertTrue(wild.canAttack(other), "a wild vex still attacks any player");
 		mine.discard();
 		wild.discard();
+		villager.discard();
+		FlightBladeGameTest.drop(c, other);
+		cleanUp(c, p);
+		c.succeed();
+	}
+
+	@GameTest(maxTicks = 40)
+	public void graspedMobsDoNotKeepTheOwnerFromSleeping(GameTestHelper c) { // D195
+		ServerPlayer p = grasper(c, 10);
+		Zombie mine = c.spawn(EntityTypes.ZOMBIE, new Vec3(5.5, 1, 5.5));
+		mine.setNoAi(true);
+		Grasp.tame(p, mine, 10);
+		net.minecraft.world.entity.monster.zombie.ZombifiedPiglin piglin = c.spawn(EntityTypes.ZOMBIFIED_PIGLIN, new Vec3(5.5, 1, 3.5));
+		piglin.setNoAi(true);
+		Grasp.tame(p, piglin, 10);
+		Zombie wild = c.spawn(EntityTypes.ZOMBIE, new Vec3(3.5, 1, 3.5));
+		wild.setNoAi(true);
+		ServerPlayer other = FlightBladeGameTest.survivor(c);
+		piglin.setPersistentAngerTarget(net.minecraft.world.entity.EntityReference.of(other)); // angry at another player: its own override of the check
+		piglin.startPersistentAngerTimer();
+		c.assertTrue(!mine.isPreventingPlayerRest(c.getLevel(), p), "a grasped zombie lets its owner sleep");
+		c.assertTrue(!piglin.isPreventingPlayerRest(c.getLevel(), p), "a grasped zombified piglin lets its owner sleep");
+		c.assertTrue(!mine.isPreventingPlayerRest(c.getLevel(), other), "it lets another player sleep outside a Death Match");
+		c.assertTrue(!piglin.isPreventingPlayerRest(c.getLevel(), other), "a grasped zombified piglin angry at another player lets them sleep outside a Death Match");
+		c.assertTrue(wild.isPreventingPlayerRest(c.getLevel(), p), "a wild zombie still keeps the player awake");
+		wild.discard();
+		FlightBladeGameTest.drop(c, other);
 		cleanUp(c, p);
 		c.succeed();
 	}
@@ -362,5 +404,198 @@ public class GraspGameTest {
 		}
 		cleanUp(c, p);
 		c.succeed();
+	}
+
+	// ---- D198: call from anywhere ----
+
+	/** Frees whatever a D198 test left behind: the mob (wherever it is), its entry, the player. */
+	private static void cleanUpAny(GameTestHelper c, ServerPlayer p) {
+		for (var e : GraspData.of(c.getLevel().getServer()).get(p.getUUID()).mobs().toArray(new GraspData.Entry[0])) {
+			if (c.getLevel().getServer().overworld().getEntityInAnyDimension(e.mob()) instanceof Mob m) {
+				Grasp.releaseMob(m, false);
+				m.discard();
+			}
+			GraspData.of(c.getLevel().getServer()).remove(p.getUUID(), e.mob());
+		}
+		FlightBladeGameTest.drop(c, p);
+	}
+
+	private static Entity anywhere(GameTestHelper c, UUID id) {
+		return c.getLevel().getServer().overworld().getEntityInAnyDimension(id);
+	}
+
+	@GameTest(maxTicks = 100)
+	public void aMobInTheNetherIsCalledToTheOwnerAndStaysGrasped(GameTestHelper c) {
+		ServerPlayer p = grasper(c, 20);
+		ServerLevel nether = c.getLevel().getServer().getLevel(Level.NETHER);
+		nether.getChunk(0, 0);
+		Zombie z = EntityTypes.ZOMBIE.create(nether, EntitySpawnReason.COMMAND);
+		z.snapTo(8.5, 80, 8.5);
+		z.setNoAi(true);
+		nether.addFreshEntity(z);
+		Grasp.tame(p, z, 20);
+		UUID id = z.getUUID();
+		int number = z.getAttached(GraspedMob.ATTACHMENT).number();
+		c.assertTrue(z.level() == nether, "starts in the Nether");
+		Grasp.handle(p, Grasp.CALL, id.toString(), 0);
+		c.runAfterDelay(5, () -> {
+			Entity now = anywhere(c, id);
+			c.assertTrue(now instanceof Zombie, "the mob exists after the trip");
+			c.assertTrue(now.level() == p.level(), "it is in the owner's dimension");
+			c.assertTrue(now.distanceTo(p) < 4, "it stands next to the owner, " + now.distanceTo(p));
+			GraspedMob ga = now.getAttached(GraspedMob.ATTACHMENT);
+			c.assertTrue(ga != null && ga.owner().equals(p.getUUID()) && ga.number() == number, "still grasped with its number");
+			c.assertTrue(((Zombie) now).getAttribute(Attributes.MAX_HEALTH).getModifier(Grasp.BONUS_ID) != null, "health bonus kept");
+			c.assertTrue(((Zombie) now).getCustomName() != null && ((Zombie) now).getCustomName().getString().endsWith(" " + number), "name kept");
+			c.assertTrue(held(c, p) == 1, "the slot is still taken (no death, no release), held " + held(c, p));
+			c.assertTrue(GraspData.of(c.getLevel().getServer()).find(p.getUUID(), id) != null, "its entry is still there");
+			c.assertTrue(Grasp.loadedOf(p.getUUID()).size() == 1 && Grasp.loadedOf(p.getUUID()).get(0) == now, "the new copy is the loaded one");
+			c.assertTrue(nether.getEntity(id) == null, "the old copy is gone from the Nether");
+			// the cooldown runs: moved away, a second call does nothing
+			Vec3 far = c.absoluteVec(new Vec3(0.8, 1, 0.8));
+			now.snapTo(far.x, far.y, far.z);
+			Grasp.handle(p, Grasp.CALL, id.toString(), 0);
+			c.assertTrue(now.distanceTo(p) > 4, "the Call cooldown is running");
+			cleanUpAny(c, p);
+			c.succeed();
+		});
+	}
+
+	@GameTest(maxTicks = 100)
+	public void callAllBringsAMobFromTheNetherToItsRingSpot(GameTestHelper c) {
+		ServerPlayer p = grasper(c, 20);
+		FlightBladeGameTest.place(c, p, 5, 1, 5, -90f, 0f);
+		ServerLevel nether = c.getLevel().getServer().getLevel(Level.NETHER);
+		nether.getChunk(0, 0);
+		Zombie z = EntityTypes.ZOMBIE.create(nether, EntitySpawnReason.COMMAND);
+		z.snapTo(8.5, 80, 8.5);
+		z.setNoAi(true);
+		nether.addFreshEntity(z);
+		Grasp.tame(p, z, 20);
+		UUID id = z.getUUID();
+		Grasp.handle(p, Grasp.ALL_CALL, "", 0);
+		c.runAfterDelay(5, () -> {
+			Entity now = anywhere(c, id);
+			c.assertTrue(now != null && now.level() == p.level(), "the mob came into the owner's dimension");
+			double d = flat((Zombie) now, p);
+			c.assertTrue(d >= 2.3 && d <= 3.7, "on its ring spot, " + d + " blocks from the owner");
+			c.assertTrue(now.hasAttached(GraspedMob.ATTACHMENT) && held(c, p) == 1, "still grasped, slot kept");
+			cleanUpAny(c, p);
+			c.succeed();
+		});
+	}
+
+	/**
+	 * Spawns a grasped zombie in a far chunk once that chunk is entity-ticking (a few ticks after its ticket), then gives the
+	 * ticket back so the chunk unloads. Call it every tick; it returns the mob's uuid once the mob is spawned, else null.
+	 */
+	private static UUID farMob(GameTestHelper c, ServerPlayer p, ChunkPos at, UUID[] made) {
+		if (made[0] != null) {
+			return made[0];
+		}
+		ServerLevel lv = c.getLevel();
+		lv.getChunkSource().addTicketWithRadius(TicketType.PORTAL, at, 2);
+		if (!lv.isPositionEntityTicking(at.getWorldPosition().offset(8, 80, 8))) {
+			return null;
+		}
+		Zombie z = EntityTypes.ZOMBIE.create(lv, EntitySpawnReason.COMMAND);
+		z.snapTo(at.getMiddleBlockX() + 0.5, 80, at.getMiddleBlockZ() + 0.5);
+		z.setNoAi(true);
+		c.assertTrue(lv.addFreshEntity(z), "the far mob was added");
+		Grasp.tame(p, z, 20);
+		Grasp.handle(p, Grasp.MODE, z.getUUID().toString(), 1); // Stay: a follower that loads would walk to its owner on its own
+		lv.getChunkSource().removeTicketWithRadius(TicketType.PORTAL, at, 2);
+		made[0] = z.getUUID();
+		return made[0];
+	}
+
+	@GameTest(maxTicks = 12000)
+	public void aMobInAnUnloadedChunkComesWhenCalledAndTheTicketIsReleased(GameTestHelper c) {
+		ServerPlayer p = grasper(c, 20);
+		ServerLevel lv = c.getLevel();
+		ChunkPos far = new ChunkPos(2000, 2000);
+		Grasp.setCallTimeout(1200); // the test server ticks far faster than real time, so loading needs more ticks than in a game
+		UUID[] made = new UUID[1];
+		int[] phase = {0, 0};
+		long t0 = System.nanoTime();
+		c.onEachTick(() -> {
+			phase[1]++;
+			UUID id = farMob(c, p, far, made);
+			if (id == null) {
+				return;
+			}
+			if (phase[0] == 0 && phase[1] < 3) {
+				return; // the ticket was just given back
+			}
+			if (phase[0] == 0 && anywhere(c, id) == null) {
+				c.assertTrue(lv.getChunkSource().getChunkNow(far.x(), far.z()) == null, "the far chunk is unloaded");
+				c.assertTrue(held(c, p) == 1, "the entry is kept while the mob is unloaded");
+				Grasp.handle(p, Grasp.CALL, id.toString(), 0);
+				phase[0] = 1;
+				phase[1] = 0;
+			} else if (phase[0] == 1 && anywhere(c, id) instanceof Zombie z && z.level() == p.level() && z.distanceTo(p) < 4) {
+				c.assertTrue(z.distanceTo(p) < 4, "it came next to the owner, " + z.distanceTo(p));
+				c.assertTrue(z.hasAttached(GraspedMob.ATTACHMENT) && held(c, p) == 1, "still grasped");
+				phase[0] = 2;
+				phase[1] = 0;
+			} else if (phase[0] == 2 && !lv.isPositionEntityTicking(far.getWorldPosition().offset(8, 80, 8))) {
+				cleanUpAny(c, p);
+				c.succeed(); // the temporary ticket was given back: the far chunk no longer ticks
+			} else if (phase[0] == 1 && (System.nanoTime() - t0) > 30_000_000_000L) {
+				c.fail("the mob never came");
+			} else if (phase[0] == 2 && phase[1] > 60) {
+				c.fail("the far chunk keeps ticking: the ticket leaked");
+			} else if (phase[0] == 0 && (System.nanoTime() - t0) > 30_000_000_000L) {
+				c.fail("the far chunk never unloaded, so the test cannot start");
+			}
+		});
+	}
+
+	@GameTest(maxTicks = 12000)
+	public void aMobThatIsNotWhereItWasSeenIsNotFoundAndNoCooldownIsSpent(GameTestHelper c) {
+		ServerPlayer p = grasper(c, 20);
+		ServerLevel lv = c.getLevel();
+		ChunkPos real = new ChunkPos(2100, 2100), wrong = new ChunkPos(2200, 2200);
+		Grasp.setCallTimeout(GraspCalls.TIMEOUT_TICKS);
+		UUID[] made = new UUID[1];
+		GraspData.Entry[] saved = new GraspData.Entry[1];
+		GraspData data = GraspData.of(lv.getServer());
+		int[] phase = {0, 0};
+		long t0 = System.nanoTime();
+		c.onEachTick(() -> {
+			phase[1]++;
+			UUID id = farMob(c, p, real, made);
+			if (id == null) {
+				return;
+			}
+			GraspData.Entry right = phase[0] == 0 ? data.find(p.getUUID(), id) : null;
+			if (phase[0] == 0 && phase[1] < 3) {
+				return; // the ticket was just given back
+			}
+			if (phase[0] == 0 && anywhere(c, id) == null) {
+				saved[0] = right;
+				data.replace(p.getUUID(), new GraspData.Entry(id, right.type(), right.number(), right.mode(), right.dim(), wrong.getMiddleBlockX(), 80, wrong.getMiddleBlockZ(),
+					right.hp(), right.maxHp(), right.bonus(), right.armor(), right.damage(), right.armorGear(), right.weaponGear()));
+				Grasp.handle(p, Grasp.CALL, id.toString(), 0);
+				phase[0] = 1;
+				phase[1] = 0;
+			} else if (phase[0] == 1 && phase[1] == 130) {
+				c.assertTrue(anywhere(c, id) == null, "the mob did not come (it is elsewhere)");
+				c.assertTrue(held(c, p) == 1, "the slot is untouched");
+				c.assertTrue(!lv.isPositionEntityTicking(wrong.getWorldPosition().offset(8, 80, 8)), "the wrong chunk was given back");
+				data.replace(p.getUUID(), saved[0]); // seen again where it really is: calling works at once (no cooldown was spent)
+				Grasp.handle(p, Grasp.CALL, id.toString(), 0);
+				phase[0] = 2;
+				phase[1] = 0;
+			} else if (phase[0] == 2 && anywhere(c, id) instanceof Zombie z && z.level() == p.level() && z.distanceTo(p) < 4) {
+				c.assertTrue(z.distanceTo(p) < 4, "it came once the right place was known");
+				cleanUpAny(c, p);
+				c.succeed();
+			} else if (phase[0] == 2 && (System.nanoTime() - t0) > 30_000_000_000L) {
+				c.fail("the second call never brought the mob: a cooldown was spent or the ticket is stuck");
+			} else if (phase[0] == 0 && (System.nanoTime() - t0) > 30_000_000_000L) {
+				c.fail("the far chunk never unloaded, so the test cannot start");
+			}
+		});
 	}
 }

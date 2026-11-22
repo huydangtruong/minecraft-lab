@@ -9,6 +9,7 @@ import io.github.huydangtruong.immortalcultivation.technique.TechniqueData;
 import io.github.huydangtruong.immortalcultivation.technique.TechniqueNet;
 import io.github.huydangtruong.immortalcultivation.technique.TechniqueRules;
 import io.github.huydangtruong.immortalcultivation.technique.TechniqueSelection;
+import io.github.huydangtruong.immortalcultivation.technique.WheelLogic;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -181,6 +182,30 @@ public final class ClientSkills {
 		return next < SkillBarLogic.HOTBAR ? next : hotbarSlot;
 	}
 
+	/** D193: slot the wheel opens on: the selected one (empty is fine), or from the cross the lowest ready slot; -1 = none open. */
+	public static int wheelStartSlot(Minecraft mc) {
+		TechniqueData d = data(mc.player);
+		int open = d.slotsOpen();
+		if (selected >= 0 && selected < open) {
+			return selected;
+		}
+		long now = mc.level.getGameTime();
+		boolean[] usable = usableFlags(mc);
+		boolean[] cooling = new boolean[usable.length];
+		for (int i = 0; i < cooling.length; i++) {
+			cooling[i] = d.slotOnCooldown(i, now);
+		}
+		return WheelLogic.defaultSlot(open, usable, cooling);
+	}
+
+	/** Ticks an empty selected slot is kept after the wheel assigned into it (the server data needs a moment to come back). */
+	private static int fillGrace;
+
+	/** Called by the wheel after it asked the server to fill the selected slot. */
+	static void keepSlotForFill() {
+		fillGrace = 20;
+	}
+
 	/** A number key or other hotbar change: back to the hotbar. */
 	public static void backToHotbar() {
 		select(-1);
@@ -245,7 +270,12 @@ public final class ClientSkills {
 			lastPlayer = p;
 			reset();
 		}
-		if (selected >= 0 && ((mc.gui.screen() != null && !(mc.gui.screen() instanceof TechniqueWheelScreen)) || !available(mc) || SkillBarLogic.slotForKey(selected, usableFlags(mc)) < 0)) {
+		boolean wheelOpen = mc.gui.screen() instanceof TechniqueWheelScreen;
+		if (fillGrace > 0) {
+			fillGrace--;
+		}
+		boolean slotGone = !wheelOpen && fillGrace == 0 && SkillBarLogic.slotForKey(selected, usableFlags(mc)) < 0; // D193: an empty slot stays selected while the wheel fills it
+		if (selected >= 0 && ((mc.gui.screen() != null && !wheelOpen) || !available(mc) || slotGone)) {
 			select(-1); // a screen opened, world switch off, creative, or the slot was cleared
 		}
 
@@ -267,8 +297,12 @@ public final class ClientSkills {
 		while (WHEEL.consumeClick()) {
 			wheel = true;
 		}
-		if (wheel && inGame && selected >= 0 && selectedTechnique(mc) != null) {
-			mc.gui.setScreen(new TechniqueWheelScreen(selected)); // D188
+		if (wheel && inGame) {
+			int slot = wheelStartSlot(mc);
+			if (slot >= 0) {
+				select(slot); // D193: from the cross the wheel picks the lowest ready slot and really selects it
+				mc.gui.setScreen(new TechniqueWheelScreen(slot)); // D188
+			}
 		}
 		for (int i = 0; i < KEYS.length; i++) {
 			boolean click = false;
