@@ -26,6 +26,11 @@ public final class GodSlayerWarningHud implements HudElement {
 			Identifier.fromNamespaceAndPath("permahearts", "god_slayer_warning"), new GodSlayerWarningHud());
 	}
 
+	/** Drops a warning from the old world (B5): its end tick is an absolute game time of that world. */
+	static void reset() {
+		endTick = -1;
+	}
+
 	/** Sets the client game time when the warning ends (-1 clears it). Also used by the client test. */
 	public static void setTicksLeft(long end) {
 		endTick = end;

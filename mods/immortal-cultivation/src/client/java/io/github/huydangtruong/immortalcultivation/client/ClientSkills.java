@@ -201,6 +201,14 @@ public final class ClientSkills {
 	/** Ticks an empty selected slot is kept after the wheel assigned into it (the server data needs a moment to come back). */
 	private static int fillGrace;
 
+	/** Forgets a charge and the fill grace of the old world (B5): called when the client disconnects. */
+	static void resetOnDisconnect() {
+		charging = false;
+		chargeTicks = 0;
+		useWasDown = false;
+		fillGrace = 0;
+	}
+
 	/** Called by the wheel after it asked the server to fill the selected slot. */
 	static void keepSlotForFill() {
 		fillGrace = 20;

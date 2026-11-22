@@ -163,6 +163,12 @@ public final class PassivesTab {
 
 	private PassivesTab() {}
 
+	/** Back to the top of the list (B5): called when the client disconnects. */
+	static void reset() {
+		detail = null;
+		scroll = 0;
+	}
+
 	public static Passive detail() {
 		return detail;
 	}

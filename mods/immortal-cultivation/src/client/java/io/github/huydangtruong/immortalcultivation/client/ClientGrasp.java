@@ -101,6 +101,15 @@ public final class ClientGrasp {
 		}
 	}
 
+	/** Forgets everything of the old world (B5): called when the client disconnects. */
+	static void reset() {
+		held = 0;
+		targetId = -1;
+		duration = 0;
+		elapsed = 0;
+		aimId = -1;
+	}
+
 	/** Stops a running tether on the client when the technique is deselected. */
 	public static void cancelIfRunning() {
 		if (tethering()) {

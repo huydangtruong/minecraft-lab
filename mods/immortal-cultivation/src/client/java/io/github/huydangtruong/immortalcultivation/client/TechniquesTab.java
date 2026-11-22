@@ -63,6 +63,15 @@ public final class TechniquesTab {
 
 	private TechniquesTab() {}
 
+	/** Back to the list with nothing selected (B5): called when the client disconnects. */
+	static void reset() {
+		selectedSlot = -1;
+		selectedTechnique = null;
+		detail = null;
+		scroll = 0;
+		detailScroll = 0;
+	}
+
 	public static int selectedSlot() {
 		return selectedSlot;
 	}
