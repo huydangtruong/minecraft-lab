@@ -469,6 +469,11 @@ public final class Mayhem {
 				end(p);
 				continue;
 			}
+			if (r.spent && !r.window && !TechniqueAttachment.get(p).onCooldown(Technique.MAYHEM, now)) {
+				RUNS.remove(id); // the batch was spent and the cooldown ran out without a channel: a fresh batch of 20 (clusters again)
+				ServerPlayNetworking.send(p, new State(-1, 0));
+				continue;
+			}
 			if (r.window) {
 				long left = r.windowEnd - now;
 				MayhemSavedData data = MayhemSavedData.of(server);

@@ -162,6 +162,28 @@ public class MayhemGameTest {
 		});
 	}
 
+	@GameTest(maxTicks = 140)
+	public void afterTheCooldownWithoutAChannelAFreshBatchLeavesClustersAgain(GameTestHelper c) {
+		ServerPlayer p = caster(c, 20);
+		for (int i = 0; i < 20; i++) {
+			c.runAfterDelay(2L + i * 3L, () -> Mayhem.input(p, 20, 0f));
+		}
+		c.runAfterDelay(80, () -> {
+			c.assertTrue(Mayhem.shardsLeft(p) == 0, "all 20 shards are used, left " + Mayhem.shardsLeft(p));
+			TechniqueAttachment.set(p, TechniqueAttachment.get(p).withCooldown(Technique.MAYHEM, 0)); // the 30 s ran out
+		});
+		c.runAfterDelay(83, () -> {
+			c.assertTrue(Mayhem.shardsLeft(p) == -1, "the spent batch is over once the cooldown ends, left " + Mayhem.shardsLeft(p));
+			Zombie z = zombie(c, 5.5, 4.5);
+			c.runAfterDelay(3, () -> {
+				c.assertTrue(TechniqueNet.cast(p, 0, 0f) == null, "the left click fires again");
+				c.assertTrue(Mayhem.shardsLeft(p) == 19, "a fresh batch of 20, left " + Mayhem.shardsLeft(p));
+				c.assertTrue(c.getBlockState(new BlockPos(5, 1, 4)).is(MayhemBlocks.CLUSTER), "its shards leave clusters again");
+				finish(c, p);
+			});
+		});
+	}
+
 	@GameTest(maxTicks = 60)
 	public void theChannelTurnsTheNearestFiveClustersIntoLitBuddingsAndLeavesTheRest(GameTestHelper c) {
 		ServerPlayer p = caster(c, 1);
