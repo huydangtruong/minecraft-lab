@@ -1,5 +1,6 @@
 package io.github.huydangtruong.immortalcultivation.technique.grasp;
 
+import io.github.huydangtruong.immortalcultivation.Uuids;
 import io.github.huydangtruong.immortalcultivation.ImmortalCultivation;
 import io.github.huydangtruong.immortalcultivation.godslayer.GodSlayer;
 import io.github.huydangtruong.immortalcultivation.technique.GraspCalls;
@@ -582,7 +583,7 @@ public final class Grasp {
 	// ---- release ----
 
 	private static void releaseRequest(ServerPlayer p, String target) {
-		UUID id = parse(target);
+		UUID id = Uuids.parseOrNull(target);
 		if (id != null && releaseOne(p, id)) {
 			sendState(p, -1, 0);
 			sendMenu(p);
@@ -642,16 +643,8 @@ public final class Grasp {
 
 	// ---- mode, call ----
 
-	private static UUID parse(String s) {
-		try {
-			return UUID.fromString(s);
-		} catch (IllegalArgumentException e) {
-			return null;
-		}
-	}
-
 	private static void setMode(ServerPlayer p, String target, int mode) {
-		if (setModeOne(p, parse(target), mode)) {
+		if (setModeOne(p, Uuids.parseOrNull(target), mode)) {
 			sendMenu(p);
 		}
 	}
@@ -682,7 +675,7 @@ public final class Grasp {
 	}
 
 	private static void call(ServerPlayer p, String target) {
-		UUID id = parse(target);
+		UUID id = Uuids.parseOrNull(target);
 		GraspData.Entry e = id == null ? null : GraspData.of(p.level().getServer()).find(p.getUUID(), id);
 		if (e == null) {
 			return;

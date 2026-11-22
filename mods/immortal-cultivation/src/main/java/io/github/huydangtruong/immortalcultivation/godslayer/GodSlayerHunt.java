@@ -1,5 +1,6 @@
 package io.github.huydangtruong.immortalcultivation.godslayer;
 
+import io.github.huydangtruong.immortalcultivation.Uuids;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import io.github.huydangtruong.immortalcultivation.HeartRules;
 import io.github.huydangtruong.immortalcultivation.HeartsAttachment;
@@ -478,10 +479,8 @@ public final class GodSlayerHunt {
 		if (uuid == null || uuid.isEmpty()) {
 			return null;
 		}
-		UUID id;
-		try {
-			id = UUID.fromString(uuid);
-		} catch (IllegalArgumentException e) {
+		UUID id = Uuids.parseOrNull(uuid);
+		if (id == null) {
 			return null;
 		}
 		for (ServerLevel level : server.getAllLevels()) {
@@ -571,10 +570,7 @@ public final class GodSlayerHunt {
 		if (uuid == null || uuid.isEmpty()) {
 			return null;
 		}
-		try {
-			return server.getPlayerList().getPlayer(UUID.fromString(uuid));
-		} catch (IllegalArgumentException e) {
-			return null;
-		}
+		UUID id = Uuids.parseOrNull(uuid);
+		return id == null ? null : server.getPlayerList().getPlayer(id);
 	}
 }

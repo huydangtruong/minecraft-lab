@@ -1,5 +1,6 @@
 package io.github.huydangtruong.immortalcultivation.wanderer;
 
+import io.github.huydangtruong.immortalcultivation.Uuids;
 import io.github.huydangtruong.immortalcultivation.Messages;
 import java.util.Optional;
 import java.util.UUID;
@@ -66,12 +67,12 @@ public final class QuestBoss {
 
 	/** The live boss entity, or null (not spawned yet, unloaded, or dead). */
 	private static Entity liveBoss(MinecraftServer server, BossState st) {
-		try {
-			Entity e = server.overworld().getEntity(UUID.fromString(st.bossUuid()));
-			return e != null && e.isAlive() ? e : null;
-		} catch (IllegalArgumentException ex) {
+		UUID id = Uuids.parseOrNull(st.bossUuid());
+		if (id == null) {
 			return null;
 		}
+		Entity e = server.overworld().getEntity(id);
+		return e != null && e.isAlive() ? e : null;
 	}
 
 	public static boolean summon(MinecraftServer server, int line, ServerPlayer by) {

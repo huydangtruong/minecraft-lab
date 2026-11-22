@@ -1,5 +1,6 @@
 package io.github.huydangtruong.immortalcultivation.wanderer;
 
+import io.github.huydangtruong.immortalcultivation.Uuids;
 import io.github.huydangtruong.immortalcultivation.reward.RewardBoxes;
 import io.github.huydangtruong.immortalcultivation.reward.RewardTier;
 import io.github.huydangtruong.immortalcultivation.HeartsAttachment;
@@ -69,11 +70,8 @@ public final class Wanderer {
 		if (d.npcUuid().isEmpty()) {
 			return null;
 		}
-		try {
-			return server.overworld().getEntity(UUID.fromString(d.npcUuid().get()));
-		} catch (IllegalArgumentException e) {
-			return null;
-		}
+		UUID id = Uuids.parseOrNull(d.npcUuid().get());
+		return id == null ? null : server.overworld().getEntity(id);
 	}
 
 	static RewardContainer rewards(MinecraftServer server, long questId) {

@@ -1,5 +1,6 @@
 package io.github.huydangtruong.immortalcultivation.technique.warp;
 
+import io.github.huydangtruong.immortalcultivation.Uuids;
 import io.github.huydangtruong.immortalcultivation.ImmortalCultivation;
 import io.github.huydangtruong.immortalcultivation.technique.Technique;
 import io.github.huydangtruong.immortalcultivation.technique.TechniqueAttachment;
@@ -119,12 +120,12 @@ public final class Warp {
 					openMenu(p);
 				}
 			}
-			case GO_PORTAL -> error = warpToPortal(p, parse(target));
-			case GO_PLAYER -> error = warpToPlayer(p, parse(target));
+			case GO_PORTAL -> error = warpToPortal(p, Uuids.parseOrNull(target));
+			case GO_PLAYER -> error = warpToPlayer(p, Uuids.parseOrNull(target));
 			case DELETE -> {
 				error = checkReady(p);
 				if (error == null) {
-					error = remove(p, parse(target)) ? null : "That portal is not yours";
+					error = remove(p, Uuids.parseOrNull(target)) ? null : "That portal is not yours";
 					if (error == null) {
 						openMenu(p); // refresh the list
 					}
@@ -134,14 +135,6 @@ public final class Warp {
 		}
 		if (error != null) {
 			p.sendOverlayMessage(Component.literal(error).withStyle(ChatFormatting.RED));
-		}
-	}
-
-	private static UUID parse(String s) {
-		try {
-			return UUID.fromString(s);
-		} catch (IllegalArgumentException e) {
-			return null;
 		}
 	}
 

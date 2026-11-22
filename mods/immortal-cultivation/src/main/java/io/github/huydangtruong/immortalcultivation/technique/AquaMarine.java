@@ -70,11 +70,6 @@ public final class AquaMarine {
 		return end != null && p.level().getGameTime() < end;
 	}
 
-	/** Remaining ticks given the saved end tick (null = not active) and the game time; never negative. */
-	public static long remaining(Long end, long now) {
-		return end == null ? 0 : Math.max(0, end - now);
-	}
-
 	/** Ends the buff now: forgets the state and takes the modifiers and the hidden effect away. */
 	public static void end(ServerPlayer p) {
 		p.removeAttached(END);

@@ -63,12 +63,12 @@ public class SkillBarHud implements HudElement {
 		}
 		// time-left lines, right side, stacked upwards above the technique name: Flight, Aqua, Spirit Walk (D129)
 		int lineY = top - 24;
-		long flight = io.github.huydangtruong.immortalcultivation.technique.Flight.remaining(
+		long flight = io.github.huydangtruong.immortalcultivation.technique.TechniqueTimers.remaining(
 			mc.player.getAttached(io.github.huydangtruong.immortalcultivation.technique.Flight.END), now);
 		if (flight > 0) {
 			lineY = timeLine(g, mc, right, "Flight", flight, 0xFFDFF4FF, lineY);
 		}
-		long aqua = io.github.huydangtruong.immortalcultivation.technique.AquaMarine.remaining(
+		long aqua = io.github.huydangtruong.immortalcultivation.technique.TechniqueTimers.remaining(
 			mc.player.getAttached(io.github.huydangtruong.immortalcultivation.technique.AquaMarine.END), now);
 		if (aqua > 0) {
 			lineY = timeLine(g, mc, right, "Aqua", aqua, 0xFF9FF0E8, lineY);
