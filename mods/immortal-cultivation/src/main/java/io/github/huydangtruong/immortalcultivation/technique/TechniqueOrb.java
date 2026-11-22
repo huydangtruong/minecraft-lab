@@ -74,7 +74,7 @@ public final class TechniqueOrb extends Snowball {
 		Vec3 bestAt = null;
 		double bestDist = Double.MAX_VALUE;
 		AABB area = getBoundingBox().expandTowards(step).inflate(1.0);
-		for (LivingEntity e : sl.getEntitiesOfClass(LivingEntity.class, area, e -> TechniqueDamage.affectable(e, getOwner()))) {
+		for (LivingEntity e : sl.getEntitiesOfClass(LivingEntity.class, area, e -> TechniqueDamage.foe(e, getOwner()))) {
 			AABB box = e.getBoundingBox().inflate(HIT_MARGIN);
 			Optional<Vec3> at = box.contains(from) ? Optional.of(from) : box.clip(from, to);
 			if (at.isPresent()) {
@@ -118,7 +118,7 @@ public final class TechniqueOrb extends Snowball {
 		ServerPlayer caster = getOwner() instanceof ServerPlayer p ? p : null;
 		Vec3 at = hit.getLocation();
 		if (hit instanceof EntityHitResult eh && eh.getEntity() instanceof LivingEntity target
-			&& TechniqueDamage.affectable(target, getOwner())) {
+			&& TechniqueDamage.foe(target, getOwner())) {
 			double damage = technique == Technique.FIRE
 				? TechniqueRules.fireImpactDamage(techLevel) : TechniqueRules.iceImpactDamage(techLevel);
 			TechniqueDamage.hurt(sl, target, caster, this, DamageTypes.MAGIC, (float) damage);

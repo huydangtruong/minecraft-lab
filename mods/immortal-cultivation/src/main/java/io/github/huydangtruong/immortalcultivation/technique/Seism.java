@@ -304,7 +304,7 @@ public final class Seism {
 		Vec3 c = caster.position();
 		double r = SeismRules.waveRadius(index);
 		for (LivingEntity e : sl.getEntitiesOfClass(LivingEntity.class, new AABB(c, c).inflate(r + 1),
-			e -> TechniqueDamage.affectable(e, caster) && !(e instanceof Player pl && pl.isCreative()) && distance(e, c) <= r)) {
+			e -> TechniqueDamage.foe(e, caster) && !(e instanceof Player pl && pl.isCreative()) && distance(e, c) <= r)) {
 			if (!e.onGround() && !e.isInWater()) {
 				continue; // already airborne (for instance launched by an earlier pulse)
 			}

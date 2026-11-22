@@ -279,7 +279,7 @@ public class TechniqueEffectsGameTest {
 	}
 
 	@GameTest(maxTicks = 300)
-	public void healingCircleHealsEveryLivingEntity(GameTestHelper c) {
+	public void healingCircleHealsEveryoneInItExceptHostileMobs(GameTestHelper c) {
 		enable(c, true);
 		GameTestKit.floor(c);
 		ServerPlayer p = c.makeMockServerPlayerInLevel();
@@ -296,7 +296,7 @@ public class TechniqueEffectsGameTest {
 		c.runAfterDelay(215, () -> {
 			float expected = 30 + (float) TechniqueRules.healingTotal(1);
 			c.assertTrue(Math.abs(cow.getHealth() - expected) < 0.01f, "cow should be at " + expected + ", was " + cow.getHealth());
-			c.assertTrue(Math.abs(h.getHealth() - expected) < 0.01f, "husk should be at " + expected + ", was " + h.getHealth());
+			c.assertTrue(h.getHealth() == 30f, "P-077 B11: a hostile husk in the circle must not heal, was " + h.getHealth());
 			c.assertTrue(far.getHealth() == 30f, "the husk outside the circle must not heal, was " + far.getHealth());
 			c.succeed();
 		});
@@ -537,7 +537,7 @@ public class TechniqueEffectsGameTest {
 	}
 
 	@GameTest(maxTicks = 100)
-	public void techniqueDamageReachesPlayersWithPvpOff(GameTestHelper c) {
+	public void repulseSparesOtherPlayersWithPvpOffAndHurtsThemWithPvpOn(GameTestHelper c) {
 		enable(c, true);
 		GameTestKit.floor(c);
 		MinecraftServer server = c.getLevel().getServer();
@@ -553,6 +553,11 @@ public class TechniqueEffectsGameTest {
 			// Control: ordinary player-vs-player damage is refused when PvP is off.
 			boolean plain = target.hurtServer(level, level.damageSources().playerAttack(caster), 2f);
 			c.assertTrue(!plain && target.getHealth() == 20f, "control: PvP off should refuse player attacks");
+			// P-077 B11 (D182 for every area technique): with PvP off the pulse leaves the other player alone ...
+			TechniqueCasts.cast(caster, Technique.REPULSE, 1, 1f);
+			c.assertTrue(target.getHealth() == 20f, "repulse spares the other player with PvP off, health " + target.getHealth());
+			// ... and with PvP on it hurts them by 5 (D72)
+			server.getGameRules().set(GameRules.PVP, true, server);
 			TechniqueCasts.cast(caster, Technique.REPULSE, 1, 1f);
 			c.assertTrue(Math.abs(target.getHealth() - (20f - (float) TechniqueRules.repulseDamage(1))) < 0.01f, "repulse should hurt the other player by 5 (D72), health " + target.getHealth());
 			c.succeed();
@@ -581,5 +586,36 @@ public class TechniqueEffectsGameTest {
 			enable(c, true);
 		}
 		c.succeed();
+	}
+
+	@GameTest(maxTicks = 100) // P-077 B11
+	public void aHealCircleHealsPlayersAndFriendsButNotAHostileMob(GameTestHelper c) {
+		enable(c, true);
+		GameTestKit.floor(c);
+		ServerPlayer owner = GameTestKit.survivor(c);
+		GameTestKit.place(c, owner, 1.5, 1, 3.5, 0f, 0f);
+		ServerPlayer other = GameTestKit.survivor(c);
+		GameTestKit.place(c, other, 3.5, 1, 3.5, 0f, 0f);
+		var guardians = io.github.huydangtruong.immortalcultivation.technique.VioletGuardian.summon(owner, 1);
+		Vec3 gp = c.absoluteVec(new Vec3(2.5, 1, 4.5));
+		guardians.forEach(g -> g.teleportTo(gp.x, gp.y, gp.z));
+		Husk h = husk(c, 2.5, 2.5, true);
+		h.getAttribute(Attributes.MAX_HEALTH).setBaseValue(100);
+		h.setHealth(50f);
+		owner.setHealth(10f);
+		other.setHealth(10f);
+		guardians.forEach(g -> g.setHealth(g.getMaxHealth() / 2));
+		float guardianBefore = guardians.get(0).getHealth();
+		TechniqueFields.add(TechniqueFields.Kind.HEAL, c.getLevel(), c.absoluteVec(new Vec3(2.5, 1, 3.5)), 4, 5, 20, owner.getUUID());
+		c.runAfterDelay(60, () -> {
+			c.assertTrue(owner.getHealth() > 10f, "the caster is healed, health " + owner.getHealth());
+			c.assertTrue(other.getHealth() > 10f, "another player is healed, health " + other.getHealth());
+			c.assertTrue(guardians.get(0).getHealth() > guardianBefore, "the caster's guardian is healed, health " + guardians.get(0).getHealth());
+			c.assertTrue(h.getHealth() == 50f, "a hostile mob in the circle is not healed, health " + h.getHealth());
+			guardians.forEach(g -> g.discard());
+			GameTestKit.drop(c, other);
+			GameTestKit.drop(c, owner);
+			c.succeed();
+		});
 	}
 }

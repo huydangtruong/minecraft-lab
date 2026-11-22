@@ -200,7 +200,7 @@ public final class TechniqueCasts {
 		double push = TechniqueRules.repulsePush(level);
 		float damage = (float) TechniqueRules.repulseDamage(level);
 		for (LivingEntity e : sl.getEntitiesOfClass(LivingEntity.class, caster.getBoundingBox().inflate(radius),
-			e -> TechniqueDamage.affectable(e, caster) && e.distanceTo(caster) <= radius)) {
+			e -> TechniqueDamage.foe(e, caster) && e.distanceTo(caster) <= radius)) {
 			double dx = e.getX() - caster.getX();
 			double dz = e.getZ() - caster.getZ();
 			double len = Math.sqrt(dx * dx + dz * dz);

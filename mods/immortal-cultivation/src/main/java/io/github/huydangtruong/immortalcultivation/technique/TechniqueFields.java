@@ -12,6 +12,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageTypes;
@@ -139,7 +140,7 @@ public final class TechniqueFields {
 		long now = level.getGameTime();
 		long end = now + Math.round(TechniqueRules.fireAfterburnSeconds(f.techLevel()) * 20);
 		for (LivingEntity e : inside(level, f)) {
-			if (!TechniqueDamage.affectable(e, owner)) {
+			if (!TechniqueDamage.foe(e, owner)) {
 				continue;
 			}
 			if (e.isInWater()) {
@@ -193,7 +194,7 @@ public final class TechniqueFields {
 		int duration = (int) Math.round(TechniqueRules.iceLingerSeconds(f.techLevel()) * 20) + 5;
 		ServerPlayer owner = level.getServer().getPlayerList().getPlayer(f.owner());
 		for (LivingEntity e : inside(level, f)) {
-			if (TechniqueDamage.affectable(e, owner)) {
+			if (TechniqueDamage.foe(e, owner)) {
 				e.addEffect(new MobEffectInstance(Frostbite.EFFECT, duration, amplifier, false, true, true));
 			}
 		}
@@ -202,8 +203,11 @@ public final class TechniqueFields {
 	private static void heal(ServerLevel level, Field f) {
 		float perStep = (float) (TechniqueRules.healingTotal(f.techLevel()) / TechniqueRules.healingSeconds(f.techLevel()));
 		int healed = 0;
+		ServerPlayer owner = level.getServer().getPlayerList().getPlayer(f.owner());
 		for (LivingEntity e : inside(level, f)) {
-			if (e.getHealth() < e.getMaxHealth()) {
+			// P-077 B11: the circle never heals a hostile mob standing in it, unless it is the caster's friend
+			boolean ally = !(e instanceof net.minecraft.world.entity.monster.Enemy) || (owner != null && Lance.isFriend(e, owner));
+			if (ally && e.getHealth() < e.getMaxHealth()) {
 				e.heal(perStep);
 				healed++;
 			}

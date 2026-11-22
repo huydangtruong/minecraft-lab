@@ -372,8 +372,7 @@ public final class Mayhem {
 	 * is on (a Death Match needs PvP on, so its opponents stay targets). With PvP off a shard flies through players.
 	 */
 	public static boolean hits(LivingEntity e, ServerPlayer p) {
-		return TechniqueDamage.affectable(e, p) && !Lance.isFriend(e, p)
-			&& (!(e instanceof net.minecraft.world.entity.player.Player) || io.github.huydangtruong.immortalcultivation.wanderer.DeathMatch.pvpAllowed(p.level().getServer()));
+		return TechniqueDamage.foe(e, p);
 	}
 
 	private static void burn(ServerPlayer p, Run r, List<BlockPos> active) {

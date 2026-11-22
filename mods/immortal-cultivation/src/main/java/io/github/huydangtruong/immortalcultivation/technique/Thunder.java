@@ -143,7 +143,7 @@ public final class Thunder {
 			bolt.setCause(caster);
 			sl.addFreshEntity(bolt);
 			// the vanilla transformations, for every such mob in the blast radius (before the damage)
-			for (LivingEntity e : near(sl, c, r, s.caster())) {
+			for (LivingEntity e : near(sl, c, r, caster)) {
 				if (e instanceof Pig || e instanceof Villager || e instanceof Creeper || e instanceof MushroomCow || e instanceof CopperGolem) {
 					e.thunderHit(sl, bolt);
 					e.clearFire(); // the generic part of thunderHit sets fire
@@ -151,7 +151,7 @@ public final class Thunder {
 			}
 		}
 		sl.explode(null, null, new NoEntityDamage(), c.x, c.y, c.z, (float) TechniqueRules.thunderPower(lvl), false, Level.ExplosionInteraction.MOB);
-		for (LivingEntity e : near(sl, c, r, s.caster())) {
+		for (LivingEntity e : near(sl, c, r, caster)) {
 			double d = distance(e, c);
 			float dmg = (float) TechniqueRules.thunderDamageAt(lvl, d);
 			if (dmg <= 0) {
@@ -174,10 +174,9 @@ public final class Thunder {
 	}
 
 	/** Living entities the strike may touch: not the caster, not the caster's summons. */
-	private static List<LivingEntity> near(ServerLevel sl, Vec3 c, double r, UUID caster) {
+	private static List<LivingEntity> near(ServerLevel sl, Vec3 c, double r, ServerPlayer caster) {
 		return sl.getEntitiesOfClass(LivingEntity.class, new AABB(c, c).inflate(r + 1),
-			e -> e.isAlive() && !e.isSpectator() && !io.github.huydangtruong.immortalcultivation.wanderer.WandererNpc.isWanderer(e)
-				&& !e.getUUID().equals(caster) && !isOwnSummon(e, caster) && distance(e, c) <= r);
+			e -> TechniqueDamage.foe(e, caster) && distance(e, c) <= r);
 	}
 
 	/** Distance from the point to the closest point of the entity's box. */

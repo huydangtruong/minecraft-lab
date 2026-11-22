@@ -176,4 +176,28 @@ public class ThunderGameTest {
 		GameTestKit.drop(c, p);
 		c.succeed();
 	}
+
+	@GameTest(maxTicks = 60) // P-077 B11
+	public void aStrikeSparesAnotherPlayerWithPvpOffButHurtsAZombie(GameTestHelper c) {
+		ServerPlayer p = caster(c, 1);
+		GameTestKit.place(c, p, 5.5, 1, 0.5, 0f, 0f);
+		ServerPlayer other = GameTestKit.survivor(c);
+		GameTestKit.place(c, other, 5.5, 1, 7.5, 0f, 0f);
+		Zombie z = c.spawn(EntityTypes.ZOMBIE, new Vec3(6.5, 1, 6.5));
+		z.setPersistenceRequired();
+		z.setNoAi(true);
+		float zBefore = z.getHealth();
+		MinecraftServer server = c.getLevel().getServer();
+		boolean pvp = server.getGameRules().get(GameRules.PVP);
+		server.getGameRules().set(GameRules.PVP, false, server);
+		Thunder.cast(p, 1, abs(c, 5.5, 1, 6.5));
+		c.runAfterDelay(30, () -> {
+			server.getGameRules().set(GameRules.PVP, pvp, server);
+			c.assertTrue(z.getHealth() < zBefore || !z.isAlive(), "control: the zombie in the blast is hurt");
+			c.assertTrue(other.getHealth() == other.getMaxHealth(), "another player in the blast is spared with PvP off, health " + other.getHealth());
+			GameTestKit.drop(c, other);
+			GameTestKit.drop(c, p);
+			c.succeed();
+		});
+	}
 }
