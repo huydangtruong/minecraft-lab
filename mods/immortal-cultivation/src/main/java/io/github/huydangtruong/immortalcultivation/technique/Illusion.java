@@ -257,6 +257,9 @@ public final class Illusion extends PathfinderMob implements OwnedSummon {
 		return parsed;
 	}
 
+	/** Most ticks a working clone may stay past its time to put what it carries in the chest (D197). */
+	public static final int OVERTIME = 400;
+
 	/** Game time at which this clone vanishes. */
 	public long endTick() {
 		return endTick;
@@ -342,7 +345,10 @@ public final class Illusion extends PathfinderMob implements OwnedSummon {
 		super.tick();
 		if (level() instanceof ServerLevel sl && isAlive()) {
 			Player o = OwnedSummon.ownerOf(this);
-			if (o == null || !o.isAlive() || sl.getGameTime() >= endTick) {
+			long now = sl.getGameTime();
+			// D197: a working clone still carrying items when its time ends first takes them to the chest (at most OVERTIME more)
+			boolean finishing = now >= endTick && now < endTick + OVERTIME && job.works() && !carry.isEmpty();
+			if (o == null || !o.isAlive() || now >= endTick && !finishing) {
 				puff(sl, this);
 				discard();
 			} else if ((tickCount + getId()) % 20 == 0) {

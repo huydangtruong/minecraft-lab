@@ -474,6 +474,24 @@ public class IllusionWorkGameTest {
 		});
 	}
 
+	/** D197 (Huy's bug: clones vanished on the way to the chest): time running out mid-delivery, the clone first stores it all. */
+	@GameTest(maxTicks = 400)
+	public void aCloneWhoseTimeEndsOnTheWayToTheChestStoresFirstThenVanishes(GameTestHelper c) {
+		ServerPlayer p = owner(c, new ItemStack(Items.SHEARS)); // a job with nothing to do here (a farming clone would work the next test's field)
+		Container chest = chest(c, 0, 1, 0);
+		Illusion a = castOne(c, p);
+		a.carry().add(new ItemStack(Items.DIAMOND, 3));
+		a.setEndTick(c.getLevel().getGameTime() + 2);
+		c.runAfterDelay(6, () -> c.assertTrue(a.isAlive() || count(chest, s -> s.is(Items.DIAMOND)) == 3, "the clone is still alive on its way to the chest" + dbg(a)));
+		c.succeedWhen(() -> {
+			c.assertTrue(count(chest, s -> s.is(Items.DIAMOND)) == 3, "the 3 diamonds are in the chest" + dbg(a));
+			c.assertTrue(!a.isAlive(), "then the clone vanishes" + dbg(a));
+			int dropped = c.getLevel().getEntitiesOfClass(ItemEntity.class, arena(c), e -> e.getItem().is(Items.DIAMOND)).size();
+			c.assertTrue(dropped == 0, "nothing dropped on the ground, found " + dropped);
+			FlightBladeGameTest.drop(c, p);
+		});
+	}
+
 	@GameTest(maxTicks = 60)
 	public void aCloneThatVanishesDropsWhatItCarries(GameTestHelper c) {
 		ServerPlayer p = owner(c, new ItemStack(Items.IRON_HOE));
