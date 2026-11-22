@@ -243,10 +243,11 @@ class RewardBoxTest {
 	@Test
 	void emeraldSpecials() {
 		assertEquals(List.of("minecraft:totem_of_undying", "permahearts:enlightenment_bottle", "minecraft:enchanted_book",
-			"minecraft:enchanted_book", "minecraft:enchanted_book", "minecraft:enchanted_book",
+			"minecraft:enchanted_book", "minecraft:enchanted_book", "minecraft:enchanted_book", "minecraft:enchanted_book", "minecraft:enchanted_book",
 			"minecraft:diamond", "minecraft:emerald", "minecraft:ender_pearl"),
 			RewardRoll.EMERALD_SPECIALS.stream().map(RewardOption::itemId).toList());
-		assertEquals(Set.of("minecraft:mending@1", "minecraft:sharpness@5", "minecraft:protection@4", "minecraft:unbreaking@3"), // D211, D212
+		assertEquals(Set.of("minecraft:mending@1", "minecraft:sharpness@5", "minecraft:protection@4", "minecraft:unbreaking@3",
+			"minecraft:looting@3", "minecraft:efficiency@5"), // D211, D212, D213
 			RewardRoll.EMERALD_SPECIALS.stream().filter(RewardOption::hasEnchant)
 				.map(o -> o.enchant() + "@" + o.enchantLevel()).collect(java.util.stream.Collectors.toSet()));
 	}
@@ -263,7 +264,8 @@ class RewardBoxTest {
 		assertEquals(Set.of("minecraft:gold_ingot x64", "minecraft:diamond x48", "minecraft:emerald x64", "minecraft:ender_pearl x48",
 			"minecraft:totem_of_undying x1", "permahearts:enlightenment_bottle x1", "minecraft:enchanted_book:minecraft:mending x1",
 			"minecraft:enchanted_book:minecraft:sharpness x1", "minecraft:enchanted_book:minecraft:protection x1",
-			"minecraft:enchanted_book:minecraft:unbreaking x1"), pool(RewardTier.EMERALD));
+			"minecraft:enchanted_book:minecraft:unbreaking x1", "minecraft:enchanted_book:minecraft:looting x1",
+			"minecraft:enchanted_book:minecraft:efficiency x1"), pool(RewardTier.EMERALD));
 	}
 
 	private static Set<String> pool(RewardTier t) {

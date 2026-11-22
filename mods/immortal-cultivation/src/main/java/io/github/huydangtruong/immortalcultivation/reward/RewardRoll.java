@@ -27,6 +27,7 @@ public final class RewardRoll {
 		new RewardOption("minecraft:totem_of_undying", 1), new RewardOption("permahearts:enlightenment_bottle", 1),
 		RewardOption.book("minecraft:mending", 1), RewardOption.book("minecraft:sharpness", 5),
 		RewardOption.book("minecraft:protection", 4), RewardOption.book("minecraft:unbreaking", 3),
+		RewardOption.book("minecraft:looting", 3), RewardOption.book("minecraft:efficiency", 5),
 		new RewardOption("minecraft:diamond", 48), new RewardOption("minecraft:emerald", 64), new RewardOption("minecraft:ender_pearl", 48));
 
 	private RewardRoll() {}
