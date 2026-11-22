@@ -448,6 +448,11 @@ public final class TechniqueRules {
 		return PEARL_RANGE * teleportPearls(level);
 	}
 
+	/** D199: Quantum Leap distance in whole blocks at this charge, the number shown above the charge bar. */
+	public static int leapBlocks(int level, float charge) {
+		return (int) Math.round(OrbBallistics.chargedRange(teleportRange(level), charge));
+	}
+
 	// ---- Thunder Strike (D86) ----
 
 	/** Reach of the aim ray, in blocks. */

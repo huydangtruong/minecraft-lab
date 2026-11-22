@@ -224,4 +224,12 @@ class TechniqueRulesTest {
 	private static double[] at(java.util.function.IntToDoubleFunction f) {
 		return new double[] {f.applyAsDouble(1), f.applyAsDouble(10), f.applyAsDouble(20)};
 	}
+
+	@Test
+	void leapBlocksFollowTheCharge() {
+		assertEquals(30, TechniqueRules.leapBlocks(1, 0f)); // minimum charge 20% of 150
+		assertEquals(75, TechniqueRules.leapBlocks(1, 0.5f));
+		assertEquals(150, TechniqueRules.leapBlocks(1, 1f));
+		assertEquals(2500, TechniqueRules.leapBlocks(20, 2f));
+	}
 }

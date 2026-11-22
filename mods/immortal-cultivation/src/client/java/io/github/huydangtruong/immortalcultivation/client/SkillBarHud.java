@@ -107,6 +107,10 @@ public class SkillBarHud implements HudElement {
 			g.fill(bx, by, bx + w, by + 5, 0xA0000000);
 			g.fill(bx + 1, by + 1, bx + 1 + Math.round((w - 2) * c), by + 4, c >= 1f ? 0xFFFFD040 : 0xFF40C0FF);
 			g.outline(bx, by, w, 5, 0xFF202020);
+			if (sel == Technique.TELEPORT && !ClientGrasp.tethering()) { // D199: how far the leap goes at this charge
+				Component far = Component.literal(io.github.huydangtruong.immortalcultivation.technique.TechniqueRules.leapBlocks(d.level(sel), c) + " blocks");
+				g.text(mc.font, far, (g.guiWidth() - mc.font.width(far)) / 2, by - 10, 0xFFFFFFFF, true);
+			}
 		}
 	}
 
