@@ -150,9 +150,8 @@ public class RewardBoxGameTest {
 	public void claimGivesExactlyTheChosenCard(GameTestHelper context) {
 		ServerPlayer p = context.makeMockServerPlayerInLevel();
 		p.getInventory().clearContent();
-		p.setItemInHand(InteractionHand.MAIN_HAND, fixedBox(RewardTier.GOLD,
-			new RewardOption("minecraft:diamond", 16), RewardRoll.elixir(ElixirStat.FURY), new RewardOption("minecraft:iron_ingot", 64),
-			new RewardOption("minecraft:enchanted_golden_apple", 4)));
+		p.setItemInHand(InteractionHand.MAIN_HAND, fixedBox(RewardTier.SILVER, // one pick (gold takes two since D210)
+			new RewardOption("minecraft:diamond", 16), RewardRoll.elixir(ElixirStat.FURY), new RewardOption("minecraft:iron_ingot", 64)));
 		RewardBoxes.open(p, InteractionHand.MAIN_HAND);
 		RewardBoxMenu menu = (RewardBoxMenu) p.containerMenu;
 		context.assertTrue(!menu.canClaim(), "Claim is disabled before a card is selected");
@@ -163,7 +162,7 @@ public class RewardBoxGameTest {
 		context.assertTrue(menu.selected() == 0b10, "one card selected, was " + menu.selected());
 		context.assertTrue(menu.canClaim(), "Claim enabled");
 		context.assertTrue(menu.clickMenuButton(p, RewardBoxMenu.CLAIM_BUTTON), "claim works");
-		context.assertTrue(p.getInventory().countItem(RewardBoxes.item(RewardTier.GOLD)) == 0, "the box is consumed");
+		context.assertTrue(p.getInventory().countItem(RewardBoxes.item(RewardTier.SILVER)) == 0, "the box is consumed");
 		Item fury = ElixirItems.get(ElixirStat.FURY);
 		context.assertTrue(p.getInventory().countItem(fury) == 1, "got exactly one fury elixir");
 		context.assertTrue(p.getInventory().countItem(Items.DIAMOND) == 0 && p.getInventory().countItem(Items.IRON_INGOT) == 0
@@ -214,34 +213,61 @@ public class RewardBoxGameTest {
 		context.succeed();
 	}
 
-	private static RewardOption[] sixCards() {
+	private static RewardOption[] eightCards() {
 		return new RewardOption[] {
 			new RewardOption("minecraft:diamond", 16), RewardRoll.elixir(ElixirStat.FURY), new RewardOption("minecraft:iron_ingot", 64),
 			RewardOption.book("minecraft:mending", 1), new RewardOption("minecraft:totem_of_undying", 1),
-			RewardOption.book("minecraft:sharpness", 5)};
+			RewardOption.book("minecraft:sharpness", 5), new RewardOption("minecraft:gold_ingot", 64), new RewardOption("minecraft:emerald", 32)};
 	}
 
-	/** D89: the emerald box takes two different cards, then Claim gives both and uses the box up. */
+	/** D210: the emerald box (8 cards) takes four different cards, then Claim gives all four and uses the box up. */
 	@GameTest(maxTicks = 100)
-	public void emeraldBoxTwoPicksGiveBothAndConsumeTheBox(GameTestHelper context) {
+	public void emeraldBoxFourPicksGiveAllAndConsumeTheBox(GameTestHelper context) {
 		ServerPlayer p = context.makeMockServerPlayerInLevel();
 		p.getInventory().clearContent();
-		p.setItemInHand(InteractionHand.MAIN_HAND, fixedBox(RewardTier.EMERALD, sixCards()));
+		p.setItemInHand(InteractionHand.MAIN_HAND, fixedBox(RewardTier.EMERALD, eightCards()));
 		RewardBoxes.open(p, InteractionHand.MAIN_HAND);
 		RewardBoxMenu menu = (RewardBoxMenu) p.containerMenu;
-		context.assertTrue(menu.options().size() == 6 && menu.tier().picks() == 2, "6 cards, 2 picks");
+		context.assertTrue(menu.options().size() == 8 && menu.tier().picks() == 4, "8 cards, 4 picks");
 		menu.clickMenuButton(p, 0);
-		context.assertTrue(!menu.canClaim(), "one pick is not enough");
-		context.assertTrue(!menu.clickMenuButton(p, RewardBoxMenu.CLAIM_BUTTON), "Claim with one pick does nothing");
-		context.assertTrue(!p.getMainHandItem().isEmpty(), "the box is kept after one pick");
 		menu.clickMenuButton(p, 4);
-		menu.clickMenuButton(p, 2); // a third card is ignored
-		context.assertTrue(menu.selected() == 0b10001, "two cards selected, was " + menu.selected());
+		menu.clickMenuButton(p, 6);
+		context.assertTrue(!menu.canClaim(), "three picks are not enough");
+		context.assertTrue(!menu.clickMenuButton(p, RewardBoxMenu.CLAIM_BUTTON), "Claim with three picks does nothing");
+		context.assertTrue(!p.getMainHandItem().isEmpty(), "the box is kept after three picks");
+		menu.clickMenuButton(p, 7);
+		menu.clickMenuButton(p, 2); // a fifth card is ignored
+		context.assertTrue(menu.selected() == 0b11010001, "four cards selected, was " + menu.selected());
 		context.assertTrue(menu.clickMenuButton(p, RewardBoxMenu.CLAIM_BUTTON), "claim works");
 		context.assertTrue(p.getInventory().countItem(Items.DIAMOND) == 16, "16 diamonds");
 		context.assertTrue(p.getInventory().countItem(Items.TOTEM_OF_UNDYING) == 1, "a totem");
+		context.assertTrue(p.getInventory().countItem(Items.GOLD_INGOT) == 64, "64 gold");
+		context.assertTrue(p.getInventory().countItem(Items.EMERALD) == 32, "32 emeralds");
 		context.assertTrue(p.getInventory().countItem(Items.IRON_INGOT) == 0, "nothing else");
 		context.assertTrue(p.getInventory().countItem(RewardBoxes.item(RewardTier.EMERALD)) == 0, "the box is used up");
+		context.succeed();
+	}
+
+	/** D210: the gold box takes two cards and the diamond box three. */
+	@GameTest(maxTicks = 100)
+	public void goldTakesTwoAndDiamondThree(GameTestHelper context) {
+		ServerPlayer p = context.makeMockServerPlayerInLevel();
+		p.getInventory().clearContent();
+		p.setItemInHand(InteractionHand.MAIN_HAND, fixedBox(RewardTier.GOLD,
+			new RewardOption("minecraft:diamond", 16), new RewardOption("minecraft:iron_ingot", 64),
+			new RewardOption("minecraft:gold_ingot", 64), new RewardOption("minecraft:emerald", 32)));
+		context.assertTrue(!RewardBoxes.claim(p, InteractionHand.MAIN_HAND, 0b1), "one card is not enough for gold");
+		context.assertTrue(RewardBoxes.claim(p, InteractionHand.MAIN_HAND, 0b101), "two cards claim gold");
+		context.assertTrue(p.getInventory().countItem(Items.DIAMOND) == 16 && p.getInventory().countItem(Items.GOLD_INGOT) == 64
+			&& p.getInventory().countItem(Items.IRON_INGOT) == 0, "gold gave cards 0 and 2");
+		p.getInventory().clearContent();
+		p.setItemInHand(InteractionHand.MAIN_HAND, fixedBox(RewardTier.DIAMOND,
+			new RewardOption("minecraft:diamond", 16), new RewardOption("minecraft:iron_ingot", 64), new RewardOption("minecraft:gold_ingot", 64),
+			new RewardOption("minecraft:emerald", 32), new RewardOption("minecraft:redstone", 64), new RewardOption("minecraft:ender_pearl", 16)));
+		context.assertTrue(!RewardBoxes.claim(p, InteractionHand.MAIN_HAND, 0b11), "two cards are not enough for diamond");
+		context.assertTrue(RewardBoxes.claim(p, InteractionHand.MAIN_HAND, 0b100011), "three cards claim diamond");
+		context.assertTrue(p.getInventory().countItem(Items.DIAMOND) == 16 && p.getInventory().countItem(Items.IRON_INGOT) == 64
+			&& p.getInventory().countItem(Items.ENDER_PEARL) == 16 && p.getInventory().countItem(Items.REDSTONE) == 0, "diamond gave cards 0, 1, 5");
 		context.succeed();
 	}
 
@@ -250,7 +276,7 @@ public class RewardBoxGameTest {
 	public void emeraldBoxClosedAfterOnePickKeepsEverything(GameTestHelper context) {
 		ServerPlayer p = context.makeMockServerPlayerInLevel();
 		p.getInventory().clearContent();
-		p.setItemInHand(InteractionHand.MAIN_HAND, fixedBox(RewardTier.EMERALD, sixCards()));
+		p.setItemInHand(InteractionHand.MAIN_HAND, fixedBox(RewardTier.EMERALD, eightCards()));
 		RewardBoxes.open(p, InteractionHand.MAIN_HAND);
 		((RewardBoxMenu) p.containerMenu).clickMenuButton(p, 1);
 		p.closeContainer();
@@ -268,11 +294,13 @@ public class RewardBoxGameTest {
 	public void enchantedBookCardsCarryTheirEnchantment(GameTestHelper context) {
 		ServerPlayer p = context.makeMockServerPlayerInLevel();
 		p.getInventory().clearContent();
-		p.setItemInHand(InteractionHand.MAIN_HAND, fixedBox(RewardTier.EMERALD, sixCards()));
+		p.setItemInHand(InteractionHand.MAIN_HAND, fixedBox(RewardTier.EMERALD, eightCards()));
 		RewardBoxes.open(p, InteractionHand.MAIN_HAND);
 		RewardBoxMenu menu = (RewardBoxMenu) p.containerMenu;
 		menu.clickMenuButton(p, 3);
 		menu.clickMenuButton(p, 5);
+		menu.clickMenuButton(p, 0); // D210: four picks
+		menu.clickMenuButton(p, 2);
 		context.assertTrue(menu.clickMenuButton(p, RewardBoxMenu.CLAIM_BUTTON), "claim works");
 		var enchants = p.level().registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
 		int mending = 0;

@@ -29,6 +29,14 @@ class TreasureRulesTest {
 	}
 
 	@Test
+	void poolChangesOfD214() {
+		assertTrue(TreasureRules.POOL.contains(new TreasureRules.Loot(new RewardOption("minecraft:experience_bottle", 32), 10)));
+		assertTrue(TreasureRules.POOL.contains(new TreasureRules.Loot(new RewardOption("minecraft:coal", 64), 10)));
+		assertTrue(TreasureRules.POOL.contains(new TreasureRules.Loot(new RewardOption("minecraft:ender_pearl", 32), 4)));
+		assertTrue(TreasureRules.POOL.contains(new TreasureRules.Loot(RewardOption.book("minecraft:blast_protection", 4), 1)));
+	}
+
+	@Test
 	void groupsMatchTheSpec() {
 		assertEquals(6, TreasureRules.group("brutes").size());
 		assertEquals(3.0, TreasureRules.group("brutes").guards().get(0).mult());

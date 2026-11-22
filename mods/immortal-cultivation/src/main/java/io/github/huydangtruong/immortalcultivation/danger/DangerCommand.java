@@ -16,7 +16,7 @@ import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.phys.Vec3;
 
-/** /danger info, /danger set <0..30>, /danger elite <affix...>: operators only (P-054). */
+/** /danger info, /danger set <0..50>, /danger elite <affix...>: operators only (P-054). */
 public final class DangerCommand {
 	private DangerCommand() {}
 

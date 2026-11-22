@@ -57,7 +57,7 @@ public class DangerGameTest {
 	}
 
 	@GameTest(maxTicks = 20)
-	public void levelGrowsOnlyAfter4800TicksAndCapsAtThirty(GameTestHelper c) {
+	public void levelGrowsOnlyAfter4800TicksAndCapsAtFifty(GameTestHelper c) {
 		enable(c);
 		MinecraftServer s = c.getLevel().getServer();
 		DangerSavedData d = DangerSavedData.of(s);
@@ -72,26 +72,27 @@ public class DangerGameTest {
 		Danger.tick(s, due);
 		c.assertTrue(d.level == 1, "+1 when due, was " + d.level);
 		c.assertTrue(d.pendingAtTick == 0, "nothing pending after growth");
-		d.level = 30;
+		d.level = 50;
 		d.pendingAtTick = now;
 		Danger.tick(s, now);
-		c.assertTrue(d.level == 30, "capped at 30");
+		c.assertTrue(d.level == 50, "capped at 50");
 		d.level = 0;
 		d.pendingAtTick = 0;
 		c.succeed();
 	}
 
 	@GameTest(maxTicks = 20)
-	public void zombieAtTwentyHasTwoAndAHalfTimesHealthAndDamage(GameTestHelper c) {
+	public void zombieAtThirtyThreeHasStrengthBonusInHealthAndDamage(GameTestHelper c) {
 		enable(c);
-		Zombie z = zombieAt(c, 20, 3.5);
+		Zombie z = zombieAt(c, 33, 3.5);
 		for (int i = 0; i < 50 && io.github.huydangtruong.immortalcultivation.danger.DangerMobs.isElite(z); i++) {
-			z.discard(); // level 20 can roll an elite (x2 health): this test checks the plain strength only
-			z = zombieAt(c, 20, 3.5);
+			z.discard(); // level 33 can roll an elite (x2 health): this test checks the plain strength only
+			z = zombieAt(c, 33, 3.5);
 		}
-		c.assertTrue(Math.abs(z.getMaxHealth() - 50) < 0.01, "max health 20 x 2.5, was " + z.getMaxHealth());
-		c.assertTrue(Math.abs(z.getHealth() - 50) < 0.01, "healed to full, was " + z.getHealth());
-		c.assertTrue(Math.abs(z.getAttributeValue(Attributes.ATTACK_DAMAGE) - 7.5) < 0.01, "damage 3 x 2.5, was " + z.getAttributeValue(Attributes.ATTACK_DAMAGE));
+		double k = 1 + DangerRules.strengthBonus(33);
+		c.assertTrue(Math.abs(z.getMaxHealth() - 20 * k) < 0.01, "max health 20 x " + k + ", was " + z.getMaxHealth());
+		c.assertTrue(Math.abs(z.getHealth() - 20 * k) < 0.01, "healed to full, was " + z.getHealth());
+		c.assertTrue(Math.abs(z.getAttributeValue(Attributes.ATTACK_DAMAGE) - 3 * k) < 0.01, "damage 3 x " + k + ", was " + z.getAttributeValue(Attributes.ATTACK_DAMAGE));
 		// a quest chieftain tagged before it enters the world keeps its values
 		MinecraftServer s = c.getLevel().getServer();
 		ServerLevel level = c.getLevel();
@@ -100,7 +101,7 @@ public class DangerGameTest {
 		Vec3 at = c.absoluteVec(new Vec3(5.5, 1, 5.5));
 		boss.snapTo(at.x, at.y, at.z, 0f, 0f);
 		boss.setNoAi(true);
-		DangerSavedData.of(s).level = 20;
+		DangerSavedData.of(s).level = 33;
 		try {
 			level.addFreshEntity(boss);
 		} finally {
@@ -116,7 +117,7 @@ public class DangerGameTest {
 		MinecraftServer s = c.getLevel().getServer();
 		s.getGameRules().set(Danger.ENABLED, false, s);
 		try {
-			Zombie z = zombieAt(c, 30, 3.5);
+			Zombie z = zombieAt(c, 50, 3.5);
 			c.assertTrue(z.getMaxHealth() == 20f && netheritePieces(z) == 0, "no effect with the switch off");
 			DangerSavedData d = DangerSavedData.of(s);
 			d.pendingAtTick = 0;
@@ -130,13 +131,59 @@ public class DangerGameTest {
 	}
 
 	@GameTest(maxTicks = 20)
-	public void levelThirtyGivesNetheriteArmor(GameTestHelper c) {
+	public void levelFiftyGivesNetheriteArmor(GameTestHelper c) {
 		enable(c);
 		for (int i = 0; i < 12; i++) {
-			Zombie z = zombieAt(c, 30, 1.5 + i * 0.5);
+			Zombie z = zombieAt(c, 50, 1.5 + i * 0.5);
 			c.assertTrue(netheritePieces(z) >= 1, "zombie " + i + " has a netherite piece");
 			c.assertTrue(Math.abs(z.getMaxHealth() - 80) < 0.01 || Math.abs(z.getMaxHealth() - 160) < 0.01, "x4 health (x8 elite), was " + z.getMaxHealth());
 		}
+		c.succeed();
+	}
+
+	/** D207: XP follows the extra health: x(1 + strength) for a boosted mob, x2 more for an elite, vanilla at level 0. */
+	@GameTest(maxTicks = 20)
+	public void boostedMobDropsXpInStepWithItsHealth(GameTestHelper c) {
+		enable(c);
+		ServerLevel level = c.getLevel();
+		Zombie plain = zombieAt(c, 0, 2.5);
+		int vanilla = plain.getExperienceReward(level, null);
+		c.assertTrue(vanilla == 5, "a zombie gives 5 XP, was " + vanilla);
+		Zombie z = zombieAt(c, 50, 3.5);
+		while (DangerMobs.isElite(z)) {
+			z.discard();
+			z = zombieAt(c, 50, 3.5);
+		}
+		for (EquipmentSlot slot : new EquipmentSlot[] {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
+			z.setItemSlot(slot, net.minecraft.world.item.ItemStack.EMPTY); // worn armor adds random vanilla XP
+		}
+		int boosted = z.getExperienceReward(level, null);
+		c.assertTrue(boosted == 20, "x4 health gives x4 XP (5 x 4), was " + boosted);
+		DangerMobs.makeElite(z, java.util.List.of(DangerRules.Affix.IRONHIDE));
+		int elite = z.getExperienceReward(level, null);
+		c.assertTrue(elite == 40, "an elite doubles it again, was " + elite);
+		Zombie mid = zombieAt(c, 25, 4.5);
+		while (DangerMobs.isElite(mid)) {
+			mid.discard();
+			mid = zombieAt(c, 25, 4.5);
+		}
+		float ratio = mid.getMaxHealth() / 20f;
+		c.assertTrue(mid.getExperienceReward(level, null) == Math.round(5 * ratio), "xp follows the health ratio " + ratio);
+		z.discard();
+		plain.discard();
+		mid.discard();
+		c.succeed();
+	}
+
+	/** D206: an old save (no format field, level on the 0..30 scale) becomes the 0..50 scale once (x5/3 minus 5, D209); a new one does not. */
+	@GameTest(maxTicks = 20)
+	public void oldSavedLevelIsConvertedOnce(GameTestHelper c) {
+		DangerSavedData old = DangerSavedData.load(30, 777L, 1);
+		c.assertTrue(old.level == 45 && old.pendingAtTick == 777L, "30 becomes 45 and the timer stays, was " + old.level + "/" + old.pendingAtTick);
+		c.assertTrue(DangerSavedData.load(12, 0L, 1).level == 15, "12 becomes 15");
+		DangerSavedData now = DangerSavedData.load(30, 0L, DangerSavedData.FORMAT);
+		c.assertTrue(now.level == 30, "a format 2 file is not converted again");
+		c.assertTrue(new DangerSavedData().level == 0, "a new world starts at 0");
 		c.succeed();
 	}
 

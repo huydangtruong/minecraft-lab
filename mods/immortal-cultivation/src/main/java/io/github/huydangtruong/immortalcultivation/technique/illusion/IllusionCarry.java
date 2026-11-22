@@ -91,6 +91,23 @@ public final class IllusionCarry {
 		}
 	}
 
+	/** True when the container has room for at least one item of what is carried (same rules as {@link #insert}, D208). */
+	public boolean fitsIn(Container c) {
+		for (ItemStack s : stacks) {
+			for (int i = 0; i < c.getContainerSize(); i++) {
+				ItemStack there = c.getItem(i);
+				if (!c.canPlaceItem(i, s)) {
+					continue;
+				}
+				if (there.isEmpty() || ItemStack.isSameItemSameComponents(there, s)
+					&& there.getCount() < Math.min(c.getMaxStackSize(), there.getMaxStackSize())) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	/** Inserts into the container (merging first, then empty slots); returns what did not fit. The input stack is changed. */
 	public static ItemStack insert(Container c, ItemStack s) {
 		for (int pass = 0; pass < 2 && !s.isEmpty(); pass++) {

@@ -49,7 +49,7 @@ public class RewardBoxClientTest implements FabricClientGameTest {
 		}
 	}
 
-	/** P-030 / D89: the emerald box has 6 cards and 2 picks. Screenshots before any pick and after the first; then a real second pick and Claim. */
+	/** P-030 / D89 / D210: the emerald box has 8 cards and 4 picks. Screenshots before any pick and after the first; then three more real picks and Claim. */
 	private static void emeraldScreen(ClientGameTestContext context, TestServerContext server) {
 		server.runOnServer(s -> {
 			ServerPlayer p = s.getPlayerList().getPlayers().get(0);
@@ -58,26 +58,31 @@ public class RewardBoxClientTest implements FabricClientGameTest {
 			p.getMainHandItem().set(RewardBoxes.DATA, new RewardBoxData(List.of(
 				new RewardOption("minecraft:totem_of_undying", 1), new RewardOption("permahearts:enlightenment_bottle", 1),
 				RewardOption.book("minecraft:mending", 1), RewardOption.book("minecraft:sharpness", 5),
-				RewardOption.book("minecraft:protection", 5), new RewardOption("minecraft:diamond", 16))));
+				RewardOption.book("minecraft:protection", 4), new RewardOption("minecraft:diamond", 16),
+				new RewardOption("minecraft:gold_ingot", 64), new RewardOption("permahearts:elixir_heart", 1))));
 			RewardBoxes.open(p, InteractionHand.MAIN_HAND);
 		});
 		context.waitForScreen(AbstractContainerScreen.class);
 		context.waitTicks(10);
 		context.takeScreenshot("101-emerald-box");
-		clickGui(context, 8 + 25, 30 + 40, InputConstants.MOUSE_BUTTON_LEFT); // card 0: the totem
+		clickCard(context, 0, InputConstants.MOUSE_BUTTON_LEFT); // card 0: the totem
 		context.waitTicks(10);
 		context.getInput().setCursorPos(5, 5);
 		context.waitTicks(5);
 		context.takeScreenshot("102-emerald-box-picked");
-		clickGui(context, 8 + 54 * 3 + 25, 30 + 40, InputConstants.MOUSE_BUTTON_LEFT); // card 3: Sharpness V
+		clickCard(context, 3, InputConstants.MOUSE_BUTTON_LEFT); // card 3: Sharpness V
+		context.waitTicks(10);
+		clickCard(context, 6, InputConstants.MOUSE_BUTTON_LEFT); // card 6: gold
+		context.waitTicks(10);
+		clickCard(context, 7, InputConstants.MOUSE_BUTTON_LEFT); // card 7: the last one, at the right edge
 		context.waitTicks(10);
 		int mask = server.computeOnServer(s -> ((RewardBoxMenu) s.getPlayerList().getPlayers().get(0).containerMenu).selected());
-		if (mask != 0b1001) {
-			throw new AssertionError("two clicks should select cards 0 and 3, mask was " + mask);
+		if (mask != 0b11001001) {
+			throw new AssertionError("four clicks should select cards 0, 3, 6, 7, mask was " + mask);
 		}
 		context.getInput().setCursorPos(5, 5);
 		context.waitTicks(5);
-		context.takeScreenshot("103-emerald-box-two-picked");
+		context.takeScreenshot("103-emerald-box-four-picked");
 		clickGui(context, -1, 30 + 80 + 8 + 10, InputConstants.MOUSE_BUTTON_LEFT); // Claim
 		context.waitTicks(10);
 		String result = server.computeOnServer(s -> {
@@ -108,7 +113,7 @@ public class RewardBoxClientTest implements FabricClientGameTest {
 					new RewardOption("minecraft:enchanted_golden_apple", 4), new RewardOption("minecraft:ender_pearl", 32))
 				: List.of(new RewardOption("minecraft:netherite_ingot", 1), new RewardOption("permahearts:elixir_iron_skin", 1),
 					new RewardOption("minecraft:redstone", 64), new RewardOption("minecraft:emerald", 32),
-					new RewardOption("permahearts:elixir_reach", 1));
+					new RewardOption("permahearts:elixir_reach", 1), new RewardOption("minecraft:ender_pearl", 16));
 			p.getMainHandItem().set(RewardBoxes.DATA, new RewardBoxData(options));
 			RewardBoxes.open(p, InteractionHand.MAIN_HAND);
 		});
@@ -116,7 +121,7 @@ public class RewardBoxClientTest implements FabricClientGameTest {
 		context.waitTicks(10);
 		context.takeScreenshot(name + "-open"); // nothing selected: Claim is disabled
 		// A real click (mouse input, not a faked event) on the second card: right button on the diamond box, left on the others.
-		clickGui(context, 8 + 54 + 25, 30 + 40,
+		clickCard(context, 1,
 			tier == RewardTier.DIAMOND ? InputConstants.MOUSE_BUTTON_RIGHT : InputConstants.MOUSE_BUTTON_LEFT);
 		context.waitTicks(10);
 		int mask = server.computeOnServer(s -> {
@@ -129,9 +134,13 @@ public class RewardBoxClientTest implements FabricClientGameTest {
 		if (mask != 0b10) {
 			throw new AssertionError("a click on card 1 should select only it, mask was " + mask);
 		}
-		if (tier.picks() == 2) { // D171: the diamond box takes two cards, so card 0 too
-			clickGui(context, 8 + 25, 30 + 40, InputConstants.MOUSE_BUTTON_LEFT);
+		for (int k = 0, more = tier.picks() - 1; more > 0; k++) { // D210: gold takes 2 cards, diamond 3: also cards 0, 2, ...
+			if (k == 1) {
+				continue;
+			}
+			clickCard(context, k, InputConstants.MOUSE_BUTTON_LEFT);
 			context.waitTicks(10);
+			more--;
 		}
 		// Hover the first card: its item tooltip.
 		double[] hover = context.computeOnClient(mc -> {
@@ -139,7 +148,7 @@ public class RewardBoxClientTest implements FabricClientGameTest {
 			int[] at = panelOrigin(mc);
 			int left = at[0];
 			int top = at[1];
-			return new double[] {(left + 8 + 25) * scale, (top + 30 + 20) * scale};
+			return new double[] {(left + 8 + cardW(mc) / 2) * scale, (top + 30 + 20) * scale};
 		});
 		context.getInput().setCursorPos(hover[0], hover[1]);
 		context.waitTicks(5);
@@ -175,7 +184,7 @@ public class RewardBoxClientTest implements FabricClientGameTest {
 		double[] at = context.computeOnClient(mc -> {
 			double scale = mc.getWindow().getGuiScale();
 			int[] o = panelOrigin(mc);
-			int w = 16 + 54 * ((RewardBoxMenu) mc.player.containerMenu).options().size() - 4;
+			int w = panelWidth(mc);
 			int x = dx >= 0 ? o[0] + dx : o[0] + w / 2 - 4 - 35;
 			return new double[] {x * scale, (o[1] + dy) * scale};
 		});
@@ -184,10 +193,26 @@ public class RewardBoxClientTest implements FabricClientGameTest {
 		context.getInput().pressMouse(button);
 	}
 
-	/** Top-left of the box screen: it is centred, 16 + 54 per card - 4 wide and 146 high (same numbers as RewardBoxScreen). */
-	private static int[] panelOrigin(net.minecraft.client.Minecraft mc) {
+	/** Width of one card (D210: narrower when 8 cards would not fit), as RewardBoxScreen computes it. */
+	private static int cardW(net.minecraft.client.Minecraft mc) {
 		int n = ((RewardBoxMenu) mc.player.containerMenu).options().size();
-		return new int[] {(mc.getWindow().getGuiScaledWidth() - (16 + 54 * n - 4)) / 2, (mc.getWindow().getGuiScaledHeight() - 146) / 2};
+		return io.github.huydangtruong.immortalcultivation.client.RewardBoxScreen.cardWidth(mc.getWindow().getGuiScaledWidth(), n);
+	}
+
+	private static int panelWidth(net.minecraft.client.Minecraft mc) {
+		int n = ((RewardBoxMenu) mc.player.containerMenu).options().size();
+		return 16 + (cardW(mc) + 4) * n - 4;
+	}
+
+	/** Top-left of the box screen: it is centred, panelWidth wide and 146 high (same numbers as RewardBoxScreen). */
+	private static int[] panelOrigin(net.minecraft.client.Minecraft mc) {
+		return new int[] {(mc.getWindow().getGuiScaledWidth() - panelWidth(mc)) / 2, (mc.getWindow().getGuiScaledHeight() - 146) / 2};
+	}
+
+	/** A real click on the middle of card k. */
+	private static void clickCard(ClientGameTestContext context, int k, int button) {
+		int dx = context.computeOnClient(mc -> 8 + k * (cardW(mc) + 4) + cardW(mc) / 2);
+		clickGui(context, dx, 30 + 40, button);
 	}
 
 	/** Done lines of a quest show a "?" box as the reward: the tier is rolled when the line is claimed (D90). */

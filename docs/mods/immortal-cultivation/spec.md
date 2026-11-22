@@ -104,9 +104,13 @@
 ## Hộp thưởng nhiệm vụ (D76, D89, D90, P-027, P-030)
 
 - Mỗi dòng nhiệm vụ trả một hộp thưởng (thay linh dược). **Loại hộp được bốc lúc nhận thưởng, không hiện trước** (D90): ô thưởng ở màn hình nhiệm vụ chỉ hiện hộp xám có dấu "?" (`permahearts:mystery_box`, tên "Random Reward Box", không nhận được). Tỉ lệ: dòng thường (thu thập, giết, khám phá, Death Match) bạc 40 / vàng 30 / kim cương 20 / ngọc lục bảo 10; hạ thủ lĩnh và Blood Moon bạc 20 / vàng 30 / kim cương 30 / ngọc lục bảo 20. Không lưu gì thêm trong save nhiệm vụ.
-- Bốn hộp: `silver_reward_box` (3 thẻ, chọn 1), `gold_reward_box` (4 thẻ, chọn 1), `diamond_reward_box` (5 thẻ, chọn 1), `emerald_reward_box` (**6 thẻ, chọn 2**, màu xanh lá, độ hiếm EPIC).
-- Mỗi thẻ: 50% một bình linh dược ngẫu nhiên (x1), 50% một món đồ. Món đồ: sắt 64, vàng 64, kim cương 16, ngọc lục bảo 16, redstone 64, lapis 64, ngọc ender 32, thuốc súng 32 (số lượng lấy từ bảng thu thập của QuestGenerator), không trùng nhau. Thẻ đồ có 20% là thẻ đặc biệt: vàng = 4 táo vàng phép hoặc 32 ngọc lục bảo; kim cương = thêm 1 thỏi netherite; bạc không có.
-- **Hộp ngọc lục bảo**: thẻ đồ có **25%** là đặc biệt: 1 Totem of Undying, 1 Bottle of Enlightenment, sách Mending, sách Sharpness V, sách Protection V (hai sách khác phép thì được ra cùng hộp). Chọn đủ 2 thẻ khác nhau rồi bấm Claim: nhận cả hai, hộp biến mất. Đóng màn hình khi mới chọn 1 thẻ thì **không lấy gì**, hộp còn nguyên (lựa chọn chưa lưu).
+- Bốn hộp (D210): `silver_reward_box` (3 thẻ, chọn 1), `gold_reward_box` (4 thẻ, **chọn 2**), `diamond_reward_box` (**6 thẻ, chọn 3**), `emerald_reward_box` (**8 thẻ, chọn 4**, màu xanh lá, độ hiếm EPIC).
+- Mỗi thẻ (D153): **60% một bình linh dược** (x1, có thể trùng; Heart Elixir chỉ từ hộp vàng trở lên), **40% một món đồ** (không trùng trong một hộp, mọi món trong danh sách của hộp ngang nhau, D108). Danh sách đồ (D211):
+  - Bạc: vàng 64, kim cương 16, ngọc lục bảo 16, ngọc ender 32.
+  - Vàng: vàng 64, kim cương 32, ngọc lục bảo 32, ngọc ender 32, 4 táo vàng phù phép.
+  - Kim cương: vàng 64, kim cương 32, ngọc lục bảo 32, ngọc ender 48, 4 táo vàng phù phép, 1 thỏi netherite.
+  - Ngọc lục bảo: vàng 64, kim cương 48, ngọc lục bảo 64, ngọc ender 48, 1 Totem of Undying, 1 Bottle of Enlightenment, sách Mending, Sharpness V, Protection IV (D212), Unbreaking III, Looting III, Efficiency V (D213) (hai sách khác phép được ra cùng hộp).
+- Chọn đủ số thẻ của hộp (D210) rồi bấm Claim: nhận hết, hộp biến mất. Đóng màn hình khi chưa chọn đủ thì **không lấy gì**, hộp còn nguyên (lựa chọn chưa lưu).
 - **Bottle of Enlightenment** (`permahearts:enlightenment_bottle`): xếp chồng 16, độ hiếm RARE, có ánh sáng. Uống (chuột phải, 32 tick như bình thuốc) được **+16 level kinh nghiệm**, tiêu 1 bình (không tiêu trong Creative). Không chế được, chỉ ra từ hộp ngọc lục bảo (có trong tab Creative "Food & Drinks" để thử).
 - Thẻ ra lúc mở lần đầu và lưu trong component `permahearts:reward_box` (thẻ sách lưu thêm `enchant` và `level`, save cũ không có hai trường này vẫn đọc được); đóng rồi mở lại vẫn các thẻ cũ. Chọn thẻ, bấm Claim: máy chủ kiểm lại, đưa đồ (đầy túi thì rơi dưới chân), trừ 1 hộp, phát tiếng lên cấp. Close giữ hộp.
 - Nhiệm vụ lưu cũ có phần thưởng linh dược vẫn cho hộp (bốc ngẫu nhiên lúc nhận).
@@ -138,26 +142,27 @@ Heaven Blast choáng mọi sinh vật không phải người chơi bị đẩy: 
 
 ## Sát Khí (Danger level) và mob Elite (P-054, D137, D138, D139)
 
-Thế giới có **Danger level 0–30**, bắt đầu từ 0. Mỗi lần Crimson Master rời đi, khoảng 4 phút (4800 tick) sau level +1 (tối đa 30, không giảm). Mỗi lần tăng: chữ cam "Danger level X" giữa màn hình, dòng nhỏ bên dưới, một dòng chat và tiếng kèn. Màn hình chỉ số có dòng "Danger level X".
+Thế giới có **Danger level 0–50** (D206: giãn từ 0–30 lên 0–50, level 50 = level 30 cũ; world cũ đổi một lần bằng ×5/3 rồi trừ 5, D209), bắt đầu từ 0. Mỗi lần Crimson Master rời đi, khoảng 4 phút (4800 tick) sau level +1 (tối đa 50, không giảm; muốn lên tối đa cần 50 lần). Mỗi lần tăng: chữ cam "Danger level X" giữa màn hình, dòng nhỏ bên dưới, một dòng chat và tiếng kèn. Màn hình chỉ số có dòng "Danger level X". Save cũ được đổi một lần: level mới = level cũ × 5/3 (30 → 50).
 
 | Level | Số mob (chỉ Overworld) | Sức mạnh (máu + sát thương, mọi thế giới) | Mở thêm |
 |---|---|---|---|
-| 1 | +10% | +8% | |
-| 4 | +40% | +30% | Pillager |
-| 6 | +60% | +45% | Vindicator, mob ra khi mưa |
-| 8 | +80% | +60% | mob ra ban ngày (15%) |
-| 10 | +100% | +75% | Blaze, Wither Skeleton (chỗ tối) |
-| 12 / 14 / 16 | +120% / +140% / +160% | +90% / +105% / +120% | Evoker / Piglin Brute / Ravager |
-| 20 | +200% | +150% | ban ngày nhiều như ban đêm, Elite xuất hiện |
-| 21 | +220% | +165% | mob mặc thêm giáp |
-| 25 | +300% (dừng) | +225% | |
-| 30 | +300% | +300% | mọi mob mặc giáp có ít nhất 1 món netherite |
+| 1 | +6% | +5% | |
+| 7 | +42% | +32% | Pillager |
+| 10 | +60% | +45% | Vindicator, mob ra khi mưa |
+| 13 | +78% | +59% | mob ra ban ngày (15%) |
+| 17 | +102% | +77% | Blaze, Wither Skeleton (chỗ tối) |
+| 20 / 23 / 27 | +120% / +138% / +162% | +90% / +104% / +122% | Evoker / Piglin Brute / Ravager |
+| 33 | +198% | +149% | ban ngày nhiều như ban đêm, Elite xuất hiện |
+| 35 | +220% | +165% | mob mặc thêm giáp |
+| 42 | +300% (dừng) | +228% | |
+| 50 | +300% | +300% | mọi mob mặc giáp có ít nhất 1 món netherite |
 
 - Mob ra ban ngày không cháy nắng. Ánh sáng từ đuốc vẫn chặn mob như vanilla. Peaceful: tắt hết.
 - Trần số mob: gamerule `permahearts:danger_spawn_ceiling` (mặc định 4 lần vanilla). Gamerule `permahearts:danger_level` bật / tắt Sát Khí.
 - Không áp cho boss, thủ lĩnh, God Slayer, mob đã thu phục, đồng minh triệu hồi, bản sao ảo ảnh.
-- **Elite** (từ level 20): 5% ở level 20 → 15% ở level 30. Máu gấp đôi, tên cam kèm phẩm chất, hạt cam. Số phẩm chất: 1 (level 20–24), tới 2 (25–29), tới 3 (30). Phẩm chất: Swift (chạy nhanh +40%), Ironhide (nhận ít hơn 40% sát thương), Regenerating (hồi 1% máu mỗi giây), Blazing (đánh trúng đốt 4 giây, miễn lửa), Venomous (đánh trúng gây độc 5 giây; xác sống miễn độc). 50% rơi 1–3 emerald. Soul Grasp thu phục được và giữ phẩm chất.
-- Lệnh (op): `/danger info`, `/danger set <0..30>`, `/danger elite <phẩm chất...>` (thả một zombie elite trước mặt để thử).
+- **Elite** (từ level 33): 5% ở level 33 → 15% ở level 50. Máu gấp đôi, tên cam kèm phẩm chất, hạt cam. Số phẩm chất: 1 (level 33–41), tới 2 (42–49), tới 3 (50). Phẩm chất: Swift (chạy nhanh +40%), Ironhide (nhận ít hơn 40% sát thương), Regenerating (hồi 1% máu mỗi giây), Blazing (đánh trúng đốt 4 giây, miễn lửa), Venomous (đánh trúng gây độc 5 giây; xác sống miễn độc). 50% rơi 1–3 emerald. Soul Grasp thu phục được và giữ phẩm chất.
+- **XP theo máu (D207)**: mob bị Sát Khí tăng máu rơi XP nhân đúng tỉ lệ máu tăng (1 + sức mạnh, elite nhân thêm 2), làm tròn. Level 0 và mob không bị tăng: XP vanilla.
+- Lệnh (op): `/danger info`, `/danger set <0..50>`, `/danger elite <phẩm chất...>` (thả một zombie elite trước mặt để thử).
 
 ## Bảng /admin (P-060, D155)
 

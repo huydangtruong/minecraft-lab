@@ -206,6 +206,32 @@ public class GraspGameTest {
 		c.succeed();
 	}
 
+	/** D200 (Huy's bug: villagers still feared grasped mobs): villagers and the wandering trader do not see a grasped mob as a threat. */
+	@GameTest(maxTicks = 200)
+	public void villagersDoNotFearGraspedMobs(GameTestHelper c) {
+		ServerPlayer p = grasper(c, 10);
+		net.minecraft.world.entity.npc.villager.Villager villager = c.spawn(EntityTypes.VILLAGER, new Vec3(2.5, 1, 2.5));
+		net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader trader = c.spawn(EntityTypes.WANDERING_TRADER, new Vec3(2.5, 1, 6.5));
+		Zombie mine = c.spawn(EntityTypes.ZOMBIE, new Vec3(4.5, 1, 4.5));
+		mine.setNoAi(true);
+		Grasp.tame(p, mine, 10);
+		c.runAfterDelay(60, () -> {
+			c.assertTrue(villager.getBrain().getMemory(net.minecraft.world.entity.ai.memory.MemoryModuleType.NEAREST_HOSTILE).isEmpty(),
+				"a villager does not see a grasped zombie as a hostile");
+			var avoid = new net.minecraft.world.entity.ai.goal.AvoidEntityGoal<>(trader, Zombie.class, 8f, 0.5, 0.5);
+			c.assertTrue(!avoid.canUse(), "the wandering trader does not run from a grasped zombie");
+			Zombie wild = c.spawn(EntityTypes.ZOMBIE, new Vec3(4.5, 1, 2.5));
+			wild.setNoAi(true);
+			c.runAfterDelay(60, () -> {
+				c.assertTrue(villager.getBrain().getMemory(net.minecraft.world.entity.ai.memory.MemoryModuleType.NEAREST_HOSTILE).isPresent(),
+					"a wild zombie is still a hostile to the villager");
+				wild.discard();
+				cleanUp(c, p);
+				c.succeed();
+			});
+		});
+	}
+
 	/** D165 (Huy's bug: 11 followers crowded onto him): following mobs that start on the owner step out to 2 blocks or more. */
 	@GameTest(maxTicks = 140)
 	public void followersKeepTwoBlocksFromTheOwner(GameTestHelper c) {

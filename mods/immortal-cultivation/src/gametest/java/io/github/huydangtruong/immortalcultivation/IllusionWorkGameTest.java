@@ -492,6 +492,26 @@ public class IllusionWorkGameTest {
 		});
 	}
 
+	/** D208 (Huy's bug: clones stood at a full chest opening and closing it): what does not fit goes to the next chest with room. */
+	@GameTest(maxTicks = 600)
+	public void whatDoesNotFitInAFullChestGoesToTheNextChest(GameTestHelper c) {
+		ServerPlayer p = owner(c, new ItemStack(Items.SHEARS)); // a job with nothing to do here: the clone delivers when idle
+		Container near = chest(c, 4, 1, 5);
+		for (int i = 0; i < near.getContainerSize(); i++) {
+			near.setItem(i, new ItemStack(Items.DIRT, 64));
+		}
+		near.setItem(0, new ItemStack(Items.DIAMOND, 63)); // room for exactly one more diamond
+		Container far = chest(c, 0, 1, 0);
+		Illusion a = castOne(c, p);
+		a.carry().add(new ItemStack(Items.DIAMOND, 3));
+		c.succeedWhen(() -> {
+			c.assertTrue(count(near, s -> s.is(Items.DIAMOND)) == 64, "one diamond filled the near chest" + dbg(a));
+			c.assertTrue(count(far, s -> s.is(Items.DIAMOND)) == 2, "the other 2 went to the far chest" + dbg(a));
+			c.assertTrue(a.carry().isEmpty(), "the clone carries nothing" + dbg(a));
+			FlightBladeGameTest.drop(c, p);
+		});
+	}
+
 	@GameTest(maxTicks = 60)
 	public void aCloneThatVanishesDropsWhatItCarries(GameTestHelper c) {
 		ServerPlayer p = owner(c, new ItemStack(Items.IRON_HOE));

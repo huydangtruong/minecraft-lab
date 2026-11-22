@@ -60,8 +60,8 @@ class RewardBoxTest {
 
 	@Test
 	void emeraldBox() {
-		assertEquals(6, RewardTier.EMERALD.options());
-		assertEquals(2, RewardTier.EMERALD.picks());
+		assertEquals(8, RewardTier.EMERALD.options()); // D210
+		assertEquals(4, RewardTier.EMERALD.picks());
 		assertEquals("emerald_reward_box", RewardTier.EMERALD.itemName());
 	}
 
@@ -69,10 +69,12 @@ class RewardBoxTest {
 	void tierSizes() {
 		assertEquals(3, RewardTier.SILVER.options());
 		assertEquals(4, RewardTier.GOLD.options());
-		assertEquals(5, RewardTier.DIAMOND.options());
-		for (RewardTier t : RewardTier.values()) {
-			assertEquals(t == RewardTier.EMERALD || t == RewardTier.DIAMOND ? 2 : 1, t.picks()); // D171
-		}
+		assertEquals(6, RewardTier.DIAMOND.options()); // D210
+		assertEquals(8, RewardTier.EMERALD.options());
+		assertEquals(1, RewardTier.SILVER.picks());
+		assertEquals(2, RewardTier.GOLD.picks());
+		assertEquals(3, RewardTier.DIAMOND.picks());
+		assertEquals(4, RewardTier.EMERALD.picks());
 	}
 
 	@Test
@@ -93,7 +95,7 @@ class RewardBoxTest {
 			boolean allItem = false;
 			boolean elixirSeen = false;
 			boolean itemSeen = false;
-			for (int i = 0; i < 4000; i++) {
+			for (int i = 0; i < 40000; i++) { // D210: an all-item emerald box (8 cards) is 0.4^8, rare
 				List<RewardOption> box = RewardRoll.roll(t, rng);
 				long elixirs = box.stream().filter(RewardBoxTest::isElixir).count();
 				elixirSeen |= elixirs > 0;
@@ -239,27 +241,48 @@ class RewardBoxTest {
 	}
 
 	@Test
-	void emeraldSpecialsAreTheFiveOfD89() {
+	void emeraldSpecials() {
 		assertEquals(List.of("minecraft:totem_of_undying", "permahearts:enlightenment_bottle", "minecraft:enchanted_book",
-			"minecraft:enchanted_book", "minecraft:enchanted_book"),
+			"minecraft:enchanted_book", "minecraft:enchanted_book", "minecraft:enchanted_book", "minecraft:enchanted_book", "minecraft:enchanted_book",
+			"minecraft:diamond", "minecraft:emerald", "minecraft:ender_pearl"),
 			RewardRoll.EMERALD_SPECIALS.stream().map(RewardOption::itemId).toList());
-		assertEquals(Set.of("minecraft:mending@1", "minecraft:sharpness@5", "minecraft:protection@5"),
+		assertEquals(Set.of("minecraft:mending@1", "minecraft:sharpness@5", "minecraft:protection@4", "minecraft:unbreaking@3",
+			"minecraft:looting@3", "minecraft:efficiency@5"), // D211, D212, D213
 			RewardRoll.EMERALD_SPECIALS.stream().filter(RewardOption::hasEnchant)
 				.map(o -> o.enchant() + "@" + o.enchantLevel()).collect(java.util.stream.Collectors.toSet()));
-		for (RewardOption o : RewardRoll.EMERALD_SPECIALS) {
-			assertEquals(1, o.count());
-		}
+	}
+
+	/** D211: the item cards of each box and their amounts. */
+	@Test
+	void itemPoolsPerTier() {
+		assertEquals(Set.of("minecraft:gold_ingot x64", "minecraft:diamond x16", "minecraft:emerald x16", "minecraft:ender_pearl x32"),
+			pool(RewardTier.SILVER));
+		assertEquals(Set.of("minecraft:gold_ingot x64", "minecraft:diamond x32", "minecraft:emerald x32", "minecraft:ender_pearl x32",
+			"minecraft:enchanted_golden_apple x4"), pool(RewardTier.GOLD));
+		assertEquals(Set.of("minecraft:gold_ingot x64", "minecraft:diamond x32", "minecraft:emerald x32", "minecraft:ender_pearl x48",
+			"minecraft:enchanted_golden_apple x4", "minecraft:netherite_ingot x1"), pool(RewardTier.DIAMOND));
+		assertEquals(Set.of("minecraft:gold_ingot x64", "minecraft:diamond x48", "minecraft:emerald x64", "minecraft:ender_pearl x48",
+			"minecraft:totem_of_undying x1", "permahearts:enlightenment_bottle x1", "minecraft:enchanted_book:minecraft:mending x1",
+			"minecraft:enchanted_book:minecraft:sharpness x1", "minecraft:enchanted_book:minecraft:protection x1",
+			"minecraft:enchanted_book:minecraft:unbreaking x1", "minecraft:enchanted_book:minecraft:looting x1",
+			"minecraft:enchanted_book:minecraft:efficiency x1"), pool(RewardTier.EMERALD));
+	}
+
+	private static Set<String> pool(RewardTier t) {
+		return RewardRoll.itemPool(t).stream()
+			.map(o -> o.itemId() + (o.hasEnchant() ? ":" + o.enchant() : "") + " x" + o.count())
+			.collect(java.util.stream.Collectors.toSet());
 	}
 
 	@Test
-	void emeraldRollSixCardsBooksMayShareAnItemIdButNotAnEnchantment() {
+	void emeraldRollEightCardsBooksMayShareAnItemIdButNotAnEnchantment() {
 		Random rng = new Random(12);
 		boolean twoBooks = false;
 		int specialCards = 0;
 		int itemCards = 0;
 		for (int i = 0; i < 20000; i++) {
 			List<RewardOption> box = RewardRoll.roll(RewardTier.EMERALD, rng);
-			assertEquals(6, box.size());
+			assertEquals(8, box.size());
 			Set<String> keys = new HashSet<>();
 			int books = 0;
 			for (RewardOption o : box) {
