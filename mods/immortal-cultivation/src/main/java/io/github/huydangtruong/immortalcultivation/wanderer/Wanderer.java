@@ -4,7 +4,8 @@ import io.github.huydangtruong.immortalcultivation.Uuids;
 import io.github.huydangtruong.immortalcultivation.reward.RewardBoxes;
 import io.github.huydangtruong.immortalcultivation.reward.RewardTier;
 import io.github.huydangtruong.immortalcultivation.HeartsAttachment;
-import io.github.huydangtruong.immortalcultivation.Messages;
+import io.github.huydangtruong.immortalcultivation.QuestEventMessages;
+import io.github.huydangtruong.immortalcultivation.WandererMessages;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -92,7 +93,7 @@ public final class Wanderer {
 		int z = (int) Math.round(near.getZ() + off[1]);
 		save(server, data(server).withPhase(Phase.PLANNED).withPos(x, 0, z).withNpc(Optional.empty()).withQuest(Optional.empty())
 			.withLeaveAt(clockTime(server) + STAY_TICKS).withWarned(false));
-		server.getPlayerList().broadcastSystemMessage(Messages.wandererPlanned(x, z), false);
+		server.getPlayerList().broadcastSystemMessage(WandererMessages.wandererPlanned(x, z), false);
 		WandererBar.announceArrival(server, x, z);
 		WandererBar.tick(server);
 	}
@@ -176,13 +177,13 @@ public final class Wanderer {
 		}
 		save(server, d.withQuest(Optional.of(r.get().quest())));
 		QuestLine l = r.get().quest().lines().get(r.get().line());
-		killer.sendOverlayMessage(Messages.killProgress(type.getDescription(), l.progress(), l.required()));
+		killer.sendOverlayMessage(WandererMessages.killProgress(type.getDescription(), l.progress(), l.required()));
 		announceIfDone(server, before, r.get().quest(), r.get().line());
 	}
 
 	static void announceIfDone(MinecraftServer server, Quest before, Quest after, int line) {
 		if (!before.lines().get(line).done() && after.lines().get(line).done()) {
-			server.getPlayerList().broadcastSystemMessage(Messages.lineCompleted(lineName(after.lines().get(line))), false);
+			server.getPlayerList().broadcastSystemMessage(WandererMessages.lineCompleted(lineName(after.lines().get(line))), false);
 		}
 	}
 
@@ -325,7 +326,7 @@ public final class Wanderer {
 		save(server, d.withPhase(Phase.WAITING).withNpc(Optional.empty()).withQuest(Optional.empty())
 			.withLeaveAt(-1L).withWarned(false)
 			.withNextDay(currentDay(server) + QuestGenerator.daysUntilReturn(RNG)));
-		server.getPlayerList().broadcastSystemMessage(Messages.farewell(), false);
+		server.getPlayerList().broadcastSystemMessage(WandererMessages.farewell(), false);
 		giftLevels(server, completed);
 		io.github.huydangtruong.immortalcultivation.danger.Danger.onWandererLeft(server); // P-054: +1 danger level in 4800 ticks
 		io.github.huydangtruong.immortalcultivation.treasure.DeadlyTreasure.onCrimsonMasterLeft(server); // P-059, D172: the treasure takes the next visit
@@ -345,7 +346,7 @@ public final class Wanderer {
 		if (phase != Phase.PLANNED && phase != Phase.PRESENT) {
 			return false;
 		}
-		leave(server, Messages.gaveUp(by.getDisplayName()));
+		leave(server, WandererMessages.gaveUp(by.getDisplayName()));
 		return true;
 	}
 
@@ -401,7 +402,7 @@ public final class Wanderer {
 				chest.setItem(i, boxes.get(i));
 			}
 		}
-		server.getPlayerList().broadcastSystemMessage(Messages.unclaimedChest(boxes.size(), pos.getX(), pos.getY(), pos.getZ()), false);
+		server.getPlayerList().broadcastSystemMessage(WandererMessages.unclaimedChest(boxes.size(), pos.getX(), pos.getY(), pos.getZ()), false);
 		return pos;
 	}
 
@@ -414,7 +415,7 @@ public final class Wanderer {
 		for (ServerPlayer p : server.getPlayerList().getPlayers()) {
 			p.giveExperienceLevels(levels);
 		}
-		server.getPlayerList().broadcastSystemMessage(Messages.farewellLevels(levels, completed), false);
+		server.getPlayerList().broadcastSystemMessage(WandererMessages.farewellLevels(levels, completed), false);
 	}
 
 	/** A player joins during a visit: repeat where the Crimson Master is (the bar follows on the next pass). */
@@ -422,7 +423,7 @@ public final class Wanderer {
 		MinecraftServer server = p.level().getServer();
 		WandererData d = data(server);
 		if (io.github.huydangtruong.immortalcultivation.ImmortalCultivation.enabled(server) && (d.phase() == Phase.PLANNED || d.phase() == Phase.PRESENT)) {
-			p.sendSystemMessage(Messages.wandererPlanned(d.x(), d.z()));
+			p.sendSystemMessage(WandererMessages.wandererPlanned(d.x(), d.z()));
 		}
 	}
 
@@ -452,10 +453,10 @@ public final class Wanderer {
 		return switch (type) {
 			case COLLECT -> Component.translatable(BuiltInRegistries.ITEM.getValue(Identifier.parse(target)).getDescriptionId());
 			case KILL -> BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.parse(target)).getDescription();
-			case EXPLORE -> Messages.structureName(target);
-			case BLOOD_MOON -> Messages.bloodMoonBar(BloodMoon.mobName(target));
-			case BOSS -> Messages.bossName(BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.parse(target)).getDescription());
-			case DEATH_MATCH -> Messages.deathMatchName();
+			case EXPLORE -> QuestEventMessages.structureName(target);
+			case BLOOD_MOON -> QuestEventMessages.bloodMoonBar(BloodMoon.mobName(target));
+			case BOSS -> QuestEventMessages.bossName(BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.parse(target)).getDescription());
+			case DEATH_MATCH -> QuestEventMessages.deathMatchName();
 		};
 	}
 
@@ -467,12 +468,12 @@ public final class Wanderer {
 	public static Component lineText(QuestType type, String target, int required, int progress, boolean running) {
 		Component name = targetName(type, target);
 		return switch (type) {
-			case COLLECT -> Messages.lineCollect(required, name, progress);
-			case KILL -> Messages.lineKill(required, name, progress);
-			case EXPLORE -> Messages.lineExplore(name);
-			case BLOOD_MOON -> Messages.lineBloodMoon(BloodMoon.mobName(target));
-			case BOSS -> Messages.lineBoss(name);
-			case DEATH_MATCH -> running ? Messages.lineDeathMatchRunning(progress, required) : Messages.lineDeathMatch();
+			case COLLECT -> WandererMessages.lineCollect(required, name, progress);
+			case KILL -> WandererMessages.lineKill(required, name, progress);
+			case EXPLORE -> QuestEventMessages.lineExplore(name);
+			case BLOOD_MOON -> QuestEventMessages.lineBloodMoon(BloodMoon.mobName(target));
+			case BOSS -> QuestEventMessages.lineBoss(name);
+			case DEATH_MATCH -> running ? QuestEventMessages.lineDeathMatchRunning(progress, required) : QuestEventMessages.lineDeathMatch();
 		};
 	}
 

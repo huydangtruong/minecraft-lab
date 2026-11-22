@@ -40,7 +40,7 @@ public final class WandererMenus {
 
 			@Override
 			public Component getDisplayName() {
-				return io.github.huydangtruong.immortalcultivation.Messages.wandererName();
+				return io.github.huydangtruong.immortalcultivation.WandererMessages.wandererName();
 			}
 
 			@Override

@@ -1,6 +1,6 @@
 package io.github.huydangtruong.immortalcultivation.wanderer;
 
-import io.github.huydangtruong.immortalcultivation.Messages;
+import io.github.huydangtruong.immortalcultivation.QuestEventMessages;
 import io.github.huydangtruong.immortalcultivation.ImmortalCultivation;
 import java.util.List;
 import java.util.Optional;
@@ -79,18 +79,18 @@ public final class DeathMatch {
 		}
 		int online = online(server);
 		if (!DeathMatchRules.canOffer(online)) {
-			starter.sendOverlayMessage(Messages.deathMatchNeedPlayers());
+			starter.sendOverlayMessage(QuestEventMessages.deathMatchNeedPlayers());
 			return false;
 		}
 		if (!pvpAllowed(server)) {
-			starter.sendOverlayMessage(Messages.deathMatchPvpOff());
+			starter.sendOverlayMessage(QuestEventMessages.deathMatchPvpOff());
 			return false;
 		}
 		int needed = DeathMatchRules.needed(online);
 		Quest started = QuestLogic.deathMatchStarted(q, line, needed);
 		Wanderer.save(server, d.withQuest(Optional.of(started))
 			.withDeathMatch(Optional.of(new DeathMatchState(line, List.of()))));
-		server.getPlayerList().broadcastSystemMessage(Messages.deathMatchStarted(needed, online), false);
+		server.getPlayerList().broadcastSystemMessage(QuestEventMessages.deathMatchStarted(needed, online), false);
 		return true;
 	}
 
@@ -145,7 +145,7 @@ public final class DeathMatch {
 		Wanderer.save(server, d.withQuest(Optional.of(after))
 			.withDeathMatch(finished ? Optional.empty() : Optional.of(next)));
 		server.getPlayerList().broadcastSystemMessage(
-			Messages.deathMatchFell(victim.getDisplayName(), killer.getDisplayName(), line.progress(), line.required()), false);
+			QuestEventMessages.deathMatchFell(victim.getDisplayName(), killer.getDisplayName(), line.progress(), line.required()), false);
 		if (finished) {
 			Wanderer.announceIfDone(server, before, after, st.line());
 		}

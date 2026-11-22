@@ -1,7 +1,8 @@
 package io.github.huydangtruong.immortalcultivation.client;
 
 import io.github.huydangtruong.immortalcultivation.reward.RewardBoxes;
-import io.github.huydangtruong.immortalcultivation.Messages;
+import io.github.huydangtruong.immortalcultivation.QuestEventMessages;
+import io.github.huydangtruong.immortalcultivation.WandererMessages;
 import io.github.huydangtruong.immortalcultivation.wanderer.DeathMatchRules;
 import io.github.huydangtruong.immortalcultivation.wanderer.QuestSnapshot;
 import io.github.huydangtruong.immortalcultivation.wanderer.QuestType;
@@ -82,7 +83,7 @@ public class WandererScreen extends AbstractContainerScreen<WandererMenu> {
 			.bounds(leftPos + (WandererMenu.QUEST_W - WandererMenu.GIVE_UP_W) / 2, topPos + WandererMenu.GIVE_UP_Y,
 				WandererMenu.GIVE_UP_W, WandererMenu.GIVE_UP_H).build());
 		if (!shownAccepted) {
-			addRenderableWidget(Button.builder(Messages.accept(),
+			addRenderableWidget(Button.builder(WandererMessages.accept(),
 					b -> minecraft.gameMode.handleInventoryButtonClick(menu.containerId, 0))
 				.bounds(leftPos + (WandererMenu.QUEST_W - 100) / 2, topPos + 120, 100, 20).build());
 			return;
@@ -103,7 +104,7 @@ public class WandererScreen extends AbstractContainerScreen<WandererMenu> {
 	}
 
 	private Component giveUpLabel() {
-		return (confirmTicks > 0 ? Messages.giveUpConfirm() : Messages.giveUp()).copy().withStyle(ChatFormatting.RED);
+		return (confirmTicks > 0 ? WandererMessages.giveUpConfirm() : WandererMessages.giveUp()).copy().withStyle(ChatFormatting.RED);
 	}
 
 	/** First click arms the button for 3 seconds, the second click sends Give up to the server. */
@@ -124,17 +125,17 @@ public class WandererScreen extends AbstractContainerScreen<WandererMenu> {
 	private Component buttonLabel(int i) {
 		QuestType type = menu.snapshot().lines().get(i).type();
 		if (menu.eventRunning(i)) {
-			return type == QuestType.BOSS ? Messages.fighting() : Messages.running();
+			return type == QuestType.BOSS ? QuestEventMessages.fighting() : QuestEventMessages.running();
 		}
-		return type == QuestType.BOSS ? Messages.summon() : Messages.start();
+		return type == QuestType.BOSS ? QuestEventMessages.summon() : QuestEventMessages.start();
 	}
 
 	/** Why the Death Match cannot start now (shown as the tooltip of the inactive button), or null. */
 	private Component deathMatchRefusal() {
 		if (menu.playersOnline() < DeathMatchRules.MIN_ONLINE) {
-			return Messages.deathMatchNeedPlayers();
+			return QuestEventMessages.deathMatchNeedPlayers();
 		}
-		return menu.pvpOn() ? null : Messages.deathMatchPvpOff();
+		return menu.pvpOn() ? null : QuestEventMessages.deathMatchPvpOff();
 	}
 
 	private void updateButtons() {
@@ -229,15 +230,15 @@ public class WandererScreen extends AbstractContainerScreen<WandererMenu> {
 	/** Called with the pose already translated to the panel's top-left corner, so coordinates here are panel-relative. */
 	@Override
 	protected void extractLabels(GuiGraphicsExtractor g, int mouseX, int mouseY) {
-		g.text(font, Messages.questsTitle(), 8, 6, TEXT, false);
+		g.text(font, WandererMessages.questsTitle(), 8, 6, TEXT, false);
 		g.text(font, title, WandererMenu.INV_PANEL_X + 8, 6, TEXT, false);
 		g.text(font, playerInventoryTitle, WandererMenu.INV_X, WandererMenu.INV_Y - 11, TEXT, false);
 
 		int infoX = PREVIEW_X + PREVIEW_W + 6;
 		int infoW = WandererMenu.INV_PANEL_X + WandererMenu.INV_PANEL_W - 8 - infoX;
 		if (!menu.isAccepted()) {
-			wrapped(g, Messages.wandererIntro(), 8, 24, WandererMenu.QUEST_W - 16, TEXT);
-			leavesIn(g, wrapped(g, Messages.questOffer(), infoX, PREVIEW_Y + 2, infoW, TEXT), infoX, infoW);
+			wrapped(g, WandererMessages.wandererIntro(), 8, 24, WandererMenu.QUEST_W - 16, TEXT);
+			leavesIn(g, wrapped(g, WandererMessages.questOffer(), infoX, PREVIEW_Y + 2, infoW, TEXT), infoX, infoW);
 			return;
 		}
 		QuestSnapshot snap = menu.snapshot();
@@ -249,14 +250,14 @@ public class WandererScreen extends AbstractContainerScreen<WandererMenu> {
 				done++;
 			}
 		}
-		leavesIn(g, wrapped(g, Messages.questSummary(done, rows), infoX, PREVIEW_Y + 2, infoW, TEXT), infoX, infoW);
+		leavesIn(g, wrapped(g, WandererMessages.questSummary(done, rows), infoX, PREVIEW_Y + 2, infoW, TEXT), infoX, infoW);
 	}
 
 	/** The countdown under the info text; y is the first free line. Must end above the "Inventory" label. */
 	private void leavesIn(GuiGraphicsExtractor g, int y, int infoX, int infoW) {
 		// "Leaves in" / "2 days 0 h" / "(≈ 40 min)": explicit breaks so a unit never wraps alone onto the next line.
 		String time = StayTime.format(menu.ticksLeft()).replace(" (", "\n(");
-		wrapped(g, Messages.leavesIn("\n" + time), infoX, y + 3, infoW, TEXT_DIM);
+		wrapped(g, WandererMessages.leavesIn("\n" + time), infoX, y + 3, infoW, TEXT_DIM);
 	}
 
 	/** Word-wrapped text without drop shadow (the shadowed variant looks smudged on the light grey panel). Returns the y after the last line. */
@@ -274,11 +275,11 @@ public class WandererScreen extends AbstractContainerScreen<WandererMenu> {
 		int color = TEXT;
 		ItemStack icon;
 		if (menu.isClaimed(i)) {
-			text = Messages.lineClaimed();
+			text = WandererMessages.lineClaimed();
 			color = TEXT_DIM;
 			icon = ItemStack.EMPTY;
 		} else if (menu.isDone(i)) {
-			text = Messages.lineDone(Wanderer.rewardName(line.type()));
+			text = WandererMessages.lineDone(Wanderer.rewardName(line.type()));
 			color = TEXT_DONE;
 			icon = new ItemStack(RewardBoxes.MYSTERY); // D90: the tier is rolled at claim
 		} else {

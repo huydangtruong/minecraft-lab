@@ -2,7 +2,8 @@ package io.github.huydangtruong.immortalcultivation.wanderer;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
-import io.github.huydangtruong.immortalcultivation.Messages;
+import io.github.huydangtruong.immortalcultivation.HeartMessages;
+import io.github.huydangtruong.immortalcultivation.WandererMessages;
 import java.util.List;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -21,7 +22,7 @@ public final class QuestCommand {
 				.executes(ctx -> {
 					ServerPlayer p = ctx.getSource().getPlayerOrException();
 					Wanderer.summon(p);
-					ctx.getSource().sendSuccess(() -> Messages.questAdmin("Summoned"), true);
+					ctx.getSource().sendSuccess(() -> WandererMessages.questAdmin("Summoned"), true);
 					return 1;
 				}))
 			.then(Commands.literal("giveup")
@@ -32,7 +33,7 @@ public final class QuestCommand {
 					Wanderer.skip(ctx.getSource().getServer());
 					// Plan right now instead of waiting for the next scheduler pass.
 					WandererScheduler.work(ctx.getSource().getServer(), false);
-					ctx.getSource().sendSuccess(() -> Messages.questAdmin("Skipped: planning the next Wanderer"), true);
+					ctx.getSource().sendSuccess(() -> WandererMessages.questAdmin("Skipped: planning the next Wanderer"), true);
 					return 1;
 				}))
 			.then(Commands.literal("complete")
@@ -41,7 +42,7 @@ public final class QuestCommand {
 					.executes(ctx -> {
 						int line = IntegerArgumentType.getInteger(ctx, "line");
 						if (!Wanderer.complete(ctx.getSource().getServer(), line - 1)) {
-							ctx.getSource().sendFailure(Messages.questAdmin("No such quest line"));
+							ctx.getSource().sendFailure(WandererMessages.questAdmin("No such quest line"));
 							return 0;
 						}
 						return 1;
@@ -50,7 +51,7 @@ public final class QuestCommand {
 				.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 				.executes(ctx -> {
 					Wanderer.reset(ctx.getSource().getServer());
-					ctx.getSource().sendSuccess(() -> Messages.questAdmin("Wanderer reset"), true);
+					ctx.getSource().sendSuccess(() -> WandererMessages.questAdmin("Wanderer reset"), true);
 					return 1;
 				})));
 	}
@@ -59,16 +60,16 @@ public final class QuestCommand {
 	private static int giveUp(CommandSourceStack src) {
 		MinecraftServer server = src.getServer();
 		if (!io.github.huydangtruong.immortalcultivation.ImmortalCultivation.enabled(server)) {
-			src.sendFailure(Messages.disabledHint());
+			src.sendFailure(HeartMessages.disabledHint());
 			return 0;
 		}
 		Component who = src.getDisplayName();
 		Phase phase = Wanderer.data(server).phase();
 		if (phase != Phase.PLANNED && phase != Phase.PRESENT) {
-			src.sendFailure(Messages.nothingToGiveUp());
+			src.sendFailure(WandererMessages.nothingToGiveUp());
 			return 0;
 		}
-		Wanderer.leave(server, Messages.gaveUp(who));
+		Wanderer.leave(server, WandererMessages.gaveUp(who));
 		return 1;
 	}
 
@@ -83,28 +84,28 @@ public final class QuestCommand {
 					dist = (int) Math.round(Math.hypot(p.getX() - d.x(), p.getZ() - d.z()));
 				}
 				int fd = dist;
-				src.sendSuccess(() -> Messages.questWhere(d.x(), d.z(), fd), false);
+				src.sendSuccess(() -> WandererMessages.questWhere(d.x(), d.z(), fd), false);
 			}
 			case WAITING -> {
 				long days = Math.max(0, d.nextDay() - Wanderer.currentDay(server));
-				src.sendSuccess(() -> Messages.questNext(days), false);
+				src.sendSuccess(() -> WandererMessages.questNext(days), false);
 			}
 		}
 		if (d.phase() == Phase.PLANNED || d.phase() == Phase.PRESENT) {
 			String left = StayTime.format(Wanderer.ticksLeft(server));
-			src.sendSuccess(() -> Messages.leavesIn(left), false);
+			src.sendSuccess(() -> WandererMessages.leavesIn(left), false);
 		}
 		if (d.phase() == Phase.PRESENT && d.quest().isPresent()) {
 			Quest q = d.quest().get();
 			if (!q.accepted()) {
-				src.sendSuccess(Messages::questNoLines, false);
+				src.sendSuccess(WandererMessages::questNoLines, false);
 			} else {
 				List<QuestLine> lines = q.lines();
 				for (int i = 0; i < lines.size(); i++) {
 					QuestLine l = lines.get(i);
 					Component text = Wanderer.lineText(l.type(), l.target(), l.required(), l.progress());
 					int n = i + 1;
-					src.sendSuccess(() -> Messages.questLineStatus(n, text), false);
+					src.sendSuccess(() -> WandererMessages.questLineStatus(n, text), false);
 				}
 			}
 		}

@@ -1,7 +1,7 @@
 package io.github.huydangtruong.immortalcultivation.wanderer;
 
 import io.github.huydangtruong.immortalcultivation.Uuids;
-import io.github.huydangtruong.immortalcultivation.Messages;
+import io.github.huydangtruong.immortalcultivation.QuestEventMessages;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.random.RandomGenerator;
@@ -89,7 +89,7 @@ public final class QuestBoss {
 			return false;
 		}
 		if (d.boss().isPresent() && liveBoss(server, d.boss().get()) != null) {
-			by.sendOverlayMessage(Messages.bossAlreadyHere());
+			by.sendOverlayMessage(QuestEventMessages.bossAlreadyHere());
 			return false;
 		}
 		ServerLevel ow = server.overworld();
@@ -129,7 +129,7 @@ public final class QuestBoss {
 			atk.setBaseValue(atk.getBaseValue() * DAMAGE_MULTIPLIER);
 		}
 		boss.setPersistenceRequired();
-		boss.setCustomName(Messages.bossName(typeName));
+		boss.setCustomName(QuestEventMessages.bossName(typeName));
 		boss.setCustomNameVisible(true);
 		boss.addTag(TAG);
 		boss.setTarget(by);
@@ -161,7 +161,7 @@ public final class QuestBoss {
 			}
 		}
 		clearBar();
-		server.getPlayerList().broadcastSystemMessage(Messages.bossSummoned(Messages.bossName(typeName)), false);
+		server.getPlayerList().broadcastSystemMessage(QuestEventMessages.bossSummoned(QuestEventMessages.bossName(typeName)), false);
 		return true;
 	}
 

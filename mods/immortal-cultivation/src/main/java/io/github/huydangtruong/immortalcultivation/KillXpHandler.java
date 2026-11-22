@@ -52,15 +52,15 @@ final class KillXpHandler {
 		HeartRules.KillResult r = HeartRules.onHostileKill(before, xp);
 		HeartsAttachment.set(sp, r.data());
 		switch (r.outcome()) {
-			case PROGRESS -> sp.sendOverlayMessage(Messages.xpGained(r.xpGained()));
+			case PROGRESS -> sp.sendOverlayMessage(HeartMessages.xpGained(r.xpGained()));
 			case GAINED -> {
 				HealthApplier.apply(sp, false);
 				sp.setHealth(Math.min(sp.getMaxHealth(), sp.getHealth() + 2f * r.heartsGained()));
 				sp.level().playSound(null, sp.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1f, 1f);
-				sp.sendSystemMessage(Messages.gained(r.heartsGained(), HeartRules.maxHearts(r.data())));
+				sp.sendSystemMessage(HeartMessages.gained(r.heartsGained(), HeartRules.maxHearts(r.data())));
 			}
 			// AT_CAP only happens when already at the cap: overlay, not chat, so farming at the cap doesn't spam chat.
-			case AT_CAP -> sp.sendOverlayMessage(Messages.cap());
+			case AT_CAP -> sp.sendOverlayMessage(HeartMessages.cap());
 		}
 	}
 }

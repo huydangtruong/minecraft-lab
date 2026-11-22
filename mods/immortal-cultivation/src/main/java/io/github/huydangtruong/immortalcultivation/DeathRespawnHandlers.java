@@ -70,15 +70,15 @@ final class DeathRespawnHandlers {
 			if (protectedDeath) {
 				HeartsAttachment.set(p, before); // no heart lost
 				HealthApplier.apply(p, true);
-				p.sendSystemMessage(Messages.deathMatchProtected());
+				p.sendSystemMessage(QuestEventMessages.deathMatchProtected());
 				return;
 			}
 			HeartRules.DeathResult r = HeartRules.onDeath(before);
 			HeartsAttachment.set(p, r.data());
 			HealthApplier.apply(p, true);
 			p.sendSystemMessage(r.outcome() == HeartRules.DeathOutcome.LOST
-				? Messages.lost(HeartRules.maxHearts(r.data()))
-				: Messages.floor());
+				? HeartMessages.lost(HeartRules.maxHearts(r.data()))
+				: HeartMessages.floor());
 		});
 	}
 }

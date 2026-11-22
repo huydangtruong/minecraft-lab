@@ -32,7 +32,7 @@ final class WandererEvents {
 				if (ImmortalCultivation.enabled(sp.level().getServer())) {
 					WandererMenus.open(sp, entity);
 				} else {
-					sp.sendSystemMessage(Messages.disabledHint());
+					sp.sendSystemMessage(HeartMessages.disabledHint());
 				}
 			}
 			return InteractionResult.SUCCESS;
@@ -65,7 +65,7 @@ final class WandererEvents {
 		// Blood Moon: no sleeping, the starter dying or leaving ends it, late joiners get the boss bar; boss death ends the boss line.
 		EntitySleepEvents.ALLOW_SLEEPING.register((player, pos) ->
 			player instanceof ServerPlayer sp && BloodMoon.running(sp.level().getServer())
-				? new Player.BedSleepingProblem(Messages.bloodMoonNoSleep()) : null);
+				? new Player.BedSleepingProblem(QuestEventMessages.bloodMoonNoSleep()) : null);
 		ServerPlayerEvents.LEAVE.register(BloodMoon::onLeave);
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity.level() instanceof ServerLevel level) {

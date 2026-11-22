@@ -110,7 +110,7 @@ public class ImmortalCultivation implements ModInitializer {
 			for (ServerPlayer p : server.getPlayerList().getPlayers()) {
 				HeartsAttachment.setActive(p, value);
 				HealthApplier.apply(p, false);
-				p.sendSystemMessage(Messages.toggled(value));
+				p.sendSystemMessage(HeartMessages.toggled(value));
 			}
 		});
 		CommandRegistrationCallback.EVENT.register((d, c, s) -> {

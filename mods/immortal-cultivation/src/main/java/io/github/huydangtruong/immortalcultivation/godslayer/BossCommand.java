@@ -2,7 +2,7 @@ package io.github.huydangtruong.immortalcultivation.godslayer;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
-import io.github.huydangtruong.immortalcultivation.Messages;
+import io.github.huydangtruong.immortalcultivation.GodSlayerMessages;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.commands.CommandSourceStack;
@@ -27,7 +27,7 @@ public final class BossCommand {
 					if (GodSlayerHunt.giveUp(ctx.getSource().getServer())) {
 						return 1;
 					}
-					ctx.getSource().sendFailure(Messages.godSlayerNoHunt());
+					ctx.getSource().sendFailure(GodSlayerMessages.godSlayerNoHunt());
 					return 0;
 				}))
 			.then(Commands.literal("freeze")
@@ -38,14 +38,14 @@ public final class BossCommand {
 			.then(Commands.literal("level")
 				.executes(ctx -> {
 					int level = GodSlayerHunt.level(ctx.getSource().getServer());
-					ctx.getSource().sendSuccess(() -> Messages.godSlayerLevelIs(level), false);
+					ctx.getSource().sendSuccess(() -> GodSlayerMessages.godSlayerLevelIs(level), false);
 					return level;
 				})
 				.then(Commands.argument("n", IntegerArgumentType.integer(1, GodSlayerRules.MAX_LEVEL))
 					.executes(ctx -> {
 						int n = IntegerArgumentType.getInteger(ctx, "n");
 						GodSlayerHunt.setLevel(ctx.getSource().getServer(), n);
-						ctx.getSource().sendSuccess(() -> Messages.godSlayerLevelSet(n), true);
+						ctx.getSource().sendSuccess(() -> GodSlayerMessages.godSlayerLevelSet(n), true);
 						return n;
 					}))));
 	}
@@ -53,10 +53,10 @@ public final class BossCommand {
 	/** /boss freeze stand|fly|fly_forward|off: look at the boss without it moving (D104). */
 	private static int freeze(CommandSourceStack source, int pose) {
 		if (GodSlayerHunt.freeze(source, pose) == null) {
-			source.sendFailure(Messages.godSlayerNoFrozen());
+			source.sendFailure(GodSlayerMessages.godSlayerNoFrozen());
 			return 0;
 		}
-		source.sendSuccess(() -> Messages.godSlayerFrozen(pose), true);
+		source.sendSuccess(() -> GodSlayerMessages.godSlayerFrozen(pose), true);
 		return 1;
 	}
 
@@ -64,7 +64,7 @@ public final class BossCommand {
 	private static int summon(CommandSourceStack source, ServerPlayer target) {
 		MinecraftServer server = source.getServer();
 		if (GodSlayerHunt.phase(server) != GodSlayerSavedData.Phase.IDLE) {
-			source.sendFailure(Messages.godSlayerBusy());
+			source.sendFailure(GodSlayerMessages.godSlayerBusy());
 			return 0;
 		}
 		ServerPlayer pick = target;
@@ -79,14 +79,14 @@ public final class BossCommand {
 				all.addAll(server.getPlayerList().getPlayers());
 			}
 			if (all.isEmpty()) {
-				source.sendFailure(Messages.godSlayerNoPlayer());
+				source.sendFailure(GodSlayerMessages.godSlayerNoPlayer());
 				return 0;
 			}
 			pick = all.get(new java.util.Random().nextInt(all.size()));
 		}
 		GodSlayerHunt.start(server, pick);
 		String name = GodSlayerHunt.name(pick);
-		source.sendSuccess(() -> Messages.godSlayerSummoned(name), true);
+		source.sendSuccess(() -> GodSlayerMessages.godSlayerSummoned(name), true);
 		return 1;
 	}
 }

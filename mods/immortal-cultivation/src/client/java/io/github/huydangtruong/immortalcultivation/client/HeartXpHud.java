@@ -3,7 +3,7 @@ package io.github.huydangtruong.immortalcultivation.client;
 import io.github.huydangtruong.immortalcultivation.HeartRules;
 import io.github.huydangtruong.immortalcultivation.HeartsAttachment;
 import io.github.huydangtruong.immortalcultivation.HeartsData;
-import io.github.huydangtruong.immortalcultivation.Messages;
+import io.github.huydangtruong.immortalcultivation.HeartMessages;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -29,7 +29,7 @@ public class HeartXpHud implements HudElement {
 		HeartsData d = p.getAttachedOrElse(HeartsAttachment.HEARTS, HeartsData.DEFAULT);
 		int barY = g.guiHeight() - MARGIN - H;
 		int labelY = barY - 10;
-		Component label = HeartRules.maxHearts(d) >= HeartRules.MAX ? Messages.hudMax() : Messages.hudLabel(d.heartXp());
+		Component label = HeartRules.maxHearts(d) >= HeartRules.MAX ? HeartMessages.hudMax() : HeartMessages.hudLabel(d.heartXp());
 		g.text(mc.font, label, X, labelY, 0xFFFF5555, true);
 		g.fill(X, barY, X + W, barY + H, 0xA0000000);
 		g.fill(X + 1, barY + 1, X + 1 + (int) ((W - 2) * HeartRules.xpFraction(d)), barY + H - 1, 0xFFE03C3C);

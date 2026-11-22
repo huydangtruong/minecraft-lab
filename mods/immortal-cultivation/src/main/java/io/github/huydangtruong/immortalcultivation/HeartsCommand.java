@@ -21,11 +21,11 @@ public final class HeartsCommand {
 			.executes(ctx -> {
 				ServerPlayer p = ctx.getSource().getPlayerOrException();
 				HeartsData d = HeartsAttachment.get(p);
-				ctx.getSource().sendSuccess(() -> Messages.status(HeartRules.maxHearts(d), d.heartXp(), d.totalHostileKills(), d.totalDeaths()), false);
+				ctx.getSource().sendSuccess(() -> HeartMessages.status(HeartRules.maxHearts(d), d.heartXp(), d.totalHostileKills(), d.totalDeaths()), false);
 				CultivationData cd = HeartsAttachment.getCultivation(p);
-				ctx.getSource().sendSuccess(() -> Messages.cultivationStatus(cd), false);
+				ctx.getSource().sendSuccess(() -> HeartMessages.cultivationStatus(cd), false);
 				if (!ImmortalCultivation.enabled(ctx.getSource().getServer())) {
-					ctx.getSource().sendSuccess(Messages::disabledHint, false);
+					ctx.getSource().sendSuccess(HeartMessages::disabledHint, false);
 				}
 				return 1;
 			})
@@ -39,7 +39,7 @@ public final class HeartsCommand {
 							for (ServerPlayer p : targets) {
 								HeartsAttachment.set(p, HeartRules.withHearts(HeartsAttachment.get(p), n));
 								HealthApplier.apply(p, false);
-								ctx.getSource().sendSuccess(() -> Messages.set(p.getDisplayName(), n), true);
+								ctx.getSource().sendSuccess(() -> HeartMessages.set(p.getDisplayName(), n), true);
 							}
 							return targets.size();
 						}))))
@@ -77,7 +77,7 @@ public final class HeartsCommand {
 							for (ServerPlayer p : targets) {
 								HeartsAttachment.set(p, HeartRules.withXp(HeartsAttachment.get(p), n));
 								HealthApplier.apply(p, false);
-								ctx.getSource().sendSuccess(() -> Messages.xpSet(p.getDisplayName(), n), true);
+								ctx.getSource().sendSuccess(() -> HeartMessages.xpSet(p.getDisplayName(), n), true);
 							}
 							return targets.size();
 						})))));

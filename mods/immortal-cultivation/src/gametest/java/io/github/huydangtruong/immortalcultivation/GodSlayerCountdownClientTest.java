@@ -18,12 +18,12 @@ public class GodSlayerCountdownClientTest implements FabricClientGameTest {
 			// start (60 s left): the edge is barely there; end (about 2 s left): the strongest it gets
 			context.runOnClient(mc -> GodSlayerWarningHud.setTicksLeft(mc.level.getGameTime() + 1200));
 			server.runOnServer(s -> s.getPlayerList().getPlayers()
-				.forEach(p -> p.sendOverlayMessage(Messages.godSlayerCountdown(60))));
+				.forEach(p -> p.sendOverlayMessage(GodSlayerMessages.godSlayerCountdown(60))));
 			context.waitTicks(5);
 			context.takeScreenshot("countdown-start");
 			context.runOnClient(mc -> GodSlayerWarningHud.setTicksLeft(mc.level.getGameTime() + 40));
 			server.runOnServer(s -> s.getPlayerList().getPlayers()
-				.forEach(p -> p.sendOverlayMessage(Messages.godSlayerCountdown(2))));
+				.forEach(p -> p.sendOverlayMessage(GodSlayerMessages.godSlayerCountdown(2))));
 			context.waitTicks(2);
 			context.takeScreenshot("countdown-end");
 			context.runOnClient(mc -> GodSlayerWarningHud.setTicksLeft(-1));

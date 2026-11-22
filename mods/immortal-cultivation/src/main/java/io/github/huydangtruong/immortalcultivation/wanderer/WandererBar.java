@@ -1,6 +1,6 @@
 package io.github.huydangtruong.immortalcultivation.wanderer;
 
-import io.github.huydangtruong.immortalcultivation.Messages;
+import io.github.huydangtruong.immortalcultivation.WandererMessages;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -33,7 +33,7 @@ public final class WandererBar {
 			return;
 		}
 		long left = Wanderer.ticksLeft(server);
-		Component name = Messages.masterBar(d.x(), d.z(), StayTime.format(left));
+		Component name = WandererMessages.masterBar(d.x(), d.z(), StayTime.format(left));
 		if (bar == null) {
 			bar = new ServerBossEvent(UUID.randomUUID(), name, BossEvent.BossBarColor.YELLOW, BossEvent.BossBarOverlay.PROGRESS);
 		} else {
@@ -80,14 +80,14 @@ public final class WandererBar {
 	/** Big title for every online player: the Crimson Master appeared. */
 	public static void announceArrival(MinecraftServer server, int x, int z) {
 		for (ServerPlayer p : server.getPlayerList().getPlayers()) {
-			title(p, Messages.masterTitle(), Messages.masterArrivedSubtitle(x, z));
+			title(p, WandererMessages.masterTitle(), WandererMessages.masterArrivedSubtitle(x, z));
 		}
 	}
 
 	/** Big title for every online player: the Crimson Master leaves soon. */
 	public static void announceLeavingSoon(MinecraftServer server, int x, int z) {
 		for (ServerPlayer p : server.getPlayerList().getPlayers()) {
-			title(p, Messages.masterTitle(), Messages.masterLeavingSubtitle(x, z));
+			title(p, WandererMessages.masterTitle(), WandererMessages.masterLeavingSubtitle(x, z));
 		}
 	}
 

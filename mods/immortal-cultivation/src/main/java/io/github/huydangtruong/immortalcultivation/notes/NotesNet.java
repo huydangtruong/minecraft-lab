@@ -83,7 +83,7 @@ public final class NotesNet {
 			}
 			sendAfterChange(server, p, data, shared);
 			if (shared) {
-				server.getPlayerList().broadcastSystemMessage(io.github.huydangtruong.immortalcultivation.Messages.sharedNoteAdded(p.getDisplayName()), false);
+				server.getPlayerList().broadcastSystemMessage(io.github.huydangtruong.immortalcultivation.WandererMessages.sharedNoteAdded(p.getDisplayName()), false);
 			}
 		} else if (kind == DELETE) {
 			if (data.delete(shared, p.getUUID(), id)) {
