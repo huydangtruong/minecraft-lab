@@ -239,16 +239,25 @@ public final class Grasp {
 
 	/** True when the entity is a mob grasped by this player: their clones, guardians and angels leave it alone. */
 	public static boolean isGraspedBy(Entity e, UUID owner) {
-		GraspedMob g = e.getAttached(GraspedMob.ATTACHMENT);
+		GraspedMob g = graspOf(e);
 		return g != null && g.owner().equals(owner);
+	}
+
+	/** The grasp of a mob, or D192: of the grasped evoker that summoned this vex (its vexes are on the owner's side too). */
+	static GraspedMob graspOf(Entity e) {
+		GraspedMob g = e.getAttached(GraspedMob.ATTACHMENT);
+		if (g == null && e instanceof net.minecraft.world.entity.monster.Vex v && v.getOwner() instanceof Mob o) {
+			g = o.getAttached(GraspedMob.ATTACHMENT);
+		}
+		return g;
 	}
 
 	/** True when the attacker must not target the target (checked from Mob#canAttack). */
 	public static boolean blocksAttack(Mob attacker, LivingEntity target) {
-		GraspedMob mine = attacker.getAttached(GraspedMob.ATTACHMENT);
+		GraspedMob mine = graspOf(attacker);
 		if (mine != null) {
-			if (target.getUUID().equals(mine.owner()) || target.hasAttached(GraspedMob.ATTACHMENT)) {
-				return true; // never its owner, never another grasped mob
+			if (target.getUUID().equals(mine.owner()) || graspOf(target) != null) {
+				return true; // never its owner, never another grasped mob (nor a vex of a grasped evoker, D192)
 			}
 		}
 		if (target.hasAttached(GraspedMob.ATTACHMENT) && (attacker instanceof net.minecraft.world.entity.animal.golem.IronGolem
