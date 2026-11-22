@@ -49,6 +49,7 @@ public class GolemClientTest implements FabricClientGameTest {
 			context.getInput().pressMouse(LEFT);
 			context.waitTicks(6);
 			context.takeScreenshot("70-life-stealer");
+			context.waitTicks(54); // D180: the bleeding starts after the 2 s drain
 			check(server.computeOnServer(s -> husk(s).hasEffect(Bleeding.EFFECT)), "the husk bleeds");
 			server.runCommand("kill @e[type=husk]");
 

@@ -58,6 +58,10 @@ public class PassiveClientTest implements FabricClientGameTest {
 			context.waitTicks(5);
 			context.clickScreenButton("Cultivation");
 			context.waitTicks(3);
+			if (!context.computeOnClient(mc -> StatsPanel.isOpen())) { // the panel state is static: an earlier test may have left it open
+				context.clickScreenButton("Cultivation");
+				context.waitTicks(3);
+			}
 			context.clickScreenButton("Passives");
 			context.waitTicks(5);
 			if (!context.computeOnClient(mc -> StatsPanel.isOpen() && StatsPanel.tab() == StatsPanel.Tab.PASSIVES)) {
