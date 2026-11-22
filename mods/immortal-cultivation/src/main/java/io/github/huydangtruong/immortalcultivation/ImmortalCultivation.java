@@ -41,7 +41,6 @@ public class ImmortalCultivation implements ModInitializer {
 	/** Fabric mod id (fabric.mod.json, jar, release tag). Not the data namespace. */
 	public static final String MOD_ID = "immortal-cultivation";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
-	private static final Identifier AFTER_ATTACHMENT_COPY = Identifier.fromNamespaceAndPath(NAMESPACE, "after_attachment_copy");
 
 	/** Per-world ImmortalCultivation switch (D10, D11). Default off; Game Rules screen at world creation or /gamerule permahearts:immortal_cultivation. */
 	/** Own game rule group (D78): the screen draws group titles in bold yellow; the title carries the mod version. */
@@ -124,133 +123,10 @@ public class ImmortalCultivation implements ModInitializer {
 			io.github.huydangtruong.immortalcultivation.admin.AdminCommand.register(d);
 			io.github.huydangtruong.immortalcultivation.quit.Quit.registerCommand(d);
 		});
-		// Right-click on the Wanderer opens the quest screen instead of the trade screen (SUCCESS also blocks vanilla).
-		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
-			if (!WandererNpc.isWanderer(entity)) {
-				return InteractionResult.PASS;
-			}
-			if (hand == InteractionHand.MAIN_HAND && player instanceof ServerPlayer sp) {
-				if (enabled(sp.level().getServer())) {
-					WandererMenus.open(sp, entity);
-				} else {
-					sp.sendSystemMessage(Messages.disabledHint());
-				}
-			}
-			return InteractionResult.SUCCESS;
-		});
-		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> !WandererNpc.isWanderer(entity));
-		// A wanderer that is not the stored one (after a reset or respawn) is a stale copy: remove it.
-		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
-			if (WandererNpc.isWanderer(entity)) {
-				var d = Wanderer.data(level.getServer());
-				boolean current = d.phase() == Phase.PRESENT && d.npcUuid().isPresent()
-					&& d.npcUuid().get().equals(entity.getUUID().toString());
-				if (!current) {
-					entity.discard();
-				} else {
-					entity.setPermanentlyInvulnerable(true); // NPCs from 0.7.0 worlds: mobs must not target them
-				}
-			}
-			// A boss that is not the saved one (a lost boss came back after a re-summon) is a stale copy.
-			if (entity.entityTags().contains(QuestBoss.TAG)) {
-				var boss = Wanderer.data(level.getServer()).boss();
-				if (boss.isEmpty() || !boss.get().bossUuid().equals(entity.getUUID().toString())) {
-					entity.discard();
-				}
-			}
-		});
-		// Blood Moon: no sleeping, the starter dying or leaving ends it, late joiners get the boss bar; boss death ends the boss line.
-		EntitySleepEvents.ALLOW_SLEEPING.register((player, pos) ->
-			player instanceof ServerPlayer sp && BloodMoon.running(sp.level().getServer())
-				? new Player.BedSleepingProblem(Messages.bloodMoonNoSleep()) : null);
-		ServerPlayerEvents.LEAVE.register(BloodMoon::onLeave);
-		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
-			if (entity.level() instanceof ServerLevel level) {
-				BloodMoon.onDeath(level.getServer(), entity);
-				QuestBoss.onDeath(level.getServer(), entity);
-			}
-		});
-		// Death Match (D25): mark a death that fell to another player during the match. Set to the computed value on every
-		// player death (not only to true), so a stale flag can never protect a later, normal death. Never cancels the death.
-		ServerLivingEntityEvents.ALLOW_DEATH.register((entity, source, amount) -> {
-			if (entity instanceof ServerPlayer sp) {
-				HeartsAttachment.setDeathMatchProtected(sp,
-					DeathMatch.isProtectedDeath(sp.level().getServer(), sp, source));
-			}
-			return true;
-		});
-		// Items and XP: the Player mixin skips the drops while the flag is set; here they come back to the new player.
-		// COPY_FROM runs inside PlayerList.respawn, after vanilla restoreFrom and before AFTER_RESPAWN.
-		ServerPlayerEvents.COPY_FROM.register((old, p, alive) -> {
-			if (!alive && HeartsAttachment.isDeathMatchProtected(old)) {
-				p.getInventory().replaceWith(old.getInventory());
-				p.experienceLevel = old.experienceLevel;
-				p.totalExperience = old.totalExperience;
-				p.experienceProgress = old.experienceProgress;
-				p.setScore(old.getScore());
-			} else if (!alive && !p.level().getGameRules().get(net.minecraft.world.level.gamerules.GameRules.KEEP_INVENTORY)) {
-				io.github.huydangtruong.immortalcultivation.passive.Passives.restore(old, p); // D148 Inventory protect
-			}
-		});
-		ServerPlayerEvents.JOIN.register(p -> {
-			BloodMoon.onJoin(p);
-			Wanderer.onJoin(p);
-			HeartsAttachment.setActive(p, enabled(p.level().getServer()));
-			HealthApplier.apply(p, false);
-		});
-		// Fabric copies attachments old -> new player in its own AFTER_RESPAWN listener (default phase). Run after it,
-		// or that copy overwrites what we set (docs/system/02-findings.md). Data is read from the old player anyway.
-		ServerPlayerEvents.AFTER_RESPAWN.register((old, p, alive) -> BloodMoon.onRespawn(p));
-		ServerPlayerEvents.AFTER_RESPAWN.addPhaseOrdering(Event.DEFAULT_PHASE, AFTER_ATTACHMENT_COPY);
-		ServerPlayerEvents.AFTER_RESPAWN.register(AFTER_ATTACHMENT_COPY, (old, p, alive) -> {
-			HeartsData before = HeartsAttachment.get(old);
-			boolean on = enabled(p.level().getServer());
-			HeartsAttachment.setActive(p, on);
-			// Death Match: the death fell to another player during the match. The flag was copied onto the new player;
-			// clear it on every path so it never outlives this respawn.
-			boolean protectedDeath = !alive && HeartsAttachment.isDeathMatchProtected(old);
-			HeartsAttachment.setDeathMatchProtected(p, false);
-			if (!on) {
-				// World switched off: no heart lost, no message; keep the data so turning it on again restores everything.
-				HeartsAttachment.set(p, before);
-				HealthApplier.apply(p, true);
-				return;
-			}
-			if (alive) {
-				HeartsAttachment.set(p, before);
-				HealthApplier.apply(p, false);
-				return;
-			}
-			if (protectedDeath) {
-				HeartsAttachment.set(p, before); // no heart lost
-				HealthApplier.apply(p, true);
-				p.sendSystemMessage(Messages.deathMatchProtected());
-				return;
-			}
-			HeartRules.DeathResult r = HeartRules.onDeath(before);
-			HeartsAttachment.set(p, r.data());
-			HealthApplier.apply(p, true);
-			p.sendSystemMessage(r.outcome() == HeartRules.DeathOutcome.LOST
-				? Messages.lost(HeartRules.maxHearts(r.data()))
-				: Messages.floor());
-		});
-		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
-			if (entity instanceof ServerPlayer victim) {
-				DeathMatch.onPlayerKilled(victim.level().getServer(), victim, source);
-			}
-			if (entity.getKillCredit() instanceof ServerPlayer killer && enabled(killer.level().getServer())) {
-				Wanderer.onKill(killer.level().getServer(), killer, entity.getType());
-			}
-			if ((entity instanceof Enemy || entity instanceof io.github.huydangtruong.immortalcultivation.godslayer.GodSlayer) && entity.getKillCredit() instanceof ServerPlayer sp
-				&& enabled(sp.level().getServer())) {
-				onHostileKill(sp, HeartRules.xpFor(entity.getMaxHealth()));
-			}
-		});
-		net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents.AFTER.register((level, player, pos, state, be) -> {
-			if (player instanceof ServerPlayer sp && ripeCrop(state)) {
-				onCropHarvest(sp, 1);
-			}
-		});
+		WandererEvents.register();
+		WandererEvents.registerBloodMoon();
+		DeathRespawnHandlers.register();
+		KillXpHandler.register();
 		LOGGER.info("ImmortalCultivation loaded");
 	}
 
@@ -258,38 +134,6 @@ public class ImmortalCultivation implements ModInitializer {
 	public static void onCropHarvest(ServerPlayer sp, int crops) {
 		if (crops > 0 && enabled(sp.level().getServer()) && !sp.isCreative() && !sp.isSpectator()) {
 			sp.giveExperiencePoints(io.github.huydangtruong.immortalcultivation.passive.Passives.bonusXp(sp, HeartRules.CROP_XP * crops)); // D148 XP gain bonus
-		}
-	}
-
-	/** D140: true when the state is a crop (CropBlock, nether wart, cocoa) in its last two growth stages. */
-	public static boolean ripeCrop(net.minecraft.world.level.block.state.BlockState st) {
-		var b = st.getBlock();
-		if (b instanceof net.minecraft.world.level.block.CropBlock c) {
-			return HeartRules.cropGivesXp(c.getAge(st), c.getMaxAge());
-		}
-		if (b instanceof net.minecraft.world.level.block.NetherWartBlock) {
-			return HeartRules.cropGivesXp(st.getValue(net.minecraft.world.level.block.NetherWartBlock.AGE), net.minecraft.world.level.block.NetherWartBlock.MAX_AGE);
-		}
-		if (b instanceof net.minecraft.world.level.block.CocoaBlock) {
-			return HeartRules.cropGivesXp(st.getValue(net.minecraft.world.level.block.CocoaBlock.AGE), net.minecraft.world.level.block.CocoaBlock.MAX_AGE);
-		}
-		return false;
-	}
-
-	static void onHostileKill(ServerPlayer sp, int xp) {
-		HeartsData before = HeartsAttachment.get(sp);
-		HeartRules.KillResult r = HeartRules.onHostileKill(before, xp);
-		HeartsAttachment.set(sp, r.data());
-		switch (r.outcome()) {
-			case PROGRESS -> sp.sendOverlayMessage(Messages.xpGained(r.xpGained()));
-			case GAINED -> {
-				HealthApplier.apply(sp, false);
-				sp.setHealth(Math.min(sp.getMaxHealth(), sp.getHealth() + 2f * r.heartsGained()));
-				sp.level().playSound(null, sp.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1f, 1f);
-				sp.sendSystemMessage(Messages.gained(r.heartsGained(), HeartRules.maxHearts(r.data())));
-			}
-			// AT_CAP only happens when already at the cap: overlay, not chat, so farming at the cap doesn't spam chat.
-			case AT_CAP -> sp.sendOverlayMessage(Messages.cap());
 		}
 	}
 }
