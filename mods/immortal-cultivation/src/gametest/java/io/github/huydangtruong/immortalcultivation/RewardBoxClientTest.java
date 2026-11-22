@@ -58,7 +58,7 @@ public class RewardBoxClientTest implements FabricClientGameTest {
 			p.getMainHandItem().set(RewardBoxes.DATA, new RewardBoxData(List.of(
 				new RewardOption("minecraft:totem_of_undying", 1), new RewardOption("permahearts:enlightenment_bottle", 1),
 				RewardOption.book("minecraft:mending", 1), RewardOption.book("minecraft:sharpness", 5),
-				RewardOption.book("minecraft:protection", 5), new RewardOption("minecraft:diamond", 16),
+				RewardOption.book("minecraft:protection", 4), new RewardOption("minecraft:diamond", 16),
 				new RewardOption("minecraft:gold_ingot", 64), new RewardOption("permahearts:elixir_heart", 1))));
 			RewardBoxes.open(p, InteractionHand.MAIN_HAND);
 		});

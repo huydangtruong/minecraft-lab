@@ -246,7 +246,7 @@ class RewardBoxTest {
 			"minecraft:enchanted_book", "minecraft:enchanted_book", "minecraft:enchanted_book",
 			"minecraft:diamond", "minecraft:emerald", "minecraft:ender_pearl"),
 			RewardRoll.EMERALD_SPECIALS.stream().map(RewardOption::itemId).toList());
-		assertEquals(Set.of("minecraft:mending@1", "minecraft:sharpness@5", "minecraft:protection@5", "minecraft:unbreaking@3"), // D211
+		assertEquals(Set.of("minecraft:mending@1", "minecraft:sharpness@5", "minecraft:protection@4", "minecraft:unbreaking@3"), // D211, D212
 			RewardRoll.EMERALD_SPECIALS.stream().filter(RewardOption::hasEnchant)
 				.map(o -> o.enchant() + "@" + o.enchantLevel()).collect(java.util.stream.Collectors.toSet()));
 	}

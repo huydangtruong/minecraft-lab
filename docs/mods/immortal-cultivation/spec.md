@@ -109,7 +109,7 @@
   - Bạc: vàng 64, kim cương 16, ngọc lục bảo 16, ngọc ender 32.
   - Vàng: vàng 64, kim cương 32, ngọc lục bảo 32, ngọc ender 32, 4 táo vàng phù phép.
   - Kim cương: vàng 64, kim cương 32, ngọc lục bảo 32, ngọc ender 48, 4 táo vàng phù phép, 1 thỏi netherite.
-  - Ngọc lục bảo: vàng 64, kim cương 48, ngọc lục bảo 64, ngọc ender 48, 1 Totem of Undying, 1 Bottle of Enlightenment, sách Mending, Sharpness V, Protection V, Unbreaking III (hai sách khác phép được ra cùng hộp).
+  - Ngọc lục bảo: vàng 64, kim cương 48, ngọc lục bảo 64, ngọc ender 48, 1 Totem of Undying, 1 Bottle of Enlightenment, sách Mending, Sharpness V, Protection IV (D212), Unbreaking III (hai sách khác phép được ra cùng hộp).
 - Chọn đủ số thẻ của hộp (D210) rồi bấm Claim: nhận hết, hộp biến mất. Đóng màn hình khi chưa chọn đủ thì **không lấy gì**, hộp còn nguyên (lựa chọn chưa lưu).
 - **Bottle of Enlightenment** (`permahearts:enlightenment_bottle`): xếp chồng 16, độ hiếm RARE, có ánh sáng. Uống (chuột phải, 32 tick như bình thuốc) được **+16 level kinh nghiệm**, tiêu 1 bình (không tiêu trong Creative). Không chế được, chỉ ra từ hộp ngọc lục bảo (có trong tab Creative "Food & Drinks" để thử).
 - Thẻ ra lúc mở lần đầu và lưu trong component `permahearts:reward_box` (thẻ sách lưu thêm `enchant` và `level`, save cũ không có hai trường này vẫn đọc được); đóng rồi mở lại vẫn các thẻ cũ. Chọn thẻ, bấm Claim: máy chủ kiểm lại, đưa đồ (đầy túi thì rơi dưới chân), trừ 1 hộp, phát tiếng lên cấp. Close giữ hộp.
