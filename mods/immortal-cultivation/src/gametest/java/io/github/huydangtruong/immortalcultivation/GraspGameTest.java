@@ -375,6 +375,26 @@ public class GraspGameTest {
 		});
 	}
 
+	/** P-077 B10: Call never puts the mob into water or the air, it lands on safe ground. */
+	@GameTest(maxTicks = 60)
+	public void aCalledMobNeverLandsInWater(GameTestHelper c) {
+		ServerPlayer p = grasper(c, 20); // at (2.5, 1, 5.5) looking along +x, so a Call aims at (4.5, 1, 5.5)
+		for (int y = 1; y <= 3; y++) {
+			c.setBlock(new net.minecraft.core.BlockPos(4, y, 5), net.minecraft.world.level.block.Blocks.WATER);
+		}
+		Zombie z = c.spawn(EntityTypes.ZOMBIE, new Vec3(0.8, 1, 0.8));
+		z.setNoAi(true);
+		Grasp.tame(p, z, 20);
+		Grasp.handle(p, Grasp.CALL, z.getUUID().toString(), 0);
+		c.assertTrue(!c.getLevel().containsAnyLiquid(z.getBoundingBox()), "the called mob is not in the water, at " + z.position());
+		c.assertTrue(z.distanceTo(p) < 4, "it came to the owner, " + z.distanceTo(p));
+		for (int y = 1; y <= 3; y++) {
+			c.setBlock(new net.minecraft.core.BlockPos(4, y, 5), net.minecraft.world.level.block.Blocks.AIR);
+		}
+		cleanUp(c, p);
+		c.succeed();
+	}
+
 	// ---- D168: the All row ----
 
 	private static Zombie[] three(GameTestHelper c, ServerPlayer p) {

@@ -1,6 +1,7 @@
 package io.github.huydangtruong.immortalcultivation.technique.grasp;
 
 import io.github.huydangtruong.immortalcultivation.Uuids;
+import io.github.huydangtruong.immortalcultivation.technique.SafeTeleport;
 import io.github.huydangtruong.immortalcultivation.technique.grasp.GraspCalls;
 import io.github.huydangtruong.immortalcultivation.technique.grasp.GraspRules;
 import java.util.ArrayList;
@@ -101,12 +102,31 @@ final class GraspCallService {
 
 	/** Teleports a mob to a spot near a point and starts its Call cooldown. */
 	private static void callTo(ServerPlayer p, Mob m, Vec3 want, long now) {
-		Vec3 at = GraspGoals.freeSpotNear(p.level(), m, want);
+		// B10 (as the follow-teleport, D170): ground and no liquid. If the wanted spot is unsafe, the same distance from the owner
+		// at other angles; then the owner's own spot; only when all fail the old free spot.
+		ServerLevel sl = p.level();
+		Vec3 at = null;
+		double rx = want.x - p.getX();
+		double rz = want.z - p.getZ();
+		for (int deg : new int[] {0, 45, -45, 90, -90, 135, -135, 180}) {
+			double a = Math.toRadians(deg);
+			Vec3 spot = new Vec3(p.getX() + rx * Math.cos(a) - rz * Math.sin(a), want.y, p.getZ() + rx * Math.sin(a) + rz * Math.cos(a));
+			at = SafeTeleport.spotOrNull(sl, m, spot);
+			if (at != null) {
+				break;
+			}
+		}
+		if (at == null) {
+			at = SafeTeleport.spotOrNull(sl, m, p.position());
+		}
+		if (at == null) {
+			at = GraspGoals.freeSpotNear(sl, m, want);
+		}
 		m.getNavigation().stop();
 		m.snapTo(at.x, at.y, at.z);
 		m.setTarget(null);
 		CALL_READY.put(m.getUUID(), now + GraspRules.CALL_COOLDOWN_TICKS);
-		p.level().sendParticles(ParticleTypes.END_ROD, at.x, at.y + m.getBbHeight() / 2, at.z, 12, 0.4, 0.4, 0.4, 0.05);
+		sl.sendParticles(ParticleTypes.END_ROD, at.x, at.y + m.getBbHeight() / 2, at.z, 12, 0.4, 0.4, 0.4, 0.05);
 	}
 
 	/** D198: D168's Call all: every ready mob comes, loaded ones now, the others after their chunk loads; says how many. */
