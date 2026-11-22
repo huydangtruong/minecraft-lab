@@ -295,7 +295,7 @@ public final class Warp {
 		ServerLevel from = p.level();
 		Vec3 start = p.position();
 		p.stopRiding();
-		if (!p.teleportTo(target, spot.x, spot.y, spot.z, Set.of(), p.getYRot(), p.getXRot(), false)) {
+		if (!p.teleportTo(target, spot.x, spot.y, spot.z, Set.of(), yaw, p.getXRot(), false)) { // B12: face the way the portal faces
 			return "You cannot warp now";
 		}
 		p.resetFallDistance();
@@ -325,7 +325,7 @@ public final class Warp {
 					for (int dy = 0; dy <= 2; dy++) {
 						double x = at.x + dx, y = at.y + dy, z = at.z + dz;
 						AABB box = new AABB(x - 0.3, y, z - 0.3, x + 0.3, y + 1.8, z + 0.3);
-						if (sl.noCollision(box)) {
+						if (sl.noCollision(box) && !sl.getBlockStatesIfLoaded(box.expandTowards(0, -1, 0)).anyMatch(s -> s.is(net.minecraft.world.level.block.Blocks.LAVA))) { // B12: never into or onto lava
 							return new Vec3(x, y, z);
 						}
 					}

@@ -125,6 +125,35 @@ public class WarpGameTest {
 		c.succeed();
 	}
 
+	/** P-077 B12: the warp faces the way the portal faces and never lands in lava. */
+	@GameTest(maxTicks = 40)
+	public void warpFacesThePortalAndAvoidsLava(GameTestHelper c) {
+		ServerPlayer p = warper(c, 9.5, 9.5);
+		Vec3 v = c.absoluteVec(new Vec3(2.5, 1, 2.5));
+		PortalRecord rec = Warp.spawn(c.getLevel(), p, v.x, v.y, v.z, 90f);
+		for (int dx = -1; dx <= 1; dx++) {
+			for (int dz = -1; dz <= 1; dz++) {
+				for (int y = 1; y <= 3; y++) {
+					c.setBlock(new BlockPos(2 + dx, y, 2 + dz), net.minecraft.world.level.block.Blocks.LAVA);
+				}
+			}
+		}
+		String error = Warp.warpToPortal(p, rec.id());
+		c.assertTrue(error == null, "the warp works, got: " + error);
+		c.assertTrue(Math.abs(p.getYRot() - 90f) < 0.01f, "faces the portal's yaw, was " + p.getYRot());
+		c.assertTrue(!c.getLevel().getBlockStatesIfLoaded(p.getBoundingBox().expandTowards(0, -1, 0)).anyMatch(s -> s.is(net.minecraft.world.level.block.Blocks.LAVA)),
+			"not in or on lava, at " + p.position());
+		for (int dx = -1; dx <= 1; dx++) {
+			for (int dz = -1; dz <= 1; dz++) {
+				for (int y = 1; y <= 3; y++) {
+					c.setBlock(new BlockPos(2 + dx, y, 2 + dz), net.minecraft.world.level.block.Blocks.AIR);
+				}
+			}
+		}
+		cleanUp(c, p);
+		c.succeed();
+	}
+
 	@GameTest(maxTicks = 40)
 	public void warpingToAnotherPlayerWorks(GameTestHelper c) {
 		ServerPlayer p = warper(c, 9.5, 9.5);
