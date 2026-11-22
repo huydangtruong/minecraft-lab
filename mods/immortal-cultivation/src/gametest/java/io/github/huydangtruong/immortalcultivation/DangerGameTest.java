@@ -85,6 +85,10 @@ public class DangerGameTest {
 	public void zombieAtTwentyHasTwoAndAHalfTimesHealthAndDamage(GameTestHelper c) {
 		enable(c);
 		Zombie z = zombieAt(c, 20, 3.5);
+		for (int i = 0; i < 50 && io.github.huydangtruong.immortalcultivation.danger.DangerMobs.isElite(z); i++) {
+			z.discard(); // level 20 can roll an elite (x2 health): this test checks the plain strength only
+			z = zombieAt(c, 20, 3.5);
+		}
 		c.assertTrue(Math.abs(z.getMaxHealth() - 50) < 0.01, "max health 20 x 2.5, was " + z.getMaxHealth());
 		c.assertTrue(Math.abs(z.getHealth() - 50) < 0.01, "healed to full, was " + z.getHealth());
 		c.assertTrue(Math.abs(z.getAttributeValue(Attributes.ATTACK_DAMAGE) - 7.5) < 0.01, "damage 3 x 2.5, was " + z.getAttributeValue(Attributes.ATTACK_DAMAGE));
@@ -201,5 +205,34 @@ public class DangerGameTest {
 			z.discard();
 			c.succeed();
 		});
+	}
+
+	@GameTest(maxTicks = 40)
+	public void naturalIllagersStayOutOfRaidsAndRaidersGlow(GameTestHelper c) { // D190
+		enable(c);
+		net.minecraft.server.level.ServerLevel level = c.getLevel();
+		net.minecraft.core.BlockPos at = c.absolutePos(new net.minecraft.core.BlockPos(2, 1, 2));
+		net.minecraft.world.entity.monster.illager.Pillager natural = net.minecraft.world.entity.EntityTypes.PILLAGER.create(level,
+			net.minecraft.world.entity.EntitySpawnReason.NATURAL);
+		natural.finalizeSpawn(level, level.getCurrentDifficultyAt(at), net.minecraft.world.entity.EntitySpawnReason.NATURAL, null);
+		c.assertTrue(!natural.canJoinRaid(), "a natural pillager never joins a raid");
+		net.minecraft.world.entity.monster.illager.Pillager wave = net.minecraft.world.entity.EntityTypes.PILLAGER.create(level,
+			net.minecraft.world.entity.EntitySpawnReason.EVENT);
+		wave.finalizeSpawn(level, level.getCurrentDifficultyAt(at), net.minecraft.world.entity.EntitySpawnReason.EVENT, null);
+		c.assertTrue(wave.canJoinRaid(), "a raid wave pillager still joins");
+		net.minecraft.world.entity.monster.illager.Vindicator in = c.spawn(net.minecraft.world.entity.EntityTypes.VINDICATOR,
+			new net.minecraft.world.phys.Vec3(2.5, 1, 2.5));
+		net.minecraft.world.entity.monster.illager.Vindicator out = c.spawn(net.minecraft.world.entity.EntityTypes.VINDICATOR,
+			new net.minecraft.world.phys.Vec3(5.5, 1, 5.5));
+		in.setNoAi(true);
+		out.setNoAi(true);
+		net.minecraft.world.entity.raid.Raid raid = new net.minecraft.world.entity.raid.Raid(at, net.minecraft.world.Difficulty.NORMAL);
+		raid.joinRaid(level, 1, in, null, false);
+		io.github.huydangtruong.immortalcultivation.danger.RaidGlow.tick(level.getServer());
+		c.assertTrue(in.hasEffect(net.minecraft.world.effect.MobEffects.GLOWING), "a raider in the raid glows");
+		c.assertTrue(!out.hasEffect(net.minecraft.world.effect.MobEffects.GLOWING), "an illager outside a raid does not");
+		in.discard();
+		out.discard();
+		c.succeed();
 	}
 }

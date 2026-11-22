@@ -87,6 +87,7 @@ public class ImmortalCultivation implements ModInitializer {
 		io.github.huydangtruong.immortalcultivation.passive.PassiveNet.register(); // P-057: Passives tab
 		io.github.huydangtruong.immortalcultivation.passive.CropGrowth.register(); // P-058: Crop growth
 		io.github.huydangtruong.immortalcultivation.treasure.DeadlyTreasure.register(); // P-059: Deadly Treasure
+		io.github.huydangtruong.immortalcultivation.danger.RaidGlow.register(); // D190: raid mobs glow
 		io.github.huydangtruong.immortalcultivation.notes.NotesNet.register(); // P-042: Notes panel
 		io.github.huydangtruong.immortalcultivation.admin.AdminNetworking.register(); // P-060: /admin panel
 		io.github.huydangtruong.immortalcultivation.technique.TechniqueSelection.init();
