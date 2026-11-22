@@ -81,17 +81,18 @@ public final class TreasureRules {
 		new RewardOption("permahearts:enlightenment_bottle", 1), new RewardOption("minecraft:enchanted_golden_apple", 2), // D166: two apples (was one)
 		new RewardOption("minecraft:golden_carrot", 32)); // D172
 
-	/** Random part (no netherite ingot, D150). Weights: common 10, rare 4, very rare 1. */
+	/** Random part (no netherite ingot, D150; D214). Weights: common 10, rare 4, very rare 1. */
 	public static final List<Loot> POOL = List.of(
 		item("diamond", 32, COMMON), item("emerald", 48, COMMON), item("gunpowder", 64, COMMON), item("string", 64, COMMON),
 		item("cooked_beef", 32, COMMON), item("carrot", 64, COMMON), item("iron_ingot", 64, COMMON), item("redstone", 64, COMMON),
-		item("lapis_lazuli", 64, COMMON), item("experience_bottle", 16, COMMON),
-		item("netherite_upgrade_smithing_template", 1, RARE), item("totem_of_undying", 1, RARE), item("ender_pearl", 16, RARE),
+		item("lapis_lazuli", 64, COMMON), item("experience_bottle", 32, COMMON), item("coal", 64, COMMON),
+		item("netherite_upgrade_smithing_template", 1, RARE), item("totem_of_undying", 1, RARE), item("ender_pearl", 32, RARE),
 		item("name_tag", 3, RARE), item("shulker_shell", 4, RARE), item("echo_shard", 8, RARE),
 		item("wither_skeleton_skull", 3, RARE), item("trident", 1, RARE), item("heart_of_the_sea", 1, RARE),
 		item("elytra", 1, VERY_RARE), item("heavy_core", 1, VERY_RARE), item("sniffer_egg", 1, VERY_RARE),
 		new Loot(RewardOption.book("minecraft:looting", 3), VERY_RARE), new Loot(RewardOption.book("minecraft:fortune", 3), VERY_RARE),
-		new Loot(RewardOption.book("minecraft:silk_touch", 1), VERY_RARE));
+		new Loot(RewardOption.book("minecraft:silk_touch", 1), VERY_RARE),
+		new Loot(RewardOption.book("minecraft:blast_protection", 4), VERY_RARE)); // D214: coal, 32 bottles and pearls, Blast Protection IV
 
 	/** The chest content: the bottle, two enchanted golden apples (D166), 32 golden carrots, then 8 different random stacks by weight (D172). */
 	public static List<RewardOption> loot(RandomGenerator rng) {
