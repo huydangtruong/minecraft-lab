@@ -30,6 +30,8 @@
 		"GhastShootFireballGoalMixin",
 		"GraspCanAttackMixin",
 		"GraspSleepMixin",
+		"VillagerGraspFearMixin",
+		"TraderGraspFearMixin",
 		"ItemGuardMixin",
 		"LivingEntityXpMixin",
 		"MobDisarmMixin",

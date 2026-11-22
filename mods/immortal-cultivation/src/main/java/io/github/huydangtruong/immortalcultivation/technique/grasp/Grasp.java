@@ -258,6 +258,11 @@ public final class Grasp {
 		return g != null && g.owner().equals(owner);
 	}
 
+	/** D200: true for a grasped mob or a grasped evoker's vex (villagers do not fear them). */
+	public static boolean isOnGraspSide(Entity e) {
+		return e != null && graspOf(e) != null;
+	}
+
 	/** The grasp of a mob, or D192: of the grasped evoker that summoned this vex (its vexes are on the owner's side too). */
 	static GraspedMob graspOf(Entity e) {
 		GraspedMob g = e.getAttached(GraspedMob.ATTACHMENT);
