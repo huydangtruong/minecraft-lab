@@ -158,6 +158,23 @@ public class TechniqueGameTest {
 	}
 
 	@GameTest(maxTicks = 100)
+	public void assignSwapsSlotsAndHonoursTheSelectedSlotCooldown(GameTestHelper context) {
+		ServerPlayer p = player(context);
+		TechniqueAttachment.set(p, TechniqueData.DEFAULT.withLevel(Technique.FIRE, 1, 10).withLevel(Technique.ICE, 2, 20).withEmeralds(320)
+			.withSlot(0, Technique.FIRE).withSlot(1, Technique.ICE));
+		context.assertTrue(act(p, TechniqueNet.ASSIGN, Technique.ICE, 0) == null, "ice into slot 1");
+		context.assertTrue(TechniqueAttachment.get(p).inSlot(0) == Technique.ICE && TechniqueAttachment.get(p).inSlot(1) == Technique.FIRE, "slots swapped");
+		// the other slot cooling down does not block the swap (cooldowns follow the technique)
+		TechniqueAttachment.set(p, TechniqueAttachment.get(p).withCooldown(Technique.FIRE, now(p) + 300));
+		context.assertTrue(act(p, TechniqueNet.ASSIGN, Technique.FIRE, 0) == null, "swap allowed: the selected slot's ice is ready");
+		context.assertTrue(TechniqueAttachment.get(p).inSlot(0) == Technique.FIRE && TechniqueAttachment.get(p).inSlot(1) == Technique.ICE, "swapped back");
+		// now the selected slot holds fire, which is cooling: the swap is refused and nothing changes
+		context.assertTrue(act(p, TechniqueNet.ASSIGN, Technique.ICE, 0) != null, "refused while the selected slot cools down");
+		context.assertTrue(TechniqueAttachment.get(p).inSlot(0) == Technique.FIRE && TechniqueAttachment.get(p).inSlot(1) == Technique.ICE, "slots unchanged");
+		context.succeed();
+	}
+
+	@GameTest(maxTicks = 100)
 	public void nothingWorksWithTheSwitchOff(GameTestHelper context) {
 		ServerPlayer p = player(context);
 		p.giveExperienceLevels(20);
