@@ -181,7 +181,7 @@ public final class TechniqueFields {
 				double extra = TechniqueRules.fireBurnPerSecond(b.techLevel) - 1;
 				if (extra > 0) {
 					ServerPlayer owner = server.getPlayerList().getPlayer(b.owner);
-					e.setInvulnerableTime(0); // the vanilla tick may have just hurt it: don't let that swallow the extra
+					e.damageCooldownTime = 0; // D183: the vanilla fire tick may have just hurt it: don't let that swallow the extra
 					TechniqueDamage.hurt(level, e, owner, null, DamageTypes.IN_FIRE, (float) extra);
 				}
 			}

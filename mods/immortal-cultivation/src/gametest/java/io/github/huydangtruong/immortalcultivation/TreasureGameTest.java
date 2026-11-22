@@ -2,6 +2,7 @@ package io.github.huydangtruong.immortalcultivation;
 
 import io.github.huydangtruong.immortalcultivation.treasure.DeadlyTreasure;
 import io.github.huydangtruong.immortalcultivation.treasure.MegaMobs;
+import io.github.huydangtruong.immortalcultivation.treasure.TreasureBar;
 import io.github.huydangtruong.immortalcultivation.treasure.TreasureRules;
 import io.github.huydangtruong.immortalcultivation.treasure.TreasureSavedData;
 import io.github.huydangtruong.immortalcultivation.wanderer.Wanderer;
@@ -135,6 +136,30 @@ public class TreasureGameTest {
 			c.absolutePos(new BlockPos(1, 1, 1)));
 		float hit = MegaMobs.scaleDamage(level.damageSources().mobAttack(m), 2f);
 		c.assertTrue(Math.abs(hit - 8f) < 0.001f, "x4 damage: " + hit);
+		c.succeed();
+	}
+
+	@GameTest(maxTicks = 200)
+	public void barShowsWhereGuardsAndTimeAndWarnsOnce(GameTestHelper c) { // D187
+		ServerLevel level = c.getLevel();
+		MinecraftServer s = level.getServer();
+		TreasureSavedData d = fresh(c);
+		d.x = 12345;
+		d.z = -6789;
+		DeadlyTreasure.tick(s);
+		c.assertTrue(TreasureBar.text().contains("near X 12345, Z -6789") && TreasureBar.text().contains("vanishes in"),
+			"bar before the chest: " + TreasureBar.text());
+		c.assertTrue(!d.warned, "no warning 2 days before the end");
+		BlockPos chest = DeadlyTreasure.place(level, d, c.absolutePos(new BlockPos(1, 1, 1)), false, "brutes").chest();
+		DeadlyTreasure.tick(s);
+		c.assertTrue(TreasureBar.text().contains("X " + chest.getX() + ", Y " + chest.getY() + ", Z " + chest.getZ())
+			&& TreasureBar.text().contains("6 guards left"), "bar after the chest: " + TreasureBar.text());
+		d.endAt = Wanderer.clockTime(s) + TreasureRules.WARN_TICKS - 20;
+		DeadlyTreasure.tick(s);
+		c.assertTrue(d.warned, "warned within 2 minutes of the end");
+		DeadlyTreasure.fail(s, d);
+		c.assertTrue(TreasureBar.text().isEmpty(), "bar gone after the event: " + TreasureBar.text());
+		c.assertTrue(!d.warned, "warning flag reset for the next event");
 		c.succeed();
 	}
 }

@@ -1,5 +1,6 @@
 package io.github.huydangtruong.immortalcultivation.client;
 
+import io.github.huydangtruong.immortalcultivation.ElixirStat;
 import io.github.huydangtruong.immortalcultivation.HeartRules;
 import io.github.huydangtruong.immortalcultivation.admin.AdminDraft;
 import io.github.huydangtruong.immortalcultivation.admin.AdminNetworking;
@@ -40,9 +41,11 @@ public class AdminScreen extends Screen {
 	private static final int LEFT_W = 4 + TAB_W + 6 + CONTENT_W + 8;
 	private static final int FRAME = 0xFFC6C6C6;
 	private static final int TEXT = 0xFF404040;
+	/** D186: the Elixirs tab sliders go up to this (or the player's count if higher). */
+	private static final int ELIXIR_SLIDER_MAX = 50;
 
 	private enum Tab {
-		PLAYER("Player"), TECHNIQUES("Techniques"), CRIMSON("Crimson Master"), GOD_SLAYER("God Slayer"),
+		PLAYER("Player"), TECHNIQUES("Techniques"), ELIXIRS("Elixirs"), CRIMSON("Crimson Master"), GOD_SLAYER("God Slayer"),
 		DANGER("Danger"), TREASURE("Treasure"), WORLD("World");
 
 		final String label;
@@ -188,6 +191,7 @@ public class AdminScreen extends Screen {
 		switch (tab) {
 			case PLAYER -> buildPlayer(row);
 			case TECHNIQUES -> buildTechniques(row);
+			case ELIXIRS -> buildElixirs(row);
 			case CRIMSON -> buildCrimson(row);
 			case GOD_SLAYER -> buildGodSlayer(row);
 			case DANGER -> buildDanger(row);
@@ -304,6 +308,8 @@ public class AdminScreen extends Screen {
 		keyedPair(row, "testmode", "Testmode full", "testmode full", "Testmode reset", "testmode reset");
 		addLine(row[0], 0, 188, "Clear cooldowns", "technique cooldowns @s clear");
 		row[0]++;
+		addLine(row[0], 0, 188, "Give full netherite", "testmode netherite"); // D186
+		row[0]++;
 		switchRow(row, "nocooldown", "No cooldown", noCooldownOn, on -> noCooldownOn = on, on -> "technique nocooldown @s " + on);
 	}
 
@@ -315,6 +321,25 @@ public class AdminScreen extends Screen {
 			button(row[0], 138, 50, "Cast", () -> add("technique cast " + t.id() + " " + Math.max(1, sliderValues.getOrDefault(key, 1))));
 			row[0]++;
 		}
+	}
+
+	/** D186: one slider per elixir, starting at the player's current count; moving it down lowers the bonus. */
+	private void buildElixirs(int[] row) {
+		label(row, "Elixirs drunk (0 = no bonus)");
+		ElixirStat[] all = ElixirStat.values();
+		for (int i = 0; i < all.length; i++) {
+			ElixirStat st = all[i];
+			int now = i < rules.elixirs().size() ? rules.elixirs().get(i) : 0;
+			String key = "elixir:" + st.id();
+			slider(row, 0, 188, key, elixirName(st), 0, Math.max(ELIXIR_SLIDER_MAX, now), now,
+				v -> set(key, "hearts elixir @s " + st.id() + " " + v));
+			row[0]++;
+		}
+	}
+
+	private static String elixirName(ElixirStat st) {
+		String s = st.id().replace('_', ' ');
+		return Character.toUpperCase(s.charAt(0)) + s.substring(1);
 	}
 
 	private void buildCrimson(int[] row) {

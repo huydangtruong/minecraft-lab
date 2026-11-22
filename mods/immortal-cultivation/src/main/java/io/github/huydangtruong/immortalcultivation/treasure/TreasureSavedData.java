@@ -22,7 +22,8 @@ public class TreasureSavedData extends SavedData {
 		Codec.BOOL.optionalFieldOf("placed", false).forGetter(d -> d.placed),
 		Codec.STRING.optionalFieldOf("group", "").forGetter(d -> d.group),
 		Codec.STRING.listOf().optionalFieldOf("guards", List.of()).forGetter(d -> d.guards),
-		Codec.LONG.listOf().optionalFieldOf("cleanup", List.of()).forGetter(d -> d.cleanup)
+		Codec.LONG.listOf().optionalFieldOf("cleanup", List.of()).forGetter(d -> d.cleanup),
+		Codec.BOOL.optionalFieldOf("warned", false).forGetter(d -> d.warned)
 	).apply(i, TreasureSavedData::new));
 
 	public static final SavedDataType<TreasureSavedData> TYPE = new SavedDataType<>(
@@ -43,11 +44,13 @@ public class TreasureSavedData extends SavedData {
 	public final List<String> guards = new ArrayList<>();
 	/** Chests of failed events to remove when their chunk loads. */
 	public final List<Long> cleanup = new ArrayList<>();
+	/** D187: the "vanishes soon" warning was given for this event. */
+	public boolean warned;
 
 	public TreasureSavedData() {}
 
 	private TreasureSavedData(String phase, long startAt, long endAt, long id, int x, int z, long chest, boolean placed, String group,
-			List<String> guards, List<Long> cleanup) {
+			List<String> guards, List<Long> cleanup, boolean warned) {
 		try {
 			this.phase = TreasureRules.Phase.valueOf(phase);
 		} catch (IllegalArgumentException e) {
@@ -63,6 +66,7 @@ public class TreasureSavedData extends SavedData {
 		this.group = group;
 		this.guards.addAll(guards);
 		this.cleanup.addAll(cleanup);
+		this.warned = warned;
 	}
 
 	/** Back to IDLE (keeps the id counter and the cleanup list). */
@@ -74,6 +78,7 @@ public class TreasureSavedData extends SavedData {
 		chest = 0;
 		group = "";
 		guards.clear();
+		warned = false;
 		setDirty();
 	}
 }

@@ -76,6 +76,22 @@ public class LanceStealerGameTest {
 		});
 	}
 
+	@GameTest(maxTicks = 60)
+	public void theBeamNeverHoldsOffOtherDamage(GameTestHelper c) { // D183: the vanilla damage cooldown stays 0
+		ServerPlayer p = caster(c, Technique.LANCE);
+		Zombie z = zombie(c, 5.5, 3.5);
+		java.util.concurrent.atomic.AtomicInteger most = new java.util.concurrent.atomic.AtomicInteger();
+		c.assertTrue(Lance.cast(p, 1), "the beam starts");
+		c.onEachTick(() -> most.accumulateAndGet(z.damageCooldownTime, Math::max));
+		c.runAfterDelay(25, () -> {
+			c.assertTrue(z.getHealth() < z.getMaxHealth(), "the beam hurt the zombie");
+			c.assertTrue(most.get() == 0, "no damage cooldown left by the beam, saw " + most.get());
+			Lance.release(p);
+			FlightBladeGameTest.drop(c, p);
+			c.succeed();
+		});
+	}
+
 	@GameTest(maxTicks = 160)
 	public void theDamageDoublesAfterThreeSeconds(GameTestHelper c) {
 		ServerPlayer p = caster(c, Technique.LANCE);

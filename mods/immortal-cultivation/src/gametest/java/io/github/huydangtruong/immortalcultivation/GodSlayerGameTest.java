@@ -47,7 +47,7 @@ public class GodSlayerGameTest {
 		GodSlayerSavedData d = GodSlayerHunt.data(s);
 		d.clearHunt();
 		d.level = level;
-		d.visitCount = 0;
+		d.treasuresSince = 0;
 		d.setDirty();
 	}
 
@@ -277,20 +277,24 @@ public class GodSlayerGameTest {
 		ServerLevel nether = server.getLevel(Level.NETHER);
 
 		c.startSequence()
-			// -- the Crimson Master trigger: day 100, visit 4, hearts --
+			// -- its own slot (D184): after 2 treasures, from day 100, hearts --
 			.thenExecute(() -> {
-				GodSlayerHunt.data(server).visitCount = 3;
+				GodSlayerHunt.onTreasure(server);
+				c.assertTrue(!GodSlayerHunt.takesSlot(server, 100), "1 treasure: the next slot is the Crimson Master's");
+				GodSlayerHunt.onTreasure(server);
+				c.assertTrue(GodSlayerHunt.takesSlot(server, 100), "2 treasures: the next slot is the boss's");
+				c.assertTrue(!GodSlayerHunt.takesSlot(server, 99), "never before day 100");
+				c.assertTrue(GodSlayerHunt.phase(server) == GodSlayerSavedData.Phase.IDLE, "counting never starts a hunt");
 				HeartsAttachment.set(p, HeartRules.withHearts(HeartsAttachment.get(p), 29));
-				GodSlayerHunt.onVisit(server, 100);
+				GodSlayerHunt.onSlot(server);
 				c.assertTrue(GodSlayerHunt.phase(server) == GodSlayerSavedData.Phase.IDLE, "29 hearts: no hunt");
-				c.assertTrue(GodSlayerHunt.data(server).visitCount == 4, "the visit was counted");
-				GodSlayerHunt.data(server).visitCount = 7;
-				GodSlayerHunt.onVisit(server, 99);
-				c.assertTrue(GodSlayerHunt.phase(server) == GodSlayerSavedData.Phase.IDLE, "day 99 never starts a hunt");
-				GodSlayerHunt.data(server).visitCount = 3;
+				c.assertTrue(!GodSlayerHunt.takesSlot(server, 100), "the slot is used even without a hunt");
+				GodSlayerHunt.onTreasure(server);
+				GodSlayerHunt.onTreasure(server);
 				HeartsAttachment.set(p, HeartRules.withHearts(HeartsAttachment.get(p), 30));
-				GodSlayerHunt.onVisit(server, 100);
-				c.assertTrue(GodSlayerHunt.phase(server) == GodSlayerSavedData.Phase.WARNING, "30 hearts at day 100, visit 4: warning");
+				GodSlayerHunt.onSlot(server);
+				c.assertTrue(GodSlayerHunt.phase(server) == GodSlayerSavedData.Phase.WARNING, "30 hearts in the boss's slot: warning");
+				c.assertTrue(GodSlayerHunt.data(server).treasuresSince == 0, "counting starts again");
 				c.assertTrue(GodSlayerHunt.currentBoss(server) == null, "no boss during the warning");
 				GodSlayerHunt.giveUp(server);
 				c.assertTrue(GodSlayerHunt.phase(server) == GodSlayerSavedData.Phase.IDLE, "giveup clears the warning");

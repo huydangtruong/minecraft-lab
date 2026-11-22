@@ -110,6 +110,24 @@ public class GraspGameTest {
 		});
 	}
 
+	/** D185 (Huy's bug: a grasped Vindicator kept the raid from finishing): a grasped raider leaves its raid and never joins one. */
+	@GameTest(maxTicks = 60)
+	public void aGraspedRaiderLeavesItsRaid(GameTestHelper c) {
+		ServerPlayer p = grasper(c, 10);
+		net.minecraft.world.entity.monster.illager.Vindicator v = c.spawn(EntityTypes.VINDICATOR, new Vec3(6.5, 1, 5.5));
+		v.setNoAi(true);
+		net.minecraft.world.entity.raid.Raid raid = new net.minecraft.world.entity.raid.Raid(c.absolutePos(new net.minecraft.core.BlockPos(5, 1, 5)),
+			net.minecraft.world.Difficulty.NORMAL);
+		raid.joinRaid(c.getLevel(), 1, v, null, false);
+		c.assertTrue(v.getCurrentRaid() == raid && raid.getTotalRaidersAlive() == 1, "the vindicator is in the raid");
+		Grasp.tame(p, v, 10);
+		c.assertTrue(v.getCurrentRaid() == null, "grasped: out of the raid");
+		c.assertTrue(raid.getTotalRaidersAlive() == 0, "the raid no longer waits for it, alive " + raid.getTotalRaidersAlive());
+		c.assertTrue(!v.canJoinRaid(), "it never joins another raid");
+		cleanUp(c, p);
+		c.succeed();
+	}
+
 	/** D165 (Huy's bug: 11 followers crowded onto him): following mobs that start on the owner step out to 2 blocks or more. */
 	@GameTest(maxTicks = 140)
 	public void followersKeepTwoBlocksFromTheOwner(GameTestHelper c) {

@@ -10,7 +10,7 @@ import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
 
 /**
- * World-wide God Slayer state (overworld data folder): the boss level, the Crimson Master visit count and the hunt in
+ * World-wide God Slayer state (overworld data folder): the boss level, the treasure count since its last slot and the hunt in
  * progress. Plain mutable fields; call {@link #setDirty()} after changing them. Times are overworld game ticks.
  */
 public class GodSlayerSavedData extends SavedData {
@@ -20,7 +20,7 @@ public class GodSlayerSavedData extends SavedData {
 
 	private static final Codec<GodSlayerSavedData> CODEC = RecordCodecBuilder.create(i -> i.group(
 		Codec.INT.optionalFieldOf("level", 1).forGetter(d -> d.level),
-		Codec.INT.optionalFieldOf("visit_count", 0).forGetter(d -> d.visitCount),
+		Codec.INT.optionalFieldOf("treasures_since", 0).forGetter(d -> d.treasuresSince),
 		PHASE_CODEC.optionalFieldOf("phase", Phase.IDLE).forGetter(d -> d.phase),
 		Codec.LONG.optionalFieldOf("warning_end", 0L).forGetter(d -> d.warningEndTick),
 		Codec.LONG.optionalFieldOf("hunt_end", 0L).forGetter(d -> d.huntEndTick),
@@ -34,7 +34,8 @@ public class GodSlayerSavedData extends SavedData {
 		Identifier.fromNamespaceAndPath("permahearts", "god_slayer"), GodSlayerSavedData::new, CODEC, null);
 
 	public int level = 1;
-	public int visitCount;
+	/** D184: Deadly Treasures started since the boss's last slot (2 = the next Crimson Master slot is the boss's). */
+	public int treasuresSince;
 	public Phase phase = Phase.IDLE;
 	public long warningEndTick;
 	public long huntEndTick;
@@ -46,10 +47,10 @@ public class GodSlayerSavedData extends SavedData {
 
 	public GodSlayerSavedData() {}
 
-	private GodSlayerSavedData(int level, int visitCount, Phase phase, long warningEnd, long huntEnd, String boss,
+	private GodSlayerSavedData(int level, int treasuresSince, Phase phase, long warningEnd, long huntEnd, String boss,
 							   String target, List<String> killed, String firstName) {
 		this.level = GodSlayerRules.clampLevel(level);
-		this.visitCount = visitCount;
+		this.treasuresSince = treasuresSince;
 		this.phase = phase;
 		this.warningEndTick = warningEnd;
 		this.huntEndTick = huntEnd;
@@ -59,7 +60,7 @@ public class GodSlayerSavedData extends SavedData {
 		this.firstTargetName = firstName;
 	}
 
-	/** Ends any hunt: back to IDLE with the hunt fields cleared. Level and visit count stay. */
+	/** Ends any hunt: back to IDLE with the hunt fields cleared. Level and treasure count stay. */
 	public void clearHunt() {
 		phase = Phase.IDLE;
 		warningEndTick = 0;

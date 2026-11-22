@@ -33,6 +33,11 @@ public final class TestModeCommand {
 				ctx.getSource().sendSuccess(() -> Component.literal("Test mode on. /testmode reset to go back."), false);
 				return 1;
 			}))
+			.then(Commands.literal("netherite").executes(ctx -> {
+				netherite(ctx.getSource().getPlayerOrException());
+				ctx.getSource().sendSuccess(() -> Component.literal("Full netherite kit given."), false);
+				return 1;
+			}))
 			.then(Commands.literal("reset").executes(ctx -> {
 				boolean ok = reset(ctx.getSource().getPlayerOrException());
 				ctx.getSource().sendSuccess(() -> Component.literal(ok ? "Test mode off." : "Test mode is not on."), false);
@@ -54,6 +59,21 @@ public final class TestModeCommand {
 			HeartsAttachment.setTestSnapshot(p, new TestSnapshot(HeartsAttachment.get(p), HeartsAttachment.getCultivation(p), items,
 				p.experienceLevel, p.experienceProgress, p.totalExperience));
 		}
+		netherite(p);
+		giveStacks(p, Items.GOLDEN_CARROT, TestModeRules.GOLDEN_CARROTS);
+		giveStacks(p, Items.EMERALD, TestModeRules.EMERALDS);
+		p.giveExperienceLevels(TestModeRules.XP_LEVELS);
+		HeartsAttachment.set(p, HeartRules.withHearts(HeartsAttachment.get(p), TestModeRules.HEARTS));
+		CultivationData c = HeartsAttachment.getCultivation(p);
+		for (ElixirStat s : ElixirStat.values()) {
+			c = c.plus(s, TestModeRules.ELIXIRS_EACH);
+		}
+		HeartsAttachment.setCultivation(p, c);
+		HealthApplier.apply(p, true);
+	}
+
+	/** D186: the enchanted netherite kit of test mode alone (armor worn, the old armor goes to the inventory). No snapshot, nothing else. */
+	public static void netherite(ServerPlayer p) {
 		EquipmentSlot[] armor = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
 		int armorIndex = 0;
 		for (TestModeRules.Gear g : TestModeRules.GEAR) {
@@ -70,16 +90,6 @@ public final class TestModeCommand {
 				give(p, stack);
 			}
 		}
-		giveStacks(p, Items.GOLDEN_CARROT, TestModeRules.GOLDEN_CARROTS);
-		giveStacks(p, Items.EMERALD, TestModeRules.EMERALDS);
-		p.giveExperienceLevels(TestModeRules.XP_LEVELS);
-		HeartsAttachment.set(p, HeartRules.withHearts(HeartsAttachment.get(p), TestModeRules.HEARTS));
-		CultivationData c = HeartsAttachment.getCultivation(p);
-		for (ElixirStat s : ElixirStat.values()) {
-			c = c.plus(s, TestModeRules.ELIXIRS_EACH);
-		}
-		HeartsAttachment.setCultivation(p, c);
-		HealthApplier.apply(p, true);
 	}
 
 	/** Puts the saved state back and deletes the snapshot. False when test mode is not on. */

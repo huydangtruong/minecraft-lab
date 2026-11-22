@@ -11,6 +11,8 @@ public final class TreasureRules {
 
 	/** The event lasts 2 Minecraft days from the announcement (D173, was 1). */
 	public static final long DURATION_TICKS = 2 * 24000L;
+	/** D187: the "vanishes soon" warning comes this long before the end (2 real minutes, like the Crimson Master). */
+	public static final long WARN_TICKS = 2400L;
 	/** Horizontal distance from the chosen player. */
 	public static final int DISTANCE = 1000;
 	/** The chest is placed once a player comes this close (chunks loaded), like the Crimson Master. */

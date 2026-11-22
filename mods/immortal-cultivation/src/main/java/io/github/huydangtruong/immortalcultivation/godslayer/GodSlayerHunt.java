@@ -8,7 +8,6 @@ import io.github.huydangtruong.immortalcultivation.godslayer.GodSlayerSavedData.
 import io.github.huydangtruong.immortalcultivation.reward.RewardBoxes;
 import io.github.huydangtruong.immortalcultivation.reward.RewardTier;
 import io.github.huydangtruong.immortalcultivation.wanderer.SpawnSpots;
-import io.github.huydangtruong.immortalcultivation.wanderer.Wanderer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -101,20 +100,27 @@ public final class GodSlayerHunt {
 		return p.getGameProfile().name();
 	}
 
-	// ---- trigger from the special events (D173) ----
+	// ---- its own special-event slot (D184) ----
 
-	/** A special event began: the Crimson Master arrived or a Deadly Treasure started (D173). visitCount counts both. */
-	public static void onSpecialEvent(MinecraftServer server) {
-		onVisit(server, Wanderer.currentDay(server));
+	/** D184: a Deadly Treasure started. After the 2nd one the next Crimson Master slot belongs to the boss. */
+	public static void onTreasure(MinecraftServer server) {
+		GodSlayerSavedData d = data(server);
+		d.treasuresSince++;
+		d.setDirty();
 	}
 
-	/** The visit logic with the day as a parameter, so tests can pass day 100. */
-	public static void onVisit(MinecraftServer server, long day) {
+	/** D184: the Crimson Master's slot on this day is the boss's instead. */
+	public static boolean takesSlot(MinecraftServer server, long day) {
+		return GodSlayerRules.isHuntSlot(day, data(server).treasuresSince);
+	}
+
+	/** D184: the boss's slot came: hunt a player with 30 hearts, or mock everyone. The slot is used either way. */
+	public static void onSlot(MinecraftServer server) {
 		GodSlayerSavedData d = data(server);
-		d.visitCount++;
+		d.treasuresSince = 0;
 		d.setDirty();
-		if (!GodSlayerRules.isHuntVisit(day, d.visitCount) || d.phase != Phase.IDLE) {
-			return;
+		if (d.phase != Phase.IDLE) {
+			return; // already here (/boss summon)
 		}
 		List<ServerPlayer> strong = new ArrayList<>();
 		for (ServerPlayer p : server.getPlayerList().getPlayers()) {

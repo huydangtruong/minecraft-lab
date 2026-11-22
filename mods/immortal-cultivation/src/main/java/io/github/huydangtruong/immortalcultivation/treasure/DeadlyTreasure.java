@@ -65,8 +65,11 @@ public final class DeadlyTreasure {
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			if (server.getTickCount() % 20 == 0 && ImmortalCultivation.enabled(server)) {
 				tick(server);
+			} else if (server.getTickCount() % 20 == 0) {
+				TreasureBar.hide(); // D187: switch off, no bar
 			}
 		});
+		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> TreasureBar.forget());
 		ServerLivingEntityEvents.AFTER_DEATH.register(DeadlyTreasure::onDeath);
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			MegaMobs.Mega m = MegaMobs.mega(entity);
@@ -134,7 +137,10 @@ public final class DeadlyTreasure {
 			case ACTIVE -> {
 				if (clock >= d.endAt) {
 					fail(server, d);
-				} else if (!d.placed) {
+					break;
+				}
+				warnTick(server, d, clock);
+				if (!d.placed) {
 					for (ServerPlayer p : ow.players()) {
 						double dx = p.getX() - d.x;
 						double dz = p.getZ() - d.z;
@@ -149,6 +155,23 @@ public final class DeadlyTreasure {
 				}
 			}
 		}
+		TreasureBar.tick(server, d);
+	}
+
+	/** D187: once per event, 2 minutes before the end, everyone is told the treasure vanishes soon. */
+	private static void warnTick(MinecraftServer server, TreasureSavedData d, long clock) {
+		if (d.warned || clock < d.endAt - TreasureRules.WARN_TICKS) {
+			return;
+		}
+		d.warned = true;
+		d.setDirty();
+		String where = d.placed ? "at X " + BlockPos.of(d.chest).getX() + ", Y " + BlockPos.of(d.chest).getY() + ", Z " + BlockPos.of(d.chest).getZ()
+			: "near X " + d.x + ", Z " + d.z;
+		for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+			title(p, text("vanishes soon! " + where));
+		}
+		server.getPlayerList().broadcastSystemMessage(text("Deadly Treasure vanishes soon: the chest " + where
+			+ " and its guards will be gone in about 2 minutes."), false);
 	}
 
 	/** Starts the event: far = 1000 blocks from the player in a random direction, else at the player (tests, command). */
@@ -162,6 +185,7 @@ public final class DeadlyTreasure {
 		d.z = (int) Math.floor(near.getZ() + Math.sin(a) * dist);
 		d.endAt = Wanderer.clockTime(server) + TreasureRules.DURATION_TICKS;
 		d.placed = false;
+		d.warned = false;
 		d.guards.clear();
 		d.setDirty();
 		for (ServerPlayer p : server.getPlayerList().getPlayers()) {
@@ -170,7 +194,7 @@ public final class DeadlyTreasure {
 		server.getPlayerList().broadcastSystemMessage(text("Deadly Treasure: a guarded chest lies near X " + d.x + ", Z " + d.z
 			+ ". Kill every Mega guard to open it. It vanishes in 2 days."), false);
 		if (far) {
-			io.github.huydangtruong.immortalcultivation.godslayer.GodSlayerHunt.onSpecialEvent(server); // D173: counts as a special event
+			io.github.huydangtruong.immortalcultivation.godslayer.GodSlayerHunt.onTreasure(server); // D184: every 2nd treasure gives the next slot to the boss
 		}
 	}
 
@@ -391,6 +415,7 @@ public final class DeadlyTreasure {
 		server.getPlayerList().broadcastSystemMessage(text("Deadly Treasure: every guard is dead. The chest at X " + c.getX()
 			+ ", Y " + c.getY() + ", Z " + c.getZ() + " is open."), false);
 		d.clear();
+		TreasureBar.hide();
 	}
 
 	/** Time is up with guards left (or never found): chest and guards vanish. */
@@ -410,6 +435,7 @@ public final class DeadlyTreasure {
 		}
 		server.getPlayerList().broadcastSystemMessage(text("Deadly Treasure has failed: the treasure and its guards are gone."), false);
 		d.clear();
+		TreasureBar.hide();
 		cleanup(ow, d);
 	}
 

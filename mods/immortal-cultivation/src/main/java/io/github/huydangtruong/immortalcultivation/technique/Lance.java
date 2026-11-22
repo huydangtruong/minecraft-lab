@@ -222,7 +222,7 @@ public final class Lance {
 				e -> TechniqueDamage.affectable(e, p) && !isFriend(e, p) && e.getBoundingBox().inflate(0.2).clip(eye, end).isPresent())) {
 				Vec3 velocity = e.getDeltaMovement();
 				TechniqueDamage.hurt(sl, e, p, null, DamageTypes.MAGIC, dmg); // hurtTime restarts: the vanilla red hurt tint stays while hit
-				e.setInvulnerableTime(0); // other damage is never held off by the beam's hits
+				e.damageCooldownTime = 0; // D183: other damage is never held off by the beam's hits (setInvulnerableTime is another counter)
 				e.setDeltaMovement(velocity); // no knockback from a laser
 				Vec3 c = e.position().add(0, e.getBbHeight() * 0.5, 0);
 				sl.sendParticles(SPARK, c.x, c.y, c.z, 6, e.getBbWidth() * 0.3, e.getBbHeight() * 0.25, e.getBbWidth() * 0.3, 0.1);
