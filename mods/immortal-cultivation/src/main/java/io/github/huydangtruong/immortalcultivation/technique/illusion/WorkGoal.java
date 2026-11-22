@@ -39,6 +39,7 @@ public final class WorkGoal extends Goal {
 	private Vec3 pickupAt; // where the last action was: its drops can land out of the clone's reach
 	private BlockPos chestPos;
 	private long nextChestScan;
+	private BlockPos storePos; // D208: where the clone is taking what it carries (a chest with room)
 	private int idle;
 	private int nextScan;
 	private Object goKey;
@@ -234,20 +235,39 @@ public final class WorkGoal extends Goal {
 			return null;
 		}
 		nextChestScan = now + 100;
+		chestPos = nearest(sl, c -> true);
+		return chestPos == null ? null : containerAt(sl, chestPos);
+	}
+
+	/** The nearest chest or barrel near the work area that has room for some of what the clone carries (D208), or null. */
+	private Container storeChest(ServerLevel sl) {
+		if (storePos != null) {
+			Container c = containerAt(sl, storePos);
+			if (c != null && a.carry().fitsIn(c)) {
+				return c;
+			}
+		}
+		storePos = nearest(sl, c -> a.carry().fitsIn(c));
+		return storePos == null ? null : containerAt(sl, storePos);
+	}
+
+	private BlockPos nearest(ServerLevel sl, java.util.function.Predicate<Container> ok) {
 		BlockPos c = a.workCenter();
 		int r = (int) Math.ceil(a.workRadius() + io.github.huydangtruong.immortalcultivation.technique.TechniqueRules.ILLUSION_CHEST_EXTRA);
 		double best = Double.MAX_VALUE;
+		BlockPos found = null;
 		for (BlockPos p : BlockPos.betweenClosed(c.offset(-r, -8, -r), c.offset(r, 8, r))) {
 			double d = p.distSqr(c);
 			if (d >= best || !sl.hasChunkAt(p)) {
 				continue;
 			}
-			if (containerAt(sl, p) != null) {
+			Container ct = containerAt(sl, p);
+			if (ct != null && ok.test(ct)) {
 				best = d;
-				chestPos = p.immutable();
+				found = p.immutable();
 			}
 		}
-		return chestPos == null ? null : containerAt(sl, chestPos);
+		return found;
 	}
 
 	/** Position of the cached chest (valid after {@link #chest}). */
@@ -301,21 +321,23 @@ public final class WorkGoal extends Goal {
 	}
 
 	private void deliver(ServerLevel sl, long now) {
-		Container ch = chest(sl);
-		if (ch == null) { // no chest: drop it, never delete it
+		Container ch = storeChest(sl);
+		if (ch == null) { // no chest, or every chest nearby is full: drop it, never delete it
 			a.dropCarry();
 			delivering = false;
 			return;
 		}
-		Vec3 at = Vec3.atCenterOf(chestPos);
+		Vec3 at = Vec3.atCenterOf(storePos);
 		if (a.position().distanceToSqr(at) <= 3.5 * 3.5) {
 			a.getNavigation().stop();
 			a.carry().storeIn(ch);
-			sl.playSound(null, chestPos, SoundEvents.CHEST_CLOSE, SoundSource.BLOCKS, 0.5f, 1.2f);
-			if (a.carry().isFull()) { // the chest is full: do not keep a stuck carry
-				a.dropCarry();
+			sl.playSound(null, storePos, SoundEvents.CHEST_CLOSE, SoundSource.BLOCKS, 0.5f, 1.2f);
+			if (a.carry().isEmpty()) {
+				delivering = false;
+			} else { // D208: this chest is full now: take the rest to the next chest with room (fresh time to walk there)
+				storePos = null;
+				deliverSince = now;
 			}
-			delivering = false;
 			return;
 		}
 		if (now - deliverSince > 400) {
