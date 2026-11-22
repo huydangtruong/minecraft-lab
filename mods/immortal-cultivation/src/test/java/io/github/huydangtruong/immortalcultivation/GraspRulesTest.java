@@ -4,9 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.github.huydangtruong.immortalcultivation.technique.GraspRules;
-import io.github.huydangtruong.immortalcultivation.technique.GraspRules.Facts;
-import io.github.huydangtruong.immortalcultivation.technique.GraspRules.Reason;
+import io.github.huydangtruong.immortalcultivation.technique.grasp.GraspRules;
+import io.github.huydangtruong.immortalcultivation.technique.grasp.GraspRules.Facts;
+import io.github.huydangtruong.immortalcultivation.technique.grasp.GraspRules.Reason;
 import io.github.huydangtruong.immortalcultivation.technique.Technique;
 import io.github.huydangtruong.immortalcultivation.technique.TechniqueRules;
 import org.junit.jupiter.api.Test;

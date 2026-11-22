@@ -1,4 +1,4 @@
-package io.github.huydangtruong.immortalcultivation.technique;
+package io.github.huydangtruong.immortalcultivation.technique.grasp;
 
 /**
  * Pure rules of Soul Grasp (D134, D135, D136): what a level can hold, charge time and the refusal reasons. No Minecraft

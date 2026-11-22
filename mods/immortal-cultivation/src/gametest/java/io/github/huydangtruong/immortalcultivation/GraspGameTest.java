@@ -1,7 +1,7 @@
 package io.github.huydangtruong.immortalcultivation;
 
-import io.github.huydangtruong.immortalcultivation.technique.GraspCalls;
-import io.github.huydangtruong.immortalcultivation.technique.GraspRules;
+import io.github.huydangtruong.immortalcultivation.technique.grasp.GraspCalls;
+import io.github.huydangtruong.immortalcultivation.technique.grasp.GraspRules;
 import io.github.huydangtruong.immortalcultivation.technique.SafeTeleport;
 import io.github.huydangtruong.immortalcultivation.technique.Technique;
 import io.github.huydangtruong.immortalcultivation.technique.TechniqueAttachment;

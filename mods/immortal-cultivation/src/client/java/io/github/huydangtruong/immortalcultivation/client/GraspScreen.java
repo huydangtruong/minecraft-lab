@@ -1,7 +1,8 @@
 package io.github.huydangtruong.immortalcultivation.client;
 
-import io.github.huydangtruong.immortalcultivation.technique.GraspRules;
+import io.github.huydangtruong.immortalcultivation.technique.grasp.GraspRules;
 import io.github.huydangtruong.immortalcultivation.technique.grasp.Grasp;
+import io.github.huydangtruong.immortalcultivation.technique.grasp.GraspNet;
 import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -33,18 +34,18 @@ public class GraspScreen extends Screen {
 	private static final int PANEL = 0xF0101018;
 	private static final String[] MODES = {"Follow", "Stay", "Guard"};
 
-	private Grasp.Menu menu;
+	private GraspNet.Menu menu;
 	private double scroll;
 	private String confirm;
 	private boolean confirmAll;
 	private int sinceRefresh;
 
-	public GraspScreen(Grasp.Menu menu) {
+	public GraspScreen(GraspNet.Menu menu) {
 		super(Component.literal("Soul Grasp"));
 		this.menu = menu;
 	}
 
-	public void update(Grasp.Menu m) {
+	public void update(GraspNet.Menu m) {
 		this.menu = m;
 		this.sinceRefresh = 0;
 	}
@@ -100,7 +101,7 @@ public class GraspScreen extends Screen {
 		return my >= listTop() && my < listTop() + listHeight();
 	}
 
-	private static String typeName(Grasp.Row r) {
+	private static String typeName(GraspNet.Row r) {
 		var type = BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.parse(r.type()));
 		return Grasp.nameOf(type, r.number()).getString();
 	}
@@ -138,7 +139,7 @@ public class GraspScreen extends Screen {
 		g.enableScissor(left + 1, listTop(), left + w - 1, listTop() + listHeight());
 		int y = listTop() - (int) scroll;
 		List<Runnable> tips = new ArrayList<>();
-		for (Grasp.Row r : menu.rows()) {
+		for (GraspNet.Row r : menu.rows()) {
 			if (y + ROW_H > listTop() && y < listTop() + listHeight()) {
 				drawRow(g, r, left, y, mouseX, mouseY, tips);
 			}
@@ -175,13 +176,13 @@ public class GraspScreen extends Screen {
 			confirm = null;
 			if (i < 3) {
 				confirmAll = false;
-				ClientPlayNetworking.send(new Grasp.Request(Grasp.ALL_MODE, "", i));
+				ClientPlayNetworking.send(new GraspNet.Request(Grasp.ALL_MODE, "", i));
 			} else if (i == 3) {
 				confirmAll = false;
-				ClientPlayNetworking.send(new Grasp.Request(Grasp.ALL_CALL, "", 0));
+				ClientPlayNetworking.send(new GraspNet.Request(Grasp.ALL_CALL, "", 0));
 			} else if (release && confirmAll) {
 				confirmAll = false;
-				ClientPlayNetworking.send(new Grasp.Request(Grasp.ALL_RELEASE, "", 0));
+				ClientPlayNetworking.send(new GraspNet.Request(Grasp.ALL_RELEASE, "", 0));
 			} else {
 				confirmAll = true;
 			}
@@ -200,7 +201,7 @@ public class GraspScreen extends Screen {
 		return mx >= x && mx < x + w && my >= y && my < y + h;
 	}
 
-	private void drawRow(GuiGraphicsExtractor g, Grasp.Row r, int left, int y, int mouseX, int mouseY, List<Runnable> tips) {
+	private void drawRow(GuiGraphicsExtractor g, GraspNet.Row r, int left, int y, int mouseX, int mouseY, List<Runnable> tips) {
 		int x0 = left + 6, x1 = left + PANEL_W - 8;
 		g.fill(x0, y, x1, y + ROW_H - 3, 0xFF1A1A28);
 		g.fill(x0, y, x0 + 3, y + ROW_H - 3, 0xFFFFD24A);
@@ -279,7 +280,7 @@ public class GraspScreen extends Screen {
 		}
 		int left = panelLeft();
 		int y = listTop() - (int) scroll;
-		for (Grasp.Row r : menu.rows()) {
+		for (GraspNet.Row r : menu.rows()) {
 			if (my >= y && my < y + ROW_H - 3) {
 				click(r, (int) mx, (int) my, left + 6, left + PANEL_W - 8, y);
 				return true;
@@ -289,23 +290,23 @@ public class GraspScreen extends Screen {
 		return super.mouseClicked(event, doubleClick);
 	}
 
-	private void click(Grasp.Row r, int mx, int my, int x0, int x1, int y) {
+	private void click(GraspNet.Row r, int mx, int my, int x0, int x1, int y) {
 		confirmAll = false;
 		int by = y + BTN_Y;
 		for (int i = 0; i < MODES.length; i++) {
 			if (over(mx, my, modeX(x0, i), by, 42, BTN_H)) {
 				confirm = null;
-				ClientPlayNetworking.send(new Grasp.Request(Grasp.MODE, r.id(), i));
+				ClientPlayNetworking.send(new GraspNet.Request(Grasp.MODE, r.id(), i));
 				return;
 			}
 		}
 		if (over(mx, my, callX(x1), by, 44, BTN_H)) {
 			confirm = null;
-			ClientPlayNetworking.send(new Grasp.Request(Grasp.CALL, r.id(), 0));
+			ClientPlayNetworking.send(new GraspNet.Request(Grasp.CALL, r.id(), 0));
 		} else if (over(mx, my, releaseX(x1), by, 56, BTN_H)) {
 			if (r.id().equals(confirm)) {
 				confirm = null;
-				ClientPlayNetworking.send(new Grasp.Request(Grasp.RELEASE, r.id(), 0));
+				ClientPlayNetworking.send(new GraspNet.Request(Grasp.RELEASE, r.id(), 0));
 			} else {
 				confirm = r.id();
 			}

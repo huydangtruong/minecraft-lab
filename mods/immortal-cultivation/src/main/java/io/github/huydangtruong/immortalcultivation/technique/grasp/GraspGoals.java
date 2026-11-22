@@ -1,7 +1,7 @@
 package io.github.huydangtruong.immortalcultivation.technique.grasp;
 
 import io.github.huydangtruong.immortalcultivation.mixin.MobGoalAccess;
-import io.github.huydangtruong.immortalcultivation.technique.GraspRules;
+import io.github.huydangtruong.immortalcultivation.technique.grasp.GraspRules;
 import io.github.huydangtruong.immortalcultivation.technique.WitchRules;
 import java.util.ArrayList;
 import java.util.EnumSet;

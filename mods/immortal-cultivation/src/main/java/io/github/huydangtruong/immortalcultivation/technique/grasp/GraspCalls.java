@@ -1,4 +1,4 @@
-package io.github.huydangtruong.immortalcultivation.technique;
+package io.github.huydangtruong.immortalcultivation.technique.grasp;
 
 import java.util.ArrayList;
 import java.util.HashMap;
