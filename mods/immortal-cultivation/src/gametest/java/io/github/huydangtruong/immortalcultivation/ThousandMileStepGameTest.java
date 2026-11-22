@@ -68,6 +68,23 @@ public class ThousandMileStepGameTest {
 		c.succeed();
 	}
 
+	/** P-077 B9: a rider is dismounted by a cast that works (the dismount now comes from the teleport itself). */
+	@GameTest(maxTicks = 60, padding = 128)
+	public void aRiderLandsOnTheirOwnFeetAfterTheStep(GameTestHelper c) {
+		GameTestKit.enable(c);
+		strip(c, START_X - 2, START_X + 50, Blocks.STONE);
+		ServerPlayer p = start(c);
+		net.minecraft.world.entity.animal.pig.Pig pig = c.spawn(net.minecraft.world.entity.EntityTypes.PIG, new Vec3(START_X + 0.5, 1, 2.5));
+		p.startRiding(pig, true, false);
+		c.assertTrue(p.isPassenger(), "the player starts mounted");
+		c.assertTrue(TechniqueCasts.cast(p, Technique.TELEPORT, 1, 0f), "cast works");
+		c.assertTrue(!p.isPassenger(), "the player is off the mount after the step");
+		c.assertTrue(relX(c, p) - (START_X + 0.5) > 10, "and has moved");
+		pig.discard();
+		clean(c, START_X - 2, START_X + 50);
+		c.succeed();
+	}
+
 	@GameTest(maxTicks = 60, padding = 128)
 	public void lowChargeKeepsTheTwentyPercentFloor(GameTestHelper c) {
 		GameTestKit.enable(c);
