@@ -79,6 +79,11 @@ public class CropOwners extends SavedData {
 		}
 	}
 
+	/** A copy of every owned position (packed BlockPos), safe to loop over while removing. */
+	public List<Long> positions() {
+		return new ArrayList<>(owners.keySet());
+	}
+
 	public int size() {
 		return owners.size();
 	}

@@ -43,8 +43,32 @@ public final class CropGrowth {
 				owners(sl).remove(pos.asLong());
 			}
 		});
+		// B7: a crop washed away by water, a piston, an explosion or a villager leaves no event, so sweep once a minute
+		net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(server -> {
+			if (server.getTickCount() % PRUNE_EVERY == 0) {
+				for (ServerLevel l : server.getAllLevels()) {
+					prune(l);
+				}
+			}
+		});
 		ServerPlayerEvents.JOIN.register(CropGrowth::remember);
 		ServerPlayerEvents.LEAVE.register(CropGrowth::remember);
+	}
+
+	private static final int PRUNE_EVERY = 1200;
+
+	/** B7: forgets every owned position in a loaded chunk where the block is no longer a crop. Returns how many it dropped. */
+	public static int prune(ServerLevel level) {
+		CropOwners o = owners(level);
+		int dropped = 0;
+		for (long packed : o.positions()) {
+			BlockPos pos = BlockPos.of(packed);
+			if (level.hasChunkAt(pos) && !grows(level.getBlockState(pos).getBlock())) {
+				o.remove(packed);
+				dropped++;
+			}
+		}
+		return dropped;
 	}
 
 	/** Keeps the owner's level for when they are offline. Called on join, leave, upgrade and switch. */

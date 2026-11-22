@@ -159,6 +159,27 @@ public class PassiveGameTest {
 		c.succeed();
 	}
 
+	/** P-077 B7: a crop that vanished without a player breaking it loses its owner, so a later crop there gets no bonus. */
+	@GameTest(maxTicks = 100)
+	public void aVanishedCropForgetsItsOwner(GameTestHelper c) {
+		ServerPlayer p = player(c);
+		BlockPos soil = c.absolutePos(new BlockPos(1, 1, 1));
+		BlockPos crop = soil.above();
+		c.getLevel().setBlockAndUpdate(soil, Blocks.FARMLAND.defaultBlockState());
+		c.getLevel().setBlockAndUpdate(crop, Blocks.WHEAT.defaultBlockState());
+		set(p, Passive.GROWTH, 10);
+		CropGrowth.remember(p);
+		CropGrowth.planted(c.getLevel(), crop, p.getUUID());
+		CropGrowth.prune(c.getLevel());
+		c.assertTrue(CropGrowth.extraTicks(c.getLevel(), crop, RandomSource.create(1)) == 2, "the owner's crop gets the bonus");
+		c.getLevel().setBlockAndUpdate(crop, Blocks.AIR.defaultBlockState()); // washed away: no player event
+		int dropped = CropGrowth.prune(c.getLevel());
+		c.assertTrue(dropped >= 1, "the sweep should drop the owner of the vanished crop, dropped " + dropped);
+		c.getLevel().setBlockAndUpdate(crop, Blocks.WHEAT.defaultBlockState()); // a villager replants it
+		c.assertTrue(CropGrowth.extraTicks(c.getLevel(), crop, RandomSource.create(1)) == 0, "the new crop has no owner and no bonus");
+		c.succeed();
+	}
+
 	@GameTest(maxTicks = 100)
 	public void extraAttemptsGrowTheCrop(GameTestHelper c) {
 		ServerPlayer p = player(c);
