@@ -241,16 +241,35 @@ class RewardBoxTest {
 	}
 
 	@Test
-	void emeraldSpecialsAreTheFiveOfD89() {
+	void emeraldSpecials() {
 		assertEquals(List.of("minecraft:totem_of_undying", "permahearts:enlightenment_bottle", "minecraft:enchanted_book",
-			"minecraft:enchanted_book", "minecraft:enchanted_book"),
+			"minecraft:enchanted_book", "minecraft:enchanted_book", "minecraft:enchanted_book",
+			"minecraft:diamond", "minecraft:emerald", "minecraft:ender_pearl"),
 			RewardRoll.EMERALD_SPECIALS.stream().map(RewardOption::itemId).toList());
-		assertEquals(Set.of("minecraft:mending@1", "minecraft:sharpness@5", "minecraft:protection@5"),
+		assertEquals(Set.of("minecraft:mending@1", "minecraft:sharpness@5", "minecraft:protection@5", "minecraft:unbreaking@3"), // D211
 			RewardRoll.EMERALD_SPECIALS.stream().filter(RewardOption::hasEnchant)
 				.map(o -> o.enchant() + "@" + o.enchantLevel()).collect(java.util.stream.Collectors.toSet()));
-		for (RewardOption o : RewardRoll.EMERALD_SPECIALS) {
-			assertEquals(1, o.count());
-		}
+	}
+
+	/** D211: the item cards of each box and their amounts. */
+	@Test
+	void itemPoolsPerTier() {
+		assertEquals(Set.of("minecraft:gold_ingot x64", "minecraft:diamond x16", "minecraft:emerald x16", "minecraft:ender_pearl x32"),
+			pool(RewardTier.SILVER));
+		assertEquals(Set.of("minecraft:gold_ingot x64", "minecraft:diamond x32", "minecraft:emerald x32", "minecraft:ender_pearl x32",
+			"minecraft:enchanted_golden_apple x4"), pool(RewardTier.GOLD));
+		assertEquals(Set.of("minecraft:gold_ingot x64", "minecraft:diamond x32", "minecraft:emerald x32", "minecraft:ender_pearl x48",
+			"minecraft:enchanted_golden_apple x4", "minecraft:netherite_ingot x1"), pool(RewardTier.DIAMOND));
+		assertEquals(Set.of("minecraft:gold_ingot x64", "minecraft:diamond x48", "minecraft:emerald x64", "minecraft:ender_pearl x48",
+			"minecraft:totem_of_undying x1", "permahearts:enlightenment_bottle x1", "minecraft:enchanted_book:minecraft:mending x1",
+			"minecraft:enchanted_book:minecraft:sharpness x1", "minecraft:enchanted_book:minecraft:protection x1",
+			"minecraft:enchanted_book:minecraft:unbreaking x1"), pool(RewardTier.EMERALD));
+	}
+
+	private static Set<String> pool(RewardTier t) {
+		return RewardRoll.itemPool(t).stream()
+			.map(o -> o.itemId() + (o.hasEnchant() ? ":" + o.enchant() : "") + " x" + o.count())
+			.collect(java.util.stream.Collectors.toSet());
 	}
 
 	@Test

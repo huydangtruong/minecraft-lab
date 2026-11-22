@@ -15,16 +15,19 @@ public final class RewardRoll {
 	public static final List<String> BASE_ITEMS = List.of(
 		"minecraft:gold_ingot", "minecraft:diamond", "minecraft:emerald", "minecraft:ender_pearl");
 
+	/** A special with a base item id replaces that base card's amount (D211: bigger diamond, emerald, pearl cards in the higher boxes). */
 	public static final List<RewardOption> GOLD_SPECIALS = List.of(
-		new RewardOption("minecraft:enchanted_golden_apple", 4), new RewardOption("minecraft:emerald", 32));
+		new RewardOption("minecraft:enchanted_golden_apple", 4), new RewardOption("minecraft:emerald", 32),
+		new RewardOption("minecraft:diamond", 32));
 	public static final List<RewardOption> DIAMOND_SPECIALS = List.of(
 		new RewardOption("minecraft:enchanted_golden_apple", 4), new RewardOption("minecraft:netherite_ingot", 1),
-		new RewardOption("minecraft:emerald", 32));
+		new RewardOption("minecraft:emerald", 32), new RewardOption("minecraft:diamond", 32), new RewardOption("minecraft:ender_pearl", 48));
 
 	public static final List<RewardOption> EMERALD_SPECIALS = List.of(
 		new RewardOption("minecraft:totem_of_undying", 1), new RewardOption("permahearts:enlightenment_bottle", 1),
 		RewardOption.book("minecraft:mending", 1), RewardOption.book("minecraft:sharpness", 5),
-		RewardOption.book("minecraft:protection", 5));
+		RewardOption.book("minecraft:protection", 5), RewardOption.book("minecraft:unbreaking", 3),
+		new RewardOption("minecraft:diamond", 48), new RewardOption("minecraft:emerald", 64), new RewardOption("minecraft:ender_pearl", 48));
 
 	private RewardRoll() {}
 
