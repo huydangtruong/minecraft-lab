@@ -447,26 +447,6 @@ THUNDER = [  # a grey cloud with a yellow lightning bolt coming out of it (D86),
 THUNDER_PAL = {"c": "e4e8f0", "g": "aab2c0", "d": "7c8496", "y": "ffd62a", "Y": "f0a000", "h": "fff7a8"}
 
 
-GRASP = [  # D202: a white sheep's head in profile facing left, only the right half of the face, a light brown horn, a hypnotic spiral eye
-    "................",
-    "....WWWW.WWW....",
-    "..WWWWWWW.HHHH..",
-    ".WWwWWWWWHhhhhH.",
-    ".WWWWWWWWHhHHhH.",
-    ".WWWWWWWWHhHhhH.",
-    ".WsssppsWHhhhH..",
-    ".WsspkkpW.HHH...",
-    ".WssppkpWWWW....",
-    ".ssssppseEEWWW..",
-    "nssssssssEEWWWW.",
-    "nnssssssssWWWW..",
-    ".nnssssssWWWW...",
-    "..nSsssSS.WWW...",
-    "...SSSSS........",
-    "................",
-]
-GRASP_PAL = {"W": "ffffff", "w": "dfe3ee", "s": "d9c8bb", "S": "ab9a8e", "n": "d49a9a", "h": "d9b27a", "H": "b88a4e", "e": "efc9c0", "E": "c8a4a0", "k": "14061f", "p": "8a3fd8"}
-GRASP_EDGE = "3a2a46"
 
 
 SEISM = [  # a grey boulder over cracked brown ground with rock spikes (D142), original art
@@ -511,6 +491,7 @@ CRYSTAL = [  # a turquoise crystal cage around a small figure (D143), original a
 CRYSTAL_PAL = {"c": "58e6d8", "h": "d8fffa", "w": "ffffff", "d": "1f8f95", "p": "f2e6c0"}
 
 
+# "grasp" (Soul Grasp) is drawn by tools/make_grasp_sprite.py (D205).
 def main():
     os.makedirs(OUT, exist_ok=True)
     icons = {
@@ -529,7 +510,6 @@ def main():
         "illusion": (illusion_art(), "1c2640"),
         "warp": (procedural(warp_color), "2a0a58"),
         "thunder": (from_ascii(THUNDER, THUNDER_PAL), "2a2f3a"),
-        "grasp": (from_ascii(GRASP, GRASP_PAL), GRASP_EDGE),
         "seism": (from_ascii(SEISM, SEISM_PAL), "3a2a1a"),
         "crystal": (from_ascii(CRYSTAL, CRYSTAL_PAL), "0c3a40"),
         "lock": (from_ascii(LOCK, LOCK_PAL), "1a1a20"),
@@ -541,7 +521,7 @@ def main():
     for name, (body, edge) in icons.items():
         img = outline(body, edge)
         write_png(os.path.join(OUT, name + ".png"), img)
-        if name in ("fire", "ice", "healing", "phase", "repulse", "sacrifice", "flight", "blade", "teleport", "golem", "angel", "aqua", "illusion", "warp", "thunder", "grasp", "seism", "crystal"):
+        if name in ("fire", "ice", "healing", "phase", "repulse", "sacrifice", "flight", "blade", "teleport", "golem", "angel", "aqua", "illusion", "warp", "thunder", "seism", "crystal"):
             write_png(os.path.join(items, "focus_" + name + ".png"), img)
     print("wrote technique sprites to", os.path.normpath(OUT))
 
