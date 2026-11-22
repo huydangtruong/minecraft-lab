@@ -2,7 +2,7 @@
 
 > **Tóm tắt cho Huy (VN, ≤ 3 dòng):** sửa 15 lỗi mà audit P-076 tìm ra (rương quà shift-click mất đồ, ô thùng rác không nhận chuột phải, chuột giữa/chuột bên bấm nhầm nút, /boss freeze không dừng hẳn, chiêu diện rộng đánh trúng đồng minh, ...). Mỗi lỗi một commit, có test khi làm được. Quyết định D219 trở đi do manager chốt thay Huy, Huy có thể đổi lại.
 
-- **Status:** in-dev
+- **Status:** review
 - **Mod / decision:** `immortal-cultivation`, D219+ · **Branch:** `feat/P-077-bug-fixes` (cut from the `feat/P-076-audit-refactor` tip) · **Depends on:** P-076
 
 ## Goal
@@ -40,4 +40,5 @@ Fix B1–B15 of [P-076](P-076-audit-refactor.md) as scoped by the manager on Huy
 
 ## Done when
 
-- [ ] One commit per bug, build green, client suite run once, branch pushed. No merge, no release.
+- [x] One commit per bug (B1-B15), full build green (292 game tests, 290 JUnit).
+- [ ] Client suite run once, branch pushed (manager). No merge, no release.
