@@ -57,14 +57,15 @@ Release steps: [workflow/release.md](../workflow/release.md). Release **only whe
 ## In flight
 
 - **P-076 audit + refactor** on `feat/P-076-audit-refactor` (worktree `.claude/worktrees/P-076`), pushed, not merged. Plan [P-076](../plans/P-076-audit-refactor.md): R1-R10 + R13 done, behaviour identical (R11 UI helpers and R12 Notes switch deferred by the manager). Shared `pngkit` for sprite scripts, `GameTestKit`, deflaked Grasp/Golem/Thunder tests, dead code removed, `Uuids`, `StatDiff`, `WheelGroups`, `onInitialize` split into `WandererEvents`/`DeathRespawnHandlers`/`KillXpHandler`, `Grasp` split into `GraspNet`/`GraspCallService`/`GraspTether`, Illusion goals top-level, `Messages` split into `HeartMessages`/`WandererMessages`/`QuestEventMessages`/`GodSlayerMessages`. Next: Huy reviews, then merge into `main`.
-- **P-077 bug fixes** (B1-B15 of the P-076 audit, D219+) on `feat/P-077-bug-fixes`, cut from the P-076 tip. See [P-077](../plans/P-077-bug-fixes.md). Status: review, B1-B15 done (D219-D233), waiting for the client suite and push.
+- **P-077 bug fixes** (B1-B15 of the P-076 audit, D219+) on `feat/P-077-bug-fixes`, cut from the P-076 tip. See [P-077](../plans/P-077-bug-fixes.md). Status: review, B1-B15 done (D219-D233), full build green (290 JUnit, 292 game tests), client suite green, pushed, not merged. Merge P-076 first, then P-077. Found, not fixed: `Warp.go` still calls `stopRiding()` before `teleportTo` (same pattern as B9).
 - **All plans up to P-075 are released** (last: 0.44.0). Released but not playtested by hand: everything from 0.13.0 on unless the release row says otherwise.
 - **Next ideas:** BL-024/D112 (God Slayer arrives 2–5 days after the 4th Crimson Master leaves; Master pauses until the fight ends). P-040 leftovers: Katana → teleport behind → Flame breath chain, `/boss skill` command, a real blade model and guardian-style beam. Then the rest of D97's skills (minions, blind, arena, self-destruct). BL-014 (player technique fire burns the God Slayer).
 - **Windows installer bug** (reported by Huy's friend): picking a profile other than "26.3 Fabric Essential" says SUCCESS, but that profile's mods folder still has the old jar. Reading `minecraft-lab.ps1` (`Find-Profiles` / `Select-Profile`) found nothing yet. Waiting for the friend's `Mods folder:` line and that profile's Game directory.
 
 ## Open, not scheduled
 
-- **Flaky game tests left:** `IllusionWorkGameTest.farmTakesSeedsFromTheChestAndPlantsEmptyFarmland` (the clone sometimes dies; failed 2 of 4 full runs during P-076). Grasp "not where it was seen", Golem guardian and Thunder pig were deflaked in P-076 R3.
+- **Flaky game tests left:** `IllusionWorkGameTest.farmTakesSeedsFromTheChestAndPlantsEmptyFarmland` (the clone sometimes dies; failed 2 of 4 full runs during P-076). Golem guardian and Thunder pig were deflaked in P-076 R3. Grasp "not where it was seen" and "unloaded chunk comes when called" still fail now and then in full runs (pass alone, also on the P-076 base). A spawned zombie sometimes has 20.9 max health; P-077 pins it in the Lance and Seism helpers, `hostile_kill_gives_xp` may still see 21 XP.
+- **Client suite** had been red on main since D178/D180/D188 (stale expectations); fixed in P-076, now green.
 
 - **BL-004**: a command to summon the Crimson Master with a chosen quest ([backlog/BACKLOG.md](../backlog/BACKLOG.md)).
 - **Not playtested by hand yet:**
