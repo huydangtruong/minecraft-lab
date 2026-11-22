@@ -290,6 +290,11 @@ public final class QuestBoss {
 		}
 	}
 
+	/** The server stopped (B6): drop the bar so a second world in the same session starts clean. */
+	static void forget() {
+		bar = null;
+	}
+
 	private static void clearBar() {
 		if (bar != null) {
 			bar.removeAllPlayers();

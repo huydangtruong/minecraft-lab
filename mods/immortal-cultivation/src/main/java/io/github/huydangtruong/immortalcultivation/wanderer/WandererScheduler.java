@@ -23,7 +23,11 @@ public final class WandererScheduler {
 	private WandererScheduler() {}
 
 	public static void register() {
-		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(s -> WandererBar.forget());
+		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(s -> {
+			WandererBar.forget();
+			BloodMoon.forget(); // B6
+			QuestBoss.forget();
+		});
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			int t = server.getTickCount();
 			if (t % 20 == 0 && !ImmortalCultivation.enabled(server)) {

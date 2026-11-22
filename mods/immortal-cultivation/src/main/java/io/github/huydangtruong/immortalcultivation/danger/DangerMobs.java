@@ -73,6 +73,7 @@ public final class DangerMobs {
 
 	public static void init() {
 		AFFIXES.identifier();
+		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(s -> ELITES.clear()); // B6: stale Mob refs
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			if (!(entity instanceof Mob m) || !(entity instanceof Enemy)) {
 				return;

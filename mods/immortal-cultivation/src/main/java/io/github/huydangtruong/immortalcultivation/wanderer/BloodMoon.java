@@ -158,6 +158,13 @@ public final class BloodMoon {
 		SIDES.clear();
 	}
 
+	/** The server stopped (B6): drop the runtime state so a second world in the same session starts clean. */
+	static void forget() {
+		bar = null;
+		lastWave = -1;
+		SIDES.clear();
+	}
+
 	private static void end(MinecraftServer server) {
 		Wanderer.save(server, Wanderer.data(server).withBloodMoon(Optional.empty()));
 		clearBar();
