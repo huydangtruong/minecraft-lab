@@ -39,10 +39,10 @@ import net.minecraft.world.phys.Vec3;
  */
 public class IllusionWorkGameTest {
 	private static ServerPlayer owner(GameTestHelper c, ItemStack held) {
-		FlightBladeGameTest.enable(c);
-		FlightBladeGameTest.floor(c);
-		ServerPlayer p = FlightBladeGameTest.survivor(c);
-		FlightBladeGameTest.place(c, p, 5.5, 1, 5.5, 0f, 0f);
+		GameTestKit.enable(c);
+		GameTestKit.floor(c);
+		ServerPlayer p = GameTestKit.survivor(c);
+		GameTestKit.place(c, p, 5.5, 1, 5.5, 0f, 0f);
 		p.setHealth(20f); // a mock player starts at 0 health: it would not count as alive
 		p.setItemInHand(InteractionHand.MAIN_HAND, held);
 		TechniqueAttachment.set(p, TechniqueAttachment.get(p).withLevel(Technique.ILLUSION, 1, 10).withEmeralds(TechniqueRules.MAX_EMERALDS).withSlot(0, Technique.ILLUSION));
@@ -96,7 +96,7 @@ public class IllusionWorkGameTest {
 			c.assertTrue(count(chest, s -> s.is(Items.WHEAT)) >= 3, "wheat in the chest, was " + count(chest, s -> s.is(Items.WHEAT)) + dbg(a));
 			c.assertTrue(replanted(c, 6, 2) && replanted(c, 7, 2) && replanted(c, 6, 3), "the three crops are replanted" + dbg(a));
 			c.assertTrue(c.getLevel().getEntitiesOfClass(ExperienceOrb.class, arena(c)).isEmpty(), "no XP orb from farming");
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 		});
 	}
 
@@ -131,7 +131,7 @@ public class IllusionWorkGameTest {
 			c.assertTrue(field(c, true), "empty farmland planted, dirt and grass untouched" + dbg(a));
 			c.assertTrue(count(chest, s -> s.is(Items.WHEAT)) >= 1, "the ripe wheat is in the chest" + dbg(a));
 			c.assertTrue(count(chest, s -> s.is(Items.WHEAT_SEEDS)) >= 5 && a.carry().isEmpty(), "leftover seeds delivered, was " + count(chest, s -> s.is(Items.WHEAT_SEEDS)) + dbg(a));
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 		});
 	}
 
@@ -150,7 +150,7 @@ public class IllusionWorkGameTest {
 			c.assertTrue(c.getBlockState(new BlockPos(6, 1, 2)).is(Blocks.WHEAT) && c.getBlockState(new BlockPos(7, 1, 2)).is(Blocks.WHEAT)
 				&& c.getBlockState(new BlockPos(6, 1, 3)).is(Blocks.WHEAT), "seeds fetched from the chest and planted, chest seeds=" + count(chest, x -> x.is(Items.WHEAT_SEEDS)) + " planted=" + c.getBlockState(new BlockPos(6, 1, 2)).is(Blocks.WHEAT) + c.getBlockState(new BlockPos(7, 1, 2)).is(Blocks.WHEAT) + c.getBlockState(new BlockPos(6, 1, 3)).is(Blocks.WHEAT) + dbg(a));
 			c.assertTrue(count(chest, s -> s.is(Items.STICK)) == 3, "only seeds were taken");
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 		});
 	}
 
@@ -166,7 +166,7 @@ public class IllusionWorkGameTest {
 			int seeds = logItems(c, p, Items.WHEAT_SEEDS);
 			c.assertTrue(seeds >= 5, "leftover seeds dropped on the ground, found " + seeds);
 			c.assertTrue(logItems(c, p, Items.WHEAT) >= 1, "the wheat dropped too");
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 		});
 	}
 
@@ -186,7 +186,7 @@ public class IllusionWorkGameTest {
 			c.assertTrue(count(chest, s -> s.is(Items.WHEAT)) >= 1, "wheat from the stage-6 crop" + dbg(a));
 			c.assertTrue(count(chest, s -> s.is(Items.BEETROOT)) >= 1, "beetroot from the stage-2 crop" + dbg(a));
 			c.assertTrue(c.getBlockState(new BlockPos(7, 1, 2)).getValue(CropBlock.AGE) >= 5, "the young crop is left alone");
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 		});
 	}
 
@@ -208,7 +208,7 @@ public class IllusionWorkGameTest {
 		Illusion a = castOne(c, p);
 		c.succeedWhen(() -> {
 			c.assertTrue(count(chest, s -> s.is(Items.WHEAT)) >= 1, "the reachable wheat reached the chest, was " + count(chest, s -> s.is(Items.WHEAT)) + " free=" + c.getBlockState(new BlockPos(0, 1, 0)) + " pillar=" + c.getBlockState(new BlockPos(6, 6, 2)) + dbg(a));
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 		});
 	}
 
@@ -234,7 +234,7 @@ public class IllusionWorkGameTest {
 		c.succeedWhen(() -> {
 			c.assertTrue(count(chest, s -> s.is(Items.OAK_LOG)) >= 4, "the four trunk logs are in the chest, was " + count(chest, s -> s.is(Items.OAK_LOG)));
 			c.assertTrue(c.getBlockState(new BlockPos(3, 1, 7)).is(Blocks.OAK_LOG) && c.getBlockState(new BlockPos(3, 2, 7)).is(Blocks.OAK_LOG), "the built wall stays");
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 		});
 	}
 
@@ -294,7 +294,7 @@ public class IllusionWorkGameTest {
 			c.assertTrue(!a.isAlive(), "wait until the clone is gone" + dbg(a));
 			int n = logItems(c, p, Items.OAK_LOG);
 			c.assertTrue(n == 6, "all 6 logs dropped or picked up by the owner, found " + n);
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 		});
 	}
 
@@ -323,7 +323,7 @@ public class IllusionWorkGameTest {
 				}
 			}
 			c.assertTrue(leaves >= 12, "only the leaves in the way are broken, not the canopy: " + leaves + " of 24 left");
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 		});
 	}
 
@@ -338,7 +338,7 @@ public class IllusionWorkGameTest {
 		c.succeedWhen(() -> {
 			c.assertTrue(sheep.isSheared(), "the sheep was sheared" + dbg(a) + " ready=" + sheep.readyForShearing());
 			c.assertTrue(count(chest, s -> s.is(ItemTags.WOOL)) >= 1, "wool in the chest");
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 		});
 	}
 
@@ -354,7 +354,7 @@ public class IllusionWorkGameTest {
 		c.succeedWhen(() -> {
 			c.assertTrue(count(chest, s -> s.is(Items.MILK_BUCKET)) == 1, "one milk bucket in the chest" + dbg(a));
 			c.assertTrue(count(chest, s -> s.is(Items.BUCKET)) == 0, "the empty bucket was used up");
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 		});
 	}
 
@@ -366,7 +366,7 @@ public class IllusionWorkGameTest {
 		Illusion a = castOne(c, p);
 		c.runAfterDelay(200, () -> {
 			c.assertTrue(chest.isEmpty() && a.carry().isEmpty(), "no bucket, so no milk and nothing carried");
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 			c.succeed();
 		});
 	}
@@ -393,7 +393,7 @@ public class IllusionWorkGameTest {
 			c.assertTrue(!cows.isEmpty(), "a baby cow was born");
 			c.assertTrue(c.getLevel().getEntitiesOfClass(ExperienceOrb.class, arena(c)).isEmpty(), "no breeding XP orb");
 			c.assertTrue(p.totalExperience > xpBefore, "D140: the birth XP went straight to the owner");
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 		});
 	}
 
@@ -415,7 +415,7 @@ public class IllusionWorkGameTest {
 			c.assertTrue(!chest.isEmpty(), "something caught is in the chest" + dbg(a));
 			c.assertTrue(p.totalExperience == xp && c.getLevel().getEntitiesOfClass(ExperienceOrb.class, arena(c)).isEmpty(), "no XP from fishing");
 			FishTask.testWaitTicks = -1;
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 		});
 	}
 
@@ -432,7 +432,7 @@ public class IllusionWorkGameTest {
 		p.getInventory().setItem(0, ItemStack.EMPTY);
 		Illusion b = castOne(c, p);
 		c.assertTrue(b.job() == IllusionJob.FIGHT, "an empty slot 0 gives FIGHT even with a sword in hand, was " + b.job());
-		FlightBladeGameTest.drop(c, p);
+		GameTestKit.drop(c, p);
 		c.succeed();
 	}
 
@@ -443,7 +443,7 @@ public class IllusionWorkGameTest {
 		p.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.DIAMOND_SWORD));
 		c.runAfterDelay(60, () -> { // the once-a-second gear refresh has run by now
 			c.assertTrue(a.job() == IllusionJob.FARM && a.getMainHandItem().is(Items.IRON_HOE), "still a farmer with the hoe, has " + a.getMainHandItem());
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 			c.succeed();
 		});
 	}
@@ -451,13 +451,13 @@ public class IllusionWorkGameTest {
 	@GameTest(maxTicks = 1500)
 	public void aWorkingCloneFightsWhoHitsTheOwnerThenGoesBackToWork(GameTestHelper c) {
 		ServerPlayer p = owner(c, new ItemStack(Items.IRON_HOE));
-		ServerPlayer q = FlightBladeGameTest.survivor(c);
+		ServerPlayer q = GameTestKit.survivor(c);
 		MinecraftServer server = c.getLevel().getServer();
 		boolean pvp = server.getGameRules().get(GameRules.PVP);
 		server.getGameRules().set(GameRules.PVP, false, server);
 		Container chest = chest(c, 2, 1, 5);
 		ripeWheat(c, 7, 2);
-		FlightBladeGameTest.place(c, q, 3.5, 1, 7.5, 0f, 0f);
+		GameTestKit.place(c, q, 3.5, 1, 7.5, 0f, 0f);
 		q.setHealth(20f);
 		Illusion a = castOne(c, p);
 		p.hurtServer(c.getLevel(), c.getLevel().damageSources().playerAttack(q), 2f); // refused, but the attacker is noted
@@ -467,10 +467,10 @@ public class IllusionWorkGameTest {
 				c.assertTrue(a.getTarget() == q, "the working clone targets the second player, was " + a.getTarget());
 				fought[0] = true;
 				server.getGameRules().set(GameRules.PVP, pvp, server);
-				FlightBladeGameTest.drop(c, q);
+				GameTestKit.drop(c, q);
 			}
 			c.assertTrue(replanted(c, 7, 2) && count(chest, s -> s.is(Items.WHEAT)) >= 1, "back at work: the crop is harvested and replanted" + dbg(a));
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 		});
 	}
 
@@ -488,7 +488,7 @@ public class IllusionWorkGameTest {
 			c.assertTrue(!a.isAlive(), "then the clone vanishes" + dbg(a));
 			int dropped = c.getLevel().getEntitiesOfClass(ItemEntity.class, arena(c), e -> e.getItem().is(Items.DIAMOND)).size();
 			c.assertTrue(dropped == 0, "nothing dropped on the ground, found " + dropped);
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 		});
 	}
 
@@ -508,7 +508,7 @@ public class IllusionWorkGameTest {
 			c.assertTrue(count(near, s -> s.is(Items.DIAMOND)) == 64, "one diamond filled the near chest" + dbg(a));
 			c.assertTrue(count(far, s -> s.is(Items.DIAMOND)) == 2, "the other 2 went to the far chest" + dbg(a));
 			c.assertTrue(a.carry().isEmpty(), "the clone carries nothing" + dbg(a));
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 		});
 	}
 
@@ -521,17 +521,17 @@ public class IllusionWorkGameTest {
 		c.runAfterDelay(3, () -> {
 			int dropped = c.getLevel().getEntitiesOfClass(ItemEntity.class, arena(c), e -> e.getItem().is(Items.DIAMOND)).stream().mapToInt(e -> e.getItem().getCount()).sum();
 			c.assertTrue(dropped == 3, "the 3 diamonds were dropped, found " + dropped);
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 			c.succeed();
 		});
 	}
 
 	@GameTest(maxTicks = 100)
 	public void hostileMobsAlsoTargetTheClones(GameTestHelper c) {
-		FlightBladeGameTest.enable(c);
-		FlightBladeGameTest.floor(c);
-		ServerPlayer p = FlightBladeGameTest.survivor(c);
-		FlightBladeGameTest.place(c, p, 5.5, 1, 5.5, 0f, 0f);
+		GameTestKit.enable(c);
+		GameTestKit.floor(c);
+		ServerPlayer p = GameTestKit.survivor(c);
+		GameTestKit.place(c, p, 5.5, 1, 5.5, 0f, 0f);
 		p.setHealth(20f);
 		TechniqueAttachment.set(p, TechniqueAttachment.get(p).withLevel(Technique.ILLUSION, 20, 10).withEmeralds(TechniqueRules.MAX_EMERALDS).withSlot(0, Technique.ILLUSION));
 		TechniqueCasts.cast(p, Technique.ILLUSION, 20, 1f);
@@ -557,7 +557,7 @@ public class IllusionWorkGameTest {
 			}
 		}
 		husk.discard();
-		FlightBladeGameTest.drop(c, p);
+		GameTestKit.drop(c, p);
 		c.assertTrue(clonePicks > 0 && ownerPicks > 0, "the husk picks both the clones and the owner, clones " + clonePicks + " owner " + ownerPicks);
 		c.assertTrue(clonePicks > ownerPicks, "with 3 clones to 1 owner the clones are picked more often, clones " + clonePicks + " owner " + ownerPicks);
 		c.succeed();

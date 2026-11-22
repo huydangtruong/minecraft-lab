@@ -36,7 +36,7 @@ public class GodSlayerGameTest {
 	}
 
 	private static ServerPlayer strong(GameTestHelper c) {
-		ServerPlayer p = FlightBladeGameTest.survivor(c);
+		ServerPlayer p = GameTestKit.survivor(c);
 		p.getAttribute(Attributes.MAX_HEALTH).setBaseValue(100000);
 		p.setHealth(100000);
 		return p;
@@ -67,7 +67,7 @@ public class GodSlayerGameTest {
 
 	@GameTest(maxTicks = 40)
 	public void onlyPlayersHurtItAndAHitIsClampedTo40(GameTestHelper c) {
-		FlightBladeGameTest.floor(c);
+		GameTestKit.floor(c);
 		GodSlayer b = boss(c, 5.5, 1, 5.5, 1);
 		ServerLevel level = c.getLevel();
 		Husk husk = c.spawn(EntityTypes.HUSK, new Vec3(1.5, 1, 1.5));
@@ -87,11 +87,11 @@ public class GodSlayerGameTest {
 
 	@GameTest(maxTicks = 60)
 	public void slashHitsAPlayerFor30AtLevel1(GameTestHelper c) {
-		FlightBladeGameTest.enable(c);
-		FlightBladeGameTest.floor(c);
+		GameTestKit.enable(c);
+		GameTestKit.floor(c);
 		c.getLevel().getServer().setDifficulty(Difficulty.NORMAL, true);
 		ServerPlayer p = strong(c);
-		FlightBladeGameTest.place(c, p, 5.5, 1, 5.5, 0f, 0f);
+		GameTestKit.place(c, p, 5.5, 1, 5.5, 0f, 0f);
 		p.setHealth(1000f);
 		p.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1000);
 		p.setHealth(1000f);
@@ -101,17 +101,17 @@ public class GodSlayerGameTest {
 			.thenWaitUntil(() -> c.assertTrue(p.getHealth() < 1000f, "the slash landed"))
 			.thenExecute(() -> {
 				c.assertTrue(Math.abs(p.getHealth() - 970f) < 0.01f, "one slash = 30 damage, health " + p.getHealth());
-				FlightBladeGameTest.drop(c, p);
+				GameTestKit.drop(c, p);
 			})
 			.thenSucceed();
 	}
 
 	@GameTest(maxTicks = 100)
 	public void teleportsNextToATargetThatIsFarAway(GameTestHelper c) {
-		FlightBladeGameTest.enable(c);
-		FlightBladeGameTest.floor(c);
+		GameTestKit.enable(c);
+		GameTestKit.floor(c);
 		ServerPlayer p = strong(c);
-		FlightBladeGameTest.place(c, p, 5.5, 1, 5.5, 0f, 0f);
+		GameTestKit.place(c, p, 5.5, 1, 5.5, 0f, 0f);
 		GodSlayer b = boss(c, 1.5, 1, 1.5, 1);
 		b.setHuntTarget(p.getUUID());
 		c.runAfterDelay(2, () -> {
@@ -122,14 +122,14 @@ public class GodSlayerGameTest {
 		c.startSequence()
 			.thenIdle(4)
 			.thenWaitUntil(() -> c.assertTrue(b.distanceTo(p) < 12, "the boss teleported near its target, distance " + b.distanceTo(p)))
-			.thenExecute(() -> FlightBladeGameTest.drop(c, p))
+			.thenExecute(() -> GameTestKit.drop(c, p))
 			.thenSucceed();
 	}
 
 	/** D100: a target 25 blocks away on open ground is chased on foot, never teleported to. */
 	@GameTest(maxTicks = 400)
 	public void frozenBossStandsStillThenActsAgain(GameTestHelper c) {
-		FlightBladeGameTest.enable(c);
+		GameTestKit.enable(c);
 		ServerPlayer p = strong(c);
 		GodSlayer b = boss(c, 5.5, 1, 5.5, 1);
 		Vec3 pv = c.absoluteVec(new Vec3(5.5, 1, 8.0));
@@ -158,14 +158,14 @@ public class GodSlayerGameTest {
 			.thenWaitUntil(() -> c.assertTrue(p.getHealth() < hp[0] || b.distanceTo(p) < 3.0, "acts again after freeze off"))
 			.thenExecute(() -> {
 				b.discard();
-				FlightBladeGameTest.drop(c, p);
+				GameTestKit.drop(c, p);
 			})
 			.thenSucceed();
 	}
 
 	@GameTest(maxTicks = 200)
 	public void runsAfterANearTargetInsteadOfTeleporting(GameTestHelper c) {
-		FlightBladeGameTest.enable(c);
+		GameTestKit.enable(c);
 		ServerLevel level = c.getLevel();
 		// far from the other tests' structures (they share the world and count blocks)
 		net.minecraft.core.BlockPos o = c.absolutePos(new net.minecraft.core.BlockPos(0, 0, 0)).offset(4000, 0, 0);
@@ -216,7 +216,7 @@ public class GodSlayerGameTest {
 						level.setChunkForced((o.getX() >> 4) + cx, (o.getZ() >> 4) + cz, false);
 					}
 				}
-				FlightBladeGameTest.drop(c, p);
+				GameTestKit.drop(c, p);
 			})
 			.thenSucceed();
 	}
@@ -225,7 +225,7 @@ public class GodSlayerGameTest {
 
 	@GameTest(maxTicks = 120)
 	public void swimsMuchFasterThanADolphin(GameTestHelper c) {
-		FlightBladeGameTest.enable(c);
+		GameTestKit.enable(c);
 		// a bedrock-walled tank 12 x 4 x 3 (bedrock: the boss cannot break it) filled with water
 		for (int x = -1; x <= 12; x++) {
 			for (int y = 0; y <= 5; y++) {
@@ -238,7 +238,7 @@ public class GodSlayerGameTest {
 		Dolphin dolphin = c.spawn(EntityTypes.DOLPHIN, new Vec3(1.5, 2, 5.5));
 		GodSlayer b = boss(c, 1.5, 1, 5.5, 1);
 		ServerPlayer p = strong(c);
-		FlightBladeGameTest.place(c, p, 11.5, 3, 5.5, 0f, 0f);
+		GameTestKit.place(c, p, 11.5, 3, 5.5, 0f, 0f);
 		b.setHuntTarget(p.getUUID());
 		double[] best = new double[2]; // [dolphin, boss]: the largest distance per tick
 		Vec3[] last = new Vec3[2];
@@ -257,7 +257,7 @@ public class GodSlayerGameTest {
 			.thenExecute(() -> {
 				c.assertTrue(best[0] > 0.05, "the dolphin did swim, best " + best[0]);
 				c.assertTrue(best[1] > best[0] * 2.5, "the boss is clearly faster: boss " + best[1] + " dolphin " + best[0]);
-				FlightBladeGameTest.drop(c, p);
+				GameTestKit.drop(c, p);
 			})
 			.thenSucceed();
 	}
@@ -266,13 +266,13 @@ public class GodSlayerGameTest {
 
 	@GameTest(maxTicks = 1500)
 	public void huntFlow(GameTestHelper c) {
-		FlightBladeGameTest.enable(c);
-		FlightBladeGameTest.floor(c);
+		GameTestKit.enable(c);
+		GameTestKit.floor(c);
 		MinecraftServer server = c.getLevel().getServer();
 		server.setDifficulty(Difficulty.NORMAL, true);
 		reset(server, 1);
 		ServerPlayer p = strong(c);
-		FlightBladeGameTest.place(c, p, 5.5, 1, 5.5, 0f, 0f);
+		GameTestKit.place(c, p, 5.5, 1, 5.5, 0f, 0f);
 		GodSlayer[] boss = new GodSlayer[1];
 		ServerLevel nether = server.getLevel(Level.NETHER);
 
@@ -367,7 +367,7 @@ public class GodSlayerGameTest {
 				c.assertTrue(!boss[0].isAlive() || boss[0].isRemoved(), "the boss left");
 				c.assertTrue(GodSlayerHunt.level(server) == 3, "the level is unchanged when it wins, was " + GodSlayerHunt.level(server));
 				reset(server, 1);
-				FlightBladeGameTest.drop(c, p);
+				GameTestKit.drop(c, p);
 			})
 			.thenSucceed();
 	}

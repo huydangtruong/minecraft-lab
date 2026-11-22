@@ -28,11 +28,11 @@ import net.minecraft.world.phys.Vec3;
 /** P-064: Crystal Mayhem (D174) on the server. The caster looks along +Z from (5.5, 1, 0.5). */
 public class MayhemGameTest {
 	private static ServerPlayer caster(GameTestHelper c, int level) {
-		FlightBladeGameTest.enable(c);
-		FlightBladeGameTest.floor(c);
+		GameTestKit.enable(c);
+		GameTestKit.floor(c);
 		c.getLevel().getServer().setDifficulty(Difficulty.NORMAL, true);
-		ServerPlayer p = FlightBladeGameTest.survivor(c);
-		FlightBladeGameTest.place(c, p, 5.5, 1, 0.5, 0f, 0f);
+		ServerPlayer p = GameTestKit.survivor(c);
+		GameTestKit.place(c, p, 5.5, 1, 0.5, 0f, 0f);
 		TechniqueAttachment.set(p, TechniqueData.DEFAULT.withLevel(Technique.MAYHEM, level, 10)
 			.withEmeralds(TechniqueRules.MAX_EMERALDS).withSlot(0, Technique.MAYHEM));
 		return p;
@@ -79,7 +79,7 @@ public class MayhemGameTest {
 
 	private static void finish(GameTestHelper c, ServerPlayer p) {
 		Mayhem.end(p);
-		FlightBladeGameTest.drop(c, p);
+		GameTestKit.drop(c, p);
 		c.succeed();
 	}
 
@@ -187,7 +187,7 @@ public class MayhemGameTest {
 	@GameTest(maxTicks = 60)
 	public void theChannelTurnsTheNearestFiveClustersIntoLitBuddingsAndLeavesTheRest(GameTestHelper c) {
 		ServerPlayer p = caster(c, 1);
-		FlightBladeGameTest.place(c, p, 3.5, 1, 0.5, 0f, 0f);
+		GameTestKit.place(c, p, 3.5, 1, 0.5, 0f, 0f);
 		for (int x = 0; x <= 6; x++) {
 			cluster(c, p, x, 2);
 		}
@@ -226,7 +226,7 @@ public class MayhemGameTest {
 			c.assertTrue(Math.abs(lost - 1f) < 0.01f, "two overlapping buddings burn once: 1 damage at level 1, lost " + lost);
 			c.assertTrue(z.hasEffect(net.minecraft.world.effect.MobEffects.SLOWNESS), "and slow it");
 		});
-		c.runAfterDelay(10, () -> FlightBladeGameTest.place(c, p, 0.5, 1, 7.5, 0f, 0f)); // 5.7+ blocks from both buddings: the links break
+		c.runAfterDelay(10, () -> GameTestKit.place(c, p, 0.5, 1, 7.5, 0f, 0f)); // 5.7+ blocks from both buddings: the links break
 		c.runAfterDelay(20, () -> {
 			var s = c.getBlockState(new BlockPos(4, 1, 3));
 			c.assertTrue(s.is(MayhemBlocks.BUDDING) && !s.getValue(MayhemBlocks.Budding.LIT), "out of reach the budding stays but goes dark");
@@ -242,7 +242,7 @@ public class MayhemGameTest {
 	@GameTest(maxTicks = 130)
 	public void aChainOfLinksOfFiveBlocksReachesFartherThanTheCaster(GameTestHelper c) {
 		ServerPlayer p = caster(c, 1);
-		FlightBladeGameTest.place(c, p, 0.5, 1, 0.5, 0f, 0f);
+		GameTestKit.place(c, p, 0.5, 1, 0.5, 0f, 0f);
 		cluster(c, p, 3, 2); // 3.6 from the player
 		cluster(c, p, 6, 5); // 4.2 from the first, 7.8 from the player: reachable only through the chain
 		c.assertTrue(Mayhem.input(p, 1, 1f) == null, "the channel starts");
@@ -271,7 +271,7 @@ public class MayhemGameTest {
 			long left = TechniqueAttachment.get(p).cooldownEnd(Technique.MAYHEM) - now(c);
 			c.assertTrue(left > 540 && left <= 600, "the 30 s cooldown runs, left " + left);
 			c.assertTrue(TechniqueNet.cast(p, 0, 0f) != null, "no new shard during the cooldown");
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 			c.succeed();
 		});
 	}
@@ -287,7 +287,7 @@ public class MayhemGameTest {
 			Mayhem.end(p); // death, dimension change and logout all end it like this
 			c.assertTrue(blocksLeft(c) == 0, "everything is gone at once, " + blocksLeft(c));
 			c.assertTrue(TechniqueAttachment.get(p).cooldownEnd(Technique.MAYHEM) - now(c) > 500, "the cooldown started");
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 			c.succeed();
 		});
 	}
@@ -300,7 +300,7 @@ public class MayhemGameTest {
 		data(c).blocks.stream().filter(e -> e.owner.equals(p.getUUID().toString())).forEach(e -> e.expiry = 0); // the server start sets this on every record
 		c.runAfterDelay(12, () -> {
 			c.assertTrue(blocksLeft(c) == 0, "swept, " + blocksLeft(c));
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 			c.succeed();
 		});
 	}
@@ -308,7 +308,7 @@ public class MayhemGameTest {
 	@GameTest(maxTicks = 40)
 	public void otherPlayersAreTargetsOnlyWithPvpOn(GameTestHelper c) { // D182
 		ServerPlayer p = caster(c, 1);
-		ServerPlayer other = FlightBladeGameTest.survivor(c);
+		ServerPlayer other = GameTestKit.survivor(c);
 		Zombie z = zombie(c, 5.5, 4.5);
 		var server = c.getLevel().getServer();
 		boolean pvp = server.getGameRules().get(net.minecraft.world.level.gamerules.GameRules.PVP);
@@ -322,7 +322,7 @@ public class MayhemGameTest {
 		} finally {
 			server.getGameRules().set(net.minecraft.world.level.gamerules.GameRules.PVP, pvp, server);
 		}
-		FlightBladeGameTest.drop(c, other);
+		GameTestKit.drop(c, other);
 		finish(c, p);
 	}
 

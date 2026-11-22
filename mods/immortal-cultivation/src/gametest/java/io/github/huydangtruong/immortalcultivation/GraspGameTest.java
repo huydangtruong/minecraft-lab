@@ -30,10 +30,10 @@ import net.minecraft.world.phys.Vec3;
 /** P-053: Soul Grasp on the server: the tether, the tame, the limit, the bonus, release and death. */
 public class GraspGameTest {
 	private static ServerPlayer grasper(GameTestHelper c, int level) {
-		FlightBladeGameTest.enable(c);
-		FlightBladeGameTest.floor(c);
-		ServerPlayer p = FlightBladeGameTest.survivor(c);
-		FlightBladeGameTest.place(c, p, 2.5, 1, 5.5, -90f, 0f); // looking along +x
+		GameTestKit.enable(c);
+		GameTestKit.floor(c);
+		ServerPlayer p = GameTestKit.survivor(c);
+		GameTestKit.place(c, p, 2.5, 1, 5.5, -90f, 0f); // looking along +x
 		TechniqueAttachment.set(p, TechniqueData.DEFAULT.withLevel(Technique.GRASP, level, 10)
 			.withEmeralds(TechniqueRules.MAX_EMERALDS).withSlot(0, Technique.GRASP));
 		return p;
@@ -51,7 +51,7 @@ public class GraspGameTest {
 			}
 			GraspData.of(c.getLevel().getServer()).remove(p.getUUID(), e.mob());
 		}
-		FlightBladeGameTest.drop(c, p);
+		GameTestKit.drop(c, p);
 	}
 
 	@GameTest(maxTicks = 400)
@@ -167,7 +167,7 @@ public class GraspGameTest {
 		c.assertTrue(Grasp.isGraspedBy(mine, p.getUUID()), "it counts as the owner's ally (techniques and allies skip it)");
 		c.assertTrue(!ev.canAttack(mine), "the evoker's other followers leave it alone");
 		c.assertTrue(wild.canAttack(p), "a wild vex still attacks the player");
-		ServerPlayer other = FlightBladeGameTest.survivor(c); // D194: no Death Match here
+		ServerPlayer other = GameTestKit.survivor(c); // D194: no Death Match here
 		net.minecraft.world.entity.npc.villager.Villager villager = c.spawn(EntityTypes.VILLAGER, new Vec3(5.5, 1, 2.5));
 		villager.setNoAi(true);
 		c.assertTrue(!mine.canAttack(other), "a vex of the grasped evoker leaves another player alone outside a Death Match");
@@ -176,7 +176,7 @@ public class GraspGameTest {
 		mine.discard();
 		wild.discard();
 		villager.discard();
-		FlightBladeGameTest.drop(c, other);
+		GameTestKit.drop(c, other);
 		cleanUp(c, p);
 		c.succeed();
 	}
@@ -192,7 +192,7 @@ public class GraspGameTest {
 		Grasp.tame(p, piglin, 10);
 		Zombie wild = c.spawn(EntityTypes.ZOMBIE, new Vec3(3.5, 1, 3.5));
 		wild.setNoAi(true);
-		ServerPlayer other = FlightBladeGameTest.survivor(c);
+		ServerPlayer other = GameTestKit.survivor(c);
 		piglin.setPersistentAngerTarget(net.minecraft.world.entity.EntityReference.of(other)); // angry at another player: its own override of the check
 		piglin.startPersistentAngerTimer();
 		c.assertTrue(!mine.isPreventingPlayerRest(c.getLevel(), p), "a grasped zombie lets its owner sleep");
@@ -201,7 +201,7 @@ public class GraspGameTest {
 		c.assertTrue(!piglin.isPreventingPlayerRest(c.getLevel(), other), "a grasped zombified piglin angry at another player lets them sleep outside a Death Match");
 		c.assertTrue(wild.isPreventingPlayerRest(c.getLevel(), p), "a wild zombie still keeps the player awake");
 		wild.discard();
-		FlightBladeGameTest.drop(c, other);
+		GameTestKit.drop(c, other);
 		cleanUp(c, p);
 		c.succeed();
 	}
@@ -236,7 +236,7 @@ public class GraspGameTest {
 	@GameTest(maxTicks = 140)
 	public void followersKeepTwoBlocksFromTheOwner(GameTestHelper c) {
 		ServerPlayer p = grasper(c, 20);
-		FlightBladeGameTest.place(c, p, 4, 1, 4, -90f, 0f); // middle of the 8x8 test area: spots reach 3.5 out
+		GameTestKit.place(c, p, 4, 1, 4, -90f, 0f); // middle of the 8x8 test area: spots reach 3.5 out
 		Zombie[] zs = new Zombie[4];
 		for (int i = 0; i < zs.length; i++) {
 			zs[i] = c.spawn(EntityTypes.ZOMBIE, new Vec3(4 + (i % 2 == 0 ? 0.6 : -0.6), 1, 4 + (i < 2 ? 0.6 : -0.6)));
@@ -321,7 +321,7 @@ public class GraspGameTest {
 	@GameTest(maxTicks = 300)
 	public void aGraspedWitchHealsItsHurtOwner(GameTestHelper c) {
 		ServerPlayer p = grasper(c, 20);
-		FlightBladeGameTest.place(c, p, 4, 1, 4, -90f, 0f);
+		GameTestKit.place(c, p, 4, 1, 4, -90f, 0f);
 		p.getFoodData().setFoodLevel(6); // below 18: no natural regeneration, only the potion can heal
 		p.setHealth(4f);
 		witchOf(c, p, 1.5, 4);
@@ -336,7 +336,7 @@ public class GraspGameTest {
 	@GameTest(maxTicks = 300)
 	public void aGraspedWitchHurtsAZombieAndSparesTheOwnerBesideIt(GameTestHelper c) {
 		ServerPlayer p = grasper(c, 20);
-		FlightBladeGameTest.place(c, p, 6, 1, 3.2, -90f, 0f); // beside the zombie, inside the splash
+		GameTestKit.place(c, p, 6, 1, 3.2, -90f, 0f); // beside the zombie, inside the splash
 		p.getFoodData().setFoodLevel(6);
 		Zombie z = c.spawn(EntityTypes.ZOMBIE, new Vec3(6, 1, 4.2));
 		z.setNoAi(true);
@@ -357,7 +357,7 @@ public class GraspGameTest {
 	@GameTest(maxTicks = 300)
 	public void aGraspedWitchSplashNeverTouchesTheOwnerBesideItsEnemy(GameTestHelper c) {
 		ServerPlayer p = grasper(c, 20);
-		FlightBladeGameTest.place(c, p, 6, 1, 3.2, -90f, 0f);
+		GameTestKit.place(c, p, 6, 1, 3.2, -90f, 0f);
 		p.getFoodData().setFoodLevel(6);
 		net.minecraft.world.entity.animal.pig.Pig pig = c.spawn(EntityTypes.PIG, new Vec3(6, 1, 4.2));
 		pig.setNoAi(true);
@@ -394,7 +394,7 @@ public class GraspGameTest {
 	@GameTest(maxTicks = 60)
 	public void stayAllAndCallAllChangeEveryMob(GameTestHelper c) {
 		ServerPlayer p = grasper(c, 20);
-		FlightBladeGameTest.place(c, p, 5, 1, 5, -90f, 0f);
+		GameTestKit.place(c, p, 5, 1, 5, -90f, 0f);
 		Zombie[] zs = three(c, p);
 		Grasp.handle(p, Grasp.ALL_MODE, "", 1);
 		for (Zombie z : zs) {
@@ -443,7 +443,7 @@ public class GraspGameTest {
 			}
 			GraspData.of(c.getLevel().getServer()).remove(p.getUUID(), e.mob());
 		}
-		FlightBladeGameTest.drop(c, p);
+		GameTestKit.drop(c, p);
 	}
 
 	private static Entity anywhere(GameTestHelper c, UUID id) {
@@ -490,7 +490,7 @@ public class GraspGameTest {
 	@GameTest(maxTicks = 100)
 	public void callAllBringsAMobFromTheNetherToItsRingSpot(GameTestHelper c) {
 		ServerPlayer p = grasper(c, 20);
-		FlightBladeGameTest.place(c, p, 5, 1, 5, -90f, 0f);
+		GameTestKit.place(c, p, 5, 1, 5, -90f, 0f);
 		ServerLevel nether = c.getLevel().getServer().getLevel(Level.NETHER);
 		nether.getChunk(0, 0);
 		Zombie z = EntityTypes.ZOMBIE.create(nether, EntitySpawnReason.COMMAND);

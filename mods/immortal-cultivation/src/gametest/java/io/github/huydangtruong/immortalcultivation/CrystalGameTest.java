@@ -35,11 +35,11 @@ import net.minecraft.world.phys.Vec3;
 /** P-056 / D143: Crystal Prison on the server: the cage, who is kept or pushed out, disarm, Enderman, hardness, containers. */
 public class CrystalGameTest {
 	private static ServerPlayer caster(GameTestHelper c, int level) {
-		FlightBladeGameTest.enable(c);
-		FlightBladeGameTest.floor(c);
+		GameTestKit.enable(c);
+		GameTestKit.floor(c);
 		c.getLevel().getServer().setDifficulty(Difficulty.NORMAL, true);
-		ServerPlayer p = FlightBladeGameTest.survivor(c);
-		FlightBladeGameTest.place(c, p, 3.5, 1, 2.5, 0f, 0f);
+		ServerPlayer p = GameTestKit.survivor(c);
+		GameTestKit.place(c, p, 3.5, 1, 2.5, 0f, 0f);
 		TechniqueAttachment.set(p, TechniqueData.DEFAULT.withLevel(Technique.CRYSTAL, level, 10)
 			.withEmeralds(TechniqueRules.MAX_EMERALDS).withSlot(0, Technique.CRYSTAL));
 		return p;
@@ -123,7 +123,7 @@ public class CrystalGameTest {
 		c.runAfterDelay(120, () -> c.assertTrue(crystals(c, 3, 5) == 54, "the cage still stands after 6 s"));
 		c.runAfterDelay(200, () -> {
 			c.assertTrue(crystals(c, 3, 5) == 0, "the crystal is gone after 8 s, left " + crystals(c, 3, 5));
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 			c.succeed();
 		});
 	}
@@ -148,7 +148,7 @@ public class CrystalGameTest {
 				}
 			}
 			c.assertTrue(inside == 2, "exactly two zombies are caged, found " + inside + " a=" + a.position() + " b=" + b.position() + " d=" + d.position() + " in=" + in);
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 			c.succeed();
 		});
 	}
@@ -159,7 +159,7 @@ public class CrystalGameTest {
 		Zombie z = c.spawn(EntityTypes.ZOMBIE, new Vec3(4.5, 1, 3.5)); // keeps its AI: it would attack at once
 		z.setPersistenceRequired();
 		z.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 2000, 0, false, false, false));
-		FlightBladeGameTest.place(c, p, 3.5, 1, 3.5, 0f, 0f);
+		GameTestKit.place(c, p, 3.5, 1, 3.5, 0f, 0f);
 		float[] hp = new float[1];
 		c.runAfterDelay(1, () -> c.assertTrue(TechniqueNet.cast(p, 0, 1f) == null, "the self cast is accepted"));
 		c.runAfterDelay(4, () -> {
@@ -174,7 +174,7 @@ public class CrystalGameTest {
 			float before = z.getHealth();
 			p.attack(z);
 			c.assertTrue(z.getHealth() < before, "the caster can still hit the zombie");
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 			c.succeed();
 		});
 	}
@@ -182,7 +182,7 @@ public class CrystalGameTest {
 	@GameTest(maxTicks = 40)
 	public void aCagedEndermanCannotTeleportOut(GameTestHelper c) {
 		ServerPlayer p = caster(c, 1);
-		FlightBladeGameTest.place(c, p, 3.5, 1, 3.5, 0f, 0f);
+		GameTestKit.place(c, p, 3.5, 1, 3.5, 0f, 0f);
 		Enderman e = c.spawn(EntityTypes.ENDERMAN, new Vec3(4.5, 1, 3.5));
 		still(e);
 		c.runAfterDelay(3, () -> {
@@ -192,7 +192,7 @@ public class CrystalGameTest {
 			Vec3 far = abs(c, 6.5, 1, 6.5);
 			boolean moved = e.teleport(far.x, far.y, far.z);
 			c.assertTrue(!moved && e.position().distanceTo(at) < 0.01, "the Enderman did not teleport, now at " + e.position());
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 			c.succeed();
 		});
 	}
@@ -212,14 +212,14 @@ public class CrystalGameTest {
 		float rHigh = calc.getBlockExplosionResistance(null, level, pos, high, high.getFluidState()).orElse(-1f);
 		c.assertTrue(Math.abs(rLow - CrystalRules.crystalBlast(1)) < 0.01 && Math.abs(rHigh - CrystalRules.crystalBlast(20)) < 0.01,
 			"blast resistance follows the tier: " + rLow + " and " + rHigh);
-		FlightBladeGameTest.drop(c, p);
+		GameTestKit.drop(c, p);
 		c.succeed();
 	}
 
 	@GameTest(maxTicks = 40)
 	public void aChestInTheWallSpillsItsContentsInsteadOfDeletingThem(GameTestHelper c) {
 		ServerPlayer p = caster(c, 1);
-		FlightBladeGameTest.place(c, p, 3.5, 1, 3.5, 0f, 0f);
+		GameTestKit.place(c, p, 3.5, 1, 3.5, 0f, 0f);
 		c.setBlock(1, 1, 3, Blocks.CHEST);
 		c.runAfterDelay(2, () -> {
 			var be = c.getLevel().getBlockEntity(c.absolutePos(new BlockPos(1, 1, 3)));
@@ -231,7 +231,7 @@ public class CrystalGameTest {
 			c.assertTrue(c.getBlockState(new BlockPos(1, 1, 3)).getBlock() instanceof CrystalBlock, "the chest was replaced by crystal");
 			List<ItemEntity> items = c.getLevel().getEntitiesOfClass(ItemEntity.class, shellBox(c, 3, 3).inflate(1), i -> i.getItem().is(Items.DIAMOND));
 			c.assertTrue(items.size() == 1 && items.get(0).getItem().getCount() == 3, "the diamonds dropped, found " + items.size());
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 			c.succeed();
 		});
 	}
@@ -243,7 +243,7 @@ public class CrystalGameTest {
 		still(ghast);
 		c.assertTrue(TechniqueNet.cast(p, 0, 0f) != null, "a ghast cannot be caged");
 		c.assertTrue(crystals(c, 3, 5) == 0, "no crystal was placed");
-		FlightBladeGameTest.drop(c, p);
+		GameTestKit.drop(c, p);
 		c.succeed();
 	}
 
@@ -259,7 +259,7 @@ public class CrystalGameTest {
 		c.assertTrue(z.getHealth() == full, "a melee hit by a disarmed player does nothing, health " + z.getHealth());
 		z.hurtServer(level, level.damageSources().indirectMagic(z, p), 4); // a technique orb: direct entity is not the player
 		c.assertTrue(z.getHealth() < full, "technique damage from a disarmed player still lands, health " + z.getHealth());
-		FlightBladeGameTest.drop(c, p);
+		GameTestKit.drop(c, p);
 		c.succeed();
 	}
 }

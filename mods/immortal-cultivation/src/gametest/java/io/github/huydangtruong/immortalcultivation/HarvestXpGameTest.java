@@ -20,10 +20,10 @@ public class HarvestXpGameTest {
 
 	@GameTest(maxTicks = 60)
 	public void breakingRipeWheatGivesOneXpUnripeGivesNone(GameTestHelper c) {
-		FlightBladeGameTest.enable(c);
-		FlightBladeGameTest.floor(c);
-		ServerPlayer p = FlightBladeGameTest.survivor(c);
-		FlightBladeGameTest.place(c, p, 5.5, 1, 5.5, 0f, 0f);
+		GameTestKit.enable(c);
+		GameTestKit.floor(c);
+		ServerPlayer p = GameTestKit.survivor(c);
+		GameTestKit.place(c, p, 5.5, 1, 5.5, 0f, 0f);
 		crop(c, 1, 3);
 		crop(c, 2, 6);
 		crop(c, 3, 7);
@@ -34,7 +34,7 @@ public class HarvestXpGameTest {
 		breakAt(c, p, 3);
 		c.assertTrue(p.totalExperience == 2, "age 7 gives 1 more, was " + p.totalExperience);
 		c.assertTrue(HeartsAttachment.get(p).heartXp() == 0, "HeartXP is untouched");
-		FlightBladeGameTest.drop(c, p);
+		GameTestKit.drop(c, p);
 		c.succeed();
 	}
 }

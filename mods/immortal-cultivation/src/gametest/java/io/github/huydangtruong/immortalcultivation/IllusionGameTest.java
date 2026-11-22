@@ -32,10 +32,10 @@ public class IllusionGameTest {
 	}
 
 	private static ServerPlayer owner(GameTestHelper c) {
-		FlightBladeGameTest.enable(c);
-		FlightBladeGameTest.floor(c);
-		ServerPlayer p = FlightBladeGameTest.survivor(c);
-		FlightBladeGameTest.place(c, p, 5.5, 1, 5.5, 0f, 0f);
+		GameTestKit.enable(c);
+		GameTestKit.floor(c);
+		ServerPlayer p = GameTestKit.survivor(c);
+		GameTestKit.place(c, p, 5.5, 1, 5.5, 0f, 0f);
 		return p;
 	}
 
@@ -70,7 +70,7 @@ public class IllusionGameTest {
 					c.assertTrue(a.endTick() - c.getLevel().getGameTime() == Math.round(TechniqueRules.illusionSeconds(k[0]) * 20), "lasts " + TechniqueRules.illusionSeconds(k[0]) + " s");
 				}
 			}
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 			c.succeed();
 		});
 	}
@@ -99,7 +99,7 @@ public class IllusionGameTest {
 			c.assertTrue(!hurtByClone && a.getHealth() == hp, "a clone's hit does nothing to a sibling");
 			a.setSprinting(true);
 			c.assertTrue(Math.abs(a.getAttributeValue(Attributes.MOVEMENT_SPEED) - 0.31 * (1 + Illusion.SPRINT_BONUS)) < 1e-6, "sprinting adds the clone bonus, was " + a.getAttributeValue(Attributes.MOVEMENT_SPEED));
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 			c.succeed();
 		});
 	}
@@ -107,12 +107,12 @@ public class IllusionGameTest {
 	@GameTest(maxTicks = 100)
 	public void withPvpOffWhoeverHitsTheOwnerBecomesATargetAndTheCloneHurtsThem(GameTestHelper c) {
 		ServerPlayer p = owner(c);
-		ServerPlayer q = FlightBladeGameTest.survivor(c);
+		ServerPlayer q = GameTestKit.survivor(c);
 		MinecraftServer server = c.getLevel().getServer();
 		boolean pvp = server.getGameRules().get(GameRules.PVP);
 		server.getGameRules().set(GameRules.PVP, false, server);
 		try {
-			FlightBladeGameTest.place(c, q, 7.5, 1, 5.5, 0f, 0f);
+			GameTestKit.place(c, q, 7.5, 1, 5.5, 0f, 0f);
 			arm(p, 20);
 			TechniqueCasts.cast(p, Technique.ILLUSION, 20, 1f);
 			q.setHealth(20f);
@@ -131,8 +131,8 @@ public class IllusionGameTest {
 					c.assertTrue(Math.abs((before - q.getHealth()) - expected) < 0.01, "the clone hit lands with PvP off: " + before + " -> " + q.getHealth() + " inv=" + q.getInvulnerableTime() + " dist=" + mine.get(0).distanceTo(q) + " dmgattr=" + mine.get(0).getAttributeValue(Attributes.ATTACK_DAMAGE) + " alive=" + q.isAlive() + " gm=" + q.gameMode() + " landed=" + landed + " invTo=" + q.isInvulnerableTo(c.getLevel(), c.getLevel().damageSources().mobAttack(mine.get(0))) + " hurtTime=" + q.hurtTime + " abs=" + q.getAbsorptionAmount() + " armor=" + q.getAttributeValue(Attributes.ARMOR));
 				} finally {
 					server.getGameRules().set(GameRules.PVP, pvp, server);
-					FlightBladeGameTest.drop(c, q);
-					FlightBladeGameTest.drop(c, p);
+					GameTestKit.drop(c, q);
+					GameTestKit.drop(c, p);
 				}
 				c.succeed();
 			});
@@ -145,12 +145,12 @@ public class IllusionGameTest {
 	@GameTest(maxTicks = 100)
 	public void withPvpOffWhomTheOwnerHitsBecomesATarget(GameTestHelper c) {
 		ServerPlayer p = owner(c);
-		ServerPlayer q = FlightBladeGameTest.survivor(c);
+		ServerPlayer q = GameTestKit.survivor(c);
 		MinecraftServer server = c.getLevel().getServer();
 		boolean pvp = server.getGameRules().get(GameRules.PVP);
 		server.getGameRules().set(GameRules.PVP, false, server);
 		try {
-			FlightBladeGameTest.place(c, q, 7.5, 1, 5.5, 0f, 0f);
+			GameTestKit.place(c, q, 7.5, 1, 5.5, 0f, 0f);
 			arm(p, 1);
 			TechniqueCasts.cast(p, Technique.ILLUSION, 1, 1f);
 			q.setHealth(20f);
@@ -163,8 +163,8 @@ public class IllusionGameTest {
 					c.assertTrue(a.getTarget() == q, "the clone targets the player the owner hit, was " + a.getTarget());
 				} finally {
 					server.getGameRules().set(GameRules.PVP, pvp, server);
-					FlightBladeGameTest.drop(c, q);
-					FlightBladeGameTest.drop(c, p);
+					GameTestKit.drop(c, q);
+					GameTestKit.drop(c, p);
 				}
 				c.succeed();
 			});
@@ -184,7 +184,7 @@ public class IllusionGameTest {
 		Illusion a = clones(c, p).get(0);
 		c.runAfterDelay(40, () -> {
 			c.assertTrue(a.getTarget() == creeper, "the clone targets the creeper, was " + a.getTarget());
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 			c.succeed();
 		});
 	}
@@ -201,7 +201,7 @@ public class IllusionGameTest {
 		IllusionTargets.noteDamage(g, c.getLevel().damageSources().playerAttack(p));
 		c.assertTrue(IllusionTargets.idsOf(p.getUUID()).isEmpty(), "the owner's clone and guardian are never targets, list " + IllusionTargets.idsOf(p.getUUID()));
 		c.assertTrue(!a.canAttack(p), "a clone never attacks its owner");
-		FlightBladeGameTest.drop(c, p);
+		GameTestKit.drop(c, p);
 		c.succeed();
 	}
 
@@ -219,7 +219,7 @@ public class IllusionGameTest {
 		c.assertTrue(!z.isAlive(), "the clone killed the zombie");
 		int now = HeartsAttachment.get(p).totalHostileKills();
 		c.assertTrue(now == kills + 1, "the owner's kill count went " + kills + " -> " + now);
-		FlightBladeGameTest.drop(c, p);
+		GameTestKit.drop(c, p);
 		c.succeed();
 	}
 
@@ -236,7 +236,7 @@ public class IllusionGameTest {
 		c.runAfterDelay(8, () -> {
 			c.assertTrue(!a.isAlive(), "the first clone vanished after its time");
 			c.assertTrue(b.isAlive() && IllusionTargets.active(p.getUUID()), "the other stays, the list stays");
-			FlightBladeGameTest.drop(c, p); // the owner leaves
+			GameTestKit.drop(c, p); // the owner leaves
 			c.runAfterDelay(8, () -> {
 				c.assertTrue(!b.isAlive(), "the clone vanishes with its owner");
 				c.assertTrue(!IllusionTargets.active(p.getUUID()), "the list is cleared when the clones end");
@@ -247,14 +247,14 @@ public class IllusionGameTest {
 
 	/** Runs a clone along a long strip; every tick the owner (and for sprinting a target) is put ahead of it. Measures blocks/s over ticks 20..80. */
 	private static void measureSpeed(GameTestHelper c, boolean sprint, double expected) {
-		FlightBladeGameTest.enable(c);
+		GameTestKit.enable(c);
 		for (int x = 0; x < 22; x++) {
 			c.setBlock(x, 0, 5, Blocks.STONE);
 			c.setBlock(x, 0, 6, Blocks.STONE);
 		}
-		ServerPlayer p = FlightBladeGameTest.survivor(c);
+		ServerPlayer p = GameTestKit.survivor(c);
 		arm(p, 1);
-		FlightBladeGameTest.place(c, p, 2.5, 1, 5.5, 0f, 0f);
+		GameTestKit.place(c, p, 2.5, 1, 5.5, 0f, 0f);
 		TechniqueCasts.cast(p, Technique.ILLUSION, 1, 1f);
 		Illusion a = clones(c, p).get(0);
 		Vec3 s0 = c.absoluteVec(new Vec3(2.5, 1, 5.5));
@@ -281,7 +281,7 @@ public class IllusionGameTest {
 			if (t == 80) {
 				double speed = total[0] / 3.0; // ticks 21..80 = 3 s
 				boolean sp = a.isSprinting();
-				FlightBladeGameTest.drop(c, p);
+				GameTestKit.drop(c, p);
 				System.out.println("ILLUSION-SPEED " + (sprint ? "sprint" : "walk") + " " + speed + " blocks/s");
 				c.assertTrue(Math.abs(speed - expected) <= expected * 0.10, (sprint ? "sprint" : "walk") + " speed " + speed + " blocks/s, expected " + expected + " (+-10%), sprinting=" + sp);
 				c.succeed();

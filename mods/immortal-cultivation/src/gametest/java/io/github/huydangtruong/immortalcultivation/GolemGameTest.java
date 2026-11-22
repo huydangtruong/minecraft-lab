@@ -28,8 +28,8 @@ public class GolemGameTest {
 
 	@GameTest(maxTicks = 40)
 	public void bleedingIsHarmfulAndHurtsOverTime(GameTestHelper c) {
-		FlightBladeGameTest.enable(c);
-		FlightBladeGameTest.floor(c);
+		GameTestKit.enable(c);
+		GameTestKit.floor(c);
 		Husk h = husk(c, 5.5);
 		h.addEffect(new MobEffectInstance(Bleeding.EFFECT, 100, 0));
 		c.runAfterDelay(30, () -> {
@@ -47,10 +47,10 @@ public class GolemGameTest {
 
 	@GameTest(maxTicks = 40)
 	public void guardianCountAndPowerFollowTheLevel(GameTestHelper c) {
-		FlightBladeGameTest.enable(c);
-		FlightBladeGameTest.floor(c);
-		ServerPlayer p = FlightBladeGameTest.survivor(c);
-		FlightBladeGameTest.place(c, p, 5.5, 1, 5.5, 0f, 0f);
+		GameTestKit.enable(c);
+		GameTestKit.floor(c);
+		ServerPlayer p = GameTestKit.survivor(c);
+		GameTestKit.place(c, p, 5.5, 1, 5.5, 0f, 0f);
 		arm(p, 1);
 		int[][] cases = {{1, 1}, {9, 1}, {10, 2}, {14, 2}, {15, 3}, {19, 3}, {20, 4}};
 		for (int[] k : cases) {
@@ -66,16 +66,16 @@ public class GolemGameTest {
 			}
 		}
 		c.assertTrue(TechniqueRules.golemPower(20) == 2.0, "double at level 20");
-		FlightBladeGameTest.drop(c, p);
+		GameTestKit.drop(c, p);
 		c.succeed();
 	}
 
 	@GameTest(maxTicks = 100)
 	public void guardianIgnoresItsOwnerAndPlayers(GameTestHelper c) {
-		FlightBladeGameTest.enable(c);
-		FlightBladeGameTest.floor(c);
-		ServerPlayer p = FlightBladeGameTest.survivor(c);
-		FlightBladeGameTest.place(c, p, 5.5, 1, 5.5, 0f, 0f);
+		GameTestKit.enable(c);
+		GameTestKit.floor(c);
+		ServerPlayer p = GameTestKit.survivor(c);
+		GameTestKit.place(c, p, 5.5, 1, 5.5, 0f, 0f);
 		arm(p, 1);
 		TechniqueCasts.cast(p, Technique.GOLEM, 1, 1f);
 		VioletGuardian g = VioletGuardian.guardiansOf(c.getLevel(), p.getUUID()).get(0);
@@ -88,34 +88,34 @@ public class GolemGameTest {
 			c.assertTrue(g.getTarget() == null, "no target, was " + g.getTarget());
 			c.assertTrue(p.getHealth() == php, "the owner is not hurt");
 			c.assertTrue(g.getHealth() == hp, "not retaliating, health " + g.getHealth());
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 			c.succeed();
 		});
 	}
 
 	@GameTest(maxTicks = 200)
 	public void guardianAttacksAMonsterNearTheOwner(GameTestHelper c) {
-		FlightBladeGameTest.enable(c);
-		FlightBladeGameTest.floor(c);
-		ServerPlayer p = FlightBladeGameTest.survivor(c);
-		FlightBladeGameTest.place(c, p, 5.5, 1, 2.5, 0f, 0f);
+		GameTestKit.enable(c);
+		GameTestKit.floor(c);
+		ServerPlayer p = GameTestKit.survivor(c);
+		GameTestKit.place(c, p, 5.5, 1, 2.5, 0f, 0f);
 		arm(p, 20);
 		Husk h = c.spawn(EntityTypes.HUSK, new Vec3(5.5, 1, 8.5));
 		h.setNoAi(true);
 		TechniqueCasts.cast(p, Technique.GOLEM, 20, 1f);
 		c.runAfterDelay(150, () -> {
 			c.assertTrue(!h.isAlive() || h.getHealth() < h.getMaxHealth(), "a guardian attacked the husk, health " + h.getHealth());
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 			c.succeed();
 		});
 	}
 
 	@GameTest(maxTicks = 80)
 	public void guardiansVanishAfterTheirTimeAndWhenTheOwnerLeaves(GameTestHelper c) {
-		FlightBladeGameTest.enable(c);
-		FlightBladeGameTest.floor(c);
-		ServerPlayer p = FlightBladeGameTest.survivor(c);
-		FlightBladeGameTest.place(c, p, 5.5, 1, 5.5, 0f, 0f);
+		GameTestKit.enable(c);
+		GameTestKit.floor(c);
+		ServerPlayer p = GameTestKit.survivor(c);
+		GameTestKit.place(c, p, 5.5, 1, 5.5, 0f, 0f);
 		arm(p, 15);
 		TechniqueCasts.cast(p, Technique.GOLEM, 15, 1f);
 		var mine = VioletGuardian.guardiansOf(c.getLevel(), p.getUUID());
@@ -127,7 +127,7 @@ public class GolemGameTest {
 		c.runAfterDelay(8, () -> {
 			c.assertTrue(!a.isAlive(), "the first guardian vanished after its time");
 			c.assertTrue(b.isAlive() && d.isAlive(), "the others stay");
-			FlightBladeGameTest.drop(c, p); // the owner leaves
+			GameTestKit.drop(c, p); // the owner leaves
 			c.runAfterDelay(8, () -> {
 				c.assertTrue(!b.isAlive() && !d.isAlive(), "the guardians vanish with their owner");
 				c.succeed();

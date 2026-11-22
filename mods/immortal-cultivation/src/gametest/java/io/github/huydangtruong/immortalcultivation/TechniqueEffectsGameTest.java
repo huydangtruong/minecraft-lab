@@ -36,53 +36,13 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * P-011 part C: server side of the six techniques, cast through TechniqueCasts.cast. Mock players from the game-test
- * helper are always Creative (invulnerable), so they only serve as casters; {@link #survivor} builds a real survival
+ * helper are always Creative (invulnerable), so they only serve as casters; {@link GameTestKit#survivor} builds a real survival
  * player for damage checks. Targets are Husks (sun-proof) so daylight never confuses the fire checks.
  */
 public class TechniqueEffectsGameTest {
 	private static void enable(GameTestHelper c, boolean on) {
 		MinecraftServer s = c.getLevel().getServer();
 		s.getGameRules().set(ImmortalCultivation.ENABLED, on, s);
-	}
-
-	private static void floor(GameTestHelper c) {
-		for (int x = 0; x < 12; x++) {
-			for (int z = 0; z < 12; z++) {
-				c.setBlock(x, 0, z, Blocks.STONE);
-			}
-		}
-	}
-
-	private static void place(GameTestHelper c, ServerPlayer p, double x, double y, double z, float yaw, float pitch) {
-		Vec3 v = c.absoluteVec(new Vec3(x, y, z));
-		p.teleportTo(c.getLevel(), v.x, v.y, v.z, Set.of(), yaw, pitch, false);
-	}
-
-	/** A survival player that takes damage (the helper's mock is Creative and never "loaded"). */
-	private static ServerPlayer survivor(GameTestHelper c) {
-		ServerLevel level = c.getLevel();
-		MinecraftServer server = level.getServer();
-		GameProfile profile = new GameProfile(UUID.randomUUID(), "tq" + Integer.toHexString((int) (Math.random() * 0xFFFFFF)));
-		CommonListenerCookie cookie = CommonListenerCookie.createInitial(profile, false);
-		ServerPlayer p = new ServerPlayer(server, level, cookie.gameProfile(), cookie.clientInformation()) {
-			@Override
-			public GameType gameMode() {
-				return GameType.SURVIVAL;
-			}
-		};
-		Connection connection = new Connection(PacketFlow.SERVERBOUND);
-		new EmbeddedChannel(connection);
-		server.getPlayerList().placeNewPlayer(connection, p, cookie);
-		p.connection.handleAcceptPlayerLoad(new ServerboundPlayerLoadedPacket());
-		p.setGameMode(GameType.SURVIVAL); // placeNewPlayer used the world's default mode: drop creative abilities
-		p.getAbilities().invulnerable = false;
-		p.getAbilities().mayfly = false;
-		p.getAbilities().flying = false;
-		return p;
-	}
-
-	private static void drop(GameTestHelper c, ServerPlayer p) {
-		c.getLevel().getServer().getPlayerList().remove(p);
 	}
 
 	private static Husk husk(GameTestHelper c, double x, double z, boolean noAi) {
@@ -118,7 +78,7 @@ public class TechniqueEffectsGameTest {
 		enable(c, true);
 		longFloor(c);
 		ServerPlayer p = c.makeMockServerPlayerInLevel();
-		place(c, p, 1.5, 1, 4.5, -90f, (float) pitch);
+		GameTestKit.place(c, p, 1.5, 1, 4.5, -90f, (float) pitch);
 		int before = TechniqueFields.count();
 		TechniqueCasts.cast(p, t, level, 1f);
 		c.runAfterDelay(80, () -> {
@@ -154,7 +114,7 @@ public class TechniqueEffectsGameTest {
 			}
 		}
 		ServerPlayer p = c.makeMockServerPlayerInLevel();
-		place(c, p, 1.5, 1, 4.5, -90f, 0f);
+		GameTestKit.place(c, p, 1.5, 1, 4.5, -90f, 0f);
 		int before = TechniqueFields.count();
 		TechniqueCasts.cast(p, Technique.FIRE, 1, 1f);
 		c.runAfterDelay(80, () -> {
@@ -172,14 +132,14 @@ public class TechniqueEffectsGameTest {
 	@GameTest(maxTicks = 100)
 	public void fireOrbSetsWoodOnFire(GameTestHelper c) {
 		enable(c, true);
-		floor(c);
+		GameTestKit.floor(c);
 		for (int y = 1; y <= 3; y++) {
 			for (int z = 3; z <= 5; z++) {
 				c.setBlock(new BlockPos(6, y, z), Blocks.OAK_LOG);
 			}
 		}
 		ServerPlayer p = c.makeMockServerPlayerInLevel();
-		place(c, p, 1.5, 1, 4.5, -90f, 0f); // looking along +X at the logs
+		GameTestKit.place(c, p, 1.5, 1, 4.5, -90f, 0f); // looking along +X at the logs
 		TechniqueCasts.cast(p, Technique.FIRE, 1, 1f);
 		c.runAfterDelay(30, () -> {
 			c.assertTrue(fireBlocksIn(c), "the wooden wall should be on fire");
@@ -191,9 +151,9 @@ public class TechniqueEffectsGameTest {
 	@GameTest(maxTicks = 100)
 	public void fireOrbBurnsAHuskAndPlacesNoFire(GameTestHelper c) {
 		enable(c, true);
-		floor(c);
+		GameTestKit.floor(c);
 		ServerPlayer p = c.makeMockServerPlayerInLevel();
-		place(c, p, 1.5, 1, 4.5, -90f, 0f); // looking along +X
+		GameTestKit.place(c, p, 1.5, 1, 4.5, -90f, 0f); // looking along +X
 		Husk h = husk(c, 6.5, 4.5, true);
 		TechniqueCasts.cast(p, Technique.FIRE, 1, 1f);
 		c.runAfterDelay(30, () -> {
@@ -215,7 +175,7 @@ public class TechniqueEffectsGameTest {
 	@GameTest(maxTicks = 200)
 	public void fireAfterburnKeepsBurningOutsideTheField(GameTestHelper c) {
 		enable(c, true);
-		floor(c);
+		GameTestKit.floor(c);
 		Husk h = husk(c, 1.5, 3.5, true);
 		h.getAttribute(Attributes.MAX_HEALTH).setBaseValue(100);
 		h.setHealth(100);
@@ -246,7 +206,7 @@ public class TechniqueEffectsGameTest {
 	@GameTest(maxTicks = 120)
 	public void fireBurnStopsInWater(GameTestHelper c) {
 		enable(c, true);
-		floor(c);
+		GameTestKit.floor(c);
 		Husk h = husk(c, 1.5, 3.5, true);
 		h.getAttribute(Attributes.MAX_HEALTH).setBaseValue(100);
 		h.setHealth(100);
@@ -277,9 +237,9 @@ public class TechniqueEffectsGameTest {
 	@GameTest(maxTicks = 100)
 	public void iceOrbGivesFrostbiteWithTheRightValues(GameTestHelper c) {
 		enable(c, true);
-		floor(c);
+		GameTestKit.floor(c);
 		ServerPlayer caster = c.makeMockServerPlayerInLevel();
-		place(c, caster, 1.5, 1, 4.5, -90f, 0f);
+		GameTestKit.place(c, caster, 1.5, 1, 4.5, -90f, 0f);
 		Husk h = husk(c, 6.5, 4.5, true);
 		TechniqueCasts.cast(caster, Technique.ICE, 10, 1f);
 		c.runAfterDelay(30, () -> {
@@ -298,11 +258,11 @@ public class TechniqueEffectsGameTest {
 	@GameTest(maxTicks = 100)
 	public void frostbiteSlowsAttackSpeedOfAPlayerToo(GameTestHelper c) {
 		enable(c, true);
-		floor(c);
+		GameTestKit.floor(c);
 		ServerPlayer caster = c.makeMockServerPlayerInLevel();
-		place(c, caster, 1.5, 1, 4.5, -90f, 0f);
-		ServerPlayer target = survivor(c);
-		place(c, target, 6.5, 1, 4.5, 0f, 0f);
+		GameTestKit.place(c, caster, 1.5, 1, 4.5, -90f, 0f);
+		ServerPlayer target = GameTestKit.survivor(c);
+		GameTestKit.place(c, target, 6.5, 1, 4.5, 0f, 0f);
 		TechniqueCasts.cast(caster, Technique.ICE, 1, 1f);
 		c.runAfterDelay(30, () -> {
 			try {
@@ -313,7 +273,7 @@ public class TechniqueEffectsGameTest {
 				c.assertTrue(mv != null && Math.abs(mv.amount() + TechniqueRules.iceSlow(1)) < 1e-9, "move modifier should be -" + TechniqueRules.iceSlow(1));
 				c.succeed();
 			} finally {
-				drop(c, target);
+				GameTestKit.drop(c, target);
 			}
 		});
 	}
@@ -321,9 +281,9 @@ public class TechniqueEffectsGameTest {
 	@GameTest(maxTicks = 300)
 	public void healingCircleHealsEveryLivingEntity(GameTestHelper c) {
 		enable(c, true);
-		floor(c);
+		GameTestKit.floor(c);
 		ServerPlayer p = c.makeMockServerPlayerInLevel();
-		place(c, p, 2.5, 1, 2.5, 0f, 0f);
+		GameTestKit.place(c, p, 2.5, 1, 2.5, 0f, 0f);
 		var cow = c.spawn(EntityTypes.COW, new Vec3(4.5, 1, 2.5));
 		cow.setNoAi(true);
 		Husk h = husk(c, 1.5, 4.0, true);
@@ -345,9 +305,9 @@ public class TechniqueEffectsGameTest {
 	@GameTest(maxTicks = 100)
 	public void repulsePushesAndHurtsButNotTheCaster(GameTestHelper c) {
 		enable(c, true);
-		floor(c);
+		GameTestKit.floor(c);
 		ServerPlayer p = c.makeMockServerPlayerInLevel();
-		place(c, p, 1.5, 1, 1.5, 0f, 0f);
+		GameTestKit.place(c, p, 1.5, 1, 1.5, 0f, 0f);
 		Husk h = husk(c, 3.5, 1.5, false);
 		float before = h.getHealth();
 		double d0 = h.position().distanceTo(c.absoluteVec(new Vec3(1.5, 1, 1.5)));
@@ -367,10 +327,10 @@ public class TechniqueEffectsGameTest {
 	@GameTest(maxTicks = 160)
 	public void repulseStunsAMobThenItWalksAgain(GameTestHelper c) {
 		enable(c, true);
-		floor(c);
-		ServerPlayer p = survivor(c);
+		GameTestKit.floor(c);
+		ServerPlayer p = GameTestKit.survivor(c);
 		try {
-			place(c, p, 8.5, 1, 5.5, 0f, 0f);
+			GameTestKit.place(c, p, 8.5, 1, 5.5, 0f, 0f);
 			p.setHealth(20f);
 			Husk h = husk(c, 6.5, 5.5, false);
 			h.setTarget(p);
@@ -394,11 +354,11 @@ public class TechniqueEffectsGameTest {
 			c.runAfterDelay(100, () -> {
 				double d = h.position().distanceTo(p.position());
 				c.assertTrue(d < at24[0] - 1.0, "after the stun the husk walks to its target again: " + at24[0] + " -> " + d);
-				drop(c, p);
+				GameTestKit.drop(c, p);
 				c.succeed();
 			});
 		} catch (RuntimeException e) {
-			drop(c, p);
+			GameTestKit.drop(c, p);
 			throw e;
 		}
 	}
@@ -406,12 +366,12 @@ public class TechniqueEffectsGameTest {
 	@GameTest(maxTicks = 40)
 	public void repulseStunLastsLongerWithLevelAndPlayersAreNeverStunned(GameTestHelper c) {
 		enable(c, true);
-		floor(c);
+		GameTestKit.floor(c);
 		ServerPlayer caster = c.makeMockServerPlayerInLevel();
-		ServerPlayer other = survivor(c);
+		ServerPlayer other = GameTestKit.survivor(c);
 		try {
-			place(c, caster, 5.5, 1, 5.5, 0f, 0f);
-			place(c, other, 7.5, 1, 5.5, 0f, 0f);
+			GameTestKit.place(c, caster, 5.5, 1, 5.5, 0f, 0f);
+			GameTestKit.place(c, other, 7.5, 1, 5.5, 0f, 0f);
 			Husk h = husk(c, 5.5, 7.5, true);
 			TechniqueCasts.cast(caster, Technique.REPULSE, 20, 1f);
 			int ticks = h.getEffect(Stun.EFFECT).getDuration();
@@ -419,16 +379,16 @@ public class TechniqueEffectsGameTest {
 			c.assertTrue(!other.hasEffect(Stun.EFFECT), "a player is never stunned");
 			c.succeed();
 		} finally {
-			drop(c, other);
+			GameTestKit.drop(c, other);
 		}
 	}
 
 	@GameTest(maxTicks = 40)
 	public void godSlayerIsStunnedForATenthOfTheTime(GameTestHelper c) {
 		enable(c, true);
-		floor(c);
+		GameTestKit.floor(c);
 		ServerPlayer caster = c.makeMockServerPlayerInLevel();
-		place(c, caster, 5.5, 1, 5.5, 0f, 0f);
+		GameTestKit.place(c, caster, 5.5, 1, 5.5, 0f, 0f);
 		GodSlayer b = GodSlayer.TYPE.create(c.getLevel(), EntitySpawnReason.MOB_SUMMONED);
 		Vec3 v = c.absoluteVec(new Vec3(5.5, 1, 8.5));
 		b.snapTo(v.x, v.y, v.z, 0f, 0f);
@@ -445,19 +405,19 @@ public class TechniqueEffectsGameTest {
 	@GameTest(maxTicks = 100)
 	public void phaseWalkPassesWallsButStandsOnTheFloor(GameTestHelper c) {
 		enable(c, true);
-		floor(c);
+		GameTestKit.floor(c);
 		for (int y = 1; y <= 3; y++) {
 			for (int z = 2; z <= 7; z++) {
 				c.setBlock(6, y, z, Blocks.STONE);
 			}
 		}
 		ServerPlayer p = c.makeMockServerPlayerInLevel();
-		place(c, p, 3.5, 1, 4.5, -90f, 0f);
+		GameTestKit.place(c, p, 3.5, 1, 4.5, -90f, 0f);
 		double wallX = c.absoluteVec(new Vec3(6, 0, 0)).x;
 		// Without Phase Walk the wall stops the player.
 		p.move(MoverType.SELF, new Vec3(4, 0, 0));
 		c.assertTrue(p.getX() < wallX, "the wall should stop the player, x " + p.getX() + " wall " + wallX);
-		place(c, p, 3.5, 1, 4.5, -90f, 0f);
+		GameTestKit.place(c, p, 3.5, 1, 4.5, -90f, 0f);
 		TechniqueCasts.cast(p, Technique.PHASE, 1, 1f);
 		c.assertTrue(PhaseState.phasing(p), "player should be phasing");
 		p.move(MoverType.SELF, new Vec3(4, 0, 0));
@@ -468,7 +428,7 @@ public class TechniqueEffectsGameTest {
 		p.move(MoverType.SELF, new Vec3(0, -3, 0));
 		c.assertTrue(p.getY() > y0 - 0.5, "the floor should hold, y " + y0 + " -> " + p.getY());
 		// Ending inside the wall lifts the player to free space.
-		place(c, p, 6.5, 1, 4.5, 0f, 0f);
+		GameTestKit.place(c, p, 6.5, 1, 4.5, 0f, 0f);
 		TechniqueCasts.endPhase(p);
 		c.assertTrue(!PhaseState.phasing(p), "phase should be over");
 		c.assertTrue(c.getLevel().noCollision(p, p.getBoundingBox()), "player must not be left inside blocks");
@@ -489,7 +449,7 @@ public class TechniqueEffectsGameTest {
 			c.setBlock(6, y, 4, Blocks.STONE);
 		}
 		ServerPlayer p = c.makeMockServerPlayerInLevel();
-		place(c, p, 3.5, 3, 4.5, -90f, 0f);
+		GameTestKit.place(c, p, 3.5, 3, 4.5, -90f, 0f);
 		TechniqueCasts.cast(p, Technique.PHASE, 1, 1f);
 		int cast = p.getAttached(PhaseState.ATTACHMENT).floorY();
 		c.assertTrue(cast == c.absolutePos(new BlockPos(0, 3, 0)).getY(), "cast floor should be the feet level, was " + cast);
@@ -511,7 +471,7 @@ public class TechniqueEffectsGameTest {
 		p.move(MoverType.SELF, new Vec3(0, -3, 0));
 		c.assertTrue(p.getY() > y0 - 0.5, "the lower ground should hold, y " + y0 + " -> " + p.getY());
 		// The floor never rises.
-		place(c, p, 3.5, 4, 4.5, 0f, 0f);
+		GameTestKit.place(c, p, 3.5, 4, 4.5, 0f, 0f);
 		PhaseState.followFall(p);
 		c.assertTrue(p.getAttached(PhaseState.ATTACHMENT).floorY() == floor, "the floor must not rise");
 		TechniqueCasts.endPhase(p);
@@ -522,7 +482,7 @@ public class TechniqueEffectsGameTest {
 	public void phaseWalkDurationFollowsTheLevel(GameTestHelper c) {
 		enable(c, true);
 		ServerPlayer p = c.makeMockServerPlayerInLevel();
-		place(c, p, 3.5, 1, 4.5, 0f, 0f);
+		GameTestKit.place(c, p, 3.5, 1, 4.5, 0f, 0f);
 		long now = c.getLevel().getGameTime();
 		TechniqueCasts.cast(p, Technique.PHASE, 10, 1f);
 		PhaseState s = p.getAttached(PhaseState.ATTACHMENT);
@@ -535,10 +495,10 @@ public class TechniqueEffectsGameTest {
 	@GameTest(maxTicks = 100)
 	public void bloodOathCostsHealthAndBlocksDamageThenStops(GameTestHelper c) {
 		enable(c, true);
-		floor(c);
-		ServerPlayer p = survivor(c);
+		GameTestKit.floor(c);
+		ServerPlayer p = GameTestKit.survivor(c);
 		try {
-			place(c, p, 5.5, 1, 5.5, 0f, 0f);
+			GameTestKit.place(c, p, 5.5, 1, 5.5, 0f, 0f);
 			c.assertTrue(!p.isCreative(), "test player must be a survival player");
 			p.setHealth(20f);
 			TechniqueCasts.cast(p, Technique.SACRIFICE, 1, 1f);
@@ -561,7 +521,7 @@ public class TechniqueEffectsGameTest {
 			p.setAttached(TechniqueCasts.OATH_UNTIL, level.getGameTime() - 1);
 			c.succeed();
 		} finally {
-			drop(c, p);
+			GameTestKit.drop(c, p);
 		}
 	}
 
@@ -579,15 +539,15 @@ public class TechniqueEffectsGameTest {
 	@GameTest(maxTicks = 100)
 	public void techniqueDamageReachesPlayersWithPvpOff(GameTestHelper c) {
 		enable(c, true);
-		floor(c);
+		GameTestKit.floor(c);
 		MinecraftServer server = c.getLevel().getServer();
 		ServerPlayer caster = c.makeMockServerPlayerInLevel();
-		ServerPlayer target = survivor(c);
+		ServerPlayer target = GameTestKit.survivor(c);
 		boolean pvp = server.getGameRules().get(GameRules.PVP);
 		server.getGameRules().set(GameRules.PVP, false, server);
 		try {
-			place(c, caster, 5.5, 1, 5.5, 0f, 0f);
-			place(c, target, 7.5, 1, 5.5, 0f, 0f);
+			GameTestKit.place(c, caster, 5.5, 1, 5.5, 0f, 0f);
+			GameTestKit.place(c, target, 7.5, 1, 5.5, 0f, 0f);
 			target.setHealth(20f);
 			ServerLevel level = c.getLevel();
 			// Control: ordinary player-vs-player damage is refused when PvP is off.
@@ -598,15 +558,15 @@ public class TechniqueEffectsGameTest {
 			c.succeed();
 		} finally {
 			server.getGameRules().set(GameRules.PVP, pvp, server);
-			drop(c, target);
+			GameTestKit.drop(c, target);
 		}
 	}
 
 	@GameTest(maxTicks = 100)
 	public void nothingWorksWithTheSwitchOff(GameTestHelper c) {
-		floor(c);
+		GameTestKit.floor(c);
 		ServerPlayer p = c.makeMockServerPlayerInLevel();
-		place(c, p, 5.5, 1, 5.5, 0f, 0f);
+		GameTestKit.place(c, p, 5.5, 1, 5.5, 0f, 0f);
 		p.setHealth(20f);
 		int fields = TechniqueFields.count();
 		enable(c, false);

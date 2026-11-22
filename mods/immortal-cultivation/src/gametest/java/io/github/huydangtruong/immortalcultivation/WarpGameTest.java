@@ -20,10 +20,10 @@ import net.minecraft.world.phys.Vec3;
 /** P-026: Cosmic Warping on the server: placing, the limit, unbreakable portals, removal, warping, the cooldown, names. */
 public class WarpGameTest {
 	private static ServerPlayer warper(GameTestHelper c, double x, double z) {
-		FlightBladeGameTest.enable(c);
-		FlightBladeGameTest.floor(c);
-		ServerPlayer p = FlightBladeGameTest.survivor(c);
-		FlightBladeGameTest.place(c, p, x, 1, z, 0f, 0f);
+		GameTestKit.enable(c);
+		GameTestKit.floor(c);
+		ServerPlayer p = GameTestKit.survivor(c);
+		GameTestKit.place(c, p, x, 1, z, 0f, 0f);
 		TechniqueAttachment.set(p, TechniqueData.DEFAULT.withLevel(Technique.WARP, 1, 10)
 			.withEmeralds(TechniqueRules.MAX_EMERALDS).withSlot(0, Technique.WARP));
 		return p;
@@ -42,7 +42,7 @@ public class WarpGameTest {
 		for (PortalRecord r : WarpSavedData.of(c.getLevel().getServer()).get().of(p.getUUID())) {
 			Warp.remove(p, r.id());
 		}
-		FlightBladeGameTest.drop(c, p);
+		GameTestKit.drop(c, p);
 	}
 
 	@GameTest(maxTicks = 40)
@@ -88,14 +88,14 @@ public class WarpGameTest {
 	@GameTest(maxTicks = 40)
 	public void onlyTheOwnerRemovesAPortalAndThatRemovesTheEntity(GameTestHelper c) {
 		ServerPlayer p = warper(c, 8.5, 8.5);
-		ServerPlayer other = FlightBladeGameTest.survivor(c);
+		ServerPlayer other = GameTestKit.survivor(c);
 		PortalRecord rec = portalAt(c, p, 4.5, 4.5);
 		c.assertTrue(!Warp.remove(other, rec.id()), "a stranger cannot remove it");
 		c.assertTrue(sl(c).getEntity(rec.id()) != null, "still there after the refusal");
 		c.assertTrue(Warp.remove(p, rec.id()), "the owner removes it");
 		c.assertTrue(WarpSavedData.of(sl(c).getServer()).get().find(rec.id()) == null, "list entry gone");
 		c.assertTrue(sl(c).getEntity(rec.id()) == null, "entity gone");
-		FlightBladeGameTest.drop(c, other);
+		GameTestKit.drop(c, other);
 		cleanUp(c, p);
 		c.succeed();
 	}
@@ -117,7 +117,7 @@ public class WarpGameTest {
 		c.assertTrue(TechniqueAttachment.get(p).onCooldown(Technique.WARP, now), "the cooldown started");
 		long left = TechniqueAttachment.get(p).cooldownLeft(Technique.WARP, now);
 		c.assertTrue(left == TechniqueRules.cooldownTicks(Technique.WARP, 1), "90 s at level 1, was " + left + " ticks");
-		FlightBladeGameTest.place(c, p, 9.5, 1, 9.5, 0f, 0f);
+		GameTestKit.place(c, p, 9.5, 1, 9.5, 0f, 0f);
 		before = p.position();
 		c.assertTrue(Warp.warpToPortal(p, rec.id()) != null, "a second warp during the cooldown is refused");
 		c.assertTrue(p.position().distanceTo(before) < 0.01, "and the player did not move");
@@ -128,13 +128,13 @@ public class WarpGameTest {
 	@GameTest(maxTicks = 40)
 	public void warpingToAnotherPlayerWorks(GameTestHelper c) {
 		ServerPlayer p = warper(c, 9.5, 9.5);
-		ServerPlayer q = FlightBladeGameTest.survivor(c);
-		FlightBladeGameTest.place(c, q, 2.5, 1, 3.5, 0f, 0f);
+		ServerPlayer q = GameTestKit.survivor(c);
+		GameTestKit.place(c, q, 2.5, 1, 3.5, 0f, 0f);
 		String error = Warp.warpToPlayer(p, q.getUUID());
 		c.assertTrue(error == null, "the warp works, got: " + error);
 		c.assertTrue(p.position().distanceTo(q.position()) < 3.5, "landed next to the other player");
 		c.assertTrue(Warp.warpToPlayer(p, p.getUUID()) != null, "never to yourself");
-		FlightBladeGameTest.drop(c, q);
+		GameTestKit.drop(c, q);
 		cleanUp(c, p);
 		c.succeed();
 	}

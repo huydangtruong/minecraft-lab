@@ -30,11 +30,11 @@ import net.minecraft.world.phys.Vec3;
 /** P-061: Solar Lance (D157, D159) and Life Stealer (D158, D159) on the server. The caster looks along +Z from (5.5, 1, 0.5). */
 public class LanceStealerGameTest {
 	private static ServerPlayer caster(GameTestHelper c, Technique t) {
-		FlightBladeGameTest.enable(c);
-		FlightBladeGameTest.floor(c);
+		GameTestKit.enable(c);
+		GameTestKit.floor(c);
 		c.getLevel().getServer().setDifficulty(Difficulty.NORMAL, true);
-		ServerPlayer p = FlightBladeGameTest.survivor(c);
-		FlightBladeGameTest.place(c, p, 5.5, 1, 0.5, 0f, 0f);
+		ServerPlayer p = GameTestKit.survivor(c);
+		GameTestKit.place(c, p, 5.5, 1, 0.5, 0f, 0f);
 		TechniqueAttachment.set(p, TechniqueData.DEFAULT.withLevel(t, 1, 10).withEmeralds(TechniqueRules.MAX_EMERALDS).withSlot(0, t));
 		return p;
 	}
@@ -71,7 +71,7 @@ public class LanceStealerGameTest {
 			c.assertTrue(far.getHealth() < far.getMaxHealth(), "the far zombie on the same line is hurt too");
 			c.assertTrue(off.getHealth() == off.getMaxHealth(), "the zombie off the line is not hurt");
 			Lance.release(p);
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 			c.succeed();
 		});
 	}
@@ -87,7 +87,7 @@ public class LanceStealerGameTest {
 			c.assertTrue(z.getHealth() < z.getMaxHealth(), "the beam hurt the zombie");
 			c.assertTrue(most.get() == 0, "no damage cooldown left by the beam, saw " + most.get());
 			Lance.release(p);
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 			c.succeed();
 		});
 	}
@@ -105,7 +105,7 @@ public class LanceStealerGameTest {
 			c.assertTrue(z.getZ() - z0 > 0.5, "the zombie was pushed along the beam, moved " + (z.getZ() - z0));
 			c.assertTrue(!off.hasEffect(net.minecraft.world.effect.MobEffects.SLOWNESS), "the zombie off the line is not slowed");
 			Lance.release(p);
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 			c.succeed();
 		});
 	}
@@ -124,7 +124,7 @@ public class LanceStealerGameTest {
 			float lost = full - z.getHealth();
 			c.assertTrue(Math.abs(lost - 9f) < 1.1f, "the next 3 s cost about 6 more, lost " + lost);
 			Lance.release(p);
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 			c.succeed();
 		});
 	}
@@ -138,7 +138,7 @@ public class LanceStealerGameTest {
 			c.assertTrue(!Lance.active(p), "off after 12 s");
 			long left = TechniqueAttachment.get(p).cooldownEnd(Technique.LANCE) - now(c);
 			c.assertTrue(left > 620 && left <= 720, "the 36 s cooldown started when the beam ended, left " + left);
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 			c.succeed();
 		});
 	}
@@ -160,7 +160,7 @@ public class LanceStealerGameTest {
 		});
 		c.runAfterDelay(80, () -> {
 			c.assertTrue(z.getHealth() == atRelease[0], "no more damage after the release, " + atRelease[0] + " -> " + z.getHealth());
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 			c.succeed();
 		});
 	}
@@ -198,7 +198,7 @@ public class LanceStealerGameTest {
 			c.assertTrue(Math.abs(slowed - speed * 0.2) < 1e-6, "exactly -80% speed: " + speed + " -> " + slowed);
 			int left = z.getEffect(StealerSlow.EFFECT).getDuration();
 			c.assertTrue(left > 30 && left <= 40, "about 2 s of slow, ticks " + left);
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 			c.succeed();
 		});
 	}
@@ -214,7 +214,7 @@ public class LanceStealerGameTest {
 		c.runAfterDelay(105, () -> {
 			c.assertTrue(!z.hasEffect(Bleeding.EFFECT) && !z.hasEffect(StealerSlow.EFFECT), "both gone 2 s after the drain");
 			c.assertTrue(Math.abs(z.getAttributeValue(Attributes.MOVEMENT_SPEED) - speed) < 1e-6, "the speed is back");
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 			c.succeed();
 		});
 	}
@@ -228,7 +228,7 @@ public class LanceStealerGameTest {
 		LifeStealer.cast(p, 1);
 		c.runAfterDelay(49, () -> {
 			c.assertTrue(Math.abs(z.getHealth() - 193f) < 0.01f, "36% of 200 is capped at 7, health " + z.getHealth());
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 			c.succeed();
 		});
 	}
@@ -250,7 +250,7 @@ public class LanceStealerGameTest {
 			c.assertTrue(!z.isNoGravity(), "gravity is back");
 			c.assertTrue(z.getHealth() > 11.5f, "no fall damage (only a little bleeding): health " + z.getHealth());
 			c.assertTrue(bats(c).isEmpty(), "no bat left: " + bats(c).size());
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 			c.succeed();
 		});
 	}
@@ -268,7 +268,7 @@ public class LanceStealerGameTest {
 		});
 		c.runAfterDelay(70, () -> {
 			c.assertTrue(up(c, z) < 0.05, "down again, height " + up(c, z));
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 			c.succeed();
 		});
 	}
@@ -283,7 +283,7 @@ public class LanceStealerGameTest {
 		c.runAfterDelay(45, () -> {
 			c.assertTrue(!LifeStealer.draining(z), "the drain is over");
 			c.assertTrue(bats(c).isEmpty(), "no bat left: " + bats(c).size());
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 			c.succeed();
 		});
 	}
@@ -322,7 +322,7 @@ public class LanceStealerGameTest {
 		});
 		c.runAfterDelay(70, () -> {
 			c.assertTrue(bats(c).isEmpty(), "bats gone");
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 			c.succeed();
 		});
 	}
@@ -331,7 +331,7 @@ public class LanceStealerGameTest {
 	public void withNoTargetTheCastFailsAndTheLanceNeedsNoTarget(GameTestHelper c) {
 		ServerPlayer p = caster(c, Technique.BLADE);
 		c.assertTrue(!LifeStealer.cast(p, 1), "nothing under the crosshair: the cast fails");
-		FlightBladeGameTest.drop(c, p);
+		GameTestKit.drop(c, p);
 		c.succeed();
 	}
 
@@ -345,7 +345,7 @@ public class LanceStealerGameTest {
 		c.runAfterDelay(14, () -> {
 			c.assertTrue(c.getBlockState(stone).isAir(), "the stone is broken after about 6 ticks");
 			Lance.release(p);
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 			c.succeed();
 		});
 	}
@@ -359,7 +359,7 @@ public class LanceStealerGameTest {
 		c.runAfterDelay(25, () -> {
 			c.assertTrue(c.getBlockState(rock).is(Blocks.BEDROCK), "bedrock stays");
 			Lance.release(p);
-			FlightBladeGameTest.drop(c, p);
+			GameTestKit.drop(c, p);
 			c.succeed();
 		});
 	}

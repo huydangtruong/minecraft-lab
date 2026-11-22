@@ -822,11 +822,11 @@ public class WandererGameTest {
 	public void deathMatchSummonsTargetTheOpponent(GameTestHelper context) {
 		MinecraftServer s = context.getLevel().getServer();
 		enable(context, true);
-		FlightBladeGameTest.floor(context);
-		ServerPlayer owner = FlightBladeGameTest.survivor(context);
-		ServerPlayer foe = FlightBladeGameTest.survivor(context);
-		FlightBladeGameTest.place(context, owner, 3.5, 1, 3.5, 0f, 0f);
-		FlightBladeGameTest.place(context, foe, 9.5, 1, 9.5, 0f, 0f);
+		GameTestKit.floor(context);
+		ServerPlayer owner = GameTestKit.survivor(context);
+		ServerPlayer foe = GameTestKit.survivor(context);
+		GameTestKit.place(context, owner, 3.5, 1, 3.5, 0f, 0f);
+		GameTestKit.place(context, foe, 9.5, 1, 9.5, 0f, 0f);
 		owner.setHealth(20f);
 		foe.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(100000); // the summons hit it: it must outlast the test
 		foe.setHealth(100000f);
@@ -872,8 +872,8 @@ public class WandererGameTest {
 				io.github.huydangtruong.immortalcultivation.technique.VioletGuardian.dismissAll(owner);
 				io.github.huydangtruong.immortalcultivation.technique.Illusion.dismissAll(owner);
 				endMatchTest(s);
-				FlightBladeGameTest.drop(context, owner);
-				FlightBladeGameTest.drop(context, foe);
+				GameTestKit.drop(context, owner);
+				GameTestKit.drop(context, foe);
 			}
 		});
 	}

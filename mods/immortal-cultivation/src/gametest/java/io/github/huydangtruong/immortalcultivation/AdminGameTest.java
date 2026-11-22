@@ -16,7 +16,7 @@ public class AdminGameTest {
 	public void opLinesRunInOrderAndNonOpRunsNothing(GameTestHelper c) {
 		MinecraftServer server = c.getLevel().getServer();
 		ServerPlayer p = c.makeMockServerPlayerInLevel();
-		FlightBladeGameTest.enable(c);
+		GameTestKit.enable(c);
 		DangerSavedData ds = DangerSavedData.of(server);
 		int dangerBefore = ds.level;
 		var id = p.nameAndId();
@@ -82,7 +82,7 @@ public class AdminGameTest {
 	public void elixirLinesSetBothWaysAndNetheriteGivesTheKit(GameTestHelper c) {
 		MinecraftServer server = c.getLevel().getServer();
 		ServerPlayer p = c.makeMockServerPlayerInLevel();
-		FlightBladeGameTest.enable(c);
+		GameTestKit.enable(c);
 		var id = p.nameAndId();
 		try {
 			server.getPlayerList().op(id, java.util.Optional.of(net.minecraft.server.permissions.LevelBasedPermissionSet.GAMEMASTER), java.util.Optional.empty());
