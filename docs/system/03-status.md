@@ -2,7 +2,7 @@
 
 > Tóm tắt cho Huy: file này ghi việc đang làm dở và bước tiếp theo, để một phiên Claude mới đọc là làm tiếp được.
 > Manager cập nhật file này cuối mỗi đợt việc (merge, phát hành, quyết định mới).
-> Snapshot: 2026-11-21, after release 0.39.0.
+> Snapshot: 2026-11-22, after release 0.40.0.
 
 A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [workflow/team.md](../workflow/team.md) → the plan of the work in flight. Do not read the whole repo.
 
@@ -10,7 +10,7 @@ A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [w
 
 | What | Where |
 |---|---|
-| Last release | `immortal-cultivation-v0.39.0` (GitHub Releases on `huydangtruong/minecraft-lab`), `mod_version=0.39.0`. All old tags `permahearts-v*` were renamed to `immortal-cultivation-v*` on 2026-11-17 (D132); the installers still accept both prefixes |
+| Last release | `immortal-cultivation-v0.40.0` (GitHub Releases on `huydangtruong/minecraft-lab`), `mod_version=0.40.0`. All old tags `permahearts-v*` were renamed to `immortal-cultivation-v*` on 2026-11-17 (D132); the installers still accept both prefixes |
 | 0.12.0 contains | Warrior Angel (P-021, D62, D63), Aqua Marine (P-022, P-023, D64, D69), chieftain XP x10 and damage x2 (D65, D66), stronger Strength/Swiftness/Mining elixirs (D67), gold quest 64 (D68) |
 | 0.13.0 contains | Illusion technique (P-024, D71); D72 numbers (Warrior Angel, Cloud Travel, Undying Jutsu, Heaven Blast, Fireball, Frozen Breath); chieftain health 200 and the leader-bonus fix; Strength +2 (D70); "Death Match (PvP)" line |
 | 0.14.0 contains | Illusion work modes and hostile mobs targeting the clones (P-025, D73); Quantum Leap rename (turquoise) and Cosmic Warping portals (P-026, D74, D75); quest reward boxes (P-027, D76); technique slots cost 64, 128, 256, 512 emeralds (D77); clones plant bare farmland and pick up wool near the sheep. Not playtested by hand |
@@ -45,7 +45,8 @@ A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [w
 | 0.37.0 contains | P-064 Crystal Mayhem, 20th technique (D174): left click Shard Projection (light-based damage, 20 shards, 10 s amethyst clusters), hold right click Light Strike Reflection (chain of lit buddings that burn 1 + 0.5/level and slow, 20 s, then 30 s cooldown). Server + client game tests green. Not playtested by hand |
 | 0.38.0 contains | P-065 Item guard, 7th passive (D176): items do not break, they become broken with a durability debt of 100% (Lv1) down to 10% (Lv10), unusable until the anvil or Mending pays it; crafting-grid repair of a broken item refused, grindstone vanilla. Solar Lance cooldown 36 s (D175). Fix: flaky sun-burn grasp test. Server game tests green; client suite green once, new screenshots not looked at. Not playtested by hand |
 | 0.39.0 contains | P-066 Life Stealer (D180): 4 visual bats fly in, lift the target 2 blocks (ceiling-safe, bosses not lifted), drain in 10 pulses over 2 s, fly out, target falls; drains 36% at Lv 1, +2%/level (D181). Passives tab scrolls with the original row size (D177). Technique upgrades cost a flat 5 levels (D178). Item guard debt starts at 0 and grows with wear up to the level cap (D179). Crystal Mayhem hits other players only with PvP on (D182). Area tests green; client suite not run; bats and scroll not looked at in game |
-| On `main`, not released | Nothing (branch `fix/damage-cooldown`: D183 Solar Lance and Fireball burn reset the real damage cooldown; branch `feat/godslayer-fifth-slot`, built on it: D184 God Slayer takes its own 5th event slot; branch `fix/grasp-raider`, built on that: D185 a grasped raider leaves its raid; branch `feat/admin-elixirs`, built on that: D186 /admin Give full netherite and Elixirs tab. D187 Deadly Treasure top bar and 2-minute warning, on the same branch. All four wait for Huy to merge or release) |
+| 0.40.0 contains | Solar Lance and Fireball burn reset the real vanilla damage cooldown (D183). God Slayer takes its own 5th special-event slot after every 2nd Deadly Treasure (D184). A grasped raider leaves its raid and never joins another (D185). /admin: Give full netherite button and Elixirs tab to lower or raise each bonus (D186). Deadly Treasure purple top bar with coordinates, guards left, time left, and a warning 2 minutes before it vanishes (D187). Area server tests green. |
+| On `main`, not released | Nothing |
 
 Release steps: [workflow/release.md](../workflow/release.md). Release **only when Huy says so**.
 
