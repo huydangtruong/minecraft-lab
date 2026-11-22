@@ -174,3 +174,10 @@ Thế giới có **Danger level 0–50** (D206: giãn từ 0–30 lên 0–50, l
 
 - **Notes đã tắt (D217):** nút Notes, trang Notes và mạng Notes (`NotesNet`, `NotesTab`) được comment ra, không xoá file. Dữ liệu Notes cũ trong world vẫn nằm yên, không được đọc nên không gây lỗi. Muốn bật lại thì bỏ các dòng `// D217: Notes disabled`.
 - **Ô thùng rác:** ở chỗ nút Notes cũ (cạnh nút Cultivation trong túi đồ) có một ô vuông giống ô túi đồ với biểu tượng thùng rác. Cầm một chồng vật phẩm trên con trỏ rồi bấm vào ô (chuột trái hoặc phải): cả chồng bị **huỷ hẳn**, như ném vào lava, kèm tiếng xèo của lava (chỉ người chơi đó nghe). Con trỏ trống thì không làm gì; chế độ Spectator không làm gì. Server tự đọc chồng đang cầm (client chỉ gửi "xoá"), nên không tin client. Rê chuột vào ô hiện chú thích "Trash: drop an item here to destroy it".
+
+## Lệnh /quit (P-075, D218)
+
+- Dùng khi Huy host world qua Essential rồi đi ngủ, để game chạy. Bạn chơi xong thì gõ `/quit` (ai cũng gõ được, không cần OP).
+- Đếm ngược **10 giây**: mọi người thấy dòng chat (ghi ai bấm) và chữ trên thanh hành động "World saves and closes in N s - type /quit again to cancel". Gõ `/quit` lần nữa trong lúc đếm sẽ **huỷ** cho mọi người, kèm thông báo ai huỷ.
+- Hết 10 giây: server lưu world, đá các người chơi khác ra ("The host's world was saved and closed"), rồi Minecraft của Huy tự thoát về "Saving world" như Save and Quit to Title, đợi lưu xong hẳn, rồi **tắt hẳn game**.
+- Trên server riêng (dedicated) lệnh chỉ báo "chỉ dùng được trong world host" và không làm gì.
