@@ -152,7 +152,9 @@ def spiral_bg(c,cx=8,cy=8,rmax=8.4):
             c.p[y][x]=(120,40,175,235) if t<0.5 else (205,70,200,235)
 def main():
     C['T']=(234,216,192,255); C['t']=(188,164,138,255)  # D205: Huy picked option 2 with skin tone 5 (light sand)
-    c=mkc('T','t'); horns2(c,0,0,HD6); ears(c,'T',8); eyes(c,SWIRL); c.outline(); glow_ring(c,(150,70,220))
+    c=mkc('T','t'); horns2(c,0,0,HD6); ears(c,'T',8); eyes(c,SWIRL); c.outline()
+    c.p[0][0]=c.p[0][15]=CLEAR  # D215: no black dots in the two top corners
+    glow_ring(c,(150,70,220))
     tex=os.path.join(os.path.dirname(os.path.abspath(__file__)),"..","src","main","resources","assets","permahearts","textures")
     png(os.path.join(tex,"gui","sprites","technique","grasp.png"),c.p)
     png(os.path.join(tex,"item","focus_grasp.png"),c.p)

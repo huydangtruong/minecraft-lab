@@ -88,7 +88,11 @@ public class ImmortalCultivation implements ModInitializer {
 		io.github.huydangtruong.immortalcultivation.passive.CropGrowth.register(); // P-058: Crop growth
 		io.github.huydangtruong.immortalcultivation.treasure.DeadlyTreasure.register(); // P-059: Deadly Treasure
 		io.github.huydangtruong.immortalcultivation.danger.RaidGlow.register(); // D190: raid mobs glow
-		io.github.huydangtruong.immortalcultivation.notes.NotesNet.register(); // P-042: Notes panel
+		// D217: Notes disabled
+		// io.github.huydangtruong.immortalcultivation.notes.NotesNet.register(); // P-042: Notes panel
+		io.github.huydangtruong.immortalcultivation.trash.TrashNet.register(); // D217: trash slot
+		io.github.huydangtruong.immortalcultivation.quit.QuitNet.register(); // D218: /quit
+		io.github.huydangtruong.immortalcultivation.quit.Quit.register();
 		io.github.huydangtruong.immortalcultivation.admin.AdminNetworking.register(); // P-060: /admin panel
 		io.github.huydangtruong.immortalcultivation.technique.TechniqueSelection.init();
 		HeartsAttachment.DM_PROTECTED.identifier();
@@ -118,6 +122,7 @@ public class ImmortalCultivation implements ModInitializer {
 			io.github.huydangtruong.immortalcultivation.technique.TechniqueCommand.register(d);
 			io.github.huydangtruong.immortalcultivation.danger.DangerCommand.register(d);
 			io.github.huydangtruong.immortalcultivation.admin.AdminCommand.register(d);
+			io.github.huydangtruong.immortalcultivation.quit.Quit.registerCommand(d);
 		});
 		// Right-click on the Wanderer opens the quest screen instead of the trade screen (SUCCESS also blocks vanilla).
 		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {

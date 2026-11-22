@@ -72,7 +72,7 @@ public final class LayeredHeartsHud {
 			: p.hasEffect(MobEffects.WITHER) ? "withered_"
 			: p.isFullyFrozen() ? "frozen_"
 			: "";
-		int layer = HealthBarRules.layer(health);
+		int layer = HealthBarRules.rowLayer(max); // D216: the colour of full health, poison/wither/frozen still override
 		int color = status.equals("poisoned_") ? HealthBarRules.POISON_COLOR
 			: status.equals("withered_") ? HealthBarRules.WITHER_COLOR
 			: status.equals("frozen_") ? HealthBarRules.FROZEN_COLOR
