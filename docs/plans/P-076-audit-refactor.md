@@ -2,7 +2,7 @@
 
 > **Tóm tắt cho Huy (VN, ≤ 3 dòng):** đọc lại toàn bộ code mod (server, client, test, tools), liệt kê lỗi thật, code trùng, code chết, class quá to. Refactor chỉ những bước giữ nguyên gameplay, có test che. Lỗi tìm được thì báo riêng, không sửa lén trong refactor.
 
-- **Status:** draft (audit done, refactor steps waiting for approval)
+- **Status:** review (R1-R10 + R13 done; R11, R12 deferred by the manager on Huy's behalf, 2026-11-23)
 - **Mod / decision:** `immortal-cultivation` · **Branch:** `feat/P-076-audit-refactor` · **Depends on:** release 0.44.0 (715401c)
 
 ## Goal
