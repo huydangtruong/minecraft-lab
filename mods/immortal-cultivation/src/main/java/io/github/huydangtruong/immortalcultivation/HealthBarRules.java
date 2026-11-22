@@ -36,6 +36,11 @@ public final class HealthBarRules {
 		return Math.min(LAYER_COLORS.length - 1, (health - 1) / HeartLayers.LAYER_HP);
 	}
 
+	/** D216: heart and bar always show the layer of the FULL health (max health), whatever health is left. */
+	public static int rowLayer(float maxHealth) {
+		return layer((int) Math.ceil(maxHealth));
+	}
+
 	public static int layerColor(int layer) {
 		return LAYER_COLORS[Math.max(0, Math.min(LAYER_COLORS.length - 1, layer))];
 	}

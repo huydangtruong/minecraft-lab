@@ -53,7 +53,7 @@ public class HealthBarClientTest implements FabricClientGameTest {
 			shot(context, "143-health-layer-1-of-60");
 			health(server, 25f);
 			context.waitTicks(8);
-			shot(context, "144-health-layer-0-of-60");
+			shot(context, "144-health-25-of-60-keeps-layer-1"); // D216
 
 			hearts(server, 100); // 200 HP: layer 4 at full
 			health(server, 200f);

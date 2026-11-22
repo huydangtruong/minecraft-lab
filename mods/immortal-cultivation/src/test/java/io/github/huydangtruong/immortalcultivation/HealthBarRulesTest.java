@@ -25,6 +25,14 @@ class HealthBarRulesTest {
 	}
 
 	@Test
+	void theRowKeepsTheColourOfFullHealth() { // D216
+		assertEquals(0, HealthBarRules.rowLayer(20f));
+		assertEquals(1, HealthBarRules.rowLayer(60f));
+		assertEquals(4, HealthBarRules.rowLayer(200f));
+		assertEquals(14, HealthBarRules.rowLayer(5000f));
+	}
+
+	@Test
 	void everyLayerHasItsOwnBarColour() {
 		for (int i = 0; i < 15; i++) {
 			for (int j = i + 1; j < 15; j++) {
