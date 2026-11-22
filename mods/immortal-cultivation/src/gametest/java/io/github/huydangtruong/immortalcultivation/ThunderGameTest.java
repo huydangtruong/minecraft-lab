@@ -99,19 +99,25 @@ public class ThunderGameTest {
 		});
 	}
 
-	@GameTest(maxTicks = 80)
+	@GameTest(maxTicks = 100)
 	public void aPigInTheBlastBecomesAZombifiedPiglin(GameTestHelper c) {
 		ServerPlayer p = caster(c, 1);
 		Pig pig = c.spawn(EntityTypes.PIG, new Vec3(5.5, 1, 9.5));
 		pig.setPersistenceRequired();
 		Thunder.cast(p, 1, abs(c, 5.5, 1, 11.0)); // 1.5 blocks from the pig, not under the bolt
-		c.runAfterDelay(30, () -> {
-			c.assertTrue(!pig.isAlive(), "the pig is gone");
-			var piglins = c.getLevel().getEntitiesOfClass(ZombifiedPiglin.class, c.getBounds().inflate(4));
-			c.assertTrue(!piglins.isEmpty(), "a zombified piglin took its place");
-			piglins.forEach(e -> e.discard());
-			GameTestKit.drop(c, p);
-			c.succeed();
+		// Polled every tick: the strike lands about 20 ticks after the cast, and the converted piglin can be hurt by the
+		// blast and leave the world again before any single fixed tick. Seeing it once, with the pig gone, proves the conversion.
+		int[] ticks = {0};
+		c.onEachTick(() -> {
+			ticks[0]++;
+			var piglins = c.getLevel().getEntitiesOfClass(ZombifiedPiglin.class, c.getBounds().inflate(8));
+			if (!pig.isAlive() && !piglins.isEmpty()) {
+				piglins.forEach(e -> e.discard());
+				GameTestKit.drop(c, p);
+				c.succeed();
+			} else if (ticks[0] > 60) {
+				c.fail("the pig did not become a zombified piglin: pig alive=" + pig.isAlive() + " removed=" + pig.isRemoved() + " health=" + pig.getHealth() + " piglins=" + piglins.size());
+			}
 		});
 	}
 

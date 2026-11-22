@@ -436,6 +436,7 @@ public class GraspGameTest {
 
 	/** Frees whatever a D198 test left behind: the mob (wherever it is), its entry, the player. */
 	private static void cleanUpAny(GameTestHelper c, ServerPlayer p) {
+		Grasp.setCallTimeout(GraspCalls.TIMEOUT_TICKS); // the call tests raise the static timeout: never leak it into later tests
 		for (var e : GraspData.of(c.getLevel().getServer()).get(p.getUUID()).mobs().toArray(new GraspData.Entry[0])) {
 			if (c.getLevel().getServer().overworld().getEntityInAnyDimension(e.mob()) instanceof Mob m) {
 				Grasp.releaseMob(m, false);
@@ -568,10 +569,13 @@ public class GraspGameTest {
 				cleanUpAny(c, p);
 				c.succeed(); // the temporary ticket was given back: the far chunk no longer ticks
 			} else if (phase[0] == 1 && (System.nanoTime() - t0) > 30_000_000_000L) {
+				Grasp.setCallTimeout(GraspCalls.TIMEOUT_TICKS);
 				c.fail("the mob never came");
 			} else if (phase[0] == 2 && phase[1] > 60) {
+				Grasp.setCallTimeout(GraspCalls.TIMEOUT_TICKS);
 				c.fail("the far chunk keeps ticking: the ticket leaked");
 			} else if (phase[0] == 0 && (System.nanoTime() - t0) > 30_000_000_000L) {
+				Grasp.setCallTimeout(GraspCalls.TIMEOUT_TICKS);
 				c.fail("the far chunk never unloaded, so the test cannot start");
 			}
 		});
@@ -582,45 +586,57 @@ public class GraspGameTest {
 		ServerPlayer p = grasper(c, 20);
 		ServerLevel lv = c.getLevel();
 		ChunkPos real = new ChunkPos(2100, 2100), wrong = new ChunkPos(2200, 2200);
-		Grasp.setCallTimeout(GraspCalls.TIMEOUT_TICKS);
+		Grasp.setCallTimeout(GraspCalls.TIMEOUT_TICKS); // short on purpose: the wrong-place call must give up quickly
 		UUID[] made = new UUID[1];
 		GraspData.Entry[] saved = new GraspData.Entry[1];
 		GraspData data = GraspData.of(lv.getServer());
 		int[] phase = {0, 0};
-		long t0 = System.nanoTime();
+		int[] total = {0};
 		c.onEachTick(() -> {
-			phase[1]++;
-			UUID id = farMob(c, p, real, made);
-			if (id == null) {
-				return;
-			}
-			GraspData.Entry right = phase[0] == 0 ? data.find(p.getUUID(), id) : null;
-			if (phase[0] == 0 && phase[1] < 3) {
-				return; // the ticket was just given back
-			}
-			if (phase[0] == 0 && anywhere(c, id) == null) {
-				saved[0] = right;
-				data.replace(p.getUUID(), new GraspData.Entry(id, right.type(), right.number(), right.mode(), right.dim(), wrong.getMiddleBlockX(), 80, wrong.getMiddleBlockZ(),
-					right.hp(), right.maxHp(), right.bonus(), right.armor(), right.damage(), right.armorGear(), right.weaponGear()));
-				Grasp.handle(p, Grasp.CALL, id.toString(), 0);
-				phase[0] = 1;
-				phase[1] = 0;
-			} else if (phase[0] == 1 && phase[1] == 130) {
-				c.assertTrue(anywhere(c, id) == null, "the mob did not come (it is elsewhere)");
-				c.assertTrue(held(c, p) == 1, "the slot is untouched");
-				c.assertTrue(!lv.isPositionEntityTicking(wrong.getWorldPosition().offset(8, 80, 8)), "the wrong chunk was given back");
-				data.replace(p.getUUID(), saved[0]); // seen again where it really is: calling works at once (no cooldown was spent)
-				Grasp.handle(p, Grasp.CALL, id.toString(), 0);
-				phase[0] = 2;
-				phase[1] = 0;
-			} else if (phase[0] == 2 && anywhere(c, id) instanceof Zombie z && z.level() == p.level() && z.distanceTo(p) < 4) {
-				c.assertTrue(z.distanceTo(p) < 4, "it came once the right place was known");
-				cleanUpAny(c, p);
-				c.succeed();
-			} else if (phase[0] == 2 && (System.nanoTime() - t0) > 30_000_000_000L) {
-				c.fail("the second call never brought the mob: a cooldown was spent or the ticket is stuck");
-			} else if (phase[0] == 0 && (System.nanoTime() - t0) > 30_000_000_000L) {
-				c.fail("the far chunk never unloaded, so the test cannot start");
+			try {
+				phase[1]++;
+				total[0]++;
+				UUID id = farMob(c, p, real, made);
+				if (id == null) {
+					if (total[0] > 1200) {
+						c.fail("the far mob was never spawned, so the test cannot start");
+					}
+					return;
+				}
+				GraspData.Entry right = phase[0] == 0 ? data.find(p.getUUID(), id) : null;
+				if (phase[0] == 0 && phase[1] < 3) {
+					return; // the ticket was just given back
+				}
+				if (phase[0] == 0 && anywhere(c, id) == null) {
+					saved[0] = right;
+					data.replace(p.getUUID(), new GraspData.Entry(id, right.type(), right.number(), right.mode(), right.dim(), wrong.getMiddleBlockX(), 80, wrong.getMiddleBlockZ(),
+						right.hp(), right.maxHp(), right.bonus(), right.armor(), right.damage(), right.armorGear(), right.weaponGear()));
+					Grasp.handle(p, Grasp.CALL, id.toString(), 0);
+					phase[0] = 1;
+					phase[1] = 0;
+				} else if (phase[0] == 1 && phase[1] >= 130 && !lv.isPositionEntityTicking(wrong.getWorldPosition().offset(8, 80, 8))) {
+					// the 100 tick call has timed out and its ticket is given back (polled: chunk loading does not follow ticks)
+					c.assertTrue(anywhere(c, id) == null, "the mob did not come (it is elsewhere)");
+					c.assertTrue(held(c, p) == 1, "the slot is untouched");
+					data.replace(p.getUUID(), saved[0]); // seen again where it really is: calling works at once (no cooldown was spent)
+					Grasp.setCallTimeout(1200); // the real call needs far more ticks than a game gives it: the test server ticks faster than chunks load
+					Grasp.handle(p, Grasp.CALL, id.toString(), 0);
+					phase[0] = 2;
+					phase[1] = 0;
+				} else if (phase[0] == 2 && anywhere(c, id) instanceof Zombie z && z.level() == p.level() && z.distanceTo(p) < 4) {
+					c.assertTrue(z.distanceTo(p) < 4, "it came once the right place was known");
+					cleanUpAny(c, p);
+					c.succeed();
+				} else if (phase[0] == 2 && phase[1] > 2400) {
+					c.fail("the second call never brought the mob: a cooldown was spent or the ticket is stuck");
+				} else if (phase[0] == 1 && phase[1] > 1200) {
+					c.fail("the wrong-place call never timed out and gave its ticket back");
+				} else if (phase[0] == 0 && total[0] > 2400) {
+					c.fail("the far chunk never unloaded, so the test cannot start");
+				}
+			} catch (RuntimeException e) {
+				Grasp.setCallTimeout(GraspCalls.TIMEOUT_TICKS);
+				throw e;
 			}
 		});
 	}

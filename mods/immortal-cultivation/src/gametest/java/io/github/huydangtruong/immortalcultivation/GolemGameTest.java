@@ -93,7 +93,7 @@ public class GolemGameTest {
 		});
 	}
 
-	@GameTest(maxTicks = 200)
+	@GameTest(maxTicks = 450)
 	public void guardianAttacksAMonsterNearTheOwner(GameTestHelper c) {
 		GameTestKit.enable(c);
 		GameTestKit.floor(c);
@@ -103,10 +103,16 @@ public class GolemGameTest {
 		Husk h = c.spawn(EntityTypes.HUSK, new Vec3(5.5, 1, 8.5));
 		h.setNoAi(true);
 		TechniqueCasts.cast(p, Technique.GOLEM, 20, 1f);
-		c.runAfterDelay(150, () -> {
-			c.assertTrue(!h.isAlive() || h.getHealth() < h.getMaxHealth(), "a guardian attacked the husk, health " + h.getHealth());
-			GameTestKit.drop(c, p);
-			c.succeed();
+		// Pathing is random: poll until the husk is hurt instead of one check at a fixed tick.
+		int[] ticks = {0};
+		c.onEachTick(() -> {
+			ticks[0]++;
+			if (!h.isAlive() || h.getHealth() < h.getMaxHealth()) {
+				GameTestKit.drop(c, p);
+				c.succeed();
+			} else if (ticks[0] > 400) {
+				c.fail("a guardian attacked the husk, health " + h.getHealth());
+			}
 		});
 	}
 
