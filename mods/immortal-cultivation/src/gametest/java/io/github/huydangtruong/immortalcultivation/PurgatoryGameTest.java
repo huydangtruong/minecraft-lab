@@ -48,7 +48,7 @@ public class PurgatoryGameTest {
 		c.assertTrue(!Purgatory.fighting(p) && data(c).runOf(id(p)) == null, "run over");
 		c.assertTrue(p.level() == c.getLevel() && p.position().distanceTo(home) < 0.01, "back on the exact spot");
 		c.assertTrue(p.experienceLevel == PurgatoryRules.rewardLevels(1), "31 levels, got " + p.experienceLevel);
-		c.assertTrue(runes(p) == PurgatoryRules.rewardRunes(1), "1 rune, got " + runes(p));
+		c.assertTrue(runes(p) == PurgatoryRules.rewardRunes(1, 1), "4 runes, got " + runes(p));
 		PurgatorySavedData.Solo s = data(c).solo(id(p));
 		c.assertTrue(s.floor == 2 && s.cooldown == PurgatoryRules.COOLDOWN_TICKS, "floor 2 after a cooldown");
 		c.assertTrue(Purgatory.startSolo(p) != null, "cooling down");
@@ -82,6 +82,32 @@ public class PurgatoryGameTest {
 			c.assertTrue(p.level() == c.getLevel() && p.position().distanceTo(home) < 0.01, "sent home");
 			c.assertTrue(p.isAlive() && p.getHealth() == p.getMaxHealth(), "full health");
 			c.assertTrue(data(c).solo(id(p)).floor == 1, "floor kept");
+			GameTestKit.drop(c, p);
+			c.succeed();
+		});
+	}
+
+	@GameTest(maxTicks = 20)
+	public void aTotemWorksOutsideThePurgatory(GameTestHelper c) {
+		ServerPlayer p = GameTestKit.survivor(c);
+		p.setItemInHand(net.minecraft.world.InteractionHand.OFF_HAND, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.TOTEM_OF_UNDYING));
+		p.hurtServer(p.level(), p.damageSources().generic(), 10000f);
+		c.assertTrue(p.isAlive() && p.getOffhandItem().isEmpty(), "the totem saved the player");
+		GameTestKit.drop(c, p);
+		c.succeed();
+	}
+
+	@GameTest(maxTicks = 60)
+	public void aTotemSavesAFighterAndTheRunGoesOn(GameTestHelper c) {
+		ServerPlayer p = fighter(c);
+		c.assertTrue(Purgatory.startSolo(p) == null, "solo starts");
+		p.setItemInHand(net.minecraft.world.InteractionHand.OFF_HAND, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.TOTEM_OF_UNDYING));
+		p.hurtServer(p.level(), p.damageSources().generic(), 10000f);
+		c.assertTrue(p.isAlive(), "alive");
+		c.assertTrue(p.getOffhandItem().isEmpty(), "the totem was used");
+		c.runAfterDelay(5, () -> {
+			c.assertTrue(data(c).runOf(id(p)) != null, "the run goes on");
+			Purgatory.giveUp(p);
 			GameTestKit.drop(c, p);
 			c.succeed();
 		});
