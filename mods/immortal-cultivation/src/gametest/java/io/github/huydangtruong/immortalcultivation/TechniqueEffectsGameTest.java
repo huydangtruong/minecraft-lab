@@ -525,6 +525,35 @@ public class TechniqueEffectsGameTest {
 		}
 	}
 
+	/** D246: under Undying Jutsu the player's own hits (hand or weapon) do nothing; once it ends they work again. */
+	@GameTest(maxTicks = 100)
+	public void bloodOathForbidsWeaponAndHandHits(GameTestHelper c) {
+		enable(c, true);
+		GameTestKit.floor(c);
+		ServerPlayer p = GameTestKit.survivor(c);
+		try {
+			GameTestKit.place(c, p, 5.5, 1, 5.5, 0f, 0f);
+			p.setHealth(20f);
+			p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DIAMOND_SWORD));
+			Husk husk = c.spawn(EntityTypes.HUSK, new Vec3(6.5, 1, 5.5));
+			husk.setNoAi(true);
+			float full = husk.getHealth();
+			TechniqueCasts.cast(p, Technique.SACRIFICE, 1, 1f);
+			p.resetAttackStrengthTicker();
+			p.attack(husk);
+			c.assertTrue(husk.getHealth() == full, "a sword hit does nothing under the oath, husk health " + husk.getHealth());
+			p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.ItemStack.EMPTY);
+			p.attack(husk);
+			c.assertTrue(husk.getHealth() == full, "a bare-hand hit does nothing under the oath, husk health " + husk.getHealth());
+			p.setAttached(TechniqueCasts.OATH_UNTIL, c.getLevel().getGameTime() - 1);
+			p.attack(husk);
+			c.assertTrue(husk.getHealth() < full, "hits work again after the oath, husk health " + husk.getHealth());
+			c.succeed();
+		} finally {
+			GameTestKit.drop(c, p);
+		}
+	}
+
 	@GameTest(maxTicks = 100)
 	public void bloodOathCostFollowsTheLevel(GameTestHelper c) {
 		enable(c, true);
