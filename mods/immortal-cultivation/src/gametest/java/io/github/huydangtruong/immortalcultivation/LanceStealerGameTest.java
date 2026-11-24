@@ -134,7 +134,7 @@ public class LanceStealerGameTest {
 		ServerPlayer p = caster(c, Technique.LANCE);
 		Lance.cast(p, 1);
 		c.runAfterDelay(100, () -> c.assertTrue(Lance.active(p), "still on after 5 s"));
-		c.runAfterDelay(LanceRules.DURATION_TICKS + 15, () -> {
+		c.runAfterDelay(LanceRules.durationTicks(1) + 15, () -> {
 			c.assertTrue(!Lance.active(p), "off after 12 s");
 			long left = TechniqueAttachment.get(p).cooldownEnd(Technique.LANCE) - now(c);
 			c.assertTrue(left > 620 && left <= 720, "the 36 s cooldown started when the beam ended, left " + left);

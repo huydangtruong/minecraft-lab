@@ -20,6 +20,7 @@ public class ImmortalCultivationClient implements ClientModInitializer {
 		MegaGlowLayer.register(); // P-059
 		MenuScreens.register(WandererMenus.TYPE, WandererScreen::new);
 		MenuScreens.register(io.github.huydangtruong.immortalcultivation.reward.RewardBoxes.MENU, RewardBoxScreen::new); // P-027
+		MenuScreens.register(io.github.huydangtruong.immortalcultivation.technique.grasp.GraspEquipMenu.TYPE, GraspEquipScreen::new); // D244
 		StatsPanel.register();
 		LayeredHeartsHud.register();
 		GodSlayerWarningHud.register();
@@ -37,12 +38,16 @@ public class ImmortalCultivationClient implements ClientModInitializer {
 		ClientLance.register(); // Solar Lance (P-061)
 		LanceBeamHud.register(); // Solar Lance beam over the HUD (D163)
 		ClientSeism.register(); // Seism camera shake (P-056)
+		ClientPurgatory.register(); // D234-D238
+		RuneClient.register(); // D241-D242: Rune Forge screen, rune tooltips
 		net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
 			ClientGrasp.reset(); // B5: nothing of the old world survives into the next one
 			GodSlayerWarningHud.reset();
 			ClientSkills.resetOnDisconnect();
 			TechniquesTab.reset();
 			PassivesTab.reset();
+			ClientPurgatory.reset();
+			PurgatoryTab.reset();
 		});
 		QuitClient.register(); // D218: /quit closes the host's game
 		net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.registerGlobalReceiver(

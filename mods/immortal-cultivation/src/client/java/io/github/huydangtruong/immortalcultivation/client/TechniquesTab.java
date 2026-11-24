@@ -47,6 +47,7 @@ public final class TechniquesTab {
 	private static final int BAR_H = 4;
 	private static final int BAR_W = 2 * SLOT_PITCH + SLOT;
 	private static final int INFO = 16;
+	private static final int WARN = 0xFFC02020;
 	private static final int CANCEL = 0xFFE08080;
 	private static final int CANCEL_HOVER = 0xFFF0A0A0;
 
@@ -90,6 +91,11 @@ public final class TechniquesTab {
 
 	static Identifier sprite(String name) {
 		return Identifier.fromNamespaceAndPath("permahearts", "technique/" + name);
+	}
+
+	/** A red line under the description: a drawback of the technique (D246), or null. */
+	private static String warning(Technique t) {
+		return t == Technique.SACRIFICE ? "No weapon or hand attacks while it lasts: only techniques." : null;
 	}
 
 	private static String description(Technique t) {
@@ -373,6 +379,13 @@ public final class TechniquesTab {
 		for (FormattedCharSequence line : font.split(Component.literal(description(t)).withStyle(ChatFormatting.ITALIC), right - tx)) {
 			g.text(font, line, tx, y, TEXT, false);
 			y += LINE;
+		}
+		String warn = warning(t);
+		if (warn != null) {
+			for (FormattedCharSequence line : font.split(Component.literal(warn), right - tx)) {
+				g.text(font, line, tx, y, WARN, false);
+				y += LINE;
+			}
 		}
 		y += 6; // space between the description and the numbers
 		int shown = Math.max(1, level);

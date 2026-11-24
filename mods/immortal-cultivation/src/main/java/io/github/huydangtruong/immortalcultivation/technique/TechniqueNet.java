@@ -133,7 +133,7 @@ public final class TechniqueNet {
 			return t == Technique.TELEPORT ? "No safe place to land" : t == Technique.BLADE ? "No target in range" : "You cannot cast now";
 		}
 		// D157: Solar Lance shows the cooldown bar from the first tick (beam time + 45 s); Lance.stop sets the real 45 s when the beam ends
-		int extra = t == Technique.LANCE ? LanceRules.DURATION_TICKS : 0;
+		int extra = t == Technique.LANCE ? LanceRules.durationTicks(level) : 0;
 		TechniqueAttachment.set(p, TechniqueAttachment.get(p).withCooldown(t, now + extra + io.github.huydangtruong.immortalcultivation.passive.Passives.cooldown(p, TechniqueRules.cooldownTicks(t, level))));
 		return null;
 	}

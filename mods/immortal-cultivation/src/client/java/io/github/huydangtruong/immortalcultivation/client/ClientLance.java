@@ -20,6 +20,7 @@ public final class ClientLance {
 	private static final class Beam {
 		Vec3 end = Vec3.ZERO;
 		int ticksLeft;
+		int total = 1;
 		int age; // client ticks since the last update; a beam that goes quiet is dropped
 	}
 
@@ -40,6 +41,7 @@ public final class ClientLance {
 			Beam b = BEAMS.computeIfAbsent(payload.caster(), k -> new Beam());
 			b.end = new Vec3(payload.x(), payload.y(), payload.z());
 			b.ticksLeft = payload.ticksLeft();
+			b.total = payload.total();
 			b.age = 0;
 		});
 	}
@@ -56,7 +58,7 @@ public final class ClientLance {
 			return -1f;
 		}
 		Beam b = BEAMS.get(mc.player.getId());
-		return b == null ? -1f : LanceRules.barFraction(b.ticksLeft);
+		return b == null ? -1f : LanceRules.barFraction(b.ticksLeft, b.total);
 	}
 
 	/** The local player's beam end point, or null when none runs (for the HUD overlay). */
@@ -70,6 +72,13 @@ public final class ClientLance {
 		Minecraft mc = Minecraft.getInstance();
 		Beam b = mc.player == null ? null : BEAMS.get(mc.player.getId());
 		return b == null ? 0 : b.ticksLeft;
+	}
+
+	/** Full firing time of the local player's beam (D243: it depends on the level). */
+	static int localTotal() {
+		Minecraft mc = Minecraft.getInstance();
+		Beam b = mc.player == null ? null : BEAMS.get(mc.player.getId());
+		return b == null ? 1 : b.total;
 	}
 
 	private static void tick(Minecraft mc) {
@@ -105,7 +114,7 @@ public final class ClientLance {
 			if (who == null) {
 				continue;
 			}
-			LightBeam.draw(ctx, LightBeam.chestPos(mc, cam, who, pt), e.getValue().end, 1f, 1.5f * LanceRules.widthFactor(e.getValue().ticksLeft), mc.player.tickCount + pt);
+			LightBeam.draw(ctx, LightBeam.chestPos(mc, cam, who, pt), e.getValue().end, 1f, 1.5f * LanceRules.widthFactor(e.getValue().ticksLeft, e.getValue().total), mc.player.tickCount + pt);
 		}
 	}
 }

@@ -683,4 +683,50 @@ public class GraspGameTest {
 			}
 		});
 	}
+
+	/** D244: the gear panel of a grasped mob puts items on and takes them off, without copies, and closes when the mob is released. */
+	@GameTest(maxTicks = 40)
+	public void theGearPanelEquipsAndUnequipsTheMob(GameTestHelper c) {
+		ServerPlayer p = grasper(c, 10);
+		Zombie z = c.spawn(EntityTypes.ZOMBIE, new Vec3(4.5, 1, 5.5));
+		z.setNoAi(true);
+		for (net.minecraft.world.entity.EquipmentSlot s : io.github.huydangtruong.immortalcultivation.technique.grasp.GraspEquipMenu.GEAR) {
+			z.setItemSlot(s, net.minecraft.world.item.ItemStack.EMPTY);
+		}
+		Grasp.tame(p, z, 10);
+		var hit = new net.minecraft.world.phys.EntityHitResult(z);
+		var use = net.fabricmc.fabric.api.event.player.UseEntityCallback.EVENT.invoker();
+		c.assertTrue(use.interact(p, c.getLevel(), net.minecraft.world.InteractionHand.MAIN_HAND, z, hit).consumesAction(), "a right click on the mob is taken");
+		c.assertTrue(p.containerMenu instanceof io.github.huydangtruong.immortalcultivation.technique.grasp.GraspEquipMenu, "the panel opened");
+		var menu = p.containerMenu;
+		var PICK = net.minecraft.world.inventory.ContainerInput.PICKUP;
+		var QUICK = net.minecraft.world.inventory.ContainerInput.QUICK_MOVE;
+		// a sword does not go in the helmet slot
+		menu.setCarried(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_SWORD));
+		menu.clicked(0, 0, PICK, p);
+		c.assertTrue(z.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.HEAD).isEmpty(), "no sword on the head");
+		menu.setCarried(net.minecraft.world.item.ItemStack.EMPTY);
+		// a helmet does
+		menu.setCarried(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DIAMOND_HELMET));
+		menu.clicked(0, 0, PICK, p);
+		c.assertTrue(z.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.HEAD).is(net.minecraft.world.item.Items.DIAMOND_HELMET), "helmet worn");
+		c.assertTrue(menu.getCarried().isEmpty(), "the cursor gave it away");
+		c.assertTrue(z.getAttached(GraspedMob.ATTACHMENT).given().contains("head"), "the helmet counts as given");
+		// shift-click a sword from the hotbar: it goes to the main hand
+		p.getInventory().setItem(0, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_SWORD));
+		menu.clicked(6 + 27, 0, QUICK, p);
+		c.assertTrue(z.getMainHandItem().is(net.minecraft.world.item.Items.IRON_SWORD), "sword in the main hand");
+		c.assertTrue(p.getInventory().getItem(0).isEmpty(), "the sword left the hotbar");
+		// shift-click the helmet back
+		menu.clicked(0, 0, QUICK, p);
+		c.assertTrue(z.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.HEAD).isEmpty(), "helmet off");
+		c.assertTrue(p.getInventory().countItem(net.minecraft.world.item.Items.DIAMOND_HELMET) == 1, "exactly one helmet back");
+		c.assertTrue(!z.getAttached(GraspedMob.ATTACHMENT).given().contains("head"), "head no longer given");
+		c.assertTrue(menu.stillValid(p), "valid while grasped and near");
+		Grasp.releaseMob(z, false);
+		c.assertTrue(!menu.stillValid(p), "closes once released");
+		p.closeContainer();
+		cleanUp(c, p);
+		c.succeed();
+	}
 }

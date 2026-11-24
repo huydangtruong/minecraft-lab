@@ -78,6 +78,11 @@ public final class TechniqueCasts {
 			TechniqueFields.clear();
 		});
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> !blocksDamage(entity, source));
+		// D246: under Undying Jutsu the player cannot hit or shoot (sword, axe, shovel, hand, bow...), only use techniques.
+		net.fabricmc.fabric.api.event.player.AttackEntityCallback.EVENT.register((player, world, hand, entity, hit) ->
+			player instanceof ServerPlayer sp && oathActive(sp) ? net.minecraft.world.InteractionResult.FAIL : net.minecraft.world.InteractionResult.PASS);
+		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) ->
+			!(source.getEntity() instanceof ServerPlayer sp && oathActive(sp) && !TechniqueDamage.active() && Crystal.isWeaponHit(sp, source)));
 		CommandRegistrationCallback.EVENT.register((d, c, s) -> TechniqueCastCommand.register(d));
 	}
 

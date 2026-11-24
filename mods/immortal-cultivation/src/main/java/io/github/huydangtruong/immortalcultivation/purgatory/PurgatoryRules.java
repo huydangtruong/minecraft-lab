@@ -1,0 +1,164 @@
+package io.github.huydangtruong.immortalcultivation.purgatory;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.random.RandomGenerator;
+
+/**
+ * Numbers of the Purgatory (D234-D240), no Minecraft imports so JUnit can test them. Floors start at 1 and never end;
+ * every number that makes a floor harder grows with the floor and never shrinks, and health and damage grow strictly.
+ */
+public final class PurgatoryRules {
+	/** Outer size of a box, bedrock included (D235). */
+	public static final int BOX = 64;
+	/** Bedrock layers on every side. */
+	public static final int WALL = 2;
+	/** Inside size: 60 x 60 x 60. */
+	public static final int INSIDE = BOX - 2 * WALL;
+	/** Boxes stand this far apart on the x axis of the purgatory dimension. */
+	public static final int SLOT_SPACING = 256;
+	/** Lowest y of a box (its bottom bedrock layer). */
+	public static final int BOX_MIN_Y = 64;
+
+	/** Survive 10 minutes to win (D236). */
+	public static final int RUN_TICKS = 10 * 60 * 20;
+	/** A new floor every 10 minutes per mode (D234). */
+	public static final int COOLDOWN_TICKS = 10 * 60 * 20;
+	/** One mob every 3 seconds (D236). */
+	public static final int SPAWN_EVERY_TICKS = 3 * 20;
+	/** At most 50 mobs alive at once (D236). */
+	public static final int MAX_ALIVE = 50;
+	/** Team queue: start 10 s after the last player joined it (D237). */
+	public static final int TEAM_COUNTDOWN_TICKS = 10 * 20;
+	public static final int TEAM_MIN_PLAYERS = 2;
+	/** Mobs never appear closer than this to a fighter. */
+	public static final int SPAWN_MIN_DISTANCE = 8;
+
+	/** Floors with a warden (a stronger mob that comes first). */
+	public static final int WARDEN_EVERY = 10;
+	/** Elites from this floor on. */
+	public static final int ELITE_START = 10;
+	/** Highest rune level a reward can roll (D240). */
+	public static final int REWARD_RUNE_MAX_LEVEL = 5;
+
+	private PurgatoryRules() {}
+
+	/** Max health multiplier of a floor's mobs: x1 on floor 1, +12% per floor. */
+	public static double healthMultiplier(int floor) {
+		return 1.0 + 0.12 * (Math.max(1, floor) - 1);
+	}
+
+	/** Attack damage multiplier: x1 on floor 1, +6% per floor. */
+	public static double damageMultiplier(int floor) {
+		return 1.0 + 0.06 * (Math.max(1, floor) - 1);
+	}
+
+	/** Extra armour points: +1 every 3 floors. */
+	public static int armorBonus(int floor) {
+		return (Math.max(1, floor) - 1) / 3;
+	}
+
+	/** Extra movement speed (fraction of base): +1% per floor up to +30%. */
+	public static double speedBonus(int floor) {
+		return Math.min(0.30, 0.01 * (Math.max(1, floor) - 1));
+	}
+
+	/** Chance that a mob is an elite: none below floor 10, then +3% per floor up to 60%. */
+	public static double eliteChance(int floor) {
+		if (floor < ELITE_START) {
+			return 0;
+		}
+		return Math.min(0.60, 0.05 + 0.03 * (floor - ELITE_START));
+	}
+
+	/** Team runs: mob health grows with the number of fighters (x1.5 per extra player). */
+	public static double teamHealthFactor(int players) {
+		return 1.0 + 0.5 * Math.max(0, players - 1);
+	}
+
+	/** Mob types that may appear on a floor (entity ids without namespace). New ones join, none ever leaves. */
+	public static List<String> mobPool(int floor) {
+		List<String> out = new ArrayList<>(List.of("zombie", "skeleton"));
+		if (floor >= 3) {
+			out.add("husk");
+		}
+		if (floor >= 5) {
+			out.add("spider");
+			out.add("creeper");
+		}
+		if (floor >= 8) {
+			out.add("stray");
+			out.add("cave_spider");
+		}
+		if (floor >= 10) {
+			out.add("witch");
+			out.add("vindicator");
+		}
+		if (floor >= 15) {
+			out.add("pillager");
+			out.add("slime");
+		}
+		if (floor >= 20) {
+			out.add("wither_skeleton");
+			out.add("blaze");
+		}
+		if (floor >= 25) {
+			out.add("piglin_brute");
+			out.add("magma_cube");
+		}
+		if (floor >= 30) {
+			out.add("evoker");
+			out.add("ravager");
+		}
+		return out;
+	}
+
+	/** The strong mob that opens every 10th floor. */
+	public static String wardenType(int floor) {
+		if (floor >= 30) {
+			return "ravager";
+		}
+		if (floor >= 20) {
+			return "wither_skeleton";
+		}
+		return "vindicator";
+	}
+
+	/** Warden health on top of the floor multiplier. */
+	public static final double WARDEN_HEALTH = 5.0;
+
+	/** Layout of the inside, one kind every 5 floors, round and round. */
+	public enum Theme {
+		OPEN, PILLARS, LAVA, PLATFORMS, WATER, WALLS;
+
+		public static Theme of(int floor) {
+			return values()[((Math.max(1, floor) - 1) / 5) % values().length];
+		}
+	}
+
+	/** D240: levels for winning floor n. */
+	public static int rewardLevels(int floor) {
+		return 30 + floor;
+	}
+
+	/** D240: runes for winning floor n. */
+	public static int rewardRunes(int floor) {
+		return Math.max(0, floor);
+	}
+
+	/** A reward rune level, 1..5, each equally likely. */
+	public static int rollRuneLevel(RandomGenerator rng) {
+		return 1 + rng.nextInt(REWARD_RUNE_MAX_LEVEL);
+	}
+
+	/** Centre x of box slot i (z is always 0). */
+	public static int slotCenterX(int slot) {
+		return slot * SLOT_SPACING;
+	}
+
+	/** "m:ss" for a tick count. */
+	public static String clock(int ticks) {
+		int s = Math.max(0, (ticks + 19) / 20);
+		return s / 60 + ":" + (s % 60 < 10 ? "0" : "") + s % 60;
+	}
+}

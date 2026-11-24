@@ -62,7 +62,7 @@ public final class Crystal {
 	}
 
 	/** A hit with the hand or a held weapon, or an arrow or trident: what a disarmed player may not do. */
-	private static boolean isWeaponHit(ServerPlayer p, net.minecraft.world.damagesource.DamageSource source) {
+	static boolean isWeaponHit(ServerPlayer p, net.minecraft.world.damagesource.DamageSource source) {
 		var direct = source.getDirectEntity();
 		return direct == p || direct instanceof net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 	}

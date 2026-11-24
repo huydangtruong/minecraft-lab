@@ -3,7 +3,15 @@ package io.github.huydangtruong.immortalcultivation.technique;
 /** Solar Lance numbers (D157, D159). Pure Java. */
 public final class LanceRules {
 	public static final double RANGE = 256;
-	public static final int DURATION_TICKS = 240; // 12 s at most, a release stops it earlier (D159)
+	/** D243: firing time grows with the level, 12 s at Lv 1 up to 24 s at Lv 20; a release stops it earlier (D159). */
+	public static final int BASE_DURATION_TICKS = 240;
+	public static final int MAX_DURATION_TICKS = 480;
+	private static final int TOP_LEVEL = 20;
+
+	public static int durationTicks(int level) {
+		int l = Math.max(1, Math.min(TOP_LEVEL, level));
+		return BASE_DURATION_TICKS + (MAX_DURATION_TICKS - BASE_DURATION_TICKS) * (l - 1) / (TOP_LEVEL - 1);
+	}
 	public static final int DAMAGE_INTERVAL = 10;
 	public static final int STAGE_TICKS = 60; // damage doubles every 3 s
 	public static final int BREAK_TICKS = 6; // D161: the beam breaks the block it rests on after 0.3 s
@@ -57,17 +65,17 @@ public final class LanceRules {
 		return damagePerSecond(level, ticksFiring) * DAMAGE_INTERVAL / 20.0;
 	}
 
-	/** D163: the beam looks wider the longer it fires: 1 at the start, MAX_WIDTH_FACTOR after the full 12 s, growing smoothly. */
+	/** D163: the beam looks wider the longer it fires: 1 at the start, MAX_WIDTH_FACTOR at the end of its full time, growing smoothly. */
 	public static final float MAX_WIDTH_FACTOR = 2.5f;
 
-	public static float widthFactor(int ticksLeft) {
-		float firing = Math.max(0f, Math.min(1f, 1f - ticksLeft / (float) DURATION_TICKS));
+	public static float widthFactor(int ticksLeft, int total) {
+		float firing = Math.max(0f, Math.min(1f, 1f - ticksLeft / (float) Math.max(1, total)));
 		return 1f + (MAX_WIDTH_FACTOR - 1f) * firing;
 	}
 
 	/** Fraction of the bar left (1 = full, 0 = empty). */
-	public static float barFraction(int ticksLeft) {
-		return Math.max(0f, Math.min(1f, ticksLeft / (float) DURATION_TICKS));
+	public static float barFraction(int ticksLeft, int total) {
+		return Math.max(0f, Math.min(1f, ticksLeft / (float) Math.max(1, total)));
 	}
 
 	/** True when the beam has rested on one block for enough ticks to break it. */

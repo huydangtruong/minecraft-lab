@@ -43,8 +43,8 @@ import net.minecraft.world.phys.Vec3;
  * takes damage every 10 ticks that doubles every 3 s. Stopping for any reason starts the 36 s cooldown.
  */
 public final class Lance {
-	/** Server to client: the beam of one caster. active = false removes it. ticksLeft drives the bar. */
-	public record State(int caster, boolean active, double x, double y, double z, int ticksLeft) implements CustomPacketPayload {
+	/** Server to client: the beam of one caster. active = false removes it. ticksLeft and total drive the bar. */
+	public record State(int caster, boolean active, double x, double y, double z, int ticksLeft, int total) implements CustomPacketPayload {
 		public static final Type<State> TYPE = new Type<>(Identifier.fromNamespaceAndPath(ImmortalCultivation.NAMESPACE, "lance_state"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, State> CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_INT, State::caster,
@@ -53,6 +53,7 @@ public final class Lance {
 			ByteBufCodecs.DOUBLE, State::y,
 			ByteBufCodecs.DOUBLE, State::z,
 			ByteBufCodecs.VAR_INT, State::ticksLeft,
+			ByteBufCodecs.VAR_INT, State::total,
 			State::new);
 
 		@Override
@@ -131,7 +132,7 @@ public final class Lance {
 		TechniqueAttachment.set(p, TechniqueAttachment.get(p).withCooldown(Technique.LANCE,
 			now + Passives.cooldown(p, Technique.LANCE.cooldownTicks())));
 		clearCrack(p, a);
-		broadcast(p, new State(p.getId(), false, a.end.x, a.end.y, a.end.z, 0));
+		broadcast(p, new State(p.getId(), false, a.end.x, a.end.y, a.end.z, 0, 1));
 	}
 
 	private static void broadcast(ServerPlayer p, State s) {
@@ -196,7 +197,7 @@ public final class Lance {
 				stop(p);
 				continue;
 			}
-			if (a.ticks >= LanceRules.DURATION_TICKS) {
+			if (a.ticks >= LanceRules.durationTicks(a.techLevel)) {
 				stop(p);
 				continue;
 			}
@@ -211,7 +212,8 @@ public final class Lance {
 		BlockHitResult hit = beamHit(p);
 		a.end = hit.getType() == HitResult.Type.MISS ? eye.add(p.getViewVector(1f).scale(LanceRules.RANGE)) : hit.getLocation();
 		mine(p, a, hit);
-		broadcast(p, new State(p.getId(), true, a.end.x, a.end.y, a.end.z, LanceRules.DURATION_TICKS - a.ticks));
+		broadcast(p, new State(p.getId(), true, a.end.x, a.end.y, a.end.z, LanceRules.durationTicks(a.techLevel) - a.ticks,
+			LanceRules.durationTicks(a.techLevel)));
 		if (a.ticks % LanceRules.DAMAGE_INTERVAL == 0) {
 			float dmg = (float) LanceRules.damagePerHit(a.techLevel, a.ticks);
 			Vec3 end = a.end;
@@ -232,7 +234,7 @@ public final class Lance {
 				sl.sendParticles(ParticleTypes.FLAME, c.x, c.y, c.z, 2, e.getBbWidth() * 0.25, e.getBbHeight() * 0.2, e.getBbWidth() * 0.25, 0.04);
 			}
 			// D163: harsher, crackling and sizzling, louder as the beam grows (never above 1.3)
-			float grow = LanceRules.widthFactor(LanceRules.DURATION_TICKS - a.ticks);
+			float grow = LanceRules.widthFactor(LanceRules.durationTicks(a.techLevel) - a.ticks, LanceRules.durationTicks(a.techLevel));
 			sl.playSound(null, p.blockPosition(), SoundEvents.BEACON_AMBIENT, SoundSource.PLAYERS, 0.5f, 2f);
 			sl.playSound(null, p.blockPosition(), SoundEvents.FIRE_AMBIENT, SoundSource.PLAYERS, 0.6f * grow, 1.4f);
 			sl.playSound(null, p.blockPosition(), SoundEvents.LAVA_POP, SoundSource.PLAYERS, 0.5f * grow, 0.6f + 0.8f * sl.getRandom().nextFloat());

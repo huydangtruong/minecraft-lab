@@ -43,6 +43,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.OwnableEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -81,6 +82,22 @@ public final class Grasp {
 	public static void init() {
 		GraspedMob.ATTACHMENT.identifier();
 		GraspNet.register();
+		GraspEquipMenu.init();
+		// D244: right-click your own grasped mob (not sneaking, no lead or name tag in hand) to open its gear panel
+		net.fabricmc.fabric.api.event.player.UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
+			if (!(player instanceof ServerPlayer sp) || !(entity instanceof Mob m) || !isGraspedBy(m, sp.getUUID())
+				|| sp.isShiftKeyDown() || sp.isSpectator()) {
+				return net.minecraft.world.InteractionResult.PASS;
+			}
+			ItemStack held = sp.getItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND);
+			if (held.is(net.minecraft.world.item.Items.LEAD) || held.is(net.minecraft.world.item.Items.NAME_TAG)) {
+				return net.minecraft.world.InteractionResult.PASS;
+			}
+			if (hand == net.minecraft.world.InteractionHand.MAIN_HAND) {
+				GraspEquipMenu.open(sp, m);
+			}
+			return net.minecraft.world.InteractionResult.SUCCESS;
+		});
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
 			if (entity instanceof Mob m && m.hasAttached(GraspedMob.ATTACHMENT)) {
 				onLoad(m, level);

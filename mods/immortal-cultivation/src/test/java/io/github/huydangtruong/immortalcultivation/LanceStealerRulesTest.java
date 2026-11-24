@@ -26,8 +26,20 @@ class LanceStealerRulesTest {
 
 	@Test
 	void lanceBar() {
-		assertEquals(1f, LanceRules.barFraction(LanceRules.DURATION_TICKS), 1e-6);
-		assertEquals(0f, LanceRules.barFraction(0), 1e-6);
+		assertEquals(1f, LanceRules.barFraction(240, 240), 1e-6);
+		assertEquals(0f, LanceRules.barFraction(0, 240), 1e-6);
+		assertEquals(0.5f, LanceRules.barFraction(240, 480), 1e-6);
+	}
+
+	@Test
+	void lanceFiresLongerWithLevel() { // D243
+		assertEquals(240, LanceRules.durationTicks(1));
+		assertEquals(480, LanceRules.durationTicks(20));
+		assertEquals(480, LanceRules.durationTicks(25));
+		assertEquals(240, LanceRules.durationTicks(0));
+		for (int l = 1; l < 20; l++) {
+			org.junit.jupiter.api.Assertions.assertTrue(LanceRules.durationTicks(l + 1) > LanceRules.durationTicks(l), "level " + l);
+		}
 	}
 
 	@Test
@@ -75,11 +87,12 @@ class LanceStealerRulesTest {
 
 	@org.junit.jupiter.api.Test
 	void beamWidthGrowsSmoothlyToTwoAndAHalf() {
-		assertEquals(1f, LanceRules.widthFactor(LanceRules.DURATION_TICKS), 1e-6);
-		assertEquals(1.75f, LanceRules.widthFactor(LanceRules.DURATION_TICKS / 2), 1e-6);
-		assertEquals(2.5f, LanceRules.widthFactor(0), 1e-6);
-		org.junit.jupiter.api.Assertions.assertTrue(LanceRules.widthFactor(100) < LanceRules.widthFactor(99));
-		assertEquals(2.5f, LanceRules.widthFactor(-5), 1e-6);
+		assertEquals(1f, LanceRules.widthFactor(240, 240), 1e-6);
+		assertEquals(1.75f, LanceRules.widthFactor(120, 240), 1e-6);
+		assertEquals(1.75f, LanceRules.widthFactor(240, 480), 1e-6);
+		assertEquals(2.5f, LanceRules.widthFactor(0, 240), 1e-6);
+		org.junit.jupiter.api.Assertions.assertTrue(LanceRules.widthFactor(100, 240) < LanceRules.widthFactor(99, 240));
+		assertEquals(2.5f, LanceRules.widthFactor(-5, 240), 1e-6);
 	}
 
 	@Test

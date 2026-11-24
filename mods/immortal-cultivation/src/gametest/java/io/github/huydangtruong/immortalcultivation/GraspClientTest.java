@@ -71,6 +71,23 @@ public class GraspClientTest implements FabricClientGameTest {
 			context.waitTicks(15);
 			check(context.computeOnClient(mc -> mc.gui.screen() instanceof GraspScreen), "a left click opens the list");
 			context.takeScreenshot("97-grasp-list");
+
+			// D244: the gear panel of the grasped zombie, with a helmet and a sword on it
+			context.runOnClient(mc -> mc.gui.screen().onClose());
+			context.waitTicks(5);
+			server.runOnServer(s -> {
+				var p = s.getPlayerList().getPlayers().get(0);
+				for (net.minecraft.world.entity.monster.zombie.Zombie z : s.overworld().getEntitiesOfClass(
+					net.minecraft.world.entity.monster.zombie.Zombie.class, p.getBoundingBox().inflate(20))) {
+					z.setItemSlot(net.minecraft.world.entity.EquipmentSlot.HEAD, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_HELMET));
+					z.setItemSlot(net.minecraft.world.entity.EquipmentSlot.MAINHAND, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_SWORD));
+					io.github.huydangtruong.immortalcultivation.technique.grasp.GraspEquipMenu.open(p, z);
+				}
+			});
+			context.waitTicks(10);
+			check(context.computeOnClient(mc -> mc.gui.screen() instanceof io.github.huydangtruong.immortalcultivation.client.GraspEquipScreen),
+				"the gear panel opens");
+			context.takeScreenshot("132-grasp-gear");
 		}
 	}
 

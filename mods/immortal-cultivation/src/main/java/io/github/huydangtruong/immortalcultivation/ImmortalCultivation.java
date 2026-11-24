@@ -106,6 +106,8 @@ public class ImmortalCultivation implements ModInitializer {
 		io.github.huydangtruong.immortalcultivation.stats.StatsSync.register();
 		io.github.huydangtruong.immortalcultivation.danger.Danger.init(); // P-054: danger level
 		io.github.huydangtruong.immortalcultivation.danger.DangerMobs.init();
+		io.github.huydangtruong.immortalcultivation.rune.Runes.init(); // D241-D242: runes and the Rune Forge
+		io.github.huydangtruong.immortalcultivation.purgatory.Purgatory.register(); // D234-D240: Purgatory
 		GameRuleEvents.changeCallback(ENABLED).register((Boolean value, MinecraftServer server) -> {
 			for (ServerPlayer p : server.getPlayerList().getPlayers()) {
 				HeartsAttachment.setActive(p, value);
@@ -122,6 +124,7 @@ public class ImmortalCultivation implements ModInitializer {
 			io.github.huydangtruong.immortalcultivation.danger.DangerCommand.register(d);
 			io.github.huydangtruong.immortalcultivation.admin.AdminCommand.register(d);
 			io.github.huydangtruong.immortalcultivation.quit.Quit.registerCommand(d);
+			io.github.huydangtruong.immortalcultivation.purgatory.PurgatoryCommand.register(d); // D234
 		});
 		WandererEvents.register();
 		WandererEvents.registerBloodMoon();
