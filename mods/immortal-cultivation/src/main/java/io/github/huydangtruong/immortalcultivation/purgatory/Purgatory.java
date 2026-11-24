@@ -96,7 +96,7 @@ public final class Purgatory {
 		ServerPlayerEvents.JOIN.register(p -> JOINED.add(p.getUUID()));
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> QUEUE.remove(handler.player.getUUID()));
 		ServerLivingEntityEvents.ALLOW_DEATH.register((entity, source, amount) -> {
-			if (entity instanceof ServerPlayer p && fighting(p)) {
+			if (entity instanceof ServerPlayer p && fighting(p) && !totemSaves(p, source)) {
 				p.setHealth(p.getMaxHealth());
 				p.removeAllEffects();
 				p.clearFire();
@@ -106,6 +106,22 @@ public final class Purgatory {
 			}
 			return true;
 		});
+	}
+
+	/**
+	 * D252: Fabric asks ALLOW_DEATH before vanilla tries the totem, so a fighter holding a totem must be let through: the totem
+	 * then saves them and the run goes on. Damage that beats a totem (void, /kill) is still a loss, never a real death.
+	 */
+	static boolean totemSaves(ServerPlayer p, net.minecraft.world.damagesource.DamageSource source) {
+		if (source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+			return false;
+		}
+		for (net.minecraft.world.InteractionHand hand : net.minecraft.world.InteractionHand.values()) {
+			if (p.getItemInHand(hand).has(net.minecraft.core.component.DataComponents.DEATH_PROTECTION)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** Clears the state that lives outside the save (B6). */
@@ -352,7 +368,7 @@ public final class Purgatory {
 		for (String id : r.players) {
 			ServerPlayer p = server.getPlayerList().getPlayer(UUID.fromString(id));
 			if (won) {
-				Owed o = new Owed(PurgatoryRules.rewardLevels(r.floor), PurgatoryRules.rewardRunes(r.floor));
+				Owed o = new Owed(PurgatoryRules.rewardLevels(r.floor), PurgatoryRules.rewardRunes(r.floor, r.players.size()));
 				if (p != null) {
 					pay(p, o);
 				} else {

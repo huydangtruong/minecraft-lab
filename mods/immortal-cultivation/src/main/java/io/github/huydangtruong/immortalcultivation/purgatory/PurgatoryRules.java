@@ -20,10 +20,10 @@ public final class PurgatoryRules {
 	/** Lowest y of a box (its bottom bedrock layer). */
 	public static final int BOX_MIN_Y = 64;
 
-	/** Survive 10 minutes to win (D236). */
-	public static final int RUN_TICKS = 10 * 60 * 20;
-	/** A new floor every 10 minutes per mode (D234). */
-	public static final int COOLDOWN_TICKS = 10 * 60 * 20;
+	/** Survive 6 minutes to win (D236, D251). */
+	public static final int RUN_TICKS = 6 * 60 * 20;
+	/** A new floor every 5 minutes per mode (D234, D251). */
+	public static final int COOLDOWN_TICKS = 5 * 60 * 20;
 	/** One mob every 3 seconds (D236). */
 	public static final int SPAWN_EVERY_TICKS = 3 * 20;
 	/** At most 50 mobs alive at once (D236). */
@@ -141,9 +141,9 @@ public final class PurgatoryRules {
 		return 30 + floor;
 	}
 
-	/** D240: runes for winning floor n. */
-	public static int rewardRunes(int floor) {
-		return Math.max(0, floor);
+	/** D251: runes each winner gets for floor n: 3 per player in the run plus the floor number. */
+	public static int rewardRunes(int floor, int players) {
+		return 3 * Math.max(1, players) + Math.max(0, floor);
 	}
 
 	/** A reward rune level, 1..5, each equally likely. */

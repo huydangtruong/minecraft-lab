@@ -31,7 +31,9 @@ class PurgatoryRulesTest {
 	void rewardIsThirtyPlusFloorLevelsAndFloorRunes() {
 		assertEquals(31, PurgatoryRules.rewardLevels(1));
 		assertEquals(57, PurgatoryRules.rewardLevels(27));
-		assertEquals(27, PurgatoryRules.rewardRunes(27));
+		assertEquals(30, PurgatoryRules.rewardRunes(27, 1));
+		assertEquals(4, PurgatoryRules.rewardRunes(1, 1));
+		assertEquals(17, PurgatoryRules.rewardRunes(5, 4));
 	}
 
 	@Test
@@ -64,7 +66,8 @@ class PurgatoryRulesTest {
 
 	@Test
 	void clockShowsMinutesAndSeconds() {
-		assertEquals("10:00", PurgatoryRules.clock(PurgatoryRules.RUN_TICKS));
+		assertEquals("6:00", PurgatoryRules.clock(PurgatoryRules.RUN_TICKS));
+		assertEquals("5:00", PurgatoryRules.clock(PurgatoryRules.COOLDOWN_TICKS));
 		assertEquals("0:01", PurgatoryRules.clock(1));
 		assertEquals("0:00", PurgatoryRules.clock(0));
 	}
