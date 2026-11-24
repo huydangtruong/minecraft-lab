@@ -23,6 +23,8 @@ class PurgatoryRulesTest {
 	void floorOneIsPlain() {
 		assertEquals(1.0, PurgatoryRules.healthMultiplier(1));
 		assertEquals(1.0, PurgatoryRules.damageMultiplier(1));
+		assertEquals(2.5, PurgatoryRules.healthMultiplier(10), 1e-9);
+		assertEquals(2.0, PurgatoryRules.damageMultiplier(10), 1e-9);
 		assertEquals(0, PurgatoryRules.eliteChance(9));
 		assertTrue(PurgatoryRules.eliteChance(10) > 0);
 	}

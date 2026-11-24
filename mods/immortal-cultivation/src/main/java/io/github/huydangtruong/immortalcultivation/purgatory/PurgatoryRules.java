@@ -43,14 +43,14 @@ public final class PurgatoryRules {
 
 	private PurgatoryRules() {}
 
-	/** Max health multiplier of a floor's mobs: x1 on floor 1, +12% per floor. */
+	/** D253: max health multiplier of a floor's mobs: x1 on floor 1, x2.5 on floor 10 (+1/6 per floor). */
 	public static double healthMultiplier(int floor) {
-		return 1.0 + 0.12 * (Math.max(1, floor) - 1);
+		return 1.0 + (Math.max(1, floor) - 1) / 6.0;
 	}
 
-	/** Attack damage multiplier: x1 on floor 1, +6% per floor. */
+	/** D253: attack damage multiplier: x1 on floor 1, x2 on floor 10 (+1/9 per floor). */
 	public static double damageMultiplier(int floor) {
-		return 1.0 + 0.06 * (Math.max(1, floor) - 1);
+		return 1.0 + (Math.max(1, floor) - 1) / 9.0;
 	}
 
 	/** Extra armour points: +1 every 3 floors. */
