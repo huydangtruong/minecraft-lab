@@ -2,7 +2,7 @@
 
 > Tóm tắt cho Huy: file này ghi việc đang làm dở và bước tiếp theo, để một phiên Claude mới đọc là làm tiếp được.
 > Manager cập nhật file này cuối mỗi đợt việc (merge, phát hành, quyết định mới).
-> Snapshot: 2026-11-24, after release 0.46.0 (P-078 Purgatory and runes, D243-D247).
+> Snapshot: 2026-11-24, after release 0.46.1 (D248-D250).
 
 A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [workflow/team.md](../workflow/team.md) → the plan of the work in flight. Do not read the whole repo.
 
@@ -10,7 +10,7 @@ A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [w
 
 | What | Where |
 |---|---|
-| Last release | `immortal-cultivation-v0.46.0` (GitHub Releases on `huydangtruong/minecraft-lab`), `mod_version=0.46.0`. All old tags `permahearts-v*` were renamed to `immortal-cultivation-v*` on 2026-11-17 (D132); the installers still accept both prefixes |
+| Last release | `immortal-cultivation-v0.46.1` (GitHub Releases on `huydangtruong/minecraft-lab`), `mod_version=0.46.1`. All old tags `permahearts-v*` were renamed to `immortal-cultivation-v*` on 2026-11-17 (D132); the installers still accept both prefixes |
 | 0.12.0 contains | Warrior Angel (P-021, D62, D63), Aqua Marine (P-022, P-023, D64, D69), chieftain XP x10 and damage x2 (D65, D66), stronger Strength/Swiftness/Mining elixirs (D67), gold quest 64 (D68) |
 | 0.13.0 contains | Illusion technique (P-024, D71); D72 numbers (Warrior Angel, Cloud Travel, Undying Jutsu, Heaven Blast, Fireball, Frozen Breath); chieftain health 200 and the leader-bonus fix; Strength +2 (D70); "Death Match (PvP)" line |
 | 0.14.0 contains | Illusion work modes and hostile mobs targeting the clones (P-025, D73); Quantum Leap rename (turquoise) and Cosmic Warping portals (P-026, D74, D75); quest reward boxes (P-027, D76); technique slots cost 64, 128, 256, 512 emeralds (D77); clones plant bare farmland and pick up wool near the sheep. Not playtested by hand |
@@ -52,13 +52,14 @@ A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [w
 | 0.44.0 contains | D215 Soul Grasp icon without the two black top-corner dots. D216 health row keeps the colour of full health (poison/wither/frozen still recolour). D217 Notes commented out; a trash slot in its place destroys the carried stack (plan P-074). D218 `/quit`: 10 s countdown, /quit again cancels, then save, kick friends and close the host's game (plan P-075; the real close never run, only compile + javap checked). Area tests green; not tried in a real game. |
 | 0.45.0 contains | P-076 refactor, behaviour identical (R1-R10, R13; R11 UI helpers and R12 Notes switch deferred, wait for Huy). P-077 fixes B1-B15 (D219-D233): shift-click quest reward gives the real box, trash slot right click, only left click on Upgrade/Reset/+/Release, /boss freeze really pauses, client/server statics reset, stale crop owners dropped, Grasp scroll clamp, Quantum Leap dismount only on success, Grasp Call and Warp on safe ground, area techniques skip friends (heal circle skips hostiles), Warp yaw, LifeStealer NoGravity cleanup, /treasure start cleans the old event, Grasp list/Release at level 0. Five stale client tests fixed. Full build green (290 JUnit, 292 game tests), client suite 27/27; not tried in a real game. |
 | 0.46.0 contains | D243 Solar Lance 12 s (Lv 1) to 24 s (Lv 20). D244 gear panel for grasped mobs (right click). D245 a vanishing Illusion stores its load in the nearest chest. D246 Undying Jutsu forbids weapon and hand hits. P-078 Purgatory (D234-D240, D247): 4th Cultivation tab, solo and team floors in a 64³ bedrock box in `permahearts:purgatory`, 10 min survival, 30+n levels and n runes, watching, `/purgatory`; bosses and events wait. Runes and Rune Forge (D241, D242, D247): runes add enchantment levels past conflicts, inscribe 5 levels per rune level, merge free. Full build green (304 game tests), client suite green; team runs and the real game not tried by hand |
+| 0.46.1 contains | D248 Rune Forge recipe in the recipe book (unlocks with a diamond or an iron ingot). D249 Undying Jutsu countdown on the skill bar. D250 Purgatory Give up at the bottom centre of the inventory screen (E). Fix: the edge tabs work again from the Purgatory tab. Client suite green |
 | On `main`, not released | Nothing |
 
 Release steps: [workflow/release.md](../workflow/release.md). Release **only when Huy says so**.
 
 ## In flight
 
-- **Branch `feat/P-079-rune-forge-recipe-book` (2026-11-24), pushed, not merged:** D248 Rune Forge recipe in the recipe book, D249 Undying countdown on the skill bar, D250 Purgatory Give up at the bottom of the inventory screen + fix: edge tabs clickable again from the Purgatory tab. Client suite green. Next: release 0.46.1 when Huy says so.
+- Nothing in flight. 0.46.x not playtested by hand; team Purgatory needs 2 real players.
 - Nothing in flight. Waiting for Huy: R11 (shared UI helpers, may move pixels) and R12 (Notes behind a feature switch) from [P-076](../plans/P-076-audit-refactor.md). Found, not fixed: `Warp.go` still calls `stopRiding()` before `teleportTo` (same pattern as B9).
 - **All plans up to P-075 are released** (last: 0.44.0). Released but not playtested by hand: everything from 0.13.0 on unless the release row says otherwise.
 - **Next ideas:** BL-024/D112 (God Slayer arrives 2–5 days after the 4th Crimson Master leaves; Master pauses until the fight ends). P-040 leftovers: Katana → teleport behind → Flame breath chain, `/boss skill` command, a real blade model and guardian-style beam. Then the rest of D97's skills (minions, blind, arena, self-destruct). BL-014 (player technique fire burns the God Slayer).
