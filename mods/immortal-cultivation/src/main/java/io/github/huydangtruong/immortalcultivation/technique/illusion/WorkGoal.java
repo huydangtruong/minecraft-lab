@@ -252,6 +252,11 @@ public final class WorkGoal extends Goal {
 	}
 
 	private BlockPos nearest(ServerLevel sl, java.util.function.Predicate<Container> ok) {
+		return nearestContainer(sl, a, ok);
+	}
+
+	/** The nearest loaded chest or barrel around the clone's work area that passes the test, or null. */
+	public static BlockPos nearestContainer(ServerLevel sl, Illusion a, java.util.function.Predicate<Container> ok) {
 		BlockPos c = a.workCenter();
 		int r = (int) Math.ceil(a.workRadius() + io.github.huydangtruong.immortalcultivation.technique.TechniqueRules.ILLUSION_CHEST_EXTRA);
 		double best = Double.MAX_VALUE;
@@ -275,7 +280,7 @@ public final class WorkGoal extends Goal {
 		return chestPos;
 	}
 
-	private static Container containerAt(ServerLevel sl, BlockPos p) {
+	public static Container containerAt(ServerLevel sl, BlockPos p) {
 		BlockState st = sl.getBlockState(p);
 		if (st.getBlock() instanceof ChestBlock cb) {
 			return ChestBlock.getContainer(cb, st, sl, p, true);

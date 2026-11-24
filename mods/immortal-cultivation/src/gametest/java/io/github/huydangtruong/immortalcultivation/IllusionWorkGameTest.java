@@ -37,6 +37,7 @@ import net.minecraft.world.phys.Vec3;
  * P-025 (D73): Illusion work modes. The AI decides when things happen, so every check waits with succeedWhen and a generous
  * limit instead of looking once at a fixed tick.
  */
+/* padding = 24 on every test (D245): a clone looks up to 16 blocks around its work area for a chest, never a neighbour test's one. */
 public class IllusionWorkGameTest {
 	private static ServerPlayer owner(GameTestHelper c, ItemStack held) {
 		GameTestKit.enable(c);
@@ -81,7 +82,7 @@ public class IllusionWorkGameTest {
 		return c.getBlockState(new BlockPos(x, 1, z)).is(Blocks.WHEAT) && c.getBlockState(new BlockPos(x, 1, z)).getValue(CropBlock.AGE) < 7; // a new crop may grow a stage while the test waits
 	}
 
-	@GameTest(maxTicks = 1200)
+	@GameTest(maxTicks = 1200, padding = 24)
 	public void farmHarvestsReplantsFillsTheChestAndGivesTheOwnerOneXpPerCrop(GameTestHelper c) {
 		ServerPlayer p = owner(c, new ItemStack(Items.IRON_HOE));
 		Container chest = chest(c, 2, 1, 5);
@@ -120,7 +121,7 @@ public class IllusionWorkGameTest {
 	}
 
 	/** D84: the farmer never makes farmland. It plants the empty farmland it has, harvests, and takes the rest to the chest. */
-	@GameTest(maxTicks = 1200)
+	@GameTest(maxTicks = 1200, padding = 24)
 	public void farmNeverTillsPlantsEmptyFarmlandAndDeliversTheRestToTheChest(GameTestHelper c) {
 		ServerPlayer p = owner(c, new ItemStack(Items.IRON_HOE));
 		Container chest = chest(c, 2, 1, 5);
@@ -136,7 +137,7 @@ public class IllusionWorkGameTest {
 	}
 
 	/** D120: no seeds in hand, empty farmland and a chest with seeds: the clone fetches them and plants. */
-	@GameTest(maxTicks = 1200)
+	@GameTest(maxTicks = 1200, padding = 24)
 	public void farmTakesSeedsFromTheChestAndPlantsEmptyFarmland(GameTestHelper c) {
 		ServerPlayer p = owner(c, new ItemStack(Items.IRON_HOE));
 		Container chest = chest(c, 2, 1, 5);
@@ -154,7 +155,7 @@ public class IllusionWorkGameTest {
 		});
 	}
 
-	@GameTest(maxTicks = 1200)
+	@GameTest(maxTicks = 1200, padding = 24)
 	public void farmWithoutAChestDropsTheLeftoversAndNeverTills(GameTestHelper c) {
 		ServerPlayer p = owner(c, new ItemStack(Items.IRON_HOE));
 		field(c);
@@ -171,7 +172,7 @@ public class IllusionWorkGameTest {
 	}
 
 	/** D123: wheat one stage short of ripe (6) and beetroot at 2 are harvested with the ripe drops (wheat, not only seeds). */
-	@GameTest(maxTicks = 900)
+	@GameTest(maxTicks = 900, padding = 24)
 	public void farmHarvestsTheLastTwoStagesWithRipeDrops(GameTestHelper c) {
 		ServerPlayer p = owner(c, new ItemStack(Items.IRON_HOE));
 		Container chest = chest(c, 2, 1, 5);
@@ -191,7 +192,7 @@ public class IllusionWorkGameTest {
 	}
 
 	/** P-044: a ripe field the clone cannot reach (on a pillar, nearer than the free crop) must not keep it standing still. */
-	@GameTest(maxTicks = 900)
+	@GameTest(maxTicks = 900, padding = 24)
 	public void farmSkipsAnUnreachableFieldAndHarvestsTheRest(GameTestHelper c) {
 		ServerPlayer p = owner(c, new ItemStack(Items.IRON_HOE));
 		Container chest = chest(c, 2, 1, 5);
@@ -212,7 +213,7 @@ public class IllusionWorkGameTest {
 		});
 	}
 
-	@GameTest(maxTicks = 1200)
+	@GameTest(maxTicks = 1200, padding = 24)
 	public void chopBreaksANaturalTreeAndLeavesABuiltWall(GameTestHelper c) {
 		ServerPlayer p = owner(c, new ItemStack(Items.IRON_AXE));
 		Container chest = chest(c, 2, 1, 5);
@@ -277,7 +278,7 @@ public class IllusionWorkGameTest {
 	}
 
 	/** P-028 (D82): a level-1 clone fells a 6-log oak in 12 s, and with no chest every log ends up on the ground or with the owner. */
-	@GameTest(maxTicks = 900)
+	@GameTest(maxTicks = 900, padding = 24)
 	public void chopFellsASixLogOakWithin12SecondsAndDropsTheLogsWithoutAChest(GameTestHelper c) {
 		ServerPlayer p = owner(c, new ItemStack(Items.IRON_AXE));
 		tree(c, 6, 2, 6, Blocks.OAK_LOG);
@@ -299,7 +300,7 @@ public class IllusionWorkGameTest {
 	}
 
 	/** P-028 (D82): a tall tree is felled completely, no log left floating. */
-	@GameTest(maxTicks = 900)
+	@GameTest(maxTicks = 900, padding = 24)
 	public void chopFellsATallBirchCompletely(GameTestHelper c) {
 		ServerPlayer p = owner(c, new ItemStack(Items.IRON_AXE));
 		tree(c, 6, 2, 7, Blocks.BIRCH_LOG);
@@ -327,7 +328,7 @@ public class IllusionWorkGameTest {
 		});
 	}
 
-	@GameTest(maxTicks = 1200)
+	@GameTest(maxTicks = 1200, padding = 24)
 	public void shearTakesTheWoolOfASheepToTheChest(GameTestHelper c) {
 		ServerPlayer p = owner(c, new ItemStack(Items.SHEARS));
 		Container chest = chest(c, 2, 1, 5);
@@ -342,7 +343,7 @@ public class IllusionWorkGameTest {
 		});
 	}
 
-	@GameTest(maxTicks = 1200)
+	@GameTest(maxTicks = 1200, padding = 24)
 	public void milkTurnsAChestBucketIntoAMilkBucket(GameTestHelper c) {
 		ServerPlayer p = owner(c, new ItemStack(Items.BUCKET));
 		Container chest = chest(c, 2, 1, 5);
@@ -358,7 +359,7 @@ public class IllusionWorkGameTest {
 		});
 	}
 
-	@GameTest(maxTicks = 300)
+	@GameTest(maxTicks = 300, padding = 24)
 	public void milkWithoutABucketInTheChestDoesNothing(GameTestHelper c) {
 		ServerPlayer p = owner(c, new ItemStack(Items.BUCKET));
 		Container chest = chest(c, 2, 1, 5);
@@ -371,7 +372,7 @@ public class IllusionWorkGameTest {
 		});
 	}
 
-	@GameTest(maxTicks = 1500)
+	@GameTest(maxTicks = 1500, padding = 24)
 	public void breedSplitsTheOwnersFoodUsesTheChestFirstAndGivesTheBirthXpToTheOwnerNoOrb(GameTestHelper c) {
 		ServerPlayer p = owner(c, new ItemStack(Items.WHEAT, 64));
 		Container chest = chest(c, 2, 1, 5);
@@ -397,7 +398,7 @@ public class IllusionWorkGameTest {
 		});
 	}
 
-	@GameTest(maxTicks = 1200)
+	@GameTest(maxTicks = 1200, padding = 24)
 	public void fishFillsTheChestWithoutXp(GameTestHelper c) {
 		FishTask.testWaitTicks = 20;
 		ServerPlayer p = owner(c, new ItemStack(Items.FISHING_ROD));
@@ -420,7 +421,7 @@ public class IllusionWorkGameTest {
 	}
 
 	/** D85: the job comes from the first hotbar slot, not from the main hand; an empty first slot means FIGHT. */
-	@GameTest(maxTicks = 60)
+	@GameTest(maxTicks = 60, padding = 24)
 	public void theJobComesFromTheFirstHotbarSlotNotTheMainHand(GameTestHelper c) {
 		ServerPlayer p = owner(c, new ItemStack(Items.AIR));
 		p.getInventory().setItem(0, new ItemStack(Items.IRON_AXE));
@@ -436,7 +437,7 @@ public class IllusionWorkGameTest {
 		c.succeed();
 	}
 
-	@GameTest(maxTicks = 120)
+	@GameTest(maxTicks = 120, padding = 24)
 	public void theJobStaysLockedWhenTheOwnerSwitchesItems(GameTestHelper c) {
 		ServerPlayer p = owner(c, new ItemStack(Items.IRON_HOE));
 		Illusion a = castOne(c, p);
@@ -448,7 +449,7 @@ public class IllusionWorkGameTest {
 		});
 	}
 
-	@GameTest(maxTicks = 1500)
+	@GameTest(maxTicks = 1500, padding = 24)
 	public void aWorkingCloneFightsWhoHitsTheOwnerThenGoesBackToWork(GameTestHelper c) {
 		ServerPlayer p = owner(c, new ItemStack(Items.IRON_HOE));
 		ServerPlayer q = GameTestKit.survivor(c);
@@ -475,7 +476,7 @@ public class IllusionWorkGameTest {
 	}
 
 	/** D197 (Huy's bug: clones vanished on the way to the chest): time running out mid-delivery, the clone first stores it all. */
-	@GameTest(maxTicks = 400)
+	@GameTest(maxTicks = 400, padding = 24)
 	public void aCloneWhoseTimeEndsOnTheWayToTheChestStoresFirstThenVanishes(GameTestHelper c) {
 		ServerPlayer p = owner(c, new ItemStack(Items.SHEARS)); // a job with nothing to do here (a farming clone would work the next test's field)
 		Container chest = chest(c, 0, 1, 0);
@@ -493,7 +494,7 @@ public class IllusionWorkGameTest {
 	}
 
 	/** D208 (Huy's bug: clones stood at a full chest opening and closing it): what does not fit goes to the next chest with room. */
-	@GameTest(maxTicks = 600)
+	@GameTest(maxTicks = 600, padding = 24)
 	public void whatDoesNotFitInAFullChestGoesToTheNextChest(GameTestHelper c) {
 		ServerPlayer p = owner(c, new ItemStack(Items.SHEARS)); // a job with nothing to do here: the clone delivers when idle
 		Container near = chest(c, 4, 1, 5);
@@ -512,7 +513,7 @@ public class IllusionWorkGameTest {
 		});
 	}
 
-	@GameTest(maxTicks = 60)
+	@GameTest(maxTicks = 60, padding = 24)
 	public void aCloneThatVanishesDropsWhatItCarries(GameTestHelper c) {
 		ServerPlayer p = owner(c, new ItemStack(Items.IRON_HOE));
 		Illusion a = castOne(c, p);
@@ -526,7 +527,31 @@ public class IllusionWorkGameTest {
 		});
 	}
 
-	@GameTest(maxTicks = 100)
+	/** D245 (Huy's bug: chest items lost when clones vanished far from the chest): a vanishing clone stores what it carries at once. */
+	@GameTest(maxTicks = 60, padding = 24)
+	public void aCloneThatVanishesStoresWhatItCarriesInTheChestAtOnce(GameTestHelper c) {
+		ServerPlayer p = owner(c, new ItemStack(Items.SHEARS));
+		Container chest = chest(c, 0, 1, 0);
+		for (int i = 1; i < chest.getContainerSize(); i++) {
+			chest.setItem(i, new ItemStack(Items.DIRT, 64));
+		}
+		chest.setItem(0, new ItemStack(Items.DIAMOND, 63)); // room for one diamond only
+		Illusion a = castOne(c, p);
+		a.carry().add(new ItemStack(Items.DIAMOND, 3));
+		Illusion.dismissAll(p);
+		c.runAfterDelay(3, () -> {
+			c.assertTrue(count(chest, s -> s.is(Items.DIAMOND)) == 64, "one diamond went into the chest");
+			var drops = c.getLevel().getEntitiesOfClass(ItemEntity.class, arena(c), e -> e.getItem().is(Items.DIAMOND));
+			int dropped = drops.stream().mapToInt(e -> e.getItem().getCount()).sum();
+			c.assertTrue(dropped == 2, "the 2 that did not fit dropped, found " + dropped);
+			net.minecraft.core.BlockPos cp = c.absolutePos(new net.minecraft.core.BlockPos(0, 1, 0));
+			c.assertTrue(drops.stream().allMatch(e -> e.blockPosition().distManhattan(cp) <= 2), "they dropped next to the chest");
+			GameTestKit.drop(c, p);
+			c.succeed();
+		});
+	}
+
+	@GameTest(maxTicks = 100, padding = 24)
 	public void hostileMobsAlsoTargetTheClones(GameTestHelper c) {
 		GameTestKit.enable(c);
 		GameTestKit.floor(c);

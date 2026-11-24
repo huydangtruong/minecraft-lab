@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.UUID;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.Container;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
@@ -310,13 +311,33 @@ public final class Illusion extends PathfinderMob implements OwnedSummon {
 		return OwnedSummon.ownerOf(this);
 	}
 
-	/** Drops what the clone carries: at the owner's feet when the owner is in the work area, else where the clone stands. Never deletes items. */
+	/**
+	 * D245: what the clone still carries when it vanishes goes straight into the nearest chest or barrel of its work area that has
+	 * room (as many chests as needed); only what fits nowhere drops, next to the last chest tried, else at the owner's feet when
+	 * the owner is in the work area, else where the clone stands. Never deletes items.
+	 */
 	public void dropCarry() {
 		if (carry.isEmpty() || !(level() instanceof ServerLevel sl)) {
 			return;
 		}
+		BlockPos lastChest = null;
+		if (workCenter != null) {
+			for (int tries = 0; tries < 8 && !carry.isEmpty(); tries++) {
+				BlockPos cp = WorkGoal.nearestContainer(sl, this, c -> carry.fitsIn(c));
+				Container ch = cp == null ? null : WorkGoal.containerAt(sl, cp);
+				if (ch == null) {
+					break;
+				}
+				carry.storeIn(ch);
+				lastChest = cp;
+			}
+			if (carry.isEmpty()) {
+				return;
+			}
+		}
 		Player o = ownerPlayer();
-		Vec3 at = o != null && o.level() == sl && o.blockPosition().distSqr(workCenter) <= workRadius * workRadius ? o.position() : position();
+		Vec3 at = lastChest != null ? Vec3.atCenterOf(lastChest.above())
+			: workCenter != null && o != null && o.level() == sl && o.blockPosition().distSqr(workCenter) <= workRadius * workRadius ? o.position() : position();
 		for (ItemStack s : carry.drain()) {
 			net.minecraft.world.entity.item.ItemEntity e = new net.minecraft.world.entity.item.ItemEntity(sl, at.x, at.y + 0.3, at.z, s);
 			e.setDefaultPickUpDelay();
