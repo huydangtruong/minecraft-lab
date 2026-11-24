@@ -44,8 +44,8 @@ public final class StatsPanel {
 	private static final int TAB_OUT = 32;
 	private static final int TAB_W = 35;
 	private static final int TAB_H = 27;
-	/** Stats, Techniques and Passives have an edge tab; Notes does not. */
-	private static final int TAB_COUNT = 3;
+	/** Stats, Techniques, Passives and Purgatory have an edge tab; Notes does not. */
+	private static final int TAB_COUNT = 4;
 	private static final int LINE = 10; // D41: one more row (Food regen) must fit
 
 	private static final int TEXT = 0xFF404040;
@@ -67,6 +67,8 @@ public final class StatsPanel {
 		TECHNIQUES("Techniques"),
 		/** P-057 (D148): five passives bought with XP levels. */
 		PASSIVES("Passives"),
+		/** D234: the Purgatory, solo and team floors. */
+		PURGATORY("Purgatory"),
 		/** P-042 (D117): opened by its own button, no tab on the edge. */
 		NOTES("Notes");
 
@@ -149,6 +151,9 @@ public final class StatsPanel {
 				// if (tab == Tab.NOTES) {
 				// 	return !NotesTab.click(x0, y0, W, H, ev.x(), ev.y(), ev.button());
 				// }
+				if (tab == Tab.PURGATORY) {
+					return !PurgatoryTab.click(x0, y0, W, H, ev.x(), ev.y(), ev.button());
+				}
 				if (tab == Tab.PASSIVES) {
 					return !PassivesTab.click(x0, y0, W, H, ev.x(), ev.y(), ev.button());
 				}
@@ -162,6 +167,9 @@ public final class StatsPanel {
 				// if (tab == Tab.NOTES) {
 				// 	return !NotesTab.scroll(panelX(inv), ((ContainerScreenAccess) inv).permahearts$topPos(), W, H, mx, my, sy);
 				// }
+				if (tab == Tab.PURGATORY) {
+					return !PurgatoryTab.scroll(panelX(inv), ((ContainerScreenAccess) inv).permahearts$topPos(), W, H, mx, my, sy);
+				}
 				if (tab == Tab.PASSIVES) {
 					return !PassivesTab.scroll(panelX(inv), ((ContainerScreenAccess) inv).permahearts$topPos(), W, H, mx, my, sy);
 				}
@@ -307,6 +315,10 @@ public final class StatsPanel {
 			PassivesTab.draw(g, font, x0, y0, W, H, mx, my);
 			return;
 		}
+		if (tab == Tab.PURGATORY) {
+			PurgatoryTab.draw(g, font, x0, y0, W, H, mx, my);
+			return;
+		}
 		// D217: Notes disabled
 		// if (tab == Tab.NOTES) {
 		// 	NotesTab.draw(g, font, x0, y0, W, H, mx, my);
@@ -440,6 +452,7 @@ public final class StatsPanel {
 		private static final ItemStack STAR = new ItemStack(Items.NETHER_STAR); // Stats tab (D40)
 		private static final ItemStack BOOK = new ItemStack(Items.ENCHANTED_BOOK); // Techniques tab
 		private static final ItemStack GEM = new ItemStack(Items.AMETHYST_SHARD); // Passives tab (D148)
+		private static final ItemStack FIRE = new ItemStack(Items.BLAZE_POWDER); // Purgatory tab (D234)
 		private final Tab tab;
 
 		TabButton(Tab t) {
@@ -455,7 +468,7 @@ public final class StatsPanel {
 			int x = getX() - (selected ? 2 : 0);
 			g.blitSprite(RenderPipelines.GUI_TEXTURED,
 				Identifier.withDefaultNamespace(selected ? "recipe_book/tab_selected" : "recipe_book/tab"), x, getY(), TAB_W, TAB_H);
-			g.fakeItem(tab == Tab.STATS ? STAR : tab == Tab.PASSIVES ? GEM : BOOK, x + 9, getY() + 5);
+			g.fakeItem(tab == Tab.STATS ? STAR : tab == Tab.PASSIVES ? GEM : tab == Tab.PURGATORY ? FIRE : BOOK, x + 9, getY() + 5);
 		}
 	}
 }

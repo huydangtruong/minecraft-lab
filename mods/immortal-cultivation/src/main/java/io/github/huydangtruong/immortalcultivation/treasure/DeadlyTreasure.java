@@ -127,7 +127,7 @@ public final class DeadlyTreasure {
 			case IDLE -> {
 			}
 			case PENDING -> {
-				if (clock >= d.startAt) {
+				if (clock >= d.startAt && !io.github.huydangtruong.immortalcultivation.purgatory.Purgatory.busy(server)) { // D239
 					List<ServerPlayer> players = ow.players().stream().filter(p -> !p.isSpectator()).toList();
 					if (!players.isEmpty()) {
 						start(server, players.get(RNG.nextInt(players.size())), true);

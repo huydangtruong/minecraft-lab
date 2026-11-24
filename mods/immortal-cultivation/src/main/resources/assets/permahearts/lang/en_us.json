@@ -170,5 +170,9 @@
   "key.permahearts.slot_3": "Technique slot 3",
   "key.permahearts.slot_4": "Technique slot 4",
   "key.permahearts.wheel": "Technique wheel (hold)",
-  "key.category.permahearts.main": "\u00a7eImmortal Cultivation"
+  "key.category.permahearts.main": "\u00a7eImmortal Cultivation",
+  "item.permahearts.rune": "Rune",
+  "block.permahearts.rune_forge": "Rune Forge",
+  "key.permahearts.purgatory_leave": "Stop watching the Purgatory",
+  "key.category.permahearts.purgatory": "\u00a7cPurgatory"
 }

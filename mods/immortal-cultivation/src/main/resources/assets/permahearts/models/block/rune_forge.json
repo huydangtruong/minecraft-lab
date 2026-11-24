@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "down": "permahearts:block/rune_forge_bottom",
+    "east": "permahearts:block/rune_forge_side",
+    "north": "permahearts:block/rune_forge_front",
+    "particle": "permahearts:block/rune_forge_front",
+    "south": "permahearts:block/rune_forge_front",
+    "up": "permahearts:block/rune_forge_top",
+    "west": "permahearts:block/rune_forge_side"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "D": "minecraft:diamond",
+    "I": "minecraft:iron_ingot",
+    "#": "#minecraft:planks"
+  },
+  "pattern": [
+    " D ",
+    "III",
+    "###"
+  ],
+  "result": {
+    "id": "permahearts:rune_forge"
+  }
+}

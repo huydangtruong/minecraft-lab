@@ -1,0 +1,50 @@
+package io.github.huydangtruong.immortalcultivation.rune;
+
+/** Numbers of runes and the Rune Forge (D241, D242), no Minecraft imports so JUnit can test them. */
+public final class RuneRules {
+	/** Vanilla never lets an enchantment level go above this. */
+	public static final int MAX_ENCHANT_LEVEL = 255;
+	/** Inscribing a rune costs this many levels per rune level. */
+	public static final int COST_PER_LEVEL = 5;
+
+	private RuneRules() {}
+
+	/** D242: enchantment levels a rune adds: level n gives 2^(n-1) (1, 2, 4, 8 ...). */
+	public static int bonus(int runeLevel) {
+		int n = Math.max(1, runeLevel);
+		return n > 9 ? MAX_ENCHANT_LEVEL : Math.min(MAX_ENCHANT_LEVEL, 1 << (n - 1));
+	}
+
+	/** Base level plus every rune bonus, capped like vanilla. */
+	public static int total(int base, int runeBonus) {
+		return Math.min(MAX_ENCHANT_LEVEL, Math.max(0, base) + Math.max(0, runeBonus));
+	}
+
+	/** D242: experience levels to put a rune in a slot (taking it out is free). */
+	public static int inscribeCost(int runeLevel) {
+		return COST_PER_LEVEL * Math.max(1, runeLevel);
+	}
+
+	/**
+	 * D242: rune slots of an item, from its id path: netherite 4, diamond 2, iron 1; mace and trident 4, bow and crossbow 2,
+	 * fishing rod 1 (manager choice); anything else 0.
+	 */
+	public static int slots(String itemPath) {
+		if (itemPath.startsWith("netherite_") || itemPath.equals("mace") || itemPath.equals("trident")) {
+			return 4;
+		}
+		if (itemPath.startsWith("diamond_") || itemPath.equals("bow") || itemPath.equals("crossbow")) {
+			return 2;
+		}
+		if (itemPath.startsWith("iron_") || itemPath.equals("fishing_rod")) {
+			return 1;
+		}
+		return 0;
+	}
+
+	/** "I", "II" ... up to 10, then plain numbers. */
+	public static String roman(int n) {
+		String[] r = {"I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"};
+		return n >= 1 && n <= r.length ? r[n - 1] : String.valueOf(n);
+	}
+}

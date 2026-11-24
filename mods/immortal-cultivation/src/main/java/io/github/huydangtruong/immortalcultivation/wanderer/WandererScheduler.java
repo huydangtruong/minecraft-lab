@@ -62,6 +62,9 @@ public final class WandererScheduler {
 		d = Wanderer.data(server);
 		switch (d.phase()) {
 			case WAITING -> {
+				if (io.github.huydangtruong.immortalcultivation.purgatory.Purgatory.busy(server) && d.nextDay() >= 0 && day >= d.nextDay()) {
+					return; // D239: Crimson Master, the God Slayer and the treasure wait while anyone fights in the Purgatory
+				}
 				if (d.nextDay() < 0) {
 					Wanderer.save(server, d.withNextDay(day + QuestGenerator.daysUntilNext(RNG)));
 				} else if (day >= d.nextDay() && io.github.huydangtruong.immortalcultivation.treasure.DeadlyTreasure.takesCrimsonSlot(server)) {

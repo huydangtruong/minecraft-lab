@@ -26,6 +26,7 @@
 		"FoodDataMixin",
 		"FoodPropertiesMixin",
 		"EnchantmentGuardMixin",
+		"RuneEnchantmentMixin",
 		"GhastMixin",
 		"GhastShootFireballGoalMixin",
 		"GraspCanAttackMixin",
