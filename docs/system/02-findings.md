@@ -396,3 +396,12 @@ Java names and ids predate many renames. Ids, `Identifier`s, lang keys and saved
 - Data component: `Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, id, DataComponentType.<T>builder().persistent(codec).networkSynchronized(streamCodec).build())`.
 - Dimension type JSON on 26.3 uses an `attributes` map, `skybox`, `timelines` (copy `the_nether`/`the_end`); flat generator `settings` has `layers`, `biome`, `features`, `lakes`, `structure_overrides`. The **server game test world has no datapack dimensions**: `Purgatory.level` falls back to the overworld there; the client test world has it.
 - Recipes in 26.3 have no `category` in vanilla files; loot table pools use `"condition"`. Tooltips: Fabric `ItemTooltipCallback.EVENT (stack, context, flag, lines)`. `PauseScreen` gets extra buttons through `ScreenEvents.AFTER_INIT` + `Screens.getWidgets`.
+
+## P-082 Purgatory dungeon (26.3)
+
+- `ServerPlayer.gameMode()` can return a stale mode right after `setGameMode` (it said SURVIVAL after switching to ADVENTURE in the same tick). Read `p.gameMode.getGameModeForPlayer()` instead.
+- Copper blocks and carpets are collections in `Blocks` (`WeatheringCopperCollection`, `ColorCollection`), not plain fields: get them by id, `BuiltInRegistries.BLOCK.getValue(Identifier.withDefaultNamespace("waxed_copper_grate"))`.
+- `Block.updateFromNeighbourShapes(state, level, pos)` gives fences, walls, bars and panes their connections after placing with `UPDATE_KNOWN_SHAPE`. `Block.UPDATE_SKIP_BLOCK_ENTITY_SIDEEFFECTS` clears chests without dropping their items.
+- Loot chests: `RandomizableContainerBlockEntity.setLootTable(ResourceKey<LootTable>)`, `setLootTableSeed(long)`; `minecraft:chests/trial_chambers/reward` exists.
+- Arrows: `net.minecraft.world.entity.projectile.arrow.Arrow(Level, x, y, z, ItemStack ammo, ItemStack weapon)` (weapon may be null), public field `pickup`, `setBaseDamage`, `shoot(dx, dy, dz, speed, spread)`.
+- `CollisionGetter.noCollision(Entity)` checks a mob fits before `addFreshEntity`. `LivingEntity.kill(ServerLevel)` fires Fabric `AFTER_DEATH`.

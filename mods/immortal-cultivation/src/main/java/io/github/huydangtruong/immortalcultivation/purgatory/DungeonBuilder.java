@@ -102,6 +102,26 @@ public final class DungeonBuilder {
 		force(level, slot, false);
 	}
 
+	/** A run saved before P-082 stood in a 64-block bedrock box: take it away. */
+	public static void clearOldBox(ServerLevel level, int slot) {
+		int n = PurgatoryRules.OLD_BOX;
+		BlockPos c = new BlockPos(PurgatoryRules.slotCenterX(slot) - n / 2, PurgatoryRules.BOX_MIN_Y, -n / 2);
+		BlockState air = Blocks.AIR.defaultBlockState();
+		BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
+		for (int x = 0; x < n; x++) {
+			for (int y = 0; y < n; y++) {
+				for (int z = 0; z < n; z++) {
+					set(level, p.set(c.getX() + x, c.getY() + y, c.getZ() + z), air);
+				}
+			}
+		}
+		for (int cx = c.getX() >> 4; cx <= (c.getX() + n - 1) >> 4; cx++) {
+			for (int cz = c.getZ() >> 4; cz <= (c.getZ() + n - 1) >> 4; cz++) {
+				level.setChunkForced(cx, cz, false);
+			}
+		}
+	}
+
 	private static void set(ServerLevel level, BlockPos p, BlockState s) {
 		if (level.getBlockState(p) != s) {
 			level.setBlock(p, s, FLAGS);
@@ -127,7 +147,7 @@ public final class DungeonBuilder {
 	}
 
 	/** The real block of one voxel. */
-	static BlockState state(Grid g, int x, int y, int z) {
+	public static BlockState state(Grid g, int x, int y, int z) {
 		Mat m = g.mat(x, y, z);
 		BlockState s = base(g.style(x, y, z), m);
 		Direction f = dir(g.facing(x, y, z));

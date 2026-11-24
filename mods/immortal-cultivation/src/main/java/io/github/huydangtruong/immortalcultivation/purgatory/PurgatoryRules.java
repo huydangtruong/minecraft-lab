@@ -9,23 +9,17 @@ import java.util.random.RandomGenerator;
  * every number that makes a floor harder grows with the floor and never shrinks, and health and damage grow strictly.
  */
 public final class PurgatoryRules {
-	/** Outer size of a box, bedrock included (D235). */
-	public static final int BOX = 64;
-	/** Bedrock layers on every side. */
-	public static final int WALL = 2;
-	/** Inside size: 60 x 60 x 60. */
-	public static final int INSIDE = BOX - 2 * WALL;
+	/** Outer size of the old bedrock box (D235, before P-082): only to clean up a run saved with one. */
+	public static final int OLD_BOX = 64;
 	/** Boxes stand this far apart on the x axis of the purgatory dimension. */
 	public static final int SLOT_SPACING = 256;
-	/** Lowest y of a box (its bottom bedrock layer). */
+	/** Lowest y of a dungeon (its bottom layer). */
 	public static final int BOX_MIN_Y = 64;
 
-	/** Survive 6 minutes to win (D236, D251). */
-	public static final int RUN_TICKS = 6 * 60 * 20;
+	/** D255: the boss must die within 10 minutes. */
+	public static final int RUN_TICKS = 10 * 60 * 20;
 	/** A new floor every 3 minutes per mode (D234, D251, D254). */
 	public static final int COOLDOWN_TICKS = 3 * 60 * 20;
-	/** One mob every 3 seconds (D236). */
-	public static final int SPAWN_EVERY_TICKS = 3 * 20;
 	/** At most 50 mobs alive at once (D236). */
 	public static final int MAX_ALIVE = 50;
 	/** Team queue: start 10 s after the last player joined it (D237). */
@@ -83,8 +77,7 @@ public final class PurgatoryRules {
 			out.add("husk");
 		}
 		if (floor >= 5) {
-			out.add("spider");
-			out.add("creeper");
+			out.add("spider"); // D256: no creepers, they would blow up the rooms
 		}
 		if (floor >= 8) {
 			out.add("stray");
@@ -113,7 +106,7 @@ public final class PurgatoryRules {
 		return out;
 	}
 
-	/** The strong mob that opens every 10th floor. */
+	/** The boss of every 10th floor (a "Floor Warden", stronger than the other bosses). */
 	public static String wardenType(int floor) {
 		if (floor >= 30) {
 			return "ravager";
@@ -122,18 +115,6 @@ public final class PurgatoryRules {
 			return "wither_skeleton";
 		}
 		return "vindicator";
-	}
-
-	/** Warden health on top of the floor multiplier. */
-	public static final double WARDEN_HEALTH = 5.0;
-
-	/** Layout of the inside, one kind every 5 floors, round and round. */
-	public enum Theme {
-		OPEN, PILLARS, LAVA, PLATFORMS, WATER, WALLS;
-
-		public static Theme of(int floor) {
-			return values()[((Math.max(1, floor) - 1) / 5) % values().length];
-		}
 	}
 
 	/** D240: levels for winning floor n. */

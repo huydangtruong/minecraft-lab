@@ -41,22 +41,41 @@ public class PurgatorySavedData extends SavedData {
 			Codec.INT.optionalFieldOf("spawn_timer", 0).forGetter(r -> r.spawnTimer),
 			Codec.STRING.listOf().fieldOf("players").forGetter(r -> r.players),
 			Codec.STRING.listOf().optionalFieldOf("dead", List.of()).forGetter(r -> r.dead),
-			Codec.BOOL.optionalFieldOf("warden", false).forGetter(r -> r.wardenDone)
+			Codec.LONG.optionalFieldOf("seed", 0L).forGetter(r -> r.seed),
+			Codec.INT.listOf().optionalFieldOf("rooms", List.of()).forGetter(r -> r.rooms),
+			Codec.INT.listOf().optionalFieldOf("room_ticks", List.of()).forGetter(r -> r.roomTicks),
+			Codec.INT.optionalFieldOf("boss", 0).forGetter(r -> r.boss)
 		).apply(i, Run::new));
+
+		/** Room states (P-082). */
+		public static final int IDLE = 0;
+		public static final int SEALED = 1;
+		public static final int DONE = 2;
+		/** Boss states. */
+		public static final int BOSS_WAITING = 0;
+		public static final int BOSS_ALIVE = 1;
+		public static final int BOSS_DEAD = 2;
 
 		public final int id;
 		public final int slot;
 		public final boolean team;
 		public final int floor;
 		public int ticksLeft;
+		/** Ticks until the boss calls its next adds. */
 		public int spawnTimer;
 		public final List<String> players = new ArrayList<>();
-		/** Team players who died: they watch inside the box as spectators. */
+		/** Team players who died: they watch inside the dungeon as spectators. */
 		public final List<String> dead = new ArrayList<>();
-		public boolean wardenDone;
+		/** Dungeon seed; 0 = a run saved before P-082 (it ends as a loss that costs nothing). */
+		public final long seed;
+		/** State of each room by index ({@link #IDLE}, {@link #SEALED}, {@link #DONE}). */
+		public final List<Integer> rooms = new ArrayList<>();
+		/** Ticks each room has been sealed. */
+		public final List<Integer> roomTicks = new ArrayList<>();
+		public int boss;
 
 		public Run(int id, int slot, boolean team, int floor, int ticksLeft, int spawnTimer, List<String> players, List<String> dead,
-				boolean wardenDone) {
+				long seed, List<Integer> rooms, List<Integer> roomTicks, int boss) {
 			this.id = id;
 			this.slot = slot;
 			this.team = team;
@@ -65,7 +84,31 @@ public class PurgatorySavedData extends SavedData {
 			this.spawnTimer = spawnTimer;
 			this.players.addAll(players);
 			this.dead.addAll(dead);
-			this.wardenDone = wardenDone;
+			this.seed = seed;
+			this.rooms.addAll(rooms);
+			this.roomTicks.addAll(roomTicks);
+			this.boss = boss;
+		}
+
+		public int room(int index) {
+			return index < rooms.size() ? rooms.get(index) : IDLE;
+		}
+
+		public void room(int index, int state) {
+			while (rooms.size() <= index) {
+				rooms.add(IDLE);
+			}
+			rooms.set(index, state);
+		}
+
+		/** Adds one tick to a sealed room's clock and returns it. */
+		public int tickRoom(int index) {
+			while (roomTicks.size() <= index) {
+				roomTicks.add(0);
+			}
+			int t = roomTicks.get(index) + 1;
+			roomTicks.set(index, t);
+			return t;
 		}
 
 		public boolean alive(String uuid) {

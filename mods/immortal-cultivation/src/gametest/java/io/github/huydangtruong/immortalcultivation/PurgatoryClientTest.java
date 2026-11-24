@@ -2,7 +2,11 @@ package io.github.huydangtruong.immortalcultivation;
 
 import io.github.huydangtruong.immortalcultivation.client.PurgatoryTab;
 import io.github.huydangtruong.immortalcultivation.client.StatsPanel;
+import io.github.huydangtruong.immortalcultivation.purgatory.DungeonBuilder;
 import io.github.huydangtruong.immortalcultivation.purgatory.Purgatory;
+import io.github.huydangtruong.immortalcultivation.purgatory.PurgatoryFloor;
+import io.github.huydangtruong.immortalcultivation.purgatory.dungeon.Room;
+import io.github.huydangtruong.immortalcultivation.purgatory.dungeon.RoomKind;
 import io.github.huydangtruong.immortalcultivation.rune.RuneEntry;
 import io.github.huydangtruong.immortalcultivation.rune.RuneForge;
 import io.github.huydangtruong.immortalcultivation.rune.Runes;
@@ -61,6 +65,50 @@ public class PurgatoryClientTest implements FabricClientGameTest {
 		return s.getPlayerList().getPlayers().get(0);
 	}
 
+	/** P-082: a look into each kind of room (each module once) and the boss room. */
+	private static void tour(ClientGameTestContext context, TestServerContext server) {
+		int rooms = server.computeOnServer(s -> {
+			ServerPlayer p = player(s);
+			p.getAbilities().invulnerable = true;
+			p.onUpdateAbilities();
+			return PurgatoryFloor.dungeon(Purgatory.data(s).runOf(p.getUUID().toString())).rooms().size();
+		});
+		java.util.Set<String> seen = new java.util.HashSet<>();
+		for (int i = 0; i < rooms; i++) {
+			int index = i;
+			String name = server.computeOnServer(s -> {
+				ServerPlayer p = player(s);
+				var r = Purgatory.data(s).runOf(p.getUUID().toString());
+				if (r == null) {
+					return null;
+				}
+				Room room = PurgatoryFloor.dungeon(r).rooms().get(index);
+				if (room.kind == RoomKind.START) {
+					return null;
+				}
+				var c = PurgatoryFloor.feet(r.slot, room.centre);
+				double mx = DungeonBuilder.origin(r.slot).getX() + (room.x0() + room.x1()) / 2.0;
+				double mz = DungeonBuilder.origin(r.slot).getZ() + (room.z0() + room.z1()) / 2.0;
+				// stand back from the middle, looking across the room
+				double bx = mx - (room.x1() - room.x0()) * 0.3;
+				double bz = mz - (room.z1() - room.z0()) * 0.3;
+				var level = Purgatory.level(s);
+				var feet = net.minecraft.core.BlockPos.containing(bx, c.y, bz);
+				boolean free = level.getBlockState(feet).isAir() && level.getBlockState(feet.above()).isAir();
+				double x = free ? bx : c.x;
+				double z = free ? bz : c.z;
+				float yaw = (float) Math.toDegrees(Math.atan2(-(mx - x), mz - z));
+				p.teleportTo(level, x, c.y, z, java.util.Set.of(), free ? yaw : -45f, 12f, false);
+				return room.module;
+			});
+			if (name == null || !seen.add(name)) {
+				continue;
+			}
+			context.waitTicks(25);
+			context.takeScreenshot("purgatory-room-" + name);
+		}
+	}
+
 	@Override
 	public void runTest(ClientGameTestContext context) {
 		try (TestSingleplayerContext world = context.worldBuilder().create()) {
@@ -87,6 +135,7 @@ public class PurgatoryClientTest implements FabricClientGameTest {
 			}
 			context.clickScreenButton("Purgatory");
 			context.waitTicks(3);
+			server.runOnServer(s -> Purgatory.data(s).solo(player(s).getUUID().toString()).floor = 6); // two layers and stairs
 			clickGui(context, context.computeOnClient(mc -> PurgatoryTab.hotspots().get(0))); // Start (solo)
 			context.waitTicks(40);
 			boolean inBox = server.computeOnServer(s -> player(s).level().dimension() == Purgatory.DIMENSION && Purgatory.fighting(player(s)));
@@ -94,8 +143,9 @@ public class PurgatoryClientTest implements FabricClientGameTest {
 				throw new AssertionError("Start did not send the player into the purgatory");
 			}
 			context.runOnClient(mc -> mc.gui.setScreen(null));
-			context.waitTicks(120); // a few mobs come
-			context.takeScreenshot("purgatory-box-floor-1");
+			context.waitTicks(20);
+			context.takeScreenshot("purgatory-dungeon-start");
+			tour(context, server);
 			openTab(context);
 			context.takeScreenshot("purgatory-tab-fighting");
 			boolean giveUpAtBottom = context.computeOnClient(mc -> { // D250: Give up at the bottom centre of the inventory

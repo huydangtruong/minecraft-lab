@@ -53,11 +53,8 @@ class PurgatoryRulesTest {
 	}
 
 	@Test
-	void themeChangesEveryFiveFloors() {
-		assertEquals(PurgatoryRules.Theme.OPEN, PurgatoryRules.Theme.of(1));
-		assertEquals(PurgatoryRules.Theme.OPEN, PurgatoryRules.Theme.of(5));
-		assertEquals(PurgatoryRules.Theme.PILLARS, PurgatoryRules.Theme.of(6));
-		assertEquals(PurgatoryRules.Theme.OPEN, PurgatoryRules.Theme.of(31));
+	void noCreepersEver() {
+		assertTrue(!PurgatoryRules.mobPool(100).contains("creeper"));
 	}
 
 	@Test
@@ -68,7 +65,7 @@ class PurgatoryRulesTest {
 
 	@Test
 	void clockShowsMinutesAndSeconds() {
-		assertEquals("6:00", PurgatoryRules.clock(PurgatoryRules.RUN_TICKS));
+		assertEquals("10:00", PurgatoryRules.clock(PurgatoryRules.RUN_TICKS));
 		assertEquals("3:00", PurgatoryRules.clock(PurgatoryRules.COOLDOWN_TICKS));
 		assertEquals("0:01", PurgatoryRules.clock(1));
 		assertEquals("0:00", PurgatoryRules.clock(0));

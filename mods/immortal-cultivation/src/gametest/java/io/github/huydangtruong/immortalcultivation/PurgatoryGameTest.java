@@ -1,15 +1,23 @@
 package io.github.huydangtruong.immortalcultivation;
 
 import io.github.huydangtruong.immortalcultivation.purgatory.Purgatory;
+import io.github.huydangtruong.immortalcultivation.purgatory.DungeonBuilder;
+import io.github.huydangtruong.immortalcultivation.purgatory.PurgatoryFloor;
 import io.github.huydangtruong.immortalcultivation.purgatory.PurgatoryRules;
+import io.github.huydangtruong.immortalcultivation.purgatory.dungeon.Dungeon;
+import io.github.huydangtruong.immortalcultivation.purgatory.dungeon.Room;
+import io.github.huydangtruong.immortalcultivation.purgatory.dungeon.RoomKind;
 import io.github.huydangtruong.immortalcultivation.purgatory.PurgatorySavedData;
 import io.github.huydangtruong.immortalcultivation.rune.Runes;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 
-/** D234-D240: solo floors, rewards, losses, deaths, the box walls and watching. Each test ends its own run. */
+/** D234-D240: solo floors, rewards, losses, deaths, the dungeon (P-082) and watching. Each test ends its own run. */
 public class PurgatoryGameTest {
 	private static String id(ServerPlayer p) {
 		return p.getUUID().toString();
@@ -149,21 +157,131 @@ public class PurgatoryGameTest {
 		c.succeed();
 	}
 
-	@GameTest(maxTicks = 200)
-	public void mobsComeEveryThreeSecondsAndStayInside(GameTestHelper c) {
+	private static net.minecraft.server.level.ServerLevel plevel(GameTestHelper c) {
+		return Purgatory.level(c.getLevel().getServer());
+	}
+
+	private static Room first(Dungeon d, RoomKind kind) {
+		for (Room r : d.rooms()) {
+			if (r.kind == kind) {
+				return r;
+			}
+		}
+		throw new AssertionError("no " + kind + " room");
+	}
+
+	private static void go(GameTestHelper c, ServerPlayer p, PurgatorySavedData.Run r, int[] g) {
+		Vec3 v = PurgatoryFloor.feet(r.slot, g);
+		p.teleportTo(plevel(c), v.x, v.y, v.z, java.util.Set.of(), 0, 0, false);
+	}
+
+	/** P-082: the world holds exactly the floor the stuck checker passed, the fighter starts in its start room in Adventure mode. */
+	@GameTest(maxTicks = 40)
+	public void theDungeonInTheWorldIsTheCheckedFloor(GameTestHelper c) {
 		ServerPlayer p = fighter(c);
 		c.assertTrue(Purgatory.startSolo(p) == null, "solo starts");
 		PurgatorySavedData.Run r = data(c).runOf(id(p));
-		c.runAfterDelay(PurgatoryRules.SPAWN_EVERY_TICKS * 3 + 5, () -> {
-			var level = Purgatory.level(c.getLevel().getServer());
-			var mobs = level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class, Purgatory.inside(r.slot));
-			c.assertTrue(mobs.size() >= 2, "mobs came: " + mobs.size());
-			for (var m : mobs) {
-				c.assertTrue(m.distanceTo(p) >= PurgatoryRules.SPAWN_MIN_DISTANCE - 1 || m.tickCount > 20, "not on top of the fighter");
+		Dungeon d = PurgatoryFloor.dungeon(r);
+		var level = plevel(c);
+		c.assertTrue(p.gameMode.getGameModeForPlayer() == GameType.ADVENTURE, "adventure mode");
+		c.assertTrue(d.roomAt(p.getBlockX() - DungeonBuilder.origin(r.slot).getX(),
+			p.getBlockY() - DungeonBuilder.origin(r.slot).getY(), p.getBlockZ() - DungeonBuilder.origin(r.slot).getZ()) == d.start(), "in the start room");
+		c.assertTrue(p.position().distanceTo(Purgatory.start(r)) < 0.01, "at the start spot");
+		var o = DungeonBuilder.origin(r.slot);
+		var pos = new net.minecraft.core.BlockPos.MutableBlockPos();
+		for (Room room : d.rooms()) {
+			for (int x = room.x0(); x < room.x1(); x++) {
+				for (int y = room.y0(); y < room.y1(); y++) {
+					for (int z = room.z0(); z < room.z1(); z++) {
+						var want = DungeonBuilder.state(d.grid(), x, y, z).getBlock();
+						var got = level.getBlockState(pos.set(o.getX() + x, o.getY() + y, o.getZ() + z)).getBlock();
+						if (want != got) {
+							c.fail("block " + x + " " + y + " " + z + " of " + room + ": want " + want + " got " + got);
+						}
+					}
+				}
 			}
+		}
+		Purgatory.finish(p, false);
+		for (Room room : d.rooms()) {
+			for (int x = room.x0(); x < room.x1(); x += 3) {
+				for (int z = room.z0(); z < room.z1(); z += 3) {
+					c.assertTrue(level.getBlockState(pos.set(o.getX() + x, o.getY() + room.y0(), o.getZ() + z)).isAir(), "cleared");
+				}
+			}
+		}
+		GameTestKit.drop(c, p);
+		c.succeed();
+	}
+
+	/** P-082: walking into a locked room seals its doors and spawns its mobs; they die, the doors open. */
+	@GameTest(maxTicks = 80)
+	public void aLockedRoomSealsUntilItsMobsDie(GameTestHelper c) {
+		ServerPlayer p = fighter(c);
+		p.getAbilities().invulnerable = true;
+		c.assertTrue(Purgatory.startSolo(p) == null, "solo starts");
+		PurgatorySavedData.Run r = data(c).runOf(id(p));
+		Room room = first(PurgatoryFloor.dungeon(r), RoomKind.LOCKED);
+		go(c, p, r, room.centre);
+		c.runAfterDelay(3, () -> {
+			var level = plevel(c);
+			c.assertTrue(r.room(room.index) == PurgatorySavedData.Run.SEALED, "sealed");
+			for (int[] g : room.gates) {
+				c.assertTrue(level.getBlockState(DungeonBuilder.world(r.slot, g)).is(Blocks.IRON_BARS), "bars at the doors");
+			}
+			var mobs = level.getEntitiesOfClass(Mob.class, Purgatory.inside(r.slot), m -> m.entityTags().contains(Purgatory.TAG));
+			c.assertTrue(!mobs.isEmpty(), "mobs came");
+			mobs.forEach(m -> m.kill(level));
+			c.runAfterDelay(15, () -> {
+				c.assertTrue(r.room(room.index) == PurgatorySavedData.Run.DONE, "open again");
+				for (int[] g : room.gates) {
+					c.assertTrue(level.getBlockState(DungeonBuilder.world(r.slot, g)).isAir(), "doors open");
+				}
+				Purgatory.finish(p, false);
+				GameTestKit.drop(c, p);
+				c.succeed();
+			});
+		});
+	}
+
+	/** P-082: the boss waits in the last room; killing it wins the floor. */
+	@GameTest(maxTicks = 80)
+	public void killingTheBossWinsTheFloor(GameTestHelper c) {
+		ServerPlayer p = fighter(c);
+		p.getAbilities().invulnerable = true;
+		c.assertTrue(Purgatory.startSolo(p) == null, "solo starts");
+		PurgatorySavedData.Run r = data(c).runOf(id(p));
+		Room boss = PurgatoryFloor.dungeon(r).boss();
+		go(c, p, r, boss.centre);
+		c.runAfterDelay(3, () -> {
+			var level = plevel(c);
+			var bosses = level.getEntitiesOfClass(Mob.class, Purgatory.inside(r.slot), m -> m.entityTags().contains(PurgatoryFloor.BOSS_TAG));
+			c.assertTrue(bosses.size() == 1, "one boss: " + bosses.size());
+			Mob b = bosses.get(0);
+			c.assertTrue(b.getMaxHealth() > 40, "a strong boss: " + b.getMaxHealth());
 			c.assertTrue(r.ticksLeft < PurgatoryRules.RUN_TICKS, "the clock runs");
-			Purgatory.finish(p, false);
-			c.assertTrue(level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class, Purgatory.inside(r.slot)).isEmpty(), "box emptied");
+			b.kill(level);
+			c.runAfterDelay(3, () -> {
+				c.assertTrue(data(c).runOf(id(p)) == null, "the run ended");
+				c.assertTrue(data(c).solo(id(p)).floor == 2, "won: floor 2");
+				c.assertTrue(p.experienceLevel == PurgatoryRules.rewardLevels(1), "paid");
+				c.assertTrue(level.getEntitiesOfClass(Mob.class, Purgatory.inside(r.slot)).isEmpty(), "dungeon emptied");
+				GameTestKit.drop(c, p);
+				c.succeed();
+			});
+		});
+	}
+
+	/** D255: running out of time loses the floor (and costs nothing). */
+	@GameTest(maxTicks = 40)
+	public void runningOutOfTimeLoses(GameTestHelper c) {
+		ServerPlayer p = fighter(c);
+		c.assertTrue(Purgatory.startSolo(p) == null, "solo starts");
+		data(c).runOf(id(p)).ticksLeft = 1;
+		c.runAfterDelay(3, () -> {
+			c.assertTrue(data(c).runOf(id(p)) == null, "the run ended");
+			c.assertTrue(data(c).solo(id(p)).floor == 1 && runes(p) == 0, "lost, nothing paid");
+			c.assertTrue(p.gameMode.getGameModeForPlayer() == GameType.SURVIVAL, "survival again");
 			GameTestKit.drop(c, p);
 			c.succeed();
 		});

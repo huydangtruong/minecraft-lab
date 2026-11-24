@@ -7,6 +7,7 @@ import io.github.huydangtruong.immortalcultivation.purgatory.PurgatorySavedData.
 import io.github.huydangtruong.immortalcultivation.purgatory.PurgatorySavedData.Owed;
 import io.github.huydangtruong.immortalcultivation.purgatory.PurgatorySavedData.Run;
 import io.github.huydangtruong.immortalcultivation.purgatory.PurgatorySavedData.Solo;
+import io.github.huydangtruong.immortalcultivation.purgatory.dungeon.DungeonRules;
 import io.github.huydangtruong.immortalcultivation.rune.Runes;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,15 +49,14 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 /**
- * Purgatory (D234-D240): solo and team floors fought in a 64 x 64 x 64 bedrock box of the `permahearts:purgatory` dimension.
- * One mob every 3 s (50 alive at most); survive 10 minutes to win. Death or Give up loses the floor, nothing else.
- * Fighters and watchers cannot leave their box; they go back to where they stood when it ends.
+ * Purgatory (D234-D240, P-082): solo and team floors fought in a generated dungeon of the `permahearts:purgatory` dimension.
+ * Rooms wake when a fighter walks in; locked rooms seal until their mobs are dead; killing the boss in the last room wins.
+ * Ten minutes at most. Death, Give up or running out of time loses the floor, nothing else. Fighters play in Adventure mode,
+ * cannot leave their dungeon and go back to where they stood when it ends.
  */
 public final class Purgatory {
 	public static final ResourceKey<Level> DIMENSION = ResourceKey.create(Registries.DIMENSION,
@@ -68,7 +68,7 @@ public final class Purgatory {
 	private static final Identifier DAMAGE_ID = id("purgatory_damage");
 	private static final Identifier ARMOR_ID = id("purgatory_armor");
 	private static final Identifier SPEED_ID = id("purgatory_speed");
-	private static final Identifier WARDEN_ID = id("purgatory_warden");
+	private static final Identifier BOSS_ID = id("purgatory_boss");
 
 	private static final RandomSource RNG = RandomSource.create();
 
@@ -106,6 +106,11 @@ public final class Purgatory {
 			}
 			return true;
 		});
+		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
+			if (entity instanceof Mob m && m.entityTags().contains(PurgatoryFloor.BOSS_TAG) && m.level() instanceof ServerLevel sl) {
+				PurgatoryFloor.bossDied(sl.getServer(), m);
+			}
+		});
 	}
 
 	/**
@@ -132,6 +137,7 @@ public final class Purgatory {
 		JOINED.clear();
 		BARS.values().forEach(ServerBossEvent::removeAllPlayers);
 		BARS.clear();
+		PurgatoryFloor.forgetAll();
 		testLevel = null;
 	}
 
@@ -178,27 +184,16 @@ public final class Purgatory {
 
 	// ---- geometry ----
 
-	/** Bottom corner of a box. */
-	static BlockPos corner(int slot) {
-		int half = PurgatoryRules.BOX / 2;
-		return new BlockPos(PurgatoryRules.slotCenterX(slot) - half, PurgatoryRules.BOX_MIN_Y, -half);
-	}
-
-	/** Floor blocks sit on the first inside layer; people stand one higher. */
-	static int floorY() {
-		return PurgatoryRules.BOX_MIN_Y + PurgatoryRules.WALL;
-	}
-
-	/** The inside of a box, where fighters and watchers must stay. */
+	/** The whole dungeon grid of a slot, where fighters and watchers must stay. */
 	public static AABB inside(int slot) {
-		BlockPos c = corner(slot);
-		int w = PurgatoryRules.WALL;
-		return new AABB(c.getX() + w, c.getY() + w, c.getZ() + w,
-			c.getX() + PurgatoryRules.BOX - w, c.getY() + PurgatoryRules.BOX - w, c.getZ() + PurgatoryRules.BOX - w);
+		BlockPos o = DungeonBuilder.origin(slot);
+		return new AABB(o.getX(), o.getY(), o.getZ(),
+			o.getX() + DungeonRules.SIZE_X, o.getY() + DungeonRules.SIZE_Y, o.getZ() + DungeonRules.SIZE_Z);
 	}
 
-	static double[] centre(int slot) {
-		return new double[] {PurgatoryRules.slotCenterX(slot) + 0.5, floorY() + 1, 0.5};
+	/** Where a run's fighters start (watchers float a little higher). */
+	public static Vec3 start(Run r) {
+		return PurgatoryFloor.start(r);
 	}
 
 	// ---- actions (null = done, else the reason) ----
@@ -279,8 +274,8 @@ public final class Purgatory {
 		}
 		d.watching.put(key(p), runId);
 		p.setGameMode(GameType.SPECTATOR);
-		double[] c = centre(r.slot);
-		p.teleportTo(level(server), c[0], c[1] + 6, c[2], Set.of(), p.getYRot(), 30f, false);
+		Vec3 c = start(r);
+		p.teleportTo(level(server), c.x, c.y + 2, c.z, Set.of(), p.getYRot(), 30f, false);
 		d.changed();
 		return null;
 	}
@@ -324,19 +319,22 @@ public final class Purgatory {
 		for (ServerPlayer p : players) {
 			ids.add(key(p));
 		}
-		Run r = new Run(d.nextId++, slot, team, floor, PurgatoryRules.RUN_TICKS, PurgatoryRules.SPAWN_EVERY_TICKS - 20, ids, List.of(), false);
+		long seed = RNG.nextLong();
+		Run r = new Run(d.nextId++, slot, team, floor, PurgatoryRules.RUN_TICKS, 0, ids, List.of(), seed == 0 ? 1 : seed, List.of(),
+			List.of(), Run.BOSS_WAITING);
 		d.runs.add(r);
 		ServerLevel level = level(server);
-		PurgatoryBox.build(level, slot, floor);
-		double[] c = centre(slot);
+		DungeonBuilder.build(level, PurgatoryFloor.dungeon(r), slot);
+		Vec3 c = start(r);
 		for (ServerPlayer p : players) {
 			d.back.put(key(p), backOf(p));
 			p.stopRiding();
-			p.teleportTo(level, c[0], c[1], c[2], Set.of(), p.getYRot(), 0f, false);
-			p.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+			p.setGameMode(GameType.ADVENTURE);
+			p.teleportTo(level, c.x, c.y, c.z, Set.of(), p.getYRot(), 0f, false);
+			p.setDeltaMovement(Vec3.ZERO);
 			p.resetFallDistance();
 			p.sendSystemMessage(Component.literal((team ? "Team " : "") + "Purgatory floor " + floor
-				+ ": survive 10 minutes").withStyle(ChatFormatting.DARK_RED));
+				+ ": find and kill the boss within 10 minutes").withStyle(ChatFormatting.DARK_RED));
 		}
 		d.changed();
 		return r;
@@ -364,7 +362,7 @@ public final class Purgatory {
 		for (Entity e : level.getEntities((Entity) null, inside(r.slot).inflate(2), e -> !(e instanceof Player))) {
 			e.discard(); // mobs, drops, arrows: the box is emptied
 		}
-		String result = (r.team ? "Team " : "") + "Purgatory floor " + r.floor + (won ? " cleared!" : " lost");
+		String result = (r.team ? "Team " : "") + "Purgatory floor " + r.floor + (won ? " cleared!" : r.ticksLeft <= 0 ? " lost: time is up" : " lost");
 		for (String id : r.players) {
 			ServerPlayer p = server.getPlayerList().getPlayer(UUID.fromString(id));
 			if (won) {
@@ -389,7 +387,12 @@ public final class Purgatory {
 				}
 			}
 		}
-		PurgatoryBox.release(level, r.slot);
+		if (r.seed != 0) {
+			DungeonBuilder.clear(level, PurgatoryFloor.dungeon(r), r.slot);
+		} else {
+			DungeonBuilder.clearOldBox(level, r.slot);
+		}
+		PurgatoryFloor.forget(r);
 		d.changed();
 	}
 
@@ -408,7 +411,7 @@ public final class Purgatory {
 
 	private static Back backOf(ServerPlayer p) {
 		return new Back(p.level().dimension().identifier().toString(), p.getX(), p.getY(), p.getZ(), p.getYRot(), p.getXRot(),
-			p.gameMode().getName());
+			p.gameMode.getGameModeForPlayer().getName());
 	}
 
 	/** Back to the saved spot and game mode; forgets the watch. */
@@ -426,7 +429,7 @@ public final class Purgatory {
 		p.stopRiding();
 		p.setGameMode(GameType.byName(b.gameMode(), GameType.SURVIVAL));
 		p.teleportTo(to, b.x(), b.y(), b.z(), Set.of(), b.yRot(), b.xRot(), false);
-		p.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+		p.setDeltaMovement(Vec3.ZERO);
 		p.resetFallDistance();
 		p.clearFire();
 	}
@@ -516,7 +519,7 @@ public final class Purgatory {
 		return out;
 	}
 
-	private static void tellRun(MinecraftServer server, Run r, String text) {
+	static void tellRun(MinecraftServer server, Run r, String text) {
 		for (String id : r.players) {
 			ServerPlayer p = server.getPlayerList().getPlayer(UUID.fromString(id));
 			if (p != null) {
@@ -526,31 +529,33 @@ public final class Purgatory {
 	}
 
 	private static void tickRun(MinecraftServer server, PurgatorySavedData d, Run r) {
+		if (r.seed == 0) {
+			end(server, d, r, false); // saved before the dungeons (P-082): nothing lost
+			return;
+		}
 		ServerLevel level = level(server);
 		AABB in = inside(r.slot);
 		List<ServerPlayer> alive = onlineAlive(server, r);
-		// keep everyone of this box inside it
+		// keep everyone of this dungeon inside it
 		for (String id : r.players) {
 			ServerPlayer p = server.getPlayerList().getPlayer(UUID.fromString(id));
 			if (p != null) {
 				keepInside(level, r, in, p, !r.dead.contains(id));
 			}
 		}
+		if (r.boss == Run.BOSS_DEAD) {
+			end(server, d, r, true);
+			return;
+		}
 		if (alive.isEmpty()) {
 			return; // D236: the clock stops while the fighters are offline
 		}
 		r.ticksLeft--;
 		if (r.ticksLeft <= 0) {
-			end(server, d, r, true);
+			end(server, d, r, false); // D255: the boss must die within the time
 			return;
 		}
-		if (++r.spawnTimer >= PurgatoryRules.SPAWN_EVERY_TICKS) {
-			r.spawnTimer = 0;
-			int mobs = level.getEntitiesOfClass(Mob.class, in, m -> m instanceof Enemy && m.isAlive()).size();
-			if (mobs < PurgatoryRules.MAX_ALIVE) {
-				spawn(level, r, alive);
-			}
-		}
+		PurgatoryFloor.tick(server, level, r, alive);
 		if (server.getTickCount() % 20 == 0) {
 			bar(server, d, r);
 			retarget(level, in, alive);
@@ -558,8 +563,8 @@ public final class Purgatory {
 	}
 
 	private static void keepInside(ServerLevel level, Run r, AABB in, ServerPlayer p, boolean fighter) {
-		if (fighter && p.isSpectator()) {
-			p.setGameMode(GameType.SURVIVAL);
+		if (fighter && p.gameMode.getGameModeForPlayer() != GameType.ADVENTURE) {
+			p.setGameMode(GameType.ADVENTURE); // D256: no breaking or placing blocks in the dungeon
 		}
 		if (!fighter && !p.isSpectator()) {
 			p.setGameMode(GameType.SPECTATOR);
@@ -567,10 +572,10 @@ public final class Purgatory {
 		if (p.level() == level && in.contains(p.position())) {
 			return;
 		}
-		double[] c = centre(r.slot);
+		Vec3 c = start(r);
 		p.stopRiding();
-		p.teleportTo(level, c[0], c[1] + (fighter ? 0 : 6), c[2], Set.of(), p.getYRot(), p.getXRot(), false);
-		p.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+		p.teleportTo(level, c.x, c.y + (fighter ? 0 : 2), c.z, Set.of(), p.getYRot(), p.getXRot(), false);
+		p.setDeltaMovement(Vec3.ZERO);
 		p.resetFallDistance();
 	}
 
@@ -667,32 +672,35 @@ public final class Purgatory {
 		for (ServerPlayer p : want) {
 			bar.addPlayer(p); // a respawned or rejoined player is a new object
 		}
+		PurgatoryFloor.bossBar(server, level(server), r, want);
 	}
 
 	// ---- mobs ----
 
-	private static void spawn(ServerLevel level, Run r, List<ServerPlayer> alive) {
-		BlockPos pos = PurgatoryBox.spawnSpot(level, r.slot, alive, RNG);
-		if (pos == null) {
-			return;
-		}
-		boolean warden = !r.wardenDone && r.floor % PurgatoryRules.WARDEN_EVERY == 0;
-		List<String> pool = PurgatoryRules.mobPool(r.floor);
-		String type = warden ? PurgatoryRules.wardenType(r.floor) : pool.get(RNG.nextInt(pool.size()));
-		EntityType<?> et = BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.withDefaultNamespace(type));
+	/**
+	 * One floor mob at a feet position, or null when it does not fit there. health = extra health factor (bosses), name = a
+	 * shown name (bosses) or null.
+	 */
+	static Mob spawnMob(ServerLevel level, Run r, String type, Vec3 at, List<ServerPlayer> alive, double health, String name) {
+		EntityType<?> et = BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.parse(type));
 		Entity e = et.create(level, EntitySpawnReason.EVENT);
 		if (!(e instanceof Mob m)) {
 			if (e != null) {
 				e.discard();
 			}
-			return;
+			return null;
 		}
-		m.snapTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, RNG.nextFloat() * 360f, 0f);
+		m.snapTo(at.x, at.y, at.z, RNG.nextFloat() * 360f, 0f);
+		if (!level.noCollision(m)) {
+			m.discard();
+			return null;
+		}
+		BlockPos pos = BlockPos.containing(at);
 		m.addTag(TAG);
 		m.addTag(DangerMobs.APPLIED_TAG); // the danger level does not touch Purgatory mobs: the floor decides
 		m.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), EntitySpawnReason.EVENT, null);
-		strengthen(m, r.floor, r.team ? r.players.size() : 1, warden);
-		if (!warden && RNG.nextDouble() < PurgatoryRules.eliteChance(r.floor)) {
+		strengthen(m, r.floor, r.team ? r.players.size() : 1, health, name);
+		if (name == null && RNG.nextDouble() < PurgatoryRules.eliteChance(r.floor)) {
 			DangerMobs.makeElite(m, DangerRules.rollAffixes(Math.min(DangerRules.MAX_LEVEL, 20 + r.floor), new java.util.Random(RNG.nextLong())));
 		}
 		m.setPersistenceRequired();
@@ -701,14 +709,12 @@ public final class Purgatory {
 		if (target != null) {
 			m.setTarget(target);
 		}
-		if (warden) {
-			r.wardenDone = true;
-		}
+		return m;
 	}
 
 	/** Floor strength on top of the vanilla mob (the numbers are in PurgatoryRules). */
-	public static void strengthen(Mob m, int floor, int players, boolean warden) {
-		double health = PurgatoryRules.healthMultiplier(floor) * PurgatoryRules.teamHealthFactor(players) * (warden ? PurgatoryRules.WARDEN_HEALTH : 1.0);
+	public static void strengthen(Mob m, int floor, int players, double extraHealth, String name) {
+		double health = PurgatoryRules.healthMultiplier(floor) * PurgatoryRules.teamHealthFactor(players) * extraHealth;
 		add(m.getAttribute(Attributes.MAX_HEALTH), HEALTH_ID, health - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
 		add(m.getAttribute(Attributes.ATTACK_DAMAGE), DAMAGE_ID, PurgatoryRules.damageMultiplier(floor) - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
 		add(m.getAttribute(Attributes.ARMOR), ARMOR_ID, PurgatoryRules.armorBonus(floor), AttributeModifier.Operation.ADD_VALUE);
@@ -717,9 +723,9 @@ public final class Purgatory {
 		if (follow != null) {
 			follow.setBaseValue(Math.max(follow.getBaseValue(), 96.0));
 		}
-		if (warden) {
-			add(m.getAttribute(Attributes.KNOCKBACK_RESISTANCE), WARDEN_ID, 0.6, AttributeModifier.Operation.ADD_VALUE);
-			m.setCustomName(Component.literal("Floor Warden").withStyle(ChatFormatting.DARK_RED));
+		if (name != null) {
+			add(m.getAttribute(Attributes.KNOCKBACK_RESISTANCE), BOSS_ID, 0.6, AttributeModifier.Operation.ADD_VALUE);
+			m.setCustomName(Component.literal(name).withStyle(ChatFormatting.DARK_RED));
 			m.setCustomNameVisible(true);
 			m.setGlowingTag(true);
 		}
@@ -768,11 +774,4 @@ public final class Purgatory {
 		end(server, d, r, won);
 		return true;
 	}
-
-	/** Blocks that make up the inside of a box (used by PurgatoryBox). */
-	static BlockState air() {
-		return Blocks.AIR.defaultBlockState();
-	}
-
-	static final int SET_FLAGS = Block.UPDATE_CLIENTS;
 }
