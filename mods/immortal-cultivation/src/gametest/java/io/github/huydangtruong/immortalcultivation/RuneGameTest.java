@@ -83,4 +83,19 @@ public class RuneGameTest {
 		GameTestKit.drop(c, p);
 		c.succeed();
 	}
+
+	@GameTest(maxTicks = 20)
+	public void theRuneForgeRecipeUnlocksInTheRecipeBook(GameTestHelper c) {
+		var server = c.getLevel().getServer();
+		var key = ResourceKey.create(Registries.RECIPE, net.minecraft.resources.Identifier.fromNamespaceAndPath("permahearts", "rune_forge"));
+		c.assertTrue(server.getRecipeManager().byKey(key).isPresent(), "recipe loaded");
+		var adv = server.getAdvancements().get(net.minecraft.resources.Identifier.fromNamespaceAndPath("permahearts", "recipes/decorations/rune_forge"));
+		c.assertTrue(adv != null, "unlock advancement loaded");
+		ServerPlayer p = GameTestKit.survivor(c);
+		c.assertTrue(!p.getRecipeBook().contains(key), "locked at first");
+		p.getAdvancements().award(adv, "has_iron_ingot");
+		c.assertTrue(p.getRecipeBook().contains(key), "in the recipe book after picking up iron");
+		GameTestKit.drop(c, p);
+		c.succeed();
+	}
 }
