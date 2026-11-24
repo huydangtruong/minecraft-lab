@@ -74,6 +74,19 @@ public class PurgatoryClientTest implements FabricClientGameTest {
 			context.waitTicks(30);
 			openTab(context);
 			context.takeScreenshot("purgatory-tab-ready");
+			clickGui(context, context.computeOnClient(mc -> { // a real mouse click on the Stats edge tab (the bug ate it)
+				for (var w : net.fabricmc.fabric.api.client.screen.v1.Screens.getWidgets(mc.gui.screen())) {
+					if (w.visible && w.getMessage().getString().equals("Stats")) {
+						return new int[] {w.getX() + w.getWidth() / 2, w.getY() + w.getHeight() / 2};
+					}
+				}
+				throw new AssertionError("no Stats tab");
+			}));
+			if (!context.computeOnClient(mc -> StatsPanel.tab() == StatsPanel.Tab.STATS)) {
+				throw new AssertionError("the Stats tab could not be clicked from the Purgatory tab");
+			}
+			context.clickScreenButton("Purgatory");
+			context.waitTicks(3);
 			clickGui(context, context.computeOnClient(mc -> PurgatoryTab.hotspots().get(0))); // Start (solo)
 			context.waitTicks(40);
 			boolean inBox = server.computeOnServer(s -> player(s).level().dimension() == Purgatory.DIMENSION && Purgatory.fighting(player(s)));
@@ -85,6 +98,18 @@ public class PurgatoryClientTest implements FabricClientGameTest {
 			context.takeScreenshot("purgatory-box-floor-1");
 			openTab(context);
 			context.takeScreenshot("purgatory-tab-fighting");
+			boolean giveUpAtBottom = context.computeOnClient(mc -> { // D250: Give up at the bottom centre of the inventory
+				var sc = mc.gui.screen();
+				for (var w : net.fabricmc.fabric.api.client.screen.v1.Screens.getWidgets(sc)) {
+					if (w.visible && w.getMessage().getString().equals("Give up")) {
+						return Math.abs(w.getX() + w.getWidth() / 2 - sc.width / 2) <= 1 && w.getY() + w.getHeight() >= sc.height - 4;
+					}
+				}
+				return false;
+			});
+			if (!giveUpAtBottom) {
+				throw new AssertionError("no Give up button at the bottom centre of the inventory");
+			}
 			context.runOnClient(mc -> mc.gui.setScreen(null));
 			server.runOnServer(s -> Purgatory.finish(player(s), true));
 			context.waitTicks(40);

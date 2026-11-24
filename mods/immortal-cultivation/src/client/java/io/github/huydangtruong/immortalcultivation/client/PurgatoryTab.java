@@ -30,7 +30,6 @@ public final class PurgatoryTab {
 
 	private static int[] soloButton = new int[4];
 	private static int[] teamButton = new int[4];
-	private static int[] giveUpButton = new int[4];
 	private static final List<int[]> watchButtons = new ArrayList<>();
 	private static final List<Integer> watchIds = new ArrayList<>();
 	private static int scroll;
@@ -77,13 +76,12 @@ public final class PurgatoryTab {
 		y += 44;
 
 		// Current fight
-		giveUpButton = new int[4];
 		if (inside) {
 			g.text(font, Component.literal(s.mode() == PurgatoryNet.MODE_FALLEN ? "You fell: watching your team" : "You are fighting")
 				.withStyle(ChatFormatting.BOLD), tx, y + 4, RED, false);
 			if (s.mode() == PurgatoryNet.MODE_FIGHTING) {
-				giveUpButton = new int[] {right - BUTTON_W, y, BUTTON_W, BUTTON_H};
-				button(g, font, giveUpButton, "Give up", true, mx, my);
+				g.text(font, "Give up: bottom of the screen", tx, y + 14, DIM, false); // D250: the button lives under the inventory
+				y += 10;
 			}
 			y += BUTTON_H + 4;
 		} else if (s.mode() == PurgatoryNet.MODE_WATCHING) {
@@ -133,9 +131,8 @@ public final class PurgatoryTab {
 		return r[2] > 0 && r[3] > 0 && mx >= r[0] && mx < r[0] + r[2] && my >= r[1] && my < r[1] + r[3];
 	}
 
-	/** A click on the panel body. True when handled. Disabled buttons still swallow the click. */
+	/** A click on the panel or its edge tabs. True only when it hit one of this tab's buttons. */
 	public static boolean click(int x0, int y0, int w, int h, double mx, double my, int button) {
-		State s = ClientPurgatory.state();
 		if (in(mx, my, soloButton)) {
 			ClientPurgatory.send(PurgatoryNet.START_SOLO, 0);
 			return true;
@@ -144,17 +141,13 @@ public final class PurgatoryTab {
 			ClientPurgatory.send(PurgatoryNet.TEAM, 0);
 			return true;
 		}
-		if (in(mx, my, giveUpButton) && s.mode() == PurgatoryNet.MODE_FIGHTING) {
-			ClientPurgatory.send(PurgatoryNet.GIVE_UP, 0);
-			return true;
-		}
 		for (int i = 0; i < watchButtons.size(); i++) {
 			if (in(mx, my, watchButtons.get(i))) {
 				ClientPurgatory.send(PurgatoryNet.WATCH, watchIds.get(i));
 				return true;
 			}
 		}
-		return true;
+		return false; // not on a button: the edge tabs and the screen still get the click
 	}
 
 	public static boolean scroll(int x0, int y0, int w, int h, double mx, double my, double amount) {
@@ -162,10 +155,10 @@ public final class PurgatoryTab {
 		return true;
 	}
 
-	/** GUI centres of Start, Join and Give up (tests). */
+	/** GUI centres of Start and Join (tests). */
 	public static List<int[]> hotspots() {
 		List<int[]> out = new ArrayList<>();
-		for (int[] r : new int[][] {soloButton, teamButton, giveUpButton}) {
+		for (int[] r : new int[][] {soloButton, teamButton}) {
 			out.add(new int[] {r[0] + r[2] / 2, r[1] + r[3] / 2});
 		}
 		return out;

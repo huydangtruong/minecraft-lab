@@ -61,7 +61,7 @@ public class SkillBarHud implements HudElement {
 					x + BOX / 2, top + BOX / 2 - 4, 0xFFFFFFFF);
 			}
 		}
-		// time-left lines, right side, stacked upwards above the technique name: Flight, Aqua, Spirit Walk (D129)
+		// time-left lines, right side, stacked upwards above the technique name: Flight, Aqua, Undying, Spirit Walk (D129, D249)
 		int lineY = top - 24;
 		long flight = io.github.huydangtruong.immortalcultivation.technique.TechniqueTimers.remaining(
 			mc.player.getAttached(io.github.huydangtruong.immortalcultivation.technique.Flight.END), now);
@@ -72,6 +72,10 @@ public class SkillBarHud implements HudElement {
 			mc.player.getAttached(io.github.huydangtruong.immortalcultivation.technique.AquaMarine.END), now);
 		if (aqua > 0) {
 			lineY = timeLine(g, mc, right, "Aqua", aqua, 0xFF9FF0E8, lineY);
+		}
+		net.minecraft.world.effect.MobEffectInstance oath = mc.player.getEffect(io.github.huydangtruong.immortalcultivation.technique.TechniqueTimers.UNDYING);
+		if (oath != null && oath.getDuration() > 0) { // D249: Undying Jutsu time left (the server mirrors its end tick into this effect)
+			lineY = timeLine(g, mc, right, "Undying", oath.getDuration(), 0xFFFF8A8A, lineY);
 		}
 		net.minecraft.world.effect.MobEffectInstance walk = mc.player.getEffect(io.github.huydangtruong.immortalcultivation.technique.TechniqueTimers.SHADOW);
 		if (walk != null && walk.getDuration() > 0) { // the server mirrors the Spirit Walk end tick into this effect (D115)
