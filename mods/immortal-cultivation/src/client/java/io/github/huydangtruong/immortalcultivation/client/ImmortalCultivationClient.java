@@ -20,6 +20,7 @@ public class ImmortalCultivationClient implements ClientModInitializer {
 		MegaGlowLayer.register(); // P-059
 		MenuScreens.register(WandererMenus.TYPE, WandererScreen::new);
 		MenuScreens.register(io.github.huydangtruong.immortalcultivation.reward.RewardBoxes.MENU, RewardBoxScreen::new); // P-027
+		MenuScreens.register(io.github.huydangtruong.immortalcultivation.technique.grasp.GraspEquipMenu.TYPE, GraspEquipScreen::new); // D244
 		StatsPanel.register();
 		LayeredHeartsHud.register();
 		GodSlayerWarningHud.register();
