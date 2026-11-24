@@ -567,7 +567,7 @@ public final class TechniqueRules {
 			case LANCE -> List.of(
 				new Stat("Damage", num(LanceRules.damagePerSecond(level, 0)) + " per second (up to " + num(LanceRules.damagePerSecond(level, 3 * LanceRules.STAGE_TICKS)) + ")"),
 				new Stat("Range", num(LanceRules.RANGE) + " blocks"),
-				new Stat("Fires", "up to " + LanceRules.DURATION_TICKS / 20 + " s while you hold the button"),
+				new Stat("Fires", "up to " + num(LanceRules.durationTicks(level) / 20.0) + " s while you hold the button"),
 				new Stat("Cooldown", t.cooldownSeconds() + " s"));
 			case TELEPORT -> List.of(
 				new Stat("Range", num(teleportRange(level)) + " blocks"),

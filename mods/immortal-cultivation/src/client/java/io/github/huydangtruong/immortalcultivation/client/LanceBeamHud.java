@@ -60,7 +60,7 @@ public final class LanceBeamHud implements HudElement {
 		} else if (a[2] < near) {
 			a = lerp(b, a, (near - b[2]) / (a[2] - b[2]));
 		}
-		float width = LanceRules.widthFactor(ClientLance.localTicksLeft()) * 1.5f;
+		float width = LanceRules.widthFactor(ClientLance.localTicksLeft(), ClientLance.localTotal()) * 1.5f;
 		float time = mc.player.tickCount + pt;
 		float pulse = 1f + 0.12f * (float) Math.sin(time * 0.9f);
 		double halfH = gh / 2.0;
