@@ -94,7 +94,7 @@ public class RuneForgeScreen extends AbstractContainerScreen<RuneForgeMenu> {
 			g.text(font, hint, 8, y, DIM, false);
 		} else {
 			RuneEntry a = Runes.entryOf(menu.getSlot(RuneForgeMenu.MERGE_A).getItem());
-			g.text(font, a == null ? "Two equal runes make one level higher" : "Free", 8, y, a == null ? DIM : ORANGE, false);
+			g.text(font, a == null ? "2 equal runes: 1 level higher" : "Free", 8, y, a == null ? DIM : ORANGE, false);
 		}
 	}
 }

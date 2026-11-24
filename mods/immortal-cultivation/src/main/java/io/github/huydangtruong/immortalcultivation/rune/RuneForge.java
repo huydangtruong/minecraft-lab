@@ -49,6 +49,14 @@ public final class RuneForge extends Block {
 	@Override
 	protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
 		if (player instanceof ServerPlayer sp) {
+			open(sp, level, pos);
+		}
+		return InteractionResult.SUCCESS;
+	}
+
+	/** Opens the forge standing at pos for this player. */
+	public static void open(ServerPlayer sp, Level level, BlockPos pos) {
+		{
 			sp.openMenu(new ExtendedMenuProvider<BlockPos>() {
 				@Override
 				public BlockPos getScreenOpeningData(ServerPlayer p) {
@@ -66,6 +74,5 @@ public final class RuneForge extends Block {
 				}
 			});
 		}
-		return InteractionResult.SUCCESS;
 	}
 }

@@ -383,3 +383,16 @@ Java names and ids predate many renames. Ids, `Identifier`s, lang keys and saved
 
 - Sprite scripts (`tools/`) share `pngkit.py`; run them as `python3 tools/<script>.py` (not `-I`, which hides `pngkit`). `blade.png`, `lance.png`, `mayhem.png` are hand-made: no script writes them.
 - `Grasp.setCallTimeout` is static: a game test that changes it must restore `GraspCalls.TIMEOUT_TICKS` (P-076 R3).
+
+## P-078 Purgatory and runes (26.3)
+
+- `@GameTest` (Fabric) has `padding()`: use it when the logic searches a wide radius (neighbour tests leak in otherwise).
+- `Player.attack(Entity)`, `resetAttackStrengthTicker()`; `Entity.invulnerableTime` is private.
+- Enchantment levels are read in three places of `EnchantmentHelper`: `getItemEnchantmentLevel(Holder, ItemInstance)` (calls `ItemInstance.getOrDefault`), the private `runIterationOnItem(ItemStack, EnchantmentVisitor)` (`ItemStack.getOrDefault`) and `runIterationOnItem(ItemStack, EquipmentSlot, LivingEntity, EnchantmentInSlotVisitor)` (`ItemStack.get`). `RuneEnchantmentMixin` wraps all three. `ItemStack` implements `ItemInstance`.
+- `ItemEnchantments.Mutable(ItemEnchantments)`: `set` (clamped to 255), `getLevel`, `toImmutable`. `Enchantment.getMaxLevel`, `isSupportedItem`, `description()`; tag `EnchantmentTags.CURSE`.
+- `MenuType` constructor is private: use Fabric `ExtendedMenuType` with `BlockPos.STREAM_CODEC`. `ContainerLevelAccess.create/NULL`, `AbstractContainerMenu.stillValid(access, player, block)`, `clickMenuButton`, `clearContainer`; client side `MultiPlayerGameMode.handleInventoryButtonClick(containerId, id)`.
+- `Block.useWithoutItem(state, level, pos, player, hit)` is protected; a plain `Block` subclass needs no `codec()` override on 26.3.
+- `Player.drop(ItemStack, boolean)` does not exist; use `spawnAtLocation(level, stack)`. `DangerRules.rollAffixes` takes a `java.util.Random`, not a `RandomSource`.
+- Data component: `Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, id, DataComponentType.<T>builder().persistent(codec).networkSynchronized(streamCodec).build())`.
+- Dimension type JSON on 26.3 uses an `attributes` map, `skybox`, `timelines` (copy `the_nether`/`the_end`); flat generator `settings` has `layers`, `biome`, `features`, `lakes`, `structure_overrides`. The **server game test world has no datapack dimensions**: `Purgatory.level` falls back to the overworld there; the client test world has it.
+- Recipes in 26.3 have no `category` in vanilla files; loot table pools use `"condition"`. Tooltips: Fabric `ItemTooltipCallback.EVENT (stack, context, flag, lines)`. `PauseScreen` gets extra buttons through `ScreenEvents.AFTER_INIT` + `Screens.getWidgets`.

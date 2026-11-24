@@ -164,7 +164,7 @@ public final class Runes {
 		for (Map.Entry<Holder<Enchantment>, Integer> e : b.entrySet()) {
 			out.add(Component.literal("Rune: ").append(e.getKey().value().description().copy()).append(" +" + e.getValue()).withColor(ORANGE));
 		}
-		out.add(Component.literal("Rune slots " + inscribed(s).size() + " / " + slots).withStyle(ChatFormatting.DARK_GRAY));
+		out.add(Component.literal("Rune slots " + inscribed(s).size() + " / " + slots).withStyle(ChatFormatting.GRAY));
 		return out;
 	}
 
