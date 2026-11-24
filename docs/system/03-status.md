@@ -58,7 +58,7 @@ Release steps: [workflow/release.md](../workflow/release.md). Release **only whe
 
 ## In flight
 
-- Nothing in flight. 0.46.0 not playtested by hand; team Purgatory needs 2 real players.
+- **Branch `feat/P-079-rune-forge-recipe-book` (2026-11-24), pushed, not merged:** D248 Rune Forge recipe in the recipe book, D249 Undying countdown on the skill bar, D250 Purgatory Give up at the bottom of the inventory screen + fix: edge tabs clickable again from the Purgatory tab. Client suite green. Next: release 0.46.1 when Huy says so.
 - Nothing in flight. Waiting for Huy: R11 (shared UI helpers, may move pixels) and R12 (Notes behind a feature switch) from [P-076](../plans/P-076-audit-refactor.md). Found, not fixed: `Warp.go` still calls `stopRiding()` before `teleportTo` (same pattern as B9).
 - **All plans up to P-075 are released** (last: 0.44.0). Released but not playtested by hand: everything from 0.13.0 on unless the release row says otherwise.
 - **Next ideas:** BL-024/D112 (God Slayer arrives 2–5 days after the 4th Crimson Master leaves; Master pauses until the fight ends). P-040 leftovers: Katana → teleport behind → Flame breath chain, `/boss skill` command, a real blade model and guardian-style beam. Then the rest of D97's skills (minions, blind, arena, self-destruct). BL-014 (player technique fire burns the God Slayer).

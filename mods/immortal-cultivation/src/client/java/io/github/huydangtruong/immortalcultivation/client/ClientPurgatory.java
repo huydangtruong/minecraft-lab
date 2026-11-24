@@ -23,6 +23,8 @@ public final class ClientPurgatory {
 	public static final KeyMapping LEAVE = KeyMappingHelper.registerKeyMapping(
 		new KeyMapping("key.permahearts.purgatory_leave", com.mojang.blaze3d.platform.InputConstants.KEY_O, CATEGORY));
 	static final String LEAVE_LABEL = "Thoát theo dõi luyện ngục";
+	static final String GIVE_UP_LABEL = "Give up";
+	static final String GIVE_UP_LINE = "In the Purgatory · giving up keeps your floor";
 
 	private static PurgatoryNet.State state = PurgatoryNet.State.EMPTY;
 	/** Client tick when state arrived: timers count down between updates. */
@@ -50,6 +52,20 @@ public final class ClientPurgatory {
 					send(PurgatoryNet.STOP_WATCH, 0);
 					mc.gui.setScreen(null);
 				}).bounds(w / 2 - 102, h - 30, 204, 20).build());
+			}
+			if (screen instanceof net.minecraft.client.gui.screens.inventory.InventoryScreen
+				|| screen instanceof net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen) {
+				// D250: Give up sits at the bottom centre of the inventory (E), with a line above it, while fighting
+				Button giveUp = Button.builder(Component.literal(GIVE_UP_LABEL), b -> send(PurgatoryNet.GIVE_UP, 0))
+					.bounds(w / 2 - 50, h - 23, 100, 20).build();
+				giveUp.visible = state.mode() == PurgatoryNet.MODE_FIGHTING;
+				Screens.getWidgets(screen).add(giveUp);
+				ScreenEvents.afterTick(screen).register(sc -> giveUp.visible = state.mode() == PurgatoryNet.MODE_FIGHTING);
+				ScreenEvents.afterExtract(screen).register((sc, g, mx, my, delta) -> {
+					if (giveUp.visible) {
+						g.centeredText(mc.font, Component.literal(GIVE_UP_LINE), w / 2, h - 34, 0xFFFF5555);
+					}
+				});
 			}
 		});
 	}
