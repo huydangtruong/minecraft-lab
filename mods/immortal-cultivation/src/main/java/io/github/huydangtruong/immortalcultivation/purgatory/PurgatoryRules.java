@@ -22,8 +22,8 @@ public final class PurgatoryRules {
 
 	/** Survive 6 minutes to win (D236, D251). */
 	public static final int RUN_TICKS = 6 * 60 * 20;
-	/** A new floor every 5 minutes per mode (D234, D251). */
-	public static final int COOLDOWN_TICKS = 5 * 60 * 20;
+	/** A new floor every 3 minutes per mode (D234, D251, D254). */
+	public static final int COOLDOWN_TICKS = 3 * 60 * 20;
 	/** One mob every 3 seconds (D236). */
 	public static final int SPAWN_EVERY_TICKS = 3 * 20;
 	/** At most 50 mobs alive at once (D236). */

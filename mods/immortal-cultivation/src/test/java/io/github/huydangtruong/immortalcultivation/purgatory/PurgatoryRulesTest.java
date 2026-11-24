@@ -69,7 +69,7 @@ class PurgatoryRulesTest {
 	@Test
 	void clockShowsMinutesAndSeconds() {
 		assertEquals("6:00", PurgatoryRules.clock(PurgatoryRules.RUN_TICKS));
-		assertEquals("5:00", PurgatoryRules.clock(PurgatoryRules.COOLDOWN_TICKS));
+		assertEquals("3:00", PurgatoryRules.clock(PurgatoryRules.COOLDOWN_TICKS));
 		assertEquals("0:01", PurgatoryRules.clock(1));
 		assertEquals("0:00", PurgatoryRules.clock(0));
 	}
