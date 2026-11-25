@@ -42,6 +42,19 @@ public final class RuneRules {
 		return 0;
 	}
 
+	/** D264: the look of a rune's stone by what it is for: attack (red), armor (blue), ranged (green), tool (teal), other (grey). */
+	public static String kind(String enchantmentPath) {
+		return switch (enchantmentPath) {
+			case "sharpness", "smite", "bane_of_arthropods", "knockback", "fire_aspect", "looting", "sweeping_edge", "density",
+				"breach", "wind_burst" -> "attack";
+			case "protection", "fire_protection", "blast_protection", "projectile_protection", "thorns", "feather_falling",
+				"respiration", "depth_strider", "frost_walker", "soul_speed", "swift_sneak" -> "armor";
+			case "power", "punch", "quick_charge", "piercing", "loyalty", "riptide", "impaling", "lunge" -> "ranged";
+			case "efficiency", "fortune", "unbreaking", "lure", "luck_of_the_sea" -> "tool";
+			default -> "other";
+		};
+	}
+
 	/** "I", "II" ... up to 10, then plain numbers. */
 	public static String roman(int n) {
 		String[] r = {"I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"};

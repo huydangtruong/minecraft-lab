@@ -1,6 +1,40 @@
 {
   "model": {
-    "type": "minecraft:model",
-    "model": "permahearts:item/rune"
+    "type": "minecraft:select",
+    "property": "minecraft:custom_model_data",
+    "cases": [
+      {
+        "when": "attack",
+        "model": {
+          "type": "minecraft:model",
+          "model": "permahearts:item/rune_attack"
+        }
+      },
+      {
+        "when": "armor",
+        "model": {
+          "type": "minecraft:model",
+          "model": "permahearts:item/rune_armor"
+        }
+      },
+      {
+        "when": "ranged",
+        "model": {
+          "type": "minecraft:model",
+          "model": "permahearts:item/rune_ranged"
+        }
+      },
+      {
+        "when": "tool",
+        "model": {
+          "type": "minecraft:model",
+          "model": "permahearts:item/rune_tool"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "permahearts:item/rune"
+    }
   }
 }

@@ -31,6 +31,9 @@ public final class DungeonBuilder {
 	private static final int FLAGS = Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE | Block.UPDATE_SKIP_BLOCK_ENTITY_SIDEEFFECTS;
 	public static final ResourceKey<net.minecraft.world.level.storage.loot.LootTable> TREASURE = ResourceKey.create(Registries.LOOT_TABLE,
 		Identifier.withDefaultNamespace("chests/trial_chambers/reward"));
+	/** D263: the wooden gift chests in about half the rooms. */
+	public static final ResourceKey<net.minecraft.world.level.storage.loot.LootTable> GIFT = ResourceKey.create(Registries.LOOT_TABLE,
+		Identifier.withDefaultNamespace("chests/simple_dungeon"));
 
 	private static final Map<Style, Map<Mat, BlockState>> PALETTE = new EnumMap<>(Style.class);
 
@@ -83,6 +86,12 @@ public final class DungeonBuilder {
 			for (int[] c : r.chests) {
 				if (level.getBlockEntity(world(slot, c)) instanceof RandomizableContainerBlockEntity chest) {
 					chest.setLootTable(TREASURE);
+					chest.setLootTableSeed(seed++);
+				}
+			}
+			for (int[] c : r.gifts) {
+				if (level.getBlockEntity(world(slot, c)) instanceof RandomizableContainerBlockEntity chest) {
+					chest.setLootTable(GIFT);
 					chest.setLootTableSeed(seed++);
 				}
 			}

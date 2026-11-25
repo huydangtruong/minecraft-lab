@@ -148,10 +148,12 @@ public class PurgatorySavedData extends SavedData {
 	}
 
 	/** A reward won while the player was offline: given when they join. */
-	public record Owed(int levels, int runes) {
+	/** Levels and runes owed to someone who was offline; {@code floor} sets the rune levels (D264; old saves: floor 1). */
+	public record Owed(int levels, int runes, int floor) {
 		static final Codec<Owed> CODEC = RecordCodecBuilder.create(i -> i.group(
 			Codec.INT.fieldOf("levels").forGetter(Owed::levels),
-			Codec.INT.fieldOf("runes").forGetter(Owed::runes)
+			Codec.INT.fieldOf("runes").forGetter(Owed::runes),
+			Codec.INT.optionalFieldOf("floor", 1).forGetter(Owed::floor)
 		).apply(i, Owed::new));
 	}
 

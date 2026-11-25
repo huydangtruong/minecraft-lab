@@ -75,6 +75,9 @@ public final class Runes {
 	public static ItemStack rune(Holder<Enchantment> e, int level) {
 		ItemStack s = new ItemStack(ITEM);
 		s.set(RUNE, new RuneEntry(e, Math.max(1, level)));
+		String kind = RuneRules.kind(e.unwrapKey().map(k -> k.identifier().getPath()).orElse(""));
+		s.set(net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA,
+			new net.minecraft.world.item.component.CustomModelData(List.of(), List.of(), List.of(kind), List.of())); // D264: stone colour
 		return s;
 	}
 
@@ -82,13 +85,13 @@ public final class Runes {
 		return rune(entry.enchantment(), entry.level());
 	}
 
-	/** D240: a reward rune, random kind and level 1-5. */
-	public static ItemStack randomReward(HolderLookup.Provider access, RandomSource rng) {
+	/** D264: a reward rune of floor n: random kind, level 1 up to {@link io.github.huydangtruong.immortalcultivation.purgatory.PurgatoryRules#maxRuneLevel}. */
+	public static ItemStack randomReward(HolderLookup.Provider access, RandomSource rng, int floor) {
 		List<Holder<Enchantment>> all = eligible(access);
 		if (all.isEmpty()) {
 			return ItemStack.EMPTY;
 		}
-		return rune(all.get(rng.nextInt(all.size())), 1 + rng.nextInt(io.github.huydangtruong.immortalcultivation.purgatory.PurgatoryRules.REWARD_RUNE_MAX_LEVEL));
+		return rune(all.get(rng.nextInt(all.size())), 1 + rng.nextInt(io.github.huydangtruong.immortalcultivation.purgatory.PurgatoryRules.maxRuneLevel(floor)));
 	}
 
 	public static RuneEntry entryOf(ItemStack s) {

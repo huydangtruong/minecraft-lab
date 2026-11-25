@@ -21,6 +21,8 @@ public final class Room {
 	/** Doorway voxels that become bars while the room is sealed. */
 	public final List<int[]> gates = new ArrayList<>();
 	public final List<int[]> chests = new ArrayList<>();
+	/** D263: wooden gift chests (a smaller loot table than the treasure chest). */
+	public final List<int[]> gifts = new ArrayList<>();
 	public final List<int[]> plates = new ArrayList<>();
 	/** x, y, z, facing ordinal. */
 	public final List<int[]> dispensers = new ArrayList<>();

@@ -34,8 +34,6 @@ public final class PurgatoryRules {
 	public static final int WARDEN_EVERY = 10;
 	/** Elites from this floor on. */
 	public static final int ELITE_START = 10;
-	/** Highest rune level a reward can roll (D240). */
-	public static final int REWARD_RUNE_MAX_LEVEL = 5;
 
 	private PurgatoryRules() {}
 
@@ -129,9 +127,14 @@ public final class PurgatoryRules {
 		return 3 * Math.max(1, players) + Math.max(0, floor);
 	}
 
-	/** A reward rune level, 1..5, each equally likely. */
-	public static int rollRuneLevel(RandomGenerator rng) {
-		return 1 + rng.nextInt(REWARD_RUNE_MAX_LEVEL);
+	/** D264: highest reward rune level of floor n: 3 below floor 20, 4 from 20, 5 from 30, 6 from 50, 7 from 70, 8 from 100. */
+	public static int maxRuneLevel(int floor) {
+		return floor >= 100 ? 8 : floor >= 70 ? 7 : floor >= 50 ? 6 : floor >= 30 ? 5 : floor >= 20 ? 4 : 3;
+	}
+
+	/** A reward rune level of floor n, 1..{@link #maxRuneLevel}, each equally likely. */
+	public static int rollRuneLevel(RandomGenerator rng, int floor) {
+		return 1 + rng.nextInt(maxRuneLevel(floor));
 	}
 
 	/** Centre x of box slot i (z is always 0). */

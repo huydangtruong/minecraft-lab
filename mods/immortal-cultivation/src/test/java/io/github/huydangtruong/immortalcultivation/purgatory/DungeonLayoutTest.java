@@ -226,5 +226,28 @@ class DungeonLayoutTest {
 		assertTrue(lengths.contains(1) && lengths.contains(DungeonRules.EXTRA_ROOMS_MAX) && !lengths.contains(0), "lengths " + lengths);
 		assertTrue(forks * 4 < rooms, "forks " + forks + " of " + rooms);
 	}
+
+	/** D263: about half the rooms have a wooden gift chest, on a reachable spot; the floors still pass the stuck check. */
+	@Test
+	void aboutHalfTheRoomsHaveAGift() {
+		int rooms = 0;
+		int gifts = 0;
+		for (int floor : FLOORS) {
+			for (long seed = 0; seed < SEEDS; seed++) {
+				Dungeon d = Layout.generate(seed * 131 + floor, floor);
+				for (Room r : d.rooms()) {
+					if (r.kind != RoomKind.START && r.kind != RoomKind.BOSS && r.kind != RoomKind.TREASURE) {
+						rooms++;
+						gifts += r.gifts.size();
+						for (int[] g : r.gifts) {
+							assertEquals(Mat.CHEST, d.grid().mat(g[0], g[1], g[2]));
+						}
+					}
+				}
+			}
+		}
+		System.out.println("gifts " + gifts + " of " + rooms);
+		assertTrue(gifts > rooms * 0.4 && gifts < rooms * 0.6, "gifts " + gifts + " of " + rooms);
+	}
 }
 

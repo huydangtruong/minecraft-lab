@@ -38,18 +38,32 @@ class PurgatoryRulesTest {
 		assertEquals(17, PurgatoryRules.rewardRunes(5, 4));
 	}
 
+	/** D264: reward rune levels grow with the floor: up to 3 below 20, 4, 5 from 30, 6 from 50, 7 from 70, 8 from 100. */
 	@Test
-	void rewardRunesRollOneToFive() {
-		Random rng = new Random(7);
-		boolean[] seen = new boolean[6];
-		for (int i = 0; i < 2000; i++) {
-			int l = PurgatoryRules.rollRuneLevel(rng);
-			assertTrue(l >= 1 && l <= 5);
-			seen[l] = true;
+	void rewardRuneLevelsGrowWithTheFloor() {
+		int[][] cases = {{1, 3}, {19, 3}, {20, 4}, {29, 4}, {30, 5}, {49, 5}, {50, 6}, {69, 6}, {70, 7}, {99, 7}, {100, 8}, {500, 8}};
+		for (int[] c : cases) {
+			assertEquals(c[1], PurgatoryRules.maxRuneLevel(c[0]), "floor " + c[0]);
+			Random rng = new Random(7);
+			boolean[] seen = new boolean[10];
+			for (int i = 0; i < 2000; i++) {
+				int l = PurgatoryRules.rollRuneLevel(rng, c[0]);
+				assertTrue(l >= 1 && l <= c[1]);
+				seen[l] = true;
+			}
+			for (int l = 1; l <= c[1]; l++) {
+				assertTrue(seen[l], "floor " + c[0] + " level " + l);
+			}
 		}
-		for (int l = 1; l <= 5; l++) {
-			assertTrue(seen[l], "level " + l);
-		}
+	}
+
+	@Test
+	void runeStonesHaveAColourByKind() {
+		assertEquals("attack", io.github.huydangtruong.immortalcultivation.rune.RuneRules.kind("sharpness"));
+		assertEquals("armor", io.github.huydangtruong.immortalcultivation.rune.RuneRules.kind("protection"));
+		assertEquals("ranged", io.github.huydangtruong.immortalcultivation.rune.RuneRules.kind("power"));
+		assertEquals("tool", io.github.huydangtruong.immortalcultivation.rune.RuneRules.kind("efficiency"));
+		assertEquals("other", io.github.huydangtruong.immortalcultivation.rune.RuneRules.kind("something_new"));
 	}
 
 	@Test

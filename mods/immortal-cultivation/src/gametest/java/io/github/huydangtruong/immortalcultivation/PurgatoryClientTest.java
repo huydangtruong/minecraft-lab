@@ -203,6 +203,11 @@ public class PurgatoryClientTest implements FabricClientGameTest {
 					new RuneEntry(reg.getOrThrow(Enchantments.SMITE), 2)));
 				p.getInventory().setItem(0, sword);
 				p.getInventory().setItem(1, Runes.rune(reg.getOrThrow(Enchantments.LOOTING), 3));
+				p.getInventory().setItem(2, Runes.rune(reg.getOrThrow(Enchantments.PROTECTION), 2)); // D264: one stone colour each
+				p.getInventory().setItem(3, Runes.rune(reg.getOrThrow(Enchantments.POWER), 1));
+				p.getInventory().setItem(4, Runes.rune(reg.getOrThrow(Enchantments.EFFICIENCY), 2));
+				p.getInventory().setItem(5, Runes.rune(reg.getOrThrow(Enchantments.RIPTIDE), 1));
+				p.getInventory().setItem(6, Runes.rune(reg.getOrThrow(Enchantments.SWEEPING_EDGE), 1));
 				p.giveExperienceLevels(40);
 				BlockPos at = p.blockPosition().offset(2, 0, 0);
 				s.overworld().setBlockAndUpdate(at, RuneForge.BLOCK.defaultBlockState());

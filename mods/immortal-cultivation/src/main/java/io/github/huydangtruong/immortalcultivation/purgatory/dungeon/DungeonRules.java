@@ -22,6 +22,8 @@ public final class DungeonRules {
 	/** D262: chance that growing the floor may give a room a third door (a fork); otherwise rooms keep two. */
 	public static final double BRANCH_CHANCE = 0.12;
 	/** Chance that two neighbouring dead ends get a door between them (loops). */
+	/** D263: chance that a room (not the start, boss or treasure room) has a wooden gift chest. */
+	public static final double GIFT_CHANCE = 0.5;
 	public static final double LOOP_CHANCE = 0.3;
 	/** Time limit of a floor; running out is a loss. */
 	public static final int TIME_TICKS = 10 * 60 * 20;

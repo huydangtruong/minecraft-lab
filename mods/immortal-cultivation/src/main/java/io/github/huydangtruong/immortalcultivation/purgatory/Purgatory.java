@@ -407,7 +407,7 @@ public final class Purgatory {
 		for (String id : r.players) {
 			ServerPlayer p = server.getPlayerList().getPlayer(UUID.fromString(id));
 			if (won) {
-				Owed o = new Owed(PurgatoryRules.rewardLevels(r.floor), PurgatoryRules.rewardRunes(r.floor, r.players.size()));
+				Owed o = new Owed(PurgatoryRules.rewardLevels(r.floor), PurgatoryRules.rewardRunes(r.floor, r.players.size()), r.floor);
 				if (p != null) {
 					pay(p, o);
 				} else {
@@ -447,7 +447,7 @@ public final class Purgatory {
 			ItemContainerContents c = bag.get(DataComponents.CONTAINER);
 			int n = c == null ? 0 : (int) c.nonEmptyItemCopyStream().count();
 			if (n > 0) {
-				d.owed.computeIfAbsent(bagOwner(bag), k -> new ArrayList<>()).add(new Owed(0, n));
+				d.owed.computeIfAbsent(bagOwner(bag), k -> new ArrayList<>()).add(new Owed(0, n, r.floor));
 			}
 		}
 		for (Entity e : level.getEntities((Entity) null, inside(r.slot).inflate(2), e -> !(e instanceof Player))) {
@@ -474,7 +474,7 @@ public final class Purgatory {
 		p.giveExperienceLevels(o.levels());
 		List<ItemStack> runes = new ArrayList<>();
 		for (int i = 0; i < o.runes(); i++) {
-			ItemStack rune = Runes.randomReward(p.level().registryAccess(), RNG);
+			ItemStack rune = Runes.randomReward(p.level().registryAccess(), RNG, o.floor());
 			if (!rune.isEmpty()) {
 				runes.add(rune);
 			}

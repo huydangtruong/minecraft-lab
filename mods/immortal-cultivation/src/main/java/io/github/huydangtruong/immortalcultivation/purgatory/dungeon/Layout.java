@@ -256,6 +256,90 @@ public final class Layout {
 		}
 	}
 
+	/**
+	 * D263: a wooden gift chest in about half the rooms, on a spot a player can reach, against a wall, away from the doors.
+	 * The floor is checked again; if a chest got in the way after all, the chests are taken out again.
+	 */
+	private Walker.Result gifts(Grid grid, List<Room> rooms, int[] start, Room boss, Walker.Result res) {
+		List<int[]> placed = new ArrayList<>();
+		for (Room r : rooms) {
+			if (r.kind == RoomKind.START || r.kind == RoomKind.BOSS || r.kind == RoomKind.TREASURE
+				|| rng.nextDouble() >= DungeonRules.GIFT_CHANCE) {
+				continue;
+			}
+			List<int[]> spots = new ArrayList<>();
+			for (int x = r.x0() + 1; x < r.x1() - 1; x++) {
+				for (int z = r.z0() + 1; z < r.z1() - 1; z++) {
+					for (int y = r.y0() + 1; y < r.y1() - 2; y++) {
+						Dir open = giftFacing(grid, r, x, y, z, res);
+						if (open != null) {
+							spots.add(new int[] {x, y, z, open.ordinal()});
+						}
+					}
+				}
+			}
+			if (!spots.isEmpty()) {
+				int[] p = spots.get(rng.nextInt(spots.size()));
+				grid.set(p[0], p[1], p[2], Mat.CHEST, r.style, Dir.values()[p[3]]);
+				r.gifts.add(new int[] {p[0], p[1], p[2]});
+				placed.add(p);
+			}
+		}
+		if (placed.isEmpty()) {
+			return res;
+		}
+		Walker.Result again = Walker.check(grid, rooms, start, boss);
+		if (again.ok()) {
+			return again;
+		}
+		for (int[] p : placed) {
+			grid.set(p[0], p[1], p[2], Mat.AIR, grid.style(p[0], p[1], p[2]), Dir.N);
+		}
+		rooms.forEach(r -> r.gifts.clear());
+		return res;
+	}
+
+	/** The way a gift chest here would face (towards open space), or null if it may not stand here. */
+	private static Dir giftFacing(Grid g, Room r, int x, int y, int z, Walker.Result res) {
+		if (!res.reachable(x, y, z) || g.mat(x, y, z) != Mat.AIR || g.mat(x, y + 1, z) != Mat.AIR) {
+			return null;
+		}
+		Mat below = g.mat(x, y - 1, z);
+		if (below.move != Mat.Move.SOLID || below == Mat.STAIR || below == Mat.LANTERN || below == Mat.CHEST) {
+			return null;
+		}
+		for (Port p : r.ports) { // keep clear of the doorways
+			int mid = p.slot() * DungeonRules.CELL + DungeonRules.CELL / 2;
+			int dx = switch (p.side()) {
+				case E -> r.x1() - 1;
+				case W -> r.x0();
+				default -> r.x0() + mid;
+			};
+			int dz = switch (p.side()) {
+				case N -> r.z0();
+				case S -> r.z1() - 1;
+				default -> r.z0() + mid;
+			};
+			if (Math.abs(x - dx) + Math.abs(z - dz) < 6) {
+				return null;
+			}
+		}
+		int walls = 0;
+		Dir open = null;
+		for (Dir d : Dir.values()) {
+			Mat m = g.mat(x + d.dx, y, z + d.dz);
+			if (m == Mat.CHEST) {
+				return null; // never a double chest
+			}
+			if (m.move == Mat.Move.SOLID) {
+				walls++;
+			} else if (m == Mat.AIR && open == null) {
+				open = d;
+			}
+		}
+		return walls >= 1 && walls <= 2 ? open : null;
+	}
+
 	private boolean isStair(int[] at) {
 		return stairLow != null && at[0] == stairLow[0] && at[1] == stairLow[1];
 	}
@@ -344,6 +428,7 @@ public final class Layout {
 		if (!res.ok()) {
 			return null;
 		}
+		res = gifts(grid, rooms, start.centre, boss, res);
 		for (Room r : rooms) {
 			res.fillRoom(r, rng);
 		}
