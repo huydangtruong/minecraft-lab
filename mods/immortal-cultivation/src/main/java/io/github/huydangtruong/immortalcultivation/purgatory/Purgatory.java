@@ -191,6 +191,23 @@ public final class Purgatory {
 			o.getX() + DungeonRules.SIZE_X, o.getY() + DungeonRules.SIZE_Y, o.getZ() + DungeonRules.SIZE_Z);
 	}
 
+	/**
+	 * D259: blocks of a running dungeon (and its bedrock skin) that skills must not break, burn or replace. True only in the
+	 * Purgatory level, inside a run's grid or one block around it.
+	 */
+	public static boolean guarded(net.minecraft.world.level.Level level, BlockPos pos) {
+		if (!(level instanceof ServerLevel sl) || sl != level(sl.getServer())) {
+			return false;
+		}
+		Vec3 c = Vec3.atCenterOf(pos);
+		for (Run r : data(sl.getServer()).runs) {
+			if (inside(r.slot).inflate(1.5).contains(c)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/** Where a run's fighters start (watchers float a little higher). */
 	public static Vec3 start(Run r) {
 		return PurgatoryFloor.start(r);
@@ -253,6 +270,24 @@ public final class Purgatory {
 		tellRun(server, r, p.getName().getString() + " gave up");
 		if (aliveCount(r) == 0) {
 			end(server, d, r, false);
+		}
+		d.changed();
+		return null;
+	}
+
+	/** D260: a winner leaves before the 30 seconds are up; the last one to leave closes the floor. */
+	public static String comeBack(ServerPlayer p) {
+		MinecraftServer server = p.level().getServer();
+		PurgatorySavedData d = data(server);
+		Run r = d.runOf(key(p));
+		if (r == null || !r.won()) {
+			return "The floor is not cleared yet";
+		}
+		r.players.remove(key(p));
+		r.dead.remove(key(p));
+		sendBack(server, d, p);
+		if (r.players.isEmpty()) {
+			close(server, d, r);
 		}
 		d.changed();
 		return null;
@@ -321,7 +356,7 @@ public final class Purgatory {
 		}
 		long seed = RNG.nextLong();
 		Run r = new Run(d.nextId++, slot, team, floor, PurgatoryRules.RUN_TICKS, 0, ids, List.of(), seed == 0 ? 1 : seed, List.of(),
-			List.of(), Run.BOSS_WAITING);
+			List.of(), Run.BOSS_WAITING, 0);
 		d.runs.add(r);
 		ServerLevel level = level(server);
 		DungeonBuilder.build(level, PurgatoryFloor.dungeon(r), slot);
@@ -340,8 +375,16 @@ public final class Purgatory {
 		return r;
 	}
 
+	/** Ends a run: settles it (unless it was already won, D260) and sends everyone home. */
 	static void end(MinecraftServer server, PurgatorySavedData d, Run r, boolean won) {
-		d.runs.remove(r);
+		if (!r.won()) {
+			settle(server, d, r, won);
+		}
+		close(server, d, r);
+	}
+
+	/** Floor, cooldown, rewards and the result line. */
+	private static void settle(MinecraftServer server, PurgatorySavedData d, Run r, boolean won) {
 		if (r.team) {
 			if (won) {
 				d.teamFloor = r.floor + 1;
@@ -353,14 +396,6 @@ public final class Purgatory {
 				s.floor = r.floor + 1;
 			}
 			s.cooldown = PurgatoryRules.COOLDOWN_TICKS;
-		}
-		ServerBossEvent bar = BARS.remove(r.id);
-		if (bar != null) {
-			bar.removeAllPlayers();
-		}
-		ServerLevel level = level(server);
-		for (Entity e : level.getEntities((Entity) null, inside(r.slot).inflate(2), e -> !(e instanceof Player))) {
-			e.discard(); // mobs, drops, arrows: the box is emptied
 		}
 		String result = (r.team ? "Team " : "") + "Purgatory floor " + r.floor + (won ? " cleared!" : r.ticksLeft <= 0 ? " lost: time is up" : " lost");
 		for (String id : r.players) {
@@ -375,6 +410,33 @@ public final class Purgatory {
 			}
 			if (p != null) {
 				p.sendSystemMessage(Component.literal(result).withStyle(won ? ChatFormatting.GOLD : ChatFormatting.RED));
+			}
+		}
+		for (Map.Entry<String, Integer> w : d.watching.entrySet()) {
+			if (w.getValue() == r.id) {
+				ServerPlayer p = server.getPlayerList().getPlayer(UUID.fromString(w.getKey()));
+				if (p != null) {
+					p.sendSystemMessage(Component.literal(result));
+				}
+			}
+		}
+		d.changed();
+	}
+
+	/** Removes the run, empties and clears its dungeon and sends fighters and watchers back. */
+	private static void close(MinecraftServer server, PurgatorySavedData d, Run r) {
+		d.runs.remove(r);
+		ServerBossEvent bar = BARS.remove(r.id);
+		if (bar != null) {
+			bar.removeAllPlayers();
+		}
+		ServerLevel level = level(server);
+		for (Entity e : level.getEntities((Entity) null, inside(r.slot).inflate(2), e -> !(e instanceof Player))) {
+			e.discard(); // mobs, drops, arrows: the box is emptied
+		}
+		for (String id : r.players) {
+			ServerPlayer p = server.getPlayerList().getPlayer(UUID.fromString(id));
+			if (p != null) {
 				sendBack(server, d, p);
 			} // offline: sent back when they join (the back point stays saved)
 		}
@@ -382,7 +444,6 @@ public final class Purgatory {
 			if (w.getValue() == r.id) {
 				ServerPlayer p = server.getPlayerList().getPlayer(UUID.fromString(w.getKey()));
 				if (p != null) {
-					p.sendSystemMessage(Component.literal(result));
 					sendBack(server, d, p);
 				}
 			}
@@ -544,8 +605,16 @@ public final class Purgatory {
 			}
 		}
 		if (r.boss == Run.BOSS_DEAD) {
-			end(server, d, r, true);
-			return;
+			if (!r.won()) {
+				win(server, d, level, r);
+			} else if (--r.victoryTicks <= 0) {
+				close(server, d, r);
+				return;
+			}
+			if (server.getTickCount() % 20 == 0) {
+				bar(server, d, r);
+			}
+			return; // D260: no clock, no mobs; the winners look around or leave
 		}
 		if (alive.isEmpty()) {
 			return; // D236: the clock stops while the fighters are offline
@@ -560,6 +629,27 @@ public final class Purgatory {
 			bar(server, d, r);
 			retarget(level, in, alive);
 		}
+	}
+
+	/**
+	 * D260: the boss is dead. The floor is paid at once, the mobs go, every gate opens; the fighters stay 30 seconds (loot,
+	 * the treasure room) unless they press Come back now.
+	 */
+	private static void win(MinecraftServer server, PurgatorySavedData d, ServerLevel level, Run r) {
+		settle(server, d, r, true);
+		r.victoryTicks = DungeonRules.VICTORY_TICKS;
+		for (Mob m : level.getEntitiesOfClass(Mob.class, inside(r.slot), m -> m.entityTags().contains(TAG))) {
+			m.discard();
+		}
+		PurgatoryFloor.openAll(level, r);
+		for (String id : r.players) {
+			ServerPlayer p = server.getPlayerList().getPlayer(UUID.fromString(id));
+			if (p != null) {
+				p.sendSystemMessage(Component.literal("Going back in " + DungeonRules.VICTORY_TICKS / 20
+					+ " seconds (Come back now in the inventory leaves at once)").withStyle(ChatFormatting.GRAY));
+			}
+		}
+		d.changed();
 	}
 
 	private static void keepInside(ServerLevel level, Run r, AABB in, ServerPlayer p, boolean fighter) {
@@ -648,9 +738,16 @@ public final class Purgatory {
 	private static void bar(MinecraftServer server, PurgatorySavedData d, Run r) {
 		ServerBossEvent bar = BARS.computeIfAbsent(r.id, k -> new ServerBossEvent(UUID.randomUUID(), Component.empty(),
 			BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10));
-		bar.setName(Component.literal((r.team ? "Team " : "") + "Purgatory floor " + r.floor + "  -  " + PurgatoryRules.clock(r.ticksLeft))
-			.withStyle(ChatFormatting.DARK_RED));
-		bar.setProgress(Math.max(0f, Math.min(1f, r.ticksLeft / (float) PurgatoryRules.RUN_TICKS)));
+		if (r.won()) {
+			bar.setColor(BossEvent.BossBarColor.YELLOW);
+			bar.setName(Component.literal((r.team ? "Team " : "") + "Purgatory floor " + r.floor + " cleared  -  back in "
+				+ PurgatoryRules.clock(r.victoryTicks)).withStyle(ChatFormatting.GOLD));
+			bar.setProgress(Math.max(0f, Math.min(1f, r.victoryTicks / (float) DungeonRules.VICTORY_TICKS)));
+		} else {
+			bar.setName(Component.literal((r.team ? "Team " : "") + "Purgatory floor " + r.floor + "  -  " + PurgatoryRules.clock(r.ticksLeft))
+				.withStyle(ChatFormatting.DARK_RED));
+			bar.setProgress(Math.max(0f, Math.min(1f, r.ticksLeft / (float) PurgatoryRules.RUN_TICKS)));
+		}
 		Set<ServerPlayer> want = new HashSet<>();
 		for (String id : r.players) {
 			ServerPlayer p = server.getPlayerList().getPlayer(UUID.fromString(id));

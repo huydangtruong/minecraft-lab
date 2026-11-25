@@ -405,3 +405,8 @@ Java names and ids predate many renames. Ids, `Identifier`s, lang keys and saved
 - Loot chests: `RandomizableContainerBlockEntity.setLootTable(ResourceKey<LootTable>)`, `setLootTableSeed(long)`; `minecraft:chests/trial_chambers/reward` exists.
 - Arrows: `net.minecraft.world.entity.projectile.arrow.Arrow(Level, x, y, z, ItemStack ammo, ItemStack weapon)` (weapon may be null), public field `pickup`, `setBaseDamage`, `shoot(dx, dy, dz, speed, spread)`.
 - `CollisionGetter.noCollision(Entity)` checks a mob fits before `addFreshEntity`. `LivingEntity.kill(ServerLevel)` fires Fabric `AFTER_DEATH`.
+
+### P-082 follow-up (D259-D260)
+- `Level.ExplosionInteraction.NONE` keeps blocks (entities still take the blast); used by Thunder inside a running dungeon.
+- `Button.onPress(InputWithModifiers)` is public; tests press a button with `new KeyEvent(InputConstants.KEY_RETURN, 0, 0)`.
+- `SoundEvents.TRIAL_SPAWNER_SPAWN_MOB` exists (second wave sound). Client screen: `mc.gui.screen()` / `mc.gui.setScreen(..)` (no `mc.screen` field).

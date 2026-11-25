@@ -294,7 +294,7 @@ public final class Layout {
 			locked += pick[i].kind == RoomKind.LOCKED ? 1 : 0;
 		}
 		for (int i : plain) {
-			if (locked >= Math.max(1, plain.size() / 3)) {
+			if (locked >= Math.max(1, plain.size() / 2)) { // D259: half the plain rooms lock
 				break;
 			}
 			if (pick[i].kind != RoomKind.LOCKED) {

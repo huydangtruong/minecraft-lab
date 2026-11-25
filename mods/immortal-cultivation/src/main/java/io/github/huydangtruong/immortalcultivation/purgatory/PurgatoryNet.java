@@ -24,12 +24,16 @@ public final class PurgatoryNet {
 	public static final int GIVE_UP = 2;
 	public static final int WATCH = 3;
 	public static final int STOP_WATCH = 4;
+	/** D260: a winner goes back before the 30 seconds are up. */
+	public static final int COME_BACK = 5;
 
 	/** What the player is doing now. */
 	public static final int MODE_NONE = 0;
 	public static final int MODE_FIGHTING = 1;
 	public static final int MODE_FALLEN = 2;
 	public static final int MODE_WATCHING = 3;
+	/** D260: the boss is dead, going back soon. */
+	public static final int MODE_CLEARED = 4;
 
 	public record Action(int kind, int arg) implements CustomPacketPayload {
 		public static final Type<Action> TYPE = new Type<>(Identifier.fromNamespaceAndPath(ImmortalCultivation.NAMESPACE, "purgatory_action"));
@@ -56,9 +60,9 @@ public final class PurgatoryNet {
 	}
 
 	public record State(int soloFloor, int soloCooldown, int teamFloor, int teamCooldown, boolean queued, int queueSize,
-			int countdown, int mode, List<RunInfo> runs) implements CustomPacketPayload {
+			int countdown, int mode, int victoryTicks, List<RunInfo> runs) implements CustomPacketPayload {
 		public static final Type<State> TYPE = new Type<>(Identifier.fromNamespaceAndPath(ImmortalCultivation.NAMESPACE, "purgatory_state"));
-		public static final State EMPTY = new State(1, 0, 1, 0, false, 0, -1, MODE_NONE, List.of());
+		public static final State EMPTY = new State(1, 0, 1, 0, false, 0, -1, MODE_NONE, 0, List.of());
 		public static final StreamCodec<RegistryFriendlyByteBuf, State> CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_INT, State::soloFloor,
 			ByteBufCodecs.VAR_INT, State::soloCooldown,
@@ -68,6 +72,7 @@ public final class PurgatoryNet {
 			ByteBufCodecs.VAR_INT, State::queueSize,
 			ByteBufCodecs.INT, State::countdown,
 			ByteBufCodecs.VAR_INT, State::mode,
+			ByteBufCodecs.VAR_INT, State::victoryTicks,
 			RunInfo.CODEC.apply(ByteBufCodecs.list()), State::runs,
 			State::new);
 
@@ -99,6 +104,7 @@ public final class PurgatoryNet {
 			case GIVE_UP -> Purgatory.giveUp(p);
 			case WATCH -> Purgatory.watch(p, arg);
 			case STOP_WATCH -> Purgatory.stopWatching(p);
+			case COME_BACK -> Purgatory.comeBack(p);
 			default -> "Unknown action";
 		};
 	}
@@ -116,9 +122,10 @@ public final class PurgatoryNet {
 			runs.add(new RunInfo(r.id, r.team, r.floor, r.ticksLeft, String.join(", ", names)));
 		}
 		Run mine = d.runOf(id);
-		int mode = mine != null ? (mine.alive(id) ? MODE_FIGHTING : MODE_FALLEN) : d.watching.containsKey(id) ? MODE_WATCHING : MODE_NONE;
+		int mode = mine != null ? (mine.won() ? MODE_CLEARED : mine.alive(id) ? MODE_FIGHTING : MODE_FALLEN)
+			: d.watching.containsKey(id) ? MODE_WATCHING : MODE_NONE;
 		return new State(s == null ? 1 : s.floor, s == null ? 0 : s.cooldown, d.teamFloor, d.teamCooldown, Purgatory.queued(p),
-			Purgatory.queueSize(), Purgatory.countdown(), mode, runs);
+			Purgatory.queueSize(), Purgatory.countdown(), mode, mine != null ? mine.victoryTicks : 0, runs);
 	}
 
 	static void sync(MinecraftServer server, PurgatorySavedData d) {

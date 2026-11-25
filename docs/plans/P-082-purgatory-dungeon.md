@@ -30,7 +30,10 @@ Trial-chamber-like floors: about 7-15 random rooms on a 6×6 cell grid (1 or 2 l
 - [x] Every floor in the JUnit sweep passes the stuck check
 - [x] The world holds exactly the checked grid
 - [x] Locked room seals and opens; boss kill wins; timeout loses
-- [ ] Huy plays a floor by hand
+- [x] Huy plays a floor by hand (2026-11-26: too short, few mobs, skills broke walls, sent home too fast)
+- [x] D259: bedrock skin + skill guards (`Purgatory.guarded`), 10+ rooms, more mobs, 2 waves in locked/treasure rooms
+- [x] D260: 30 s after the boss dies (paid at once, gates open), Come back now (screen + inventory button)
+- [ ] Huy plays again
 
 ## Risks / ask first
 - Old saved runs (before P-082) end as a loss that costs nothing; their 64³ box is cleared.

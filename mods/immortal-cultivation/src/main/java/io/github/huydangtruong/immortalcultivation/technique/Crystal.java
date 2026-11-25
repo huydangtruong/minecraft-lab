@@ -224,7 +224,7 @@ public final class Crystal {
 	/** Unbreakable blocks (bedrock, barriers) stay. */
 	private static boolean replaceable(ServerLevel sl, BlockPos pos) {
 		BlockState s = sl.getBlockState(pos);
-		return s.isAir() || s.getDestroySpeed(sl, pos) >= 0;
+		return s.isAir() || s.getDestroySpeed(sl, pos) >= 0 && !io.github.huydangtruong.immortalcultivation.purgatory.Purgatory.guarded(sl, pos); // D259: not the dungeon's blocks
 	}
 
 	/** A container in the way spills its contents instead of deleting them. */

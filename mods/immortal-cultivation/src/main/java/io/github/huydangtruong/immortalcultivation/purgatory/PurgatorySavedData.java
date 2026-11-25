@@ -44,13 +44,16 @@ public class PurgatorySavedData extends SavedData {
 			Codec.LONG.optionalFieldOf("seed", 0L).forGetter(r -> r.seed),
 			Codec.INT.listOf().optionalFieldOf("rooms", List.of()).forGetter(r -> r.rooms),
 			Codec.INT.listOf().optionalFieldOf("room_ticks", List.of()).forGetter(r -> r.roomTicks),
-			Codec.INT.optionalFieldOf("boss", 0).forGetter(r -> r.boss)
+			Codec.INT.optionalFieldOf("boss", 0).forGetter(r -> r.boss),
+			Codec.INT.optionalFieldOf("victory_ticks", 0).forGetter(r -> r.victoryTicks)
 		).apply(i, Run::new));
 
 		/** Room states (P-082). */
 		public static final int IDLE = 0;
 		public static final int SEALED = 1;
 		public static final int DONE = 2;
+		/** Sealed, the second and last wave (D259). */
+		public static final int SEALED_LAST = 3;
 		/** Boss states. */
 		public static final int BOSS_WAITING = 0;
 		public static final int BOSS_ALIVE = 1;
@@ -73,9 +76,11 @@ public class PurgatorySavedData extends SavedData {
 		/** Ticks each room has been sealed. */
 		public final List<Integer> roomTicks = new ArrayList<>();
 		public int boss;
+		/** D260: ticks left before the winners go back; above 0 the floor is already won and paid. */
+		public int victoryTicks;
 
 		public Run(int id, int slot, boolean team, int floor, int ticksLeft, int spawnTimer, List<String> players, List<String> dead,
-				long seed, List<Integer> rooms, List<Integer> roomTicks, int boss) {
+				long seed, List<Integer> rooms, List<Integer> roomTicks, int boss, int victoryTicks) {
 			this.id = id;
 			this.slot = slot;
 			this.team = team;
@@ -88,6 +93,7 @@ public class PurgatorySavedData extends SavedData {
 			this.rooms.addAll(rooms);
 			this.roomTicks.addAll(roomTicks);
 			this.boss = boss;
+			this.victoryTicks = victoryTicks;
 		}
 
 		public int room(int index) {
@@ -109,6 +115,18 @@ public class PurgatorySavedData extends SavedData {
 			int t = roomTicks.get(index) + 1;
 			roomTicks.set(index, t);
 			return t;
+		}
+
+		/** Restarts a sealed room's clock (a new wave). */
+		public void resetRoom(int index) {
+			if (index < roomTicks.size()) {
+				roomTicks.set(index, 0);
+			}
+		}
+
+		/** The boss is dead and the winners are looking around (D260). */
+		public boolean won() {
+			return victoryTicks > 0;
 		}
 
 		public boolean alive(String uuid) {

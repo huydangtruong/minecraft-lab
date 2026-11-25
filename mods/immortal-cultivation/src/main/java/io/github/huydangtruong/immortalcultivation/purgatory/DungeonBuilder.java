@@ -59,6 +59,10 @@ public final class DungeonBuilder {
 				}
 			}
 		}
+		BlockState bedrock = Blocks.BEDROCK.defaultBlockState();
+		for (int[] k : d.skin()) { // D259: nothing a skill breaks opens onto the void
+			set(level, p.set(o.getX() + k[0], o.getY() + k[1], o.getZ() + k[2]), bedrock);
+		}
 		for (Room r : d.rooms()) { // shapes that depend on neighbours
 			for (int x = r.x0(); x < r.x1(); x++) {
 				for (int y = r.y0(); y < r.y1(); y++) {
@@ -99,6 +103,9 @@ public final class DungeonBuilder {
 				}
 			}
 		}
+		for (int[] k : d.skin()) {
+			set(level, p.set(o.getX() + k[0], o.getY() + k[1], o.getZ() + k[2]), air);
+		}
 		force(level, slot, false);
 	}
 
@@ -130,8 +137,8 @@ public final class DungeonBuilder {
 
 	static void force(ServerLevel level, int slot, boolean on) {
 		BlockPos o = origin(slot);
-		for (int cx = o.getX() >> 4; cx <= (o.getX() + DungeonRules.SIZE_X - 1) >> 4; cx++) {
-			for (int cz = o.getZ() >> 4; cz <= (o.getZ() + DungeonRules.SIZE_Z - 1) >> 4; cz++) {
+		for (int cx = (o.getX() - 1) >> 4; cx <= (o.getX() + DungeonRules.SIZE_X) >> 4; cx++) { // the skin is one block past the grid
+			for (int cz = (o.getZ() - 1) >> 4; cz <= (o.getZ() + DungeonRules.SIZE_Z) >> 4; cz++) {
 				level.setChunkForced(cx, cz, on);
 			}
 		}

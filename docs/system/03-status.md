@@ -2,7 +2,7 @@
 
 > Tóm tắt cho Huy: file này ghi việc đang làm dở và bước tiếp theo, để một phiên Claude mới đọc là làm tiếp được.
 > Manager cập nhật file này cuối mỗi đợt việc (merge, phát hành, quyết định mới).
-> Snapshot: 2026-11-24, after release 0.46.2 (D251-D253); P-082 Purgatory dungeon in review.
+> Snapshot: 2026-11-26, after release 0.46.2 (D251-D253); P-082 Purgatory dungeon in review, with Huy's first playtest fixes (D259-D260).
 
 A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [workflow/team.md](../workflow/team.md) → the plan of the work in flight. Do not read the whole repo.
 
@@ -60,7 +60,7 @@ Release steps: [workflow/release.md](../workflow/release.md). Release **only whe
 
 ## In flight
 
-- **P-082 Purgatory dungeon** (D255-D258), branch `feat/P-082-purgatory-dungeon` (pushed, built on `feat/P-081-purgatory-wait` = D254, also not released). Plan: [P-082](../plans/P-082-purgatory-dungeon.md). Done: generator + stuck checker (JUnit), builder, rooms/boss runtime, Purgatory game tests 11/11, client room-tour screenshots. Next: Huy plays a floor; tune looks and numbers from his notes; release only when he asks (merge P-081 then P-082 into `main`).
+- **P-082 Purgatory dungeon** (D255-D260), branch `feat/P-082-purgatory-dungeon` (pushed, built on `feat/P-081-purgatory-wait` = D254, also not released). Plan: [P-082](../plans/P-082-purgatory-dungeon.md). Done: generator + stuck checker (JUnit), builder, rooms/boss runtime, client room-tour screenshots; playtest fixes D259 (bedrock skin, skills leave the dungeon alone, 10+ rooms, more mobs, 2 waves) and D260 (30 s after the win, Come back now). Full build 311/311. Next: Huy plays a floor; tune looks and numbers from his notes; release only when he asks (merge P-081 then P-082 into `main`).
 - Nothing in flight. 0.46.x not playtested by hand; team Purgatory needs 2 real players.
 - Nothing in flight. Waiting for Huy: R11 (shared UI helpers, may move pixels) and R12 (Notes behind a feature switch) from [P-076](../plans/P-076-audit-refactor.md). Found, not fixed: `Warp.go` still calls `stopRiding()` before `teleportTo` (same pattern as B9).
 - **All plans up to P-075 are released** (last: 0.44.0). Released but not playtested by hand: everything from 0.13.0 on unless the release row says otherwise.

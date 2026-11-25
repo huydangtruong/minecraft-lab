@@ -35,8 +35,13 @@ public final class ClientPurgatory {
 
 	public static void register() {
 		ClientPlayNetworking.registerGlobalReceiver(PurgatoryNet.State.TYPE, (payload, ctx) -> {
+			boolean cleared = payload.mode() == PurgatoryNet.MODE_CLEARED && state.mode() != PurgatoryNet.MODE_CLEARED;
 			state = payload;
 			receivedAt = ticks;
+			Minecraft mc = Minecraft.getInstance();
+			if (cleared && mc.gui.screen() == null) {
+				mc.gui.setScreen(new PurgatoryClearedScreen()); // D260: once, when the boss dies
+			}
 		});
 		ClientTickEvents.END_CLIENT_TICK.register(mc -> {
 			ticks++;
@@ -55,15 +60,25 @@ public final class ClientPurgatory {
 			}
 			if (screen instanceof net.minecraft.client.gui.screens.inventory.InventoryScreen
 				|| screen instanceof net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen) {
-				// D250: Give up sits at the bottom centre of the inventory (E), with a line above it, while fighting
+				// D250: Give up sits at the bottom centre of the inventory (E), with a line above it, while fighting;
+				// D260: after the boss died the same place holds Come back now
 				Button giveUp = Button.builder(Component.literal(GIVE_UP_LABEL), b -> send(PurgatoryNet.GIVE_UP, 0))
 					.bounds(w / 2 - 50, h - 23, 100, 20).build();
-				giveUp.visible = state.mode() == PurgatoryNet.MODE_FIGHTING;
+				Button comeBack = Button.builder(Component.literal(PurgatoryClearedScreen.COME_BACK_LABEL), b -> send(PurgatoryNet.COME_BACK, 0))
+					.bounds(w / 2 - 50, h - 23, 100, 20).build();
+				Runnable show = () -> {
+					giveUp.visible = state.mode() == PurgatoryNet.MODE_FIGHTING;
+					comeBack.visible = state.mode() == PurgatoryNet.MODE_CLEARED;
+				};
+				show.run();
 				Screens.getWidgets(screen).add(giveUp);
-				ScreenEvents.afterTick(screen).register(sc -> giveUp.visible = state.mode() == PurgatoryNet.MODE_FIGHTING);
+				Screens.getWidgets(screen).add(comeBack);
+				ScreenEvents.afterTick(screen).register(sc -> show.run());
 				ScreenEvents.afterExtract(screen).register((sc, g, mx, my, delta) -> {
 					if (giveUp.visible) {
 						g.centeredText(mc.font, Component.literal(GIVE_UP_LINE), w / 2, h - 34, 0xFFFF5555);
+					} else if (comeBack.visible) {
+						g.centeredText(mc.font, Component.literal("Floor cleared · going back in " + victorySeconds() + " s"), w / 2, h - 34, 0xFFFFAA00);
 					}
 				});
 			}
@@ -77,6 +92,11 @@ public final class ClientPurgatory {
 	/** Ticks since the last update (timers shown in the tab subtract this so they move smoothly). */
 	public static int age() {
 		return (int) Math.min(20, ticks - receivedAt);
+	}
+
+	/** D260: whole seconds before a winner goes back. */
+	public static int victorySeconds() {
+		return Math.max(0, (state.victoryTicks() - age() + 19) / 20);
 	}
 
 	public static void send(int kind, int arg) {

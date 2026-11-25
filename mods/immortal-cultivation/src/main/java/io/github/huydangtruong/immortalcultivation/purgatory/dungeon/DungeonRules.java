@@ -36,7 +36,7 @@ public final class DungeonRules {
 
 	/** Rooms besides the boss room (the stairs count). */
 	public static int rooms(int floor) {
-		return Math.min(14, 6 + (Math.max(1, floor) - 1) / 2);
+		return Math.min(20, 10 + (Math.max(1, floor) - 1) / 2); // D259: floors 1-2 took about a minute with 6
 	}
 
 	/** Mobs that come when a room wakes. */
@@ -44,14 +44,22 @@ public final class DungeonRules {
 		int f = Math.max(1, floor);
 		int extra = Math.max(0, players - 1);
 		return switch (kind) {
-			case LOCKED -> Math.min(12, 3 + f / 4 + 2 * extra);
-			case TREASURE -> Math.min(14, 5 + f / 4 + 2 * extra);
-			case BOSS -> Math.min(6, 1 + f / 10 + extra);
-			case OPEN, DARK -> Math.min(6, 2 + f / 8 + extra);
-			case CORRIDOR, HAZARD, TRAP -> Math.min(4, 1 + f / 12 + extra / 2);
+			case LOCKED -> Math.min(14, 5 + f / 3 + 2 * extra);
+			case TREASURE -> Math.min(16, 7 + f / 3 + 2 * extra);
+			case BOSS -> Math.min(8, 2 + f / 8 + extra);
+			case OPEN, DARK -> Math.min(8, 3 + f / 6 + extra);
+			case CORRIDOR, HAZARD, TRAP -> Math.min(5, 2 + f / 10 + extra / 2);
 			default -> 0;
 		};
 	}
+
+	/** Waves a sealed room sends (D259): the second comes when the first is dead. */
+	public static int waves(RoomKind kind) {
+		return kind == RoomKind.LOCKED || kind == RoomKind.TREASURE ? 2 : 1;
+	}
+
+	/** After the boss dies the fighters stay this long (D260), or leave at once with Come back now. */
+	public static final int VICTORY_TICKS = 30 * 20;
 
 	/** Mobs a boss calls every {@link #BOSS_ADDS_EVERY_TICKS}. */
 	public static int bossAdds(int floor, int players) {

@@ -123,11 +123,13 @@ public final class PurgatoryFloor {
 						break;
 					}
 				}
-			} else if (state == Run.SEALED && room.kind != RoomKind.BOSS) {
+			} else if ((state == Run.SEALED || state == Run.SEALED_LAST) && room.kind != RoomKind.BOSS) {
 				int t = r.tickRoom(room.index);
 				if (t % 10 == 0) {
 					List<Mob> mobs = mobs(level, box(r.slot, room).inflate(0.5));
-					if (mobs.isEmpty() || t >= DungeonRules.OPEN_AFTER_TICKS) {
+					if (mobs.isEmpty() && state == Run.SEALED && DungeonRules.waves(room.kind) > 1) {
+						secondWave(server, level, r, room, alive); // D259
+					} else if (mobs.isEmpty() || t >= DungeonRules.OPEN_AFTER_TICKS) {
 						open(level, r, room);
 					} else if (t >= DungeonRules.GLOW_AFTER_TICKS) {
 						mobs.forEach(m -> m.setGlowingTag(true)); // D257: the last ones are easy to find
@@ -164,6 +166,31 @@ public final class PurgatoryFloor {
 			Purgatory.tellRun(server, r, "The doors seal: kill every mob to open them");
 		}
 		spawnWave(level, r, room, alive, DungeonRules.wave(room.kind, r.floor, players));
+	}
+
+	private static void secondWave(MinecraftServer server, ServerLevel level, Run r, Room room, List<ServerPlayer> alive) {
+		r.room(room.index, Run.SEALED_LAST);
+		r.resetRoom(room.index);
+		List<ServerPlayer> in = new ArrayList<>();
+		AABB b = box(r.slot, room);
+		for (ServerPlayer p : alive) {
+			if (b.contains(p.position())) {
+				in.add(p);
+			}
+		}
+		level.playSound(null, BlockPos.containing(b.getCenter()), SoundEvents.TRIAL_SPAWNER_SPAWN_MOB, SoundSource.HOSTILE, 2f, 0.8f);
+		spawnWave(level, r, room, in.isEmpty() ? alive : in, DungeonRules.wave(room.kind, r.floor, r.team ? r.players.size() : 1));
+		Purgatory.tellRun(server, r, "A second wave comes!");
+	}
+
+	/** D260: the floor is won: every sealed gate opens. */
+	static void openAll(ServerLevel level, Run r) {
+		for (Room room : dungeon(r).rooms()) {
+			int state = r.room(room.index);
+			if (state == Run.SEALED || state == Run.SEALED_LAST) {
+				open(level, r, room);
+			}
+		}
 	}
 
 	/** Team: the fighters outside the boss room join the fight. */

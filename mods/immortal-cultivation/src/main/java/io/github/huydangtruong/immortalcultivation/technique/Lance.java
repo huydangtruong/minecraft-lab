@@ -159,7 +159,8 @@ public final class Lance {
 	/** D161: the block the beam ends on cracks while the beam rests on it and breaks (dropping items) after 6 ticks. */
 	private static void mine(ServerPlayer p, Active a, BlockHitResult hit) {
 		ServerLevel sl = a.level;
-		if (hit.getType() == HitResult.Type.MISS || !LanceRules.breakable(sl.getBlockState(hit.getBlockPos()).getDestroySpeed(sl, hit.getBlockPos()))) {
+		if (hit.getType() == HitResult.Type.MISS || !LanceRules.breakable(sl.getBlockState(hit.getBlockPos()).getDestroySpeed(sl, hit.getBlockPos()))
+			|| io.github.huydangtruong.immortalcultivation.purgatory.Purgatory.guarded(sl, hit.getBlockPos())) { // D259: never the Purgatory dungeon
 			clearCrack(p, a);
 			return;
 		}

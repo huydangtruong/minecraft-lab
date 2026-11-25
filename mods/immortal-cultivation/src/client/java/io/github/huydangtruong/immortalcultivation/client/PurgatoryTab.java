@@ -49,7 +49,7 @@ public final class PurgatoryTab {
 		int tx = x0 + 7;
 		int right = x0 + w - 7;
 		int y = y0 + 19;
-		boolean inside = s.mode() == PurgatoryNet.MODE_FIGHTING || s.mode() == PurgatoryNet.MODE_FALLEN;
+		boolean inside = s.mode() == PurgatoryNet.MODE_FIGHTING || s.mode() == PurgatoryNet.MODE_FALLEN || s.mode() == PurgatoryNet.MODE_CLEARED;
 		watchButtons.clear();
 		watchIds.clear();
 
@@ -77,9 +77,13 @@ public final class PurgatoryTab {
 
 		// Current fight
 		if (inside) {
-			g.text(font, Component.literal(s.mode() == PurgatoryNet.MODE_FALLEN ? "You fell: watching your team" : "You are fighting")
+			g.text(font, Component.literal(s.mode() == PurgatoryNet.MODE_CLEARED ? "Floor cleared!" : s.mode() == PurgatoryNet.MODE_FALLEN
+				? "You fell: watching your team" : "You are fighting")
 				.withStyle(ChatFormatting.BOLD), tx, y + 4, RED, false);
-			if (s.mode() == PurgatoryNet.MODE_FIGHTING) {
+			if (s.mode() == PurgatoryNet.MODE_CLEARED) {
+				g.text(font, "Back in " + ClientPurgatory.victorySeconds() + " s · Come back now: bottom of the inventory", tx, y + 14, DIM, false);
+				y += 10;
+			} else if (s.mode() == PurgatoryNet.MODE_FIGHTING) {
 				g.text(font, "Give up: bottom of the screen", tx, y + 14, DIM, false); // D250: the button lives under the inventory
 				y += 10;
 			}

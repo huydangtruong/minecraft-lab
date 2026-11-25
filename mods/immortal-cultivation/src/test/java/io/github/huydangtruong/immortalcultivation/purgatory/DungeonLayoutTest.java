@@ -151,4 +151,54 @@ class DungeonLayoutTest {
 		Walker.Result r = Walker.check(d.grid(), d.rooms(), new int[] {c[0], c[1] - 1, c[2]}, d.boss());
 		assertFalse(r.ok(), "a pit with 2-high walls is a trap");
 	}
+
+	/** D259: every face of every room touches another room or bedrock skin, never the void; the skin is never inside a room. */
+	@Test
+	void roomsAreWrappedInBedrock() {
+		int[][] faces = {{1, 0, 0}, {-1, 0, 0}, {0, 1, 0}, {0, -1, 0}, {0, 0, 1}, {0, 0, -1}};
+		for (int floor : new int[] {1, 6, 30}) {
+			for (long seed = 1; seed <= 10; seed++) {
+				Dungeon d = Layout.generate(seed, floor);
+				Set<Long> skin = new HashSet<>();
+				for (int[] k : d.skin()) {
+					assertFalse(d.built(k[0], k[1], k[2]), "skin inside a room");
+					skin.add(key(k[0], k[1], k[2]));
+				}
+				for (Room r : d.rooms()) {
+					for (int x = r.x0(); x < r.x1(); x++) {
+						for (int y = r.y0(); y < r.y1(); y++) {
+							for (int z = r.z0(); z < r.z1(); z++) {
+								for (int[] f : faces) {
+									int nx = x + f[0], ny = y + f[1], nz = z + f[2];
+									assertTrue(d.built(nx, ny, nz) || skin.contains(key(nx, ny, nz)),
+										"open to the void at " + nx + " " + ny + " " + nz + " floor " + floor + " seed " + seed);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	private static long key(int x, int y, int z) {
+		return ((long) (x + 2) << 40) | ((long) (y + 2) << 20) | (z + 2);
+	}
+
+	/** D259: longer floors, more mobs, two waves in locked rooms, about half the plain rooms locked. */
+	@Test
+	void floorsAreLongerAndFuller() {
+		assertEquals(10, DungeonRules.rooms(1));
+		assertEquals(10, DungeonRules.rooms(2));
+		assertEquals(20, DungeonRules.rooms(99));
+		assertEquals(5, DungeonRules.wave(RoomKind.LOCKED, 1, 1));
+		assertEquals(2, DungeonRules.waves(RoomKind.LOCKED));
+		assertEquals(1, DungeonRules.waves(RoomKind.OPEN));
+		for (long seed = 1; seed <= 30; seed++) {
+			Dungeon d = Layout.generate(seed, 1);
+			long locked = d.rooms().stream().filter(r -> r.kind == RoomKind.LOCKED).count();
+			assertTrue(locked >= 3, "locked rooms " + locked + " seed " + seed);
+		}
+	}
 }
+

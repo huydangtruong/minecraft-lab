@@ -153,7 +153,7 @@ public final class TechniqueOrb extends Snowball {
 	}
 
 	private static void placeFire(ServerLevel sl, BlockPos pos) {
-		if (sl.getBlockState(pos).isAir() && BaseFireBlock.canBePlacedAt(sl, pos, Direction.UP)) {
+		if (sl.getBlockState(pos).isAir() && BaseFireBlock.canBePlacedAt(sl, pos, Direction.UP) && !io.github.huydangtruong.immortalcultivation.purgatory.Purgatory.guarded(sl, pos)) { // D259: no fire on dungeon wood
 			sl.setBlockAndUpdate(pos, BaseFireBlock.getState(sl, pos));
 		}
 	}

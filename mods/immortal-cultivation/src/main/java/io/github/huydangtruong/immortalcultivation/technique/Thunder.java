@@ -150,7 +150,9 @@ public final class Thunder {
 				}
 			}
 		}
-		sl.explode(null, null, new NoEntityDamage(), c.x, c.y, c.z, (float) TechniqueRules.thunderPower(lvl), false, Level.ExplosionInteraction.MOB);
+		Level.ExplosionInteraction blocks = io.github.huydangtruong.immortalcultivation.purgatory.Purgatory.guarded(sl, net.minecraft.core.BlockPos.containing(c))
+			? Level.ExplosionInteraction.NONE : Level.ExplosionInteraction.MOB; // D259: the Purgatory dungeon stays whole
+		sl.explode(null, null, new NoEntityDamage(), c.x, c.y, c.z, (float) TechniqueRules.thunderPower(lvl), false, blocks);
 		for (LivingEntity e : near(sl, c, r, caster)) {
 			double d = distance(e, c);
 			float dmg = (float) TechniqueRules.thunderDamageAt(lvl, d);

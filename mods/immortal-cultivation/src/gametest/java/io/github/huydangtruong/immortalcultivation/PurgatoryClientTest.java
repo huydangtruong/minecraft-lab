@@ -161,7 +161,28 @@ public class PurgatoryClientTest implements FabricClientGameTest {
 				throw new AssertionError("no Give up button at the bottom centre of the inventory");
 			}
 			context.runOnClient(mc -> mc.gui.setScreen(null));
-			server.runOnServer(s -> Purgatory.finish(player(s), true));
+			// D260: the boss dies; the cleared screen opens with the 30 s count and Come back now
+			server.runOnServer(s -> Purgatory.data(s).runOf(player(s).getUUID().toString()).boss =
+				io.github.huydangtruong.immortalcultivation.purgatory.PurgatorySavedData.Run.BOSS_DEAD);
+			context.waitTicks(45);
+			context.takeScreenshot("purgatory-cleared");
+			boolean pressed = context.computeOnClient(mc -> {
+				var sc = mc.gui.screen();
+				if (sc == null || !sc.getClass().getSimpleName().equals("PurgatoryClearedScreen")) {
+					return false;
+				}
+				for (var w : net.fabricmc.fabric.api.client.screen.v1.Screens.getWidgets(sc)) {
+					if (w.visible && w.getMessage().getString().equals("Come back now")
+						&& w instanceof net.minecraft.client.gui.components.Button b) {
+						b.onPress(new net.minecraft.client.input.KeyEvent(com.mojang.blaze3d.platform.InputConstants.KEY_RETURN, 0, 0));
+						return true;
+					}
+				}
+				return false;
+			});
+			if (!pressed) {
+				throw new AssertionError("no cleared screen with Come back now");
+			}
 			context.waitTicks(40);
 			boolean home = server.computeOnServer(s -> player(s).level() == s.overworld() && player(s).experienceLevel >= 31);
 			if (!home) {

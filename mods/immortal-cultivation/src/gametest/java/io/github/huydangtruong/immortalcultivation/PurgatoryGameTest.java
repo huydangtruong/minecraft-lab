@@ -14,6 +14,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.GameType;
+import io.github.huydangtruong.immortalcultivation.purgatory.PurgatoryNet;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 
@@ -202,7 +203,23 @@ public class PurgatoryGameTest {
 				}
 			}
 		}
+		var skin = d.skin();
+		c.assertTrue(!skin.isEmpty(), "a bedrock skin");
+		for (int[] k : skin) {
+			if (!level.getBlockState(pos.set(o.getX() + k[0], o.getY() + k[1], o.getZ() + k[2])).is(Blocks.BEDROCK)) {
+				c.fail("no bedrock at " + k[0] + " " + k[1] + " " + k[2]);
+			}
+		}
+		Room start = d.start();
+		var wall = new net.minecraft.core.BlockPos(o.getX() + start.x0(), o.getY() + start.y0() + 2, o.getZ() + start.z0() + 5);
+		c.assertTrue(Purgatory.guarded(level, wall), "skills leave the dungeon alone");
+		c.assertTrue(!Purgatory.guarded(level, wall.offset(0, 0, 500)), "but not the world around it");
 		Purgatory.finish(p, false);
+		for (int[] k : skin) {
+			if (!level.getBlockState(pos.set(o.getX() + k[0], o.getY() + k[1], o.getZ() + k[2])).isAir()) {
+				c.fail("skin left at " + k[0] + " " + k[1] + " " + k[2]);
+			}
+		}
 		for (Room room : d.rooms()) {
 			for (int x = room.x0(); x < room.x1(); x += 3) {
 				for (int z = room.z0(); z < room.z1(); z += 3) {
@@ -214,8 +231,8 @@ public class PurgatoryGameTest {
 		c.succeed();
 	}
 
-	/** P-082: walking into a locked room seals its doors and spawns its mobs; they die, the doors open. */
-	@GameTest(maxTicks = 80)
+	/** P-082, D259: walking into a locked room seals its doors and spawns its mobs; two waves die, the doors open. */
+	@GameTest(maxTicks = 120)
 	public void aLockedRoomSealsUntilItsMobsDie(GameTestHelper c) {
 		ServerPlayer p = fighter(c);
 		p.getAbilities().invulnerable = true;
@@ -233,13 +250,19 @@ public class PurgatoryGameTest {
 			c.assertTrue(!mobs.isEmpty(), "mobs came");
 			mobs.forEach(m -> m.kill(level));
 			c.runAfterDelay(15, () -> {
-				c.assertTrue(r.room(room.index) == PurgatorySavedData.Run.DONE, "open again");
-				for (int[] g : room.gates) {
-					c.assertTrue(level.getBlockState(DungeonBuilder.world(r.slot, g)).isAir(), "doors open");
-				}
-				Purgatory.finish(p, false);
-				GameTestKit.drop(c, p);
-				c.succeed();
+				c.assertTrue(r.room(room.index) == PurgatorySavedData.Run.SEALED_LAST, "a second wave");
+				var second = level.getEntitiesOfClass(Mob.class, Purgatory.inside(r.slot), m -> m.entityTags().contains(Purgatory.TAG));
+				c.assertTrue(!second.isEmpty(), "second wave mobs came");
+				second.forEach(m -> m.kill(level));
+				c.runAfterDelay(15, () -> {
+					c.assertTrue(r.room(room.index) == PurgatorySavedData.Run.DONE, "open again");
+					for (int[] g : room.gates) {
+						c.assertTrue(level.getBlockState(DungeonBuilder.world(r.slot, g)).isAir(), "doors open");
+					}
+					Purgatory.finish(p, false);
+					GameTestKit.drop(c, p);
+					c.succeed();
+				});
 			});
 		});
 	}
@@ -262,10 +285,39 @@ public class PurgatoryGameTest {
 			c.assertTrue(r.ticksLeft < PurgatoryRules.RUN_TICKS, "the clock runs");
 			b.kill(level);
 			c.runAfterDelay(3, () -> {
-				c.assertTrue(data(c).runOf(id(p)) == null, "the run ended");
+				c.assertTrue(data(c).runOf(id(p)) == r && r.won(), "D260: the winner stays a while");
 				c.assertTrue(data(c).solo(id(p)).floor == 2, "won: floor 2");
 				c.assertTrue(p.experienceLevel == PurgatoryRules.rewardLevels(1), "paid");
-				c.assertTrue(level.getEntitiesOfClass(Mob.class, Purgatory.inside(r.slot)).isEmpty(), "dungeon emptied");
+				c.assertTrue(level.getEntitiesOfClass(Mob.class, Purgatory.inside(r.slot)).isEmpty(), "the mobs are gone");
+				c.assertTrue(PurgatoryNet.stateFor(c.getLevel().getServer(), data(c), p).mode() == PurgatoryNet.MODE_CLEARED, "shown as cleared");
+				int ticks = r.victoryTicks;
+				c.runAfterDelay(5, () -> {
+					c.assertTrue(r.victoryTicks < ticks && r.ticksLeft > 0, "the 30 s count down");
+					c.assertTrue(PurgatoryNet.apply(p, PurgatoryNet.COME_BACK, 0) == null, "Come back now");
+					c.assertTrue(data(c).runOf(id(p)) == null, "the run closed");
+					c.assertTrue(p.gameMode.getGameModeForPlayer() == GameType.SURVIVAL, "back home");
+					c.assertTrue(data(c).solo(id(p)).floor == 2 && p.experienceLevel == PurgatoryRules.rewardLevels(1), "paid once");
+					GameTestKit.drop(c, p);
+					c.succeed();
+				});
+			});
+		});
+	}
+
+	/** D260: without Come back now the winners go back when the 30 seconds are up. */
+	@GameTest(maxTicks = 40)
+	public void winnersGoBackAfterTheCountdown(GameTestHelper c) {
+		ServerPlayer p = fighter(c);
+		c.assertTrue(Purgatory.startSolo(p) == null, "solo starts");
+		PurgatorySavedData.Run r = data(c).runOf(id(p));
+		r.boss = PurgatorySavedData.Run.BOSS_DEAD;
+		c.runAfterDelay(2, () -> {
+			c.assertTrue(r.won(), "won");
+			r.victoryTicks = 2;
+			c.runAfterDelay(4, () -> {
+				c.assertTrue(data(c).runOf(id(p)) == null, "the run closed");
+				c.assertTrue(data(c).solo(id(p)).floor == 2, "won once: floor 2");
+				c.assertTrue(p.gameMode.getGameModeForPlayer() == GameType.SURVIVAL, "back home");
 				GameTestKit.drop(c, p);
 				c.succeed();
 			});
