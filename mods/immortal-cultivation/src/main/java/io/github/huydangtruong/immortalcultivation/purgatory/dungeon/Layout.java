@@ -122,7 +122,7 @@ public final class Layout {
 	}
 
 	private Dungeon attempt(long seed, int attempts) {
-		int target = DungeonRules.rooms(floor) + rng.nextInt(DungeonRules.EXTRA_ROOMS_MAX + 1); // D262: some floors run longer
+		int target = DungeonRules.rooms(floor) + 1 + rng.nextInt(DungeonRules.EXTRA_ROOMS_MAX); // D262: 1 to 6 rooms more, at random
 		add(rng.nextInt(2), rng.nextInt(2), 0);
 		int lower = layers == 2 ? target / 2 : target;
 		if (!grow(cells.get(0), lower - 1)) {

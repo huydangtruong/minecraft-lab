@@ -17,7 +17,7 @@ public final class DungeonRules {
 	public static final int TWO_LAYERS_FROM = 5;
 	/** Floors with this many runs of the rest shrine. */
 	public static final int REST_FROM = 3;
-	/** D262: a floor has up to this many rooms more than {@link #rooms} (random, 0 = the standard length). */
+	/** D262: a floor has 1 to this many rooms more than {@link #rooms} (random). */
 	public static final int EXTRA_ROOMS_MAX = 6;
 	/** D262: chance that growing the floor may give a room a third door (a fork); otherwise rooms keep two. */
 	public static final double BRANCH_CHANCE = 0.12;

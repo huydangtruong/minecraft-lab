@@ -51,7 +51,7 @@ class DungeonLayoutTest {
 				assertEquals(DungeonRules.layers(floor) - 1, boss.layer, "on the top layer");
 				assertEquals(RoomKind.START, d.start().kind);
 				int n = d.rooms().size() - 1;
-				assertTrue(n >= DungeonRules.rooms(floor) && n <= DungeonRules.rooms(floor) + DungeonRules.EXTRA_ROOMS_MAX, "rooms " + n);
+				assertTrue(n >= DungeonRules.rooms(floor) + 1 && n <= DungeonRules.rooms(floor) + DungeonRules.EXTRA_ROOMS_MAX, "rooms " + n);
 				for (Room r : d.rooms()) {
 					assertFalse(r.ports.isEmpty(), r + " has a door");
 					assertNotNull(r.centre, r + " has a centre");
@@ -205,7 +205,7 @@ class DungeonLayoutTest {
 		}
 	}
 
-	/** D262: floors vary in length (up to 6 rooms more) and most rooms are a plain way through, with few forks. */
+	/** D262: floors are 1 to 6 rooms longer than the standard and most rooms are a plain way through, with few forks. */
 	@Test
 	void mostRoomsHaveTwoDoorsAndLengthsVary() {
 		Set<Integer> lengths = new HashSet<>();
@@ -223,7 +223,7 @@ class DungeonLayoutTest {
 				}
 			}
 		}
-		assertTrue(lengths.contains(0) && lengths.contains(DungeonRules.EXTRA_ROOMS_MAX), "lengths " + lengths);
+		assertTrue(lengths.contains(1) && lengths.contains(DungeonRules.EXTRA_ROOMS_MAX) && !lengths.contains(0), "lengths " + lengths);
 		assertTrue(forks * 4 < rooms, "forks " + forks + " of " + rooms);
 	}
 }
