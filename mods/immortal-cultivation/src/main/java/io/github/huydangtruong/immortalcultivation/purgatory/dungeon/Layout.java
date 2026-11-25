@@ -76,6 +76,9 @@ public final class Layout {
 		int added = 0;
 		for (int tries = 0; added < count && tries < 3000; tries++) {
 			int[] at = rng.nextInt(10) < 6 ? mine.get(mine.size() - 1) : mine.get(rng.nextInt(mine.size()));
+			if (degree(at) >= 2 && rng.nextDouble() >= DungeonRules.BRANCH_CHANCE) {
+				continue; // D262: most rooms stay a plain way through (two doors); a fork only now and then
+			}
 			Dir d = Dir.values()[rng.nextInt(4)];
 			int c = at[0] + d.dx;
 			int r = at[1] + d.dz;
@@ -119,7 +122,7 @@ public final class Layout {
 	}
 
 	private Dungeon attempt(long seed, int attempts) {
-		int target = DungeonRules.rooms(floor);
+		int target = DungeonRules.rooms(floor) + rng.nextInt(DungeonRules.EXTRA_ROOMS_MAX + 1); // D262: some floors run longer
 		add(rng.nextInt(2), rng.nextInt(2), 0);
 		int lower = layers == 2 ? target / 2 : target;
 		if (!grow(cells.get(0), lower - 1)) {
@@ -245,6 +248,7 @@ public final class Layout {
 				int r = at[1] + d.dz;
 				if (inGrid(c, r) && owner[c][r][at[2]] >= 0 && !door[at[0]][at[1]][at[2]][d.ordinal()]
 					&& !blocked[at[0]][at[1]][at[2]][d.ordinal()] && !blocked[c][r][at[2]][d.opposite().ordinal()]
+					&& degree(at) < 2 && degree(cells.get(owner[c][r][at[2]])) < 2 // D262: loops only join dead ends, no new forks
 					&& rng.nextDouble() < DungeonRules.LOOP_CHANCE) {
 					link(at[0], at[1], at[2], d);
 				}

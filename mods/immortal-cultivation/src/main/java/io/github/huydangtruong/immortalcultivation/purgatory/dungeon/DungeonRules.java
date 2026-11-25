@@ -17,8 +17,12 @@ public final class DungeonRules {
 	public static final int TWO_LAYERS_FROM = 5;
 	/** Floors with this many runs of the rest shrine. */
 	public static final int REST_FROM = 3;
-	/** Chance that two neighbouring rooms get an extra door (loops). */
-	public static final double LOOP_CHANCE = 0.18;
+	/** D262: a floor has up to this many rooms more than {@link #rooms} (random, 0 = the standard length). */
+	public static final int EXTRA_ROOMS_MAX = 6;
+	/** D262: chance that growing the floor may give a room a third door (a fork); otherwise rooms keep two. */
+	public static final double BRANCH_CHANCE = 0.12;
+	/** Chance that two neighbouring dead ends get a door between them (loops). */
+	public static final double LOOP_CHANCE = 0.3;
 	/** Time limit of a floor; running out is a loss. */
 	public static final int TIME_TICKS = 10 * 60 * 20;
 	/** A sealed room whose mobs are not dead: they glow after this, the gates open after the second number. */

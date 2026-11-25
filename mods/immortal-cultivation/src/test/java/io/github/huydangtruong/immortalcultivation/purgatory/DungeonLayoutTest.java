@@ -50,7 +50,8 @@ class DungeonLayoutTest {
 				assertNotNull(boss.boss, "a boss spot");
 				assertEquals(DungeonRules.layers(floor) - 1, boss.layer, "on the top layer");
 				assertEquals(RoomKind.START, d.start().kind);
-				assertTrue(d.rooms().size() == DungeonRules.rooms(floor) + 1, "rooms " + d.rooms().size());
+				int n = d.rooms().size() - 1;
+				assertTrue(n >= DungeonRules.rooms(floor) && n <= DungeonRules.rooms(floor) + DungeonRules.EXTRA_ROOMS_MAX, "rooms " + n);
 				for (Room r : d.rooms()) {
 					assertFalse(r.ports.isEmpty(), r + " has a door");
 					assertNotNull(r.centre, r + " has a centre");
@@ -202,6 +203,28 @@ class DungeonLayoutTest {
 			long locked = d.rooms().stream().filter(r -> r.kind == RoomKind.LOCKED).count();
 			assertTrue(locked >= 3, "locked rooms " + locked + " seed " + seed);
 		}
+	}
+
+	/** D262: floors vary in length (up to 6 rooms more) and most rooms are a plain way through, with few forks. */
+	@Test
+	void mostRoomsHaveTwoDoorsAndLengthsVary() {
+		Set<Integer> lengths = new HashSet<>();
+		int rooms = 0;
+		int forks = 0;
+		for (int floor : new int[] {1, 2, 6, 15}) {
+			for (long seed = 1; seed <= 40; seed++) {
+				Dungeon d = Layout.generate(seed, floor);
+				lengths.add(d.rooms().size() - 1 - DungeonRules.rooms(floor));
+				for (Room r : d.rooms()) {
+					if (r.kind != RoomKind.BOSS && r.kind != RoomKind.START) {
+						rooms++;
+						forks += r.ports.size() >= 3 ? 1 : 0;
+					}
+				}
+			}
+		}
+		assertTrue(lengths.contains(0) && lengths.contains(DungeonRules.EXTRA_ROOMS_MAX), "lengths " + lengths);
+		assertTrue(forks * 4 < rooms, "forks " + forks + " of " + rooms);
 	}
 }
 
