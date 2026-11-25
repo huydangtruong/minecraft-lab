@@ -31,9 +31,18 @@ public class PurgatoryGameTest {
 	private static int runes(ServerPlayer p) {
 		int n = 0;
 		for (int i = 0; i < p.getInventory().getContainerSize(); i++) {
-			n += p.getInventory().getItem(i).is(Runes.ITEM) ? p.getInventory().getItem(i).getCount() : 0;
+			n += inStack(p.getInventory().getItem(i));
 		}
 		return n;
+	}
+
+	/** Runes in a stack: a rune, or the runes inside a reward bag (D261). */
+	private static int inStack(net.minecraft.world.item.ItemStack s) {
+		if (s.is(Runes.ITEM)) {
+			return s.getCount();
+		}
+		var c = s.get(net.minecraft.core.component.DataComponents.CONTAINER);
+		return c == null ? 0 : (int) c.nonEmptyItemCopyStream().filter(x -> x.is(Runes.ITEM)).count();
 	}
 
 	private static ServerPlayer fighter(GameTestHelper c) {
@@ -282,12 +291,14 @@ public class PurgatoryGameTest {
 			c.assertTrue(bosses.size() == 1, "one boss: " + bosses.size());
 			Mob b = bosses.get(0);
 			c.assertTrue(b.getMaxHealth() > 40, "a strong boss: " + b.getMaxHealth());
+			c.assertTrue(Math.abs(b.getScale() - 2.0) < 0.01, "D261: twice the size: " + b.getScale());
 			c.assertTrue(r.ticksLeft < PurgatoryRules.RUN_TICKS, "the clock runs");
 			b.kill(level);
 			c.runAfterDelay(3, () -> {
 				c.assertTrue(data(c).runOf(id(p)) == r && r.won(), "D260: the winner stays a while");
 				c.assertTrue(data(c).solo(id(p)).floor == 2, "won: floor 2");
 				c.assertTrue(p.experienceLevel == PurgatoryRules.rewardLevels(1), "paid");
+				c.assertTrue(runes(p) == PurgatoryRules.rewardRunes(1, 1), "D261: the runes, in a bag: " + runes(p));
 				c.assertTrue(level.getEntitiesOfClass(Mob.class, Purgatory.inside(r.slot)).isEmpty(), "the mobs are gone");
 				c.assertTrue(PurgatoryNet.stateFor(c.getLevel().getServer(), data(c), p).mode() == PurgatoryNet.MODE_CLEARED, "shown as cleared");
 				int ticks = r.victoryTicks;
@@ -321,6 +332,31 @@ public class PurgatoryGameTest {
 				GameTestKit.drop(c, p);
 				c.succeed();
 			});
+		});
+	}
+
+	/** D261: a full inventory: the rune bag waits on the dungeon floor and lands at the winner's feet back home. */
+	@GameTest(maxTicks = 40)
+	public void aBagLeftBehindFollowsTheWinnerHome(GameTestHelper c) {
+		ServerPlayer p = fighter(c);
+		c.assertTrue(Purgatory.startSolo(p) == null, "solo starts");
+		for (int i = 0; i < p.getInventory().getContainerSize(); i++) {
+			p.getInventory().setItem(i, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DIRT, 64));
+		}
+		PurgatorySavedData.Run r = data(c).runOf(id(p));
+		r.boss = PurgatorySavedData.Run.BOSS_DEAD;
+		c.runAfterDelay(2, () -> {
+			var level = plevel(c);
+			var bags = level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, Purgatory.inside(r.slot), e -> inStack(e.getItem()) > 0);
+			c.assertTrue(bags.size() == 1 && inStack(bags.get(0).getItem()) == PurgatoryRules.rewardRunes(1, 1), "one bag on the floor: " + bags.size());
+			p.teleportTo(p.getX() + 3, p.getY(), p.getZ()); // walked away from it
+			c.assertTrue(PurgatoryNet.apply(p, PurgatoryNet.COME_BACK, 0) == null, "Come back now");
+			var home = p.level().getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, p.getBoundingBox().inflate(2), e -> inStack(e.getItem()) > 0);
+			c.assertTrue(home.size() == 1, "the bag is at their feet at home");
+			c.assertTrue(!Purgatory.inside(r.slot).contains(home.get(0).position()), "outside the dungeon");
+			home.forEach(net.minecraft.world.entity.Entity::discard);
+			GameTestKit.drop(c, p);
+			c.succeed();
 		});
 	}
 

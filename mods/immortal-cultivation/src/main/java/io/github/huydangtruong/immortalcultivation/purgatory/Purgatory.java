@@ -41,6 +41,12 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -285,7 +291,7 @@ public final class Purgatory {
 		}
 		r.players.remove(key(p));
 		r.dead.remove(key(p));
-		sendBack(server, d, p);
+		sendHome(server, d, level(server), r, p);
 		if (r.players.isEmpty()) {
 			close(server, d, r);
 		}
@@ -431,14 +437,21 @@ public final class Purgatory {
 			bar.removeAllPlayers();
 		}
 		ServerLevel level = level(server);
-		for (Entity e : level.getEntities((Entity) null, inside(r.slot).inflate(2), e -> !(e instanceof Player))) {
-			e.discard(); // mobs, drops, arrows: the box is emptied
-		}
 		for (String id : r.players) {
 			ServerPlayer p = server.getPlayerList().getPlayer(UUID.fromString(id));
 			if (p != null) {
-				sendBack(server, d, p);
+				sendHome(server, d, level, r, p);
 			} // offline: sent back when they join (the back point stays saved)
+		}
+		for (ItemStack bag : takeBags(level, r, null)) { // owners offline or gone: owed, paid when they join
+			ItemContainerContents c = bag.get(DataComponents.CONTAINER);
+			int n = c == null ? 0 : (int) c.nonEmptyItemCopyStream().count();
+			if (n > 0) {
+				d.owed.computeIfAbsent(bagOwner(bag), k -> new ArrayList<>()).add(new Owed(0, n));
+			}
+		}
+		for (Entity e : level.getEntities((Entity) null, inside(r.slot).inflate(2), e -> !(e instanceof Player))) {
+			e.discard(); // mobs, drops, arrows: the box is emptied
 		}
 		for (Map.Entry<String, Integer> w : new ArrayList<>(d.watching.entrySet())) {
 			if (w.getValue() == r.id) {
@@ -459,15 +472,70 @@ public final class Purgatory {
 
 	private static void pay(ServerPlayer p, Owed o) {
 		p.giveExperienceLevels(o.levels());
+		List<ItemStack> runes = new ArrayList<>();
 		for (int i = 0; i < o.runes(); i++) {
 			ItemStack rune = Runes.randomReward(p.level().registryAccess(), RNG);
-			if (!rune.isEmpty() && !p.getInventory().add(rune)) {
-				p.spawnAtLocation(p.level(), rune);
+			if (!rune.isEmpty()) {
+				runes.add(rune);
+			}
+		}
+		for (ItemStack bag : bags(runes, key(p))) {
+			if (!p.getInventory().add(bag)) {
+				dropAtFeet(p, bag); // D261: a full inventory: on the ground, only for them; carried home if left behind
 			}
 		}
 		p.sendSystemMessage(Component.literal("Reward: " + o.levels() + " levels and " + o.runes() + " rune" + (o.runes() == 1 ? "" : "s"))
 			.withStyle(ChatFormatting.GOLD));
 		p.level().playSound(null, p.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1f, 1f);
+	}
+
+	private static final String BAG_OWNER = "permahearts_purgatory_bag";
+
+	/** D261: rewards come in purple shulker boxes ("Purgatory Runes"), {@link PurgatoryRules#BAG_SIZE} runes each. */
+	static List<ItemStack> bags(List<ItemStack> runes, String owner) {
+		List<ItemStack> out = new ArrayList<>();
+		for (int i = 0; i < runes.size(); i += PurgatoryRules.BAG_SIZE) {
+			ItemStack bag = new ItemStack(Items.DYED_SHULKER_BOX.purple());
+			bag.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(runes.subList(i, Math.min(runes.size(), i + PurgatoryRules.BAG_SIZE))));
+			bag.set(DataComponents.CUSTOM_NAME, Component.literal("Purgatory Runes").withStyle(ChatFormatting.LIGHT_PURPLE));
+			CompoundTag tag = new CompoundTag();
+			tag.putString(BAG_OWNER, owner);
+			bag.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+			out.add(bag);
+		}
+		return out;
+	}
+
+	/** Owner of a reward bag, or null. */
+	static String bagOwner(ItemStack s) {
+		CustomData c = s.get(DataComponents.CUSTOM_DATA);
+		String o = c == null ? "" : c.copyTag().getStringOr(BAG_OWNER, "");
+		return o.isEmpty() ? null : o;
+	}
+
+	private static void dropAtFeet(ServerPlayer p, ItemStack s) {
+		ItemEntity e = new ItemEntity(p.level(), p.getX(), p.getY() + 0.2, p.getZ(), s, 0, 0, 0);
+		e.setTarget(p.getUUID());
+		e.setPickUpDelay(10);
+		p.level().addFreshEntity(e);
+	}
+
+	/** D261: reward bags of one owner still lying in the dungeon are taken out of it. */
+	private static List<ItemStack> takeBags(ServerLevel level, Run r, String owner) {
+		List<ItemStack> out = new ArrayList<>();
+		for (ItemEntity e : level.getEntitiesOfClass(ItemEntity.class, inside(r.slot).inflate(2),
+				e -> owner == null ? bagOwner(e.getItem()) != null : owner.equals(bagOwner(e.getItem())))) {
+			out.add(e.getItem().copy());
+			e.discard();
+		}
+		return out;
+	}
+
+	/** Sends a fighter home with the bags they left on the dungeon floor, dropped at their feet there. */
+	private static void sendHome(MinecraftServer server, PurgatorySavedData d, ServerLevel level, Run r, ServerPlayer p) {
+		List<ItemStack> left = takeBags(level, r, key(p));
+		sendBack(server, d, p);
+		left.forEach(b -> dropAtFeet(p, b));
 	}
 
 	private static Back backOf(ServerPlayer p) {

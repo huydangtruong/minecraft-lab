@@ -22,6 +22,8 @@ public final class PurgatoryRules {
 	public static final int COOLDOWN_TICKS = 3 * 60 * 20;
 	/** At most 50 mobs alive at once (D236). */
 	public static final int MAX_ALIVE = 50;
+	/** D261: runes per reward bag (a shulker box). */
+	public static final int BAG_SIZE = 27;
 	/** Team queue: start 10 s after the last player joined it (D237). */
 	public static final int TEAM_COUNTDOWN_TICKS = 10 * 20;
 	public static final int TEAM_MIN_PLAYERS = 2;

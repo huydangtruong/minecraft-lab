@@ -33,6 +33,7 @@ Trial-chamber-like floors: about 7-15 random rooms on a 6×6 cell grid (1 or 2 l
 - [x] Huy plays a floor by hand (2026-11-26: too short, few mobs, skills broke walls, sent home too fast)
 - [x] D259: bedrock skin + skill guards (`Purgatory.guarded`), 10+ rooms, more mobs, 2 waves in locked/treasure rooms
 - [x] D260: 30 s after the boss dies (paid at once, gates open), Come back now (screen + inventory button)
+- [x] D261: more path mobs, rune shulker bag (follows the winner home), bosses 2× size and +20% damage
 - [ ] Huy plays again
 
 ## Risks / ask first

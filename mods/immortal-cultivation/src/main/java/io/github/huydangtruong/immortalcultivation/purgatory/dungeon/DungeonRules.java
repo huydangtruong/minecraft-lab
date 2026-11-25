@@ -26,6 +26,9 @@ public final class DungeonRules {
 	public static final int OPEN_AFTER_TICKS = 150 * 20;
 	/** Boss health on top of the floor multiplier, and how often it calls adds. */
 	public static final double BOSS_HEALTH = 8.0;
+	/** D261: bosses are twice the normal size and hit 20% harder from floor 1. */
+	public static final double BOSS_SCALE = 2.0;
+	public static final double BOSS_DAMAGE = 1.2;
 	public static final int BOSS_ADDS_EVERY_TICKS = 20 * 20;
 
 	private DungeonRules() {}
@@ -47,8 +50,9 @@ public final class DungeonRules {
 			case LOCKED -> Math.min(14, 5 + f / 3 + 2 * extra);
 			case TREASURE -> Math.min(16, 7 + f / 3 + 2 * extra);
 			case BOSS -> Math.min(8, 2 + f / 8 + extra);
-			case OPEN, DARK -> Math.min(8, 3 + f / 6 + extra);
-			case CORRIDOR, HAZARD, TRAP -> Math.min(5, 2 + f / 10 + extra / 2);
+			case OPEN, DARK -> Math.min(10, 5 + f / 5 + extra); // D261: the path rooms had too few
+			case CORRIDOR, HAZARD, TRAP -> Math.min(9, 4 + f / 6 + extra);
+			case STAIRS -> Math.min(6, 2 + f / 8 + extra / 2);
 			default -> 0;
 		};
 	}

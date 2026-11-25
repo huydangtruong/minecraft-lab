@@ -194,6 +194,9 @@ class DungeonLayoutTest {
 		assertEquals(5, DungeonRules.wave(RoomKind.LOCKED, 1, 1));
 		assertEquals(2, DungeonRules.waves(RoomKind.LOCKED));
 		assertEquals(1, DungeonRules.waves(RoomKind.OPEN));
+		assertEquals(4, DungeonRules.wave(RoomKind.CORRIDOR, 1, 1)); // D261: was 2
+		assertEquals(5, DungeonRules.wave(RoomKind.OPEN, 1, 1));
+		assertTrue(DungeonRules.wave(RoomKind.STAIRS, 1, 1) >= 2);
 		for (long seed = 1; seed <= 30; seed++) {
 			Dungeon d = Layout.generate(seed, 1);
 			long locked = d.rooms().stream().filter(r -> r.kind == RoomKind.LOCKED).count();

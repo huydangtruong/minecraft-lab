@@ -410,3 +410,4 @@ Java names and ids predate many renames. Ids, `Identifier`s, lang keys and saved
 - `Level.ExplosionInteraction.NONE` keeps blocks (entities still take the blast); used by Thunder inside a running dungeon.
 - `Button.onPress(InputWithModifiers)` is public; tests press a button with `new KeyEvent(InputConstants.KEY_RETURN, 0, 0)`.
 - `SoundEvents.TRIAL_SPAWNER_SPAWN_MOB` exists (second wave sound). Client screen: `mc.gui.screen()` / `mc.gui.setScreen(..)` (no `mc.screen` field).
+- D261: dyed shulker boxes are `Items.DYED_SHULKER_BOX.purple()` (a `ColorCollection`). Contents: `DataComponents.CONTAINER` with `ItemContainerContents.fromItems(list)`, read with `nonEmptyItemCopyStream()`. `CustomData.of(tag)`, `tag.getStringOr(k, "")`. Bundles hold only one rune (stack size 1 fills a bundle). Size: `Attributes.SCALE` modifier; `ItemEntity.setTarget(uuid)` lets only that player pick it up.

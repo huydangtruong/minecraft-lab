@@ -275,9 +275,29 @@ public final class PurgatoryFloor {
 			m = Purgatory.spawnMob(level, r, type, feet(r.slot, room.centre), alive, health, warden ? "Floor Warden" : "Floor Boss");
 		}
 		if (m != null) {
+			bossBody(m);
 			m.addTag(BOSS_TAG);
 			r.boss = Run.BOSS_ALIVE;
 			r.spawnTimer = DungeonRules.BOSS_ADDS_EVERY_TICKS;
+		}
+	}
+
+	private static final net.minecraft.resources.Identifier BOSS_SIZE_ID = net.minecraft.resources.Identifier.fromNamespaceAndPath(
+		io.github.huydangtruong.immortalcultivation.ImmortalCultivation.NAMESPACE, "purgatory_boss_size");
+	private static final net.minecraft.resources.Identifier BOSS_HIT_ID = net.minecraft.resources.Identifier.fromNamespaceAndPath(
+		io.github.huydangtruong.immortalcultivation.ImmortalCultivation.NAMESPACE, "purgatory_boss_hit");
+
+	/** D261: twice the size, 20% more damage (on top of the floor's damage). */
+	static void bossBody(Mob m) {
+		var scale = m.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.SCALE);
+		if (scale != null && !scale.hasModifier(BOSS_SIZE_ID)) {
+			scale.addPermanentModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(BOSS_SIZE_ID, DungeonRules.BOSS_SCALE - 1.0,
+				net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+		}
+		var hit = m.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE);
+		if (hit != null && !hit.hasModifier(BOSS_HIT_ID)) {
+			hit.addPermanentModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(BOSS_HIT_ID, DungeonRules.BOSS_DAMAGE - 1.0,
+				net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
 		}
 	}
 
