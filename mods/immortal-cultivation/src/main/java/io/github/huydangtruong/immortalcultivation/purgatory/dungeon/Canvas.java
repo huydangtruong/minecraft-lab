@@ -153,6 +153,11 @@ public final class Canvas {
 		room.dispensers.add(new int[] {p[0], p[1], p[2], turn(localFacing).ordinal()});
 	}
 
+	/** D265: the Seal Pillar stands here (feet, local). */
+	public void pillarSpot(int x, int y, int z) {
+		room.pillar = at(x, y, z);
+	}
+
 	/** The boss stands here (feet, local). */
 	public void bossSpot(int x, int y, int z) {
 		room.boss = at(x, y, z);

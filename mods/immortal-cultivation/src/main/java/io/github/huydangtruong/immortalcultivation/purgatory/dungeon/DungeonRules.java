@@ -54,6 +54,7 @@ public final class DungeonRules {
 		int extra = Math.max(0, players - 1);
 		return switch (kind) {
 			case LOCKED -> Math.min(14, 5 + f / 3 + 2 * extra);
+			case PILLAR -> Math.min(10, 4 + f / 4 + 2 * extra);
 			case TREASURE -> Math.min(16, 7 + f / 3 + 2 * extra);
 			case BOSS -> Math.min(8, 2 + f / 8 + extra);
 			case OPEN, DARK -> Math.min(10, 5 + f / 5 + extra); // D261: the path rooms had too few
@@ -61,6 +62,18 @@ public final class DungeonRules {
 			case STAIRS -> Math.min(6, 2 + f / 8 + extra / 2);
 			default -> 0;
 		};
+	}
+
+	/** D265: health of a Seal Pillar (30 hearts). */
+	public static final double PILLAR_HEALTH = 60.0;
+	/** D265: while the pillar stands, more mobs come this often (up to a full wave alive). */
+	public static final int PILLAR_REINFORCE_TICKS = 20 * 20;
+	/** D265: share of the sealed rooms the layout adds that are pillar rooms. */
+	public static final double PILLAR_SHARE = 0.35;
+
+	/** D265: mobs a pillar room adds each time while its pillar stands. */
+	public static int reinforcements(int floor, int players) {
+		return Math.max(2, wave(RoomKind.PILLAR, floor, players) / 2);
 	}
 
 	/** Waves a sealed room sends (D259): the second comes when the first is dead. */

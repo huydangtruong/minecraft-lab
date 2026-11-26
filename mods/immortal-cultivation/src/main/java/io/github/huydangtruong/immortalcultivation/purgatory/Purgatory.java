@@ -102,6 +102,10 @@ public final class Purgatory {
 		ServerPlayerEvents.JOIN.register(p -> JOINED.add(p.getUUID()));
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> QUEUE.remove(handler.player.getUUID()));
 		ServerLivingEntityEvents.ALLOW_DEATH.register((entity, source, amount) -> {
+			if (entity instanceof Mob m && PurgatoryFloor.isPillar(m) && m.level() instanceof ServerLevel sl) {
+				PurgatoryFloor.shatter(sl, m); // D265: the Seal Pillar shatters, the room opens on its next check
+				return false;
+			}
 			if (entity instanceof ServerPlayer p && fighting(p) && !totemSaves(p, source)) {
 				p.setHealth(p.getMaxHealth());
 				p.removeAllEffects();
@@ -354,13 +358,17 @@ public final class Purgatory {
 
 	// ---- start and end ----
 
+	/** Game tests only: the seed of the next run (0 = random), used once. */
+	public static long nextSeedForTests;
+
 	static Run begin(MinecraftServer server, PurgatorySavedData d, boolean team, int floor, List<ServerPlayer> players) {
 		int slot = d.freeSlot();
 		List<String> ids = new ArrayList<>();
 		for (ServerPlayer p : players) {
 			ids.add(key(p));
 		}
-		long seed = RNG.nextLong();
+		long seed = nextSeedForTests != 0 ? nextSeedForTests : RNG.nextLong();
+		nextSeedForTests = 0;
 		Run r = new Run(d.nextId++, slot, team, floor, PurgatoryRules.RUN_TICKS, 0, ids, List.of(), seed == 0 ? 1 : seed, List.of(),
 			List.of(), Run.BOSS_WAITING, 0);
 		d.runs.add(r);

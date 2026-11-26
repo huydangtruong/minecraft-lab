@@ -136,6 +136,12 @@ public class PurgatoryClientTest implements FabricClientGameTest {
 			context.clickScreenButton("Purgatory");
 			context.waitTicks(3);
 			server.runOnServer(s -> Purgatory.data(s).solo(player(s).getUUID().toString()).floor = 6); // two layers and stairs
+			long seed = 1; // D265: a floor with Seal Pillar rooms, to see them
+			while (io.github.huydangtruong.immortalcultivation.purgatory.dungeon.Layout.generate(seed, 6).rooms().stream()
+					.filter(x -> x.kind == RoomKind.PILLAR).map(x -> x.module).distinct().count() < 2) {
+				seed++;
+			}
+			Purgatory.nextSeedForTests = seed;
 			clickGui(context, context.computeOnClient(mc -> PurgatoryTab.hotspots().get(0))); // Start (solo)
 			context.waitTicks(40);
 			boolean inBox = server.computeOnServer(s -> player(s).level().dimension() == Purgatory.DIMENSION && Purgatory.fighting(player(s)));

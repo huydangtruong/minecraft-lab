@@ -5,6 +5,7 @@ import io.github.huydangtruong.immortalcultivation.purgatory.DungeonBuilder;
 import io.github.huydangtruong.immortalcultivation.purgatory.PurgatoryFloor;
 import io.github.huydangtruong.immortalcultivation.purgatory.PurgatoryRules;
 import io.github.huydangtruong.immortalcultivation.purgatory.dungeon.Dungeon;
+import io.github.huydangtruong.immortalcultivation.purgatory.dungeon.Layout;
 import io.github.huydangtruong.immortalcultivation.purgatory.dungeon.Room;
 import io.github.huydangtruong.immortalcultivation.purgatory.dungeon.RoomKind;
 import io.github.huydangtruong.immortalcultivation.purgatory.PurgatorySavedData;
@@ -268,6 +269,56 @@ public class PurgatoryGameTest {
 					for (int[] g : room.gates) {
 						c.assertTrue(level.getBlockState(DungeonBuilder.world(r.slot, g)).isAir(), "doors open");
 					}
+					Purgatory.finish(p, false);
+					GameTestKit.drop(c, p);
+					c.succeed();
+				});
+			});
+		});
+	}
+
+	/** D265: a pillar room seals until its Seal Pillar (30 hearts, still, no drops) is destroyed; killing mobs does not open it. */
+	@GameTest(maxTicks = 80)
+	public void aSealPillarRoomOpensWhenThePillarBreaks(GameTestHelper c) {
+		ServerPlayer p = fighter(c);
+		p.getAbilities().invulnerable = true;
+		long seed = 1;
+		while (Layout.generate(seed, 1).rooms().stream().noneMatch(x -> x.kind == RoomKind.PILLAR)) {
+			seed++;
+		}
+		Purgatory.nextSeedForTests = seed;
+		c.assertTrue(Purgatory.startSolo(p) == null, "solo starts");
+		PurgatorySavedData.Run r = data(c).runOf(id(p));
+		c.assertTrue(r.seed == seed && r.floor == 1, "the chosen floor");
+		Room room = PurgatoryFloor.dungeon(r).rooms().stream().filter(x -> x.kind == RoomKind.PILLAR).findFirst().orElseThrow();
+		PurgatorySavedData.Run run = r;
+		Room pr = room;
+		go(c, p, run, pr.centre);
+		c.runAfterDelay(3, () -> {
+			var level = plevel(c);
+			c.assertTrue(run.room(pr.index) == PurgatorySavedData.Run.SEALED, "sealed");
+			var pillars = level.getEntitiesOfClass(Mob.class, Purgatory.inside(run.slot), m -> m.entityTags().contains(PurgatoryFloor.PILLAR_TAG));
+			c.assertTrue(pillars.size() == 1, "one pillar: " + pillars.size());
+			Mob pillar = pillars.get(0);
+			c.assertTrue(Math.abs(pillar.getMaxHealth() - 60) < 0.01, "30 hearts: " + pillar.getMaxHealth());
+			c.assertTrue(pillar.isNoAi(), "the pillar stands still");
+			c.assertTrue(level.getEntitiesOfClass(net.minecraft.world.entity.Display.BlockDisplay.class, Purgatory.inside(run.slot),
+				e -> e.entityTags().contains(PurgatoryFloor.PILLAR_TAG)).size() == 2, "two blocks tall");
+			level.getEntitiesOfClass(Mob.class, Purgatory.inside(run.slot), m -> m.entityTags().contains(Purgatory.TAG)).forEach(m -> m.kill(level));
+			c.runAfterDelay(15, () -> {
+				c.assertTrue(run.room(pr.index) == PurgatorySavedData.Run.SEALED, "killing the mobs does not open it");
+				net.minecraft.world.phys.AABB near = pillar.getBoundingBox().inflate(1.5);
+				level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, near).forEach(e -> e.discard()); // mob drops
+				pillar.hurtServer(level, level.damageSources().playerAttack(p), 1000f);
+				c.runAfterDelay(15, () -> {
+					c.assertTrue(run.room(pr.index) == PurgatorySavedData.Run.DONE, "open after the pillar breaks");
+					for (int[] g : pr.gates) {
+						c.assertTrue(level.getBlockState(DungeonBuilder.world(run.slot, g)).isAir(), "doors open");
+					}
+					c.assertTrue(level.getEntities((net.minecraft.world.entity.Entity) null, Purgatory.inside(run.slot),
+						e -> e.entityTags().contains(PurgatoryFloor.PILLAR_TAG)).isEmpty(), "the pillar is gone");
+					c.assertTrue(level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, near).isEmpty(),
+						"no drops");
 					Purgatory.finish(p, false);
 					GameTestKit.drop(c, p);
 					c.succeed();

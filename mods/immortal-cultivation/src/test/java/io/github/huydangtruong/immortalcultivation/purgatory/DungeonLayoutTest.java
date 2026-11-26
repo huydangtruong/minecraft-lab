@@ -200,7 +200,7 @@ class DungeonLayoutTest {
 		assertTrue(DungeonRules.wave(RoomKind.STAIRS, 1, 1) >= 2);
 		for (long seed = 1; seed <= 30; seed++) {
 			Dungeon d = Layout.generate(seed, 1);
-			long locked = d.rooms().stream().filter(r -> r.kind == RoomKind.LOCKED).count();
+			long locked = d.rooms().stream().filter(r -> r.kind == RoomKind.LOCKED || r.kind == RoomKind.PILLAR).count(); // D265: pillar rooms seal too
 			assertTrue(locked >= 3, "locked rooms " + locked + " seed " + seed);
 		}
 	}
@@ -248,6 +248,29 @@ class DungeonLayoutTest {
 		}
 		System.out.println("gifts " + gifts + " of " + rooms);
 		assertTrue(gifts > rooms * 0.4 && gifts < rooms * 0.6, "gifts " + gifts + " of " + rooms);
+	}
+
+	/** D265: pillar rooms show up, and their Seal Pillar stands on a spot a player can reach. */
+	@Test
+	void sealPillarsCanBeReached() {
+		int pillars = 0;
+		int rooms = 0;
+		for (int floor : FLOORS) {
+			for (long seed = 0; seed < SEEDS; seed++) {
+				Dungeon d = Layout.generate(seed * 17 + floor, floor);
+				Walker.Result res = Walker.check(d.grid(), d.rooms(), d.start().centre, d.boss());
+				for (Room r : d.rooms()) {
+					rooms++;
+					if (r.kind == RoomKind.PILLAR) {
+						pillars++;
+						assertNotNull(r.pillar, r.toString());
+						assertTrue(res.reachable(r.pillar[0], r.pillar[1], r.pillar[2]), r + " pillar " + java.util.Arrays.toString(r.pillar));
+					}
+				}
+			}
+		}
+		System.out.println("pillar rooms " + pillars + " of " + rooms);
+		assertTrue(pillars * 12 > rooms, "pillar rooms " + pillars + " of " + rooms);
 	}
 }
 

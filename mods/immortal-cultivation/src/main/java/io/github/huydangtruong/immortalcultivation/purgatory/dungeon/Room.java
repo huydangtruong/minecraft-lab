@@ -26,6 +26,8 @@ public final class Room {
 	public final List<int[]> plates = new ArrayList<>();
 	/** x, y, z, facing ordinal. */
 	public final List<int[]> dispensers = new ArrayList<>();
+	/** D265: where the Seal Pillar stands (feet; pillar rooms). */
+	public int[] pillar;
 	/** Boss feet position (boss rooms). */
 	public int[] boss;
 	/** Stair rooms: the wall the stairs run along (no door there below). */

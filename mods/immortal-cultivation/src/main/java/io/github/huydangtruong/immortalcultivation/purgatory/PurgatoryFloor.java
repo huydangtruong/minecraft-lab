@@ -44,6 +44,8 @@ import net.minecraft.world.phys.Vec3;
  */
 public final class PurgatoryFloor {
 	public static final String BOSS_TAG = "permahearts_purgatory_boss";
+	/** D265: the Seal Pillar (its hit box mob and the blocks it looks like). */
+	public static final String PILLAR_TAG = "permahearts_purgatory_pillar";
 	private static final Map<Integer, Dungeon> CACHE = new HashMap<>();
 	private static final Map<Integer, ServerBossEvent> BOSS_BARS = new HashMap<>();
 	private static final RandomSource RNG = RandomSource.create();
@@ -123,6 +125,8 @@ public final class PurgatoryFloor {
 						break;
 					}
 				}
+			} else if (state == Run.SEALED && room.kind == RoomKind.PILLAR) {
+				tickPillar(server, level, r, room, alive);
 			} else if ((state == Run.SEALED || state == Run.SEALED_LAST) && room.kind != RoomKind.BOSS) {
 				int t = r.tickRoom(room.index);
 				if (t % 10 == 0) {
@@ -162,6 +166,9 @@ public final class PurgatoryFloor {
 			pullIn(level, r, room, alive);
 			spawnBoss(level, r, room, alive);
 			Purgatory.tellRun(server, r, "The boss wakes!");
+		} else if (room.kind == RoomKind.PILLAR) {
+			spawnPillar(level, r, room);
+			Purgatory.tellRun(server, r, "The doors seal: destroy the glowing Seal Pillar to open them!");
 		} else if (room.kind.locks) {
 			Purgatory.tellRun(server, r, "The doors seal: kill every mob to open them");
 		}
@@ -183,8 +190,132 @@ public final class PurgatoryFloor {
 		Purgatory.tellRun(server, r, "A second wave comes!");
 	}
 
+	// ---- Seal Pillar (D265) ----
+
+	private static final net.minecraft.resources.Identifier PILLAR_HEALTH_ID = net.minecraft.resources.Identifier.fromNamespaceAndPath(
+		io.github.huydangtruong.immortalcultivation.ImmortalCultivation.NAMESPACE, "purgatory_pillar_health");
+
+	/**
+	 * A 2-block pillar of crying obsidian and a charged respawn anchor (block displays, glowing so it is found through walls)
+	 * around a still, silent wither skeleton that takes the hits (30 hearts). It never dies: at 0 health it shatters.
+	 */
+	private static void spawnPillar(ServerLevel level, Run r, Room room) {
+		int[] g = room.pillar != null ? room.pillar : room.centre;
+		Vec3 at = feet(r.slot, g);
+		if (!level.getEntitiesOfClass(Mob.class, box(r.slot, room), m -> m.entityTags().contains(PILLAR_TAG)).isEmpty()) {
+			return;
+		}
+		if (!(net.minecraft.world.entity.EntityTypes.WITHER_SKELETON.create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT)
+				instanceof Mob m)) {
+			return;
+		}
+		m.snapTo(at.x, at.y, at.z, 0f, 0f);
+		m.setNoAi(true);
+		m.setSilent(true);
+		m.setPersistenceRequired();
+		m.addTag(PILLAR_TAG);
+		m.addTag(io.github.huydangtruong.immortalcultivation.danger.DangerMobs.APPLIED_TAG);
+		var health = m.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
+		if (health != null) {
+			health.addPermanentModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(PILLAR_HEALTH_ID,
+				DungeonRules.PILLAR_HEALTH - health.getBaseValue(), net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE));
+		}
+		var push = m.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.KNOCKBACK_RESISTANCE);
+		if (push != null) {
+			push.setBaseValue(1.0);
+		}
+		var scale = m.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.SCALE);
+		if (scale != null) {
+			scale.setBaseValue(0.82); // 2 blocks tall, hidden inside the blocks
+		}
+		m.setHealth(m.getMaxHealth());
+		m.setCustomNameVisible(true);
+		pillarName(m);
+		level.addFreshEntity(m);
+		pillarBlock(level, at, Blocks.CRYING_OBSIDIAN.defaultBlockState(), 0f);
+		pillarBlock(level, at, Blocks.RESPAWN_ANCHOR.defaultBlockState()
+			.setValue(net.minecraft.world.level.block.RespawnAnchorBlock.CHARGE, 4), 1f);
+		level.playSound(null, BlockPos.containing(at), SoundEvents.RESPAWN_ANCHOR_CHARGE, SoundSource.BLOCKS, 2f, 0.7f);
+	}
+
+	private static void pillarBlock(ServerLevel level, Vec3 at, BlockState state, float y) {
+		if (!(net.minecraft.world.entity.EntityTypes.BLOCK_DISPLAY.create(level, net.minecraft.world.entity.EntitySpawnReason.TRIGGERED)
+				instanceof net.minecraft.world.entity.Display.BlockDisplay d)) {
+			return;
+		}
+		((io.github.huydangtruong.immortalcultivation.mixin.BlockDisplayAccess) d).permahearts$setBlockState(state);
+		((io.github.huydangtruong.immortalcultivation.mixin.DisplayAccess) d).permahearts$setTransformation(new com.mojang.math.Transformation(
+			new org.joml.Vector3f(-0.45f, y, -0.45f), new org.joml.Quaternionf(), new org.joml.Vector3f(0.9f, 1f, 0.9f), new org.joml.Quaternionf()));
+		d.setPos(at.x, at.y, at.z);
+		d.setNoGravity(true);
+		d.addTag(PILLAR_TAG);
+		d.setGlowingTag(true);
+		level.addFreshEntity(d);
+	}
+
+	private static void pillarName(Mob m) {
+		int hearts = (int) Math.ceil(m.getHealth() / 2.0);
+		m.setCustomName(Component.literal("Seal Pillar ").withStyle(ChatFormatting.LIGHT_PURPLE)
+			.append(Component.literal("\u2764 " + hearts).withStyle(ChatFormatting.RED)));
+	}
+
+	static boolean isPillar(net.minecraft.world.entity.Entity e) {
+		return e.entityTags().contains(PILLAR_TAG);
+	}
+
+	/** The pillar's health hit 0 (death event): it shatters instead of dying, no drops. */
+	static void shatter(ServerLevel level, Mob m) {
+		Vec3 at = m.position();
+		for (net.minecraft.world.entity.Entity e : level.getEntities((net.minecraft.world.entity.Entity) null,
+				new AABB(at, at).inflate(1.0, 3.0, 1.0), PurgatoryFloor::isPillar)) {
+			e.discard();
+		}
+		m.discard();
+		level.playSound(null, BlockPos.containing(at), SoundEvents.RESPAWN_ANCHOR_DEPLETE.value(), SoundSource.BLOCKS, 2f, 0.8f);
+		level.playSound(null, BlockPos.containing(at), SoundEvents.GLASS_BREAK, SoundSource.BLOCKS, 2f, 0.6f);
+		level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(net.minecraft.core.particles.ParticleTypes.BLOCK,
+			Blocks.CRYING_OBSIDIAN.defaultBlockState()), at.x, at.y + 1, at.z, 60, 0.4, 0.8, 0.4, 0.1);
+	}
+
+	private static void tickPillar(MinecraftServer server, ServerLevel level, Run r, Room room, List<ServerPlayer> alive) {
+		int t = r.tickRoom(room.index);
+		if (t % 10 != 0) {
+			return;
+		}
+		AABB b = box(r.slot, room).inflate(0.5);
+		List<Mob> pillar = level.getEntitiesOfClass(Mob.class, b, m -> isPillar(m) && m.isAlive());
+		if (pillar.isEmpty()) {
+			for (net.minecraft.world.entity.Entity e : level.getEntities((net.minecraft.world.entity.Entity) null, b, PurgatoryFloor::isPillar)) {
+				e.discard();
+			}
+			open(level, r, room);
+			Purgatory.tellRun(server, r, "The seal breaks: the doors open");
+			return;
+		}
+		Mob m = pillar.get(0);
+		Vec3 home = feet(r.slot, room.pillar != null ? room.pillar : room.centre);
+		if (m.position().distanceToSqr(home) > 0.25) {
+			m.teleportTo(home.x, home.y, home.z); // never pushed off its spot
+			m.setDeltaMovement(Vec3.ZERO);
+		}
+		pillarName(m);
+		if (t % DungeonRules.PILLAR_REINFORCE_TICKS == 0) {
+			int players = r.team ? r.players.size() : 1;
+			int alreadyIn = mobs(level, b).size();
+			int add = Math.min(DungeonRules.reinforcements(r.floor, players), DungeonRules.wave(room.kind, r.floor, players) - alreadyIn);
+			if (add > 0) {
+				level.playSound(null, BlockPos.containing(home), SoundEvents.TRIAL_SPAWNER_SPAWN_MOB, SoundSource.HOSTILE, 2f, 0.8f);
+				spawnWave(level, r, room, alive, add);
+			}
+		}
+	}
+
 	/** D260: the floor is won: every sealed gate opens. */
 	static void openAll(ServerLevel level, Run r) {
+		for (net.minecraft.world.entity.Entity e : level.getEntities((net.minecraft.world.entity.Entity) null, Purgatory.inside(r.slot),
+				PurgatoryFloor::isPillar)) {
+			e.discard(); // D265
+		}
 		for (Room room : dungeon(r).rooms()) {
 			int state = r.room(room.index);
 			if (state == Run.SEALED || state == Run.SEALED_LAST) {

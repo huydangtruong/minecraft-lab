@@ -23,6 +23,10 @@ public enum Modules {
 	CRYPT(RoomKind.LOCKED, 7, Modules::crypt, Style.DEEP, Style.BASE),
 	COPPER_LAB(RoomKind.LOCKED, 7, Modules::copperLab, Style.TRIAL),
 	NETHER_HALL(RoomKind.LOCKED, 7, Modules::netherHall, Style.NETHER),
+	// D265: sealed until the Seal Pillar is destroyed
+	PILLAR_TOWER(RoomKind.PILLAR, 5, Modules::pillarTower, Style.TRIAL, Style.BASE, Style.DEEP),
+	PILLAR_PERCH(RoomKind.PILLAR, 5, Modules::pillarPerch, Style.END, Style.TRIAL, Style.LIBRARY),
+	PILLAR_FORGE(RoomKind.PILLAR, 5, Modules::pillarForge, Style.NETHER),
 	// hazards
 	LIBRARY_MAZE(RoomKind.HAZARD, 5, c -> maze(c, Mat.SHELF), Style.LIBRARY),
 	HEDGE_MAZE(RoomKind.HAZARD, 5, c -> maze(c, Mat.LEAVES), Style.GARDEN),
@@ -484,6 +488,64 @@ public enum Modules {
 		f.set(10, DungeonRules.CELL_H - 1, 4, Mat.LIGHT);
 		f.set(MID, DungeonRules.CELL_H - 1, MID, Mat.LIGHT);
 		f.set(2, 4, MID, Mat.LANTERN);
+	}
+
+	// ---------------------------------------------------------------- Seal Pillar rooms (D265)
+
+	/** The pillar on a raised dais on columns in the middle of the room, stairs up on one side, low walls around. */
+	private static void pillarTower(Canvas c) {
+		Canvas f = c.facing(Dir.values()[c.rng.nextInt(4)]);
+		f.shell();
+		f.fill(4, 4, 4, 10, 4, 9, Mat.FLOOR2);
+		for (int[] p : new int[][] {{4, 4}, {10, 4}, {4, 9}, {10, 9}}) {
+			column(f, p[0], p[1], 3, Mat.PILLAR);
+			f.set(p[0], 5, p[1], Mat.FENCE);
+		}
+		for (int x = 5; x <= 9; x++) {
+			f.set(x, 5, 4, Mat.FENCE);
+		}
+		for (int z = 5; z <= 8; z++) {
+			f.set(4, 5, z, Mat.FENCE);
+			f.set(10, 5, z, Mat.FENCE);
+		}
+		for (int x = 5; x <= 8; x++) {
+			f.set(x, 5, 9, Mat.FENCE);
+		}
+		stepsNorth(f, 9, 10, 13, 4);
+		f.set(MID, 3, 6, Mat.LANTERN);
+		f.pillarSpot(MID, 5, 6);
+		cover(f, 2, 2, 3, 2, 2);
+		cover(f, 11, 11, 12, 11, 2);
+		cover(f, 2, 11, 2, 12, 2);
+		for (int[] p : new int[][] {{3, 3}, {11, 3}, {3, 11}, {11, 11}}) {
+			f.set(p[0], DungeonRules.CELL_H - 1, p[1], Mat.LIGHT);
+		}
+		f.set(MID, TOP, 6, Mat.LANTERN);
+	}
+
+	/** The pillar on a floating perch in a corner, reached over a bridge from a mezzanine. */
+	private static void pillarPerch(Canvas c) {
+		Canvas f = c.facing(Dir.values()[c.rng.nextInt(4)]);
+		f.shell();
+		gallery(f, 5, 3, Mat.FLOOR2);
+		platform(f, 9, 9, 12, 12, 5, Mat.FLOOR2);
+		bridge(f, 4, 8, 11, 5, false, true);
+		f.set(11, 6, 3, Mat.AIR); // a gap in the mezzanine rail onto the bridge
+		f.set(11, 6, 9, Mat.AIR);
+		f.pillarSpot(11, 6, 11);
+		for (int[] p : new int[][] {{4, 10}, {MID, 12}}) {
+			column(f, p[0], p[1], TOP, Mat.PILLAR);
+		}
+		cover(f, 5, 7, 7, 7, 2);
+		f.set(3, TOP, 10, Mat.LANTERN);
+		f.set(MID, TOP, MID, Mat.LANTERN);
+		f.fill(5, 0, 8, 8, 0, 11, Mat.FLOOR2);
+	}
+
+	/** The pillar on an island over lava, four short bridges to it from steps on the rim. */
+	private static void pillarForge(Canvas c) {
+		lavaBridge(c);
+		c.pillarSpot(MID, 4, MID);
 	}
 
 	// ---------------------------------------------------------------- hazards

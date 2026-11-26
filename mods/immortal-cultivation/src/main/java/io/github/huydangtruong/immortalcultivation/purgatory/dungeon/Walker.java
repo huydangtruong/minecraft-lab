@@ -96,6 +96,34 @@ public final class Walker {
 			return reach.cardinality();
 		}
 
+		/** The spot farthest from every door of the room (or {@code fallback} when there are no spots). */
+		private int[] farFromDoors(Room r, int[] fallback, List<int[]> spots) {
+			int[] best = fallback;
+			double bestD = -1;
+			for (int[] p : spots) {
+				double near = Double.MAX_VALUE;
+				for (Port port : r.ports) {
+					int mid = port.slot() * DungeonRules.CELL + DungeonRules.CELL / 2;
+					int dx = switch (port.side()) {
+						case E -> r.x1() - 1;
+						case W -> r.x0();
+						default -> r.x0() + mid;
+					};
+					int dz = switch (port.side()) {
+						case N -> r.z0();
+						case S -> r.z1() - 1;
+						default -> r.z0() + mid;
+					};
+					near = Math.min(near, (p[0] - dx) * (p[0] - dx) + (p[2] - dz) * (p[2] - dz));
+				}
+				if (near > bestD) {
+					bestD = near;
+					best = p;
+				}
+			}
+			return best;
+		}
+
 		/** Spawn points (reachable, away from the walls and doors), the centre and the boss spot of a room. */
 		void fillRoom(Room r, Random rng) {
 			List<int[]> spots = new ArrayList<>();
@@ -126,6 +154,9 @@ public final class Walker {
 			r.spawns.addAll(spots.subList(0, Math.min(48, spots.size())));
 			if (r.centre == null) {
 				r.centre = best;
+			}
+			if (r.kind == RoomKind.PILLAR && (r.pillar == null || !reachable(r.pillar[0], r.pillar[1], r.pillar[2]))) {
+				r.pillar = farFromDoors(r, spots.isEmpty() ? best : null, spots); // D265
 			}
 			if (r.kind == RoomKind.BOSS && (r.boss == null || !reachable(r.boss[0], r.boss[1], r.boss[2]))) {
 				r.boss = best;

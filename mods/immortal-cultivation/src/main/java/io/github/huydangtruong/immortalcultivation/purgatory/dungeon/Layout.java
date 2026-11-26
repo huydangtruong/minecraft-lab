@@ -304,6 +304,9 @@ public final class Layout {
 		if (!res.reachable(x, y, z) || g.mat(x, y, z) != Mat.AIR || g.mat(x, y + 1, z) != Mat.AIR) {
 			return null;
 		}
+		if (r.pillar != null && Math.abs(r.pillar[0] - x) <= 1 && Math.abs(r.pillar[2] - z) <= 1 && Math.abs(r.pillar[1] - y) <= 1) {
+			return null; // not on the Seal Pillar's spot
+		}
 		Mat below = g.mat(x, y - 1, z);
 		if (below.move != Mat.Move.SOLID || below == Mat.STAIR || below == Mat.LANTERN || below == Mat.CHEST) {
 			return null;
@@ -379,14 +382,14 @@ public final class Layout {
 		}
 		int locked = 0;
 		for (int i : plain) {
-			locked += pick[i].kind == RoomKind.LOCKED ? 1 : 0;
+			locked += pick[i].kind == RoomKind.LOCKED || pick[i].kind == RoomKind.PILLAR ? 1 : 0;
 		}
 		for (int i : plain) {
 			if (locked >= Math.max(1, plain.size() / 2)) { // D259: half the plain rooms lock
 				break;
 			}
-			if (pick[i].kind != RoomKind.LOCKED) {
-				pick[i] = weighted(uses, RoomKind.LOCKED);
+			if (pick[i].kind != RoomKind.LOCKED && pick[i].kind != RoomKind.PILLAR) {
+				pick[i] = weighted(uses, rng.nextDouble() < DungeonRules.PILLAR_SHARE ? RoomKind.PILLAR : RoomKind.LOCKED); // D265
 				locked++;
 			}
 		}
