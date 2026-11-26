@@ -344,6 +344,11 @@ public class PurgatoryGameTest {
 			c.assertTrue(b.getMaxHealth() > 40, "a strong boss: " + b.getMaxHealth());
 			c.assertTrue(Math.abs(b.getScale() - 2.0) < 0.01, "D261: twice the size: " + b.getScale());
 			c.assertTrue(r.ticksLeft < PurgatoryRules.RUN_TICKS, "the clock runs");
+			Mob plain = (Mob) b.getType().create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
+			int vanilla = plain.getExperienceReward(level, p);
+			plain.discard();
+			c.assertTrue(vanilla > 0 && b.getExperienceReward(level, p) >= vanilla * 10 && b.getExperienceReward(level, p) % 10 == 0, // (gear adds vanilla XP too)
+				"D267: ten times the XP: " + b.getExperienceReward(level, p) + " vs " + vanilla);
 			b.kill(level);
 			c.runAfterDelay(3, () -> {
 				c.assertTrue(data(c).runOf(id(p)) == r && r.won(), "D260: the winner stays a while");

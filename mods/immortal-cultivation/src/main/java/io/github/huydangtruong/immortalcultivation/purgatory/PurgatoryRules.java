@@ -9,6 +9,9 @@ import java.util.random.RandomGenerator;
  * every number that makes a floor harder grows with the floor and never shrinks, and health and damage grow strictly.
  */
 public final class PurgatoryRules {
+	/** D267: a floor boss drops this many times the vanilla XP of its kind. */
+	public static final int BOSS_XP_MULTIPLIER = 10;
+
 	/** Outer size of the old bedrock box (D235, before P-082): only to clean up a run saved with one. */
 	public static final int OLD_BOX = 64;
 	/** Boxes stand this far apart on the x axis of the purgatory dimension. */
