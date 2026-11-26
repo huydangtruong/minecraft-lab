@@ -1,5 +1,7 @@
 package io.github.huydangtruong.immortalcultivation.purgatory.dungeon;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.function.Consumer;
 
@@ -24,9 +26,11 @@ public enum Modules {
 	COPPER_LAB(RoomKind.LOCKED, 7, Modules::copperLab, Style.TRIAL),
 	NETHER_HALL(RoomKind.LOCKED, 7, Modules::netherHall, Style.NETHER),
 	// D265: sealed until the Seal Pillar is destroyed
-	PILLAR_TOWER(RoomKind.PILLAR, 5, Modules::pillarTower, Style.TRIAL, Style.BASE, Style.DEEP),
-	PILLAR_PERCH(RoomKind.PILLAR, 5, Modules::pillarPerch, Style.END, Style.TRIAL, Style.LIBRARY),
-	PILLAR_FORGE(RoomKind.PILLAR, 5, Modules::pillarForge, Style.NETHER),
+	PILLAR_TOWER(RoomKind.PILLAR, 3, Modules::pillarTower, Style.TRIAL, Style.BASE, Style.DEEP),
+	PILLAR_PERCH(RoomKind.PILLAR, 3, Modules::pillarPerch, Style.END, Style.TRIAL, Style.LIBRARY),
+	PILLAR_FORGE(RoomKind.PILLAR, 3, Modules::pillarForge, Style.NETHER),
+	PILLAR_SHRINE(RoomKind.PILLAR, 3, Modules::pillarShrine, Style.BASE, Style.DEEP, Style.GARDEN),
+	PILLAR_SPIRE(RoomKind.PILLAR, 3, Modules::pillarSpire, Style.OCEAN, Style.END, Style.LIBRARY),
 	// hazards
 	LIBRARY_MAZE(RoomKind.HAZARD, 5, c -> maze(c, Mat.SHELF), Style.LIBRARY),
 	HEDGE_MAZE(RoomKind.HAZARD, 5, c -> maze(c, Mat.LEAVES), Style.GARDEN),
@@ -548,6 +552,83 @@ public enum Modules {
 		c.pillarSpot(MID, 4, MID);
 	}
 
+	/** A 3-high ring wall (accent on top) around x0..x1, z0..z1, with an opening {@code gap} wide in the middle of its south (or north) side. */
+	private static void ring(Canvas f, int x0, int z0, int x1, int z1, int gap, boolean south) {
+		for (int x = x0; x <= x1; x++) {
+			for (int z = z0; z <= z1; z++) {
+				if (x != x0 && x != x1 && z != z0 && z != z1) {
+					continue;
+				}
+				if (z == (south ? z1 : z0) && Math.abs(x - MID) <= gap / 2) {
+					continue;
+				}
+				f.fill(x, 1, z, x, 2, z, Mat.WALL2);
+				f.set(x, 3, z, Mat.ACCENT);
+			}
+		}
+	}
+
+	/** D265: the pillar in a shrine of two ring walls; their openings face opposite ways, so one walks round to get in. */
+	private static void pillarShrine(Canvas c) {
+		Canvas f = c.facing(Dir.values()[c.rng.nextInt(4)]);
+		f.shell();
+		ring(f, 3, 3, 11, 11, 3, true);
+		ring(f, 5, 5, 9, 9, 1, false); // the inner ring opens the other way
+		f.fill(6, 0, 6, 8, 0, 8, Mat.FLOOR2);
+		for (int[] p : new int[][] {{3, 3}, {11, 3}, {3, 11}, {11, 11}}) {
+			f.set(p[0], 3, p[1], Mat.LIGHT);
+		}
+		for (int[] p : new int[][] {{5, 5}, {9, 5}, {5, 9}, {9, 9}}) {
+			f.set(p[0], 3, p[1], Mat.DECOR);
+			f.set(p[0], 4, p[1], Mat.LANTERN);
+		}
+		f.pillarSpot(MID, 1, MID);
+		f.set(MID, TOP, MID, Mat.LANTERN);
+		for (int[] p : new int[][] {{1, 1}, {13, 1}, {1, 13}, {13, 13}}) {
+			column(f, p[0], p[1], TOP, Mat.PILLAR);
+		}
+	}
+
+	/** D265: the pillar on a high platform on a thick column, reached by floating steps spiralling up around it. */
+	private static void pillarSpire(Canvas c) {
+		Canvas f = c.facing(Dir.values()[c.rng.nextInt(4)]);
+		f.shell();
+		f.fill(6, 1, 6, 8, 6, 8, Mat.PILLAR);
+		f.fill(5, 7, 5, 9, 7, 9, Mat.FLOOR2);
+		f.set(5, 8, 5, Mat.FENCE);
+		f.set(9, 8, 5, Mat.FENCE);
+		f.set(5, 8, 9, Mat.FENCE);
+		f.set(9, 8, 9, Mat.FENCE);
+		f.set(MID, 4, 9, Mat.LIGHT);
+		f.set(MID, 4, 5, Mat.LIGHT);
+		List<int[]> path = new ArrayList<>();
+		for (int z = 10; z >= 4; z--) {
+			path.add(new int[] {10, z});
+		}
+		for (int x = 9; x >= 4; x--) {
+			path.add(new int[] {x, 4});
+		}
+		for (int z = 5; z <= 10; z++) {
+			path.add(new int[] {4, z});
+		}
+		for (int i = 0; i < path.size(); i++) {
+			int h = 1 + i / 3;
+			if (h > 6) {
+				break;
+			}
+			int[] p = path.get(i);
+			f.set(p[0], h, p[1], Mat.FLOOR2);
+			if (h >= 3 && i % 3 == 1) {
+				f.set(p[0], h - 1, p[1], Mat.LANTERN);
+			}
+		}
+		f.pillarSpot(MID, 8, MID);
+		for (int[] p : new int[][] {{2, 2}, {12, 2}, {2, 12}, {12, 12}}) {
+			column(f, p[0], p[1], TOP, Mat.PILLAR);
+			f.set(p[0], 5, p[1], Mat.LIGHT);
+		}
+	}
+
 	// ---------------------------------------------------------------- hazards
 
 	/** A perfect maze of 7 x 7 cells, walls 3 high: no way over, always a way through. */
@@ -722,28 +803,71 @@ public enum Modules {
 		c.set(MID, TOP, MID, Mat.LANTERN);
 	}
 
-	/** Straight stairs along the wall the layout chose ({@link Room#stairSide}), up through the ceiling. */
+	/**
+	 * A stair hall along the wall the layout chose ({@link Room#stairSide}): a first flight rises west to a landing on columns,
+	 * a wide second flight rises east with a rail up through the ceiling. Below: a fountain, bookshelves, a carpet runner.
+	 */
 	private static void stairUp(Canvas c) {
 		Canvas f = c.facing(c.room.stairSide);
 		f.shell();
 		f.fill(8, DungeonRules.CELL_H - 1, IN0, 11, DungeonRules.CELL_H - 1, 3, Mat.AIR);
-		for (int i = 1; i <= 11; i++) {
-			f.fill(i, 1, IN0, i, i - 1, 3, Mat.WALL2);
-			f.fill(i, i, IN0, i, i, 3, Mat.STAIR, Dir.E);
+		for (int k = 1; k <= 5; k++) { // first flight, x 10..6, z 4..5, rising west
+			int x = 11 - k;
+			if (k > 1) {
+				f.fill(x, 1, 4, x, k - 1, 5, Mat.WALL2);
+			}
+			f.fill(x, k, 4, x, k, 5, Mat.STAIR, Dir.W);
 		}
-		f.set(MID, TOP, 10, Mat.LANTERN);
+		f.fill(3, 5, IN0, 5, 5, 5, Mat.FLOOR2); // the landing
+		for (int[] p : new int[][] {{3, 5}, {5, 5}, {3, IN0}}) {
+			f.fill(p[0], 1, p[1], p[0], 4, p[1], Mat.PILLAR);
+		}
+		f.set(4, 4, 3, Mat.LANTERN);
+		f.set(3, 6, 5, Mat.FENCE);
+		f.set(3, 6, 4, Mat.FENCE);
+		f.set(3, 6, 3, Mat.LANTERN);
+		for (int x = 6; x <= 11; x++) { // second flight, x 6..11, z 1..3, rising east
+			f.fill(x, 1, IN0, x, x - 1, 3, Mat.WALL2);
+			f.fill(x, x, IN0, x, x, 3, Mat.STAIR, Dir.E);
+			if (x >= 7 && x <= 10) {
+				f.set(x, x + 1, 4, Mat.FENCE);
+			}
+		}
+		f.fill(6, 1, 3, 10, 4, 3, Mat.ACCENT); // a band of accent on the flight's face
+		f.fill(12, 1, IN0, IN1, 3, IN0, Mat.SHELF);
+		f.fill(IN0, 1, 12, 3, 2, IN1, Mat.SHELF);
+		f.fill(11, 1, 12, IN1, 2, IN1, Mat.SHELF);
+		f.fill(6, 1, 8, 8, 1, 10, Mat.ACCENT); // a fountain
+		f.set(MID, 1, 9, Mat.WATER);
+		f.set(MID, 2, 9, Mat.AIR);
+		f.set(MID, 4, 9, Mat.LIGHT);
+		for (int z = 6; z <= 11; z++) {
+			f.set(11, 1, z, Mat.CARPET);
+			f.set(12, 1, z, Mat.CARPET);
+		}
+		f.set(MID, TOP, MID, Mat.LANTERN);
+		f.set(3, TOP, 10, Mat.LANTERN);
+		f.set(11, TOP, 10, Mat.LANTERN);
 	}
 
-	/** The top of {@link #stairUp}: a hole in the floor fenced on its open sides. */
+	/** The top of {@link #stairUp}: the stairwell rises through a railed opening between two lit posts. */
 	private static void stairDown(Canvas c) {
 		Canvas f = c.facing(c.room.stairSide);
 		f.shell();
 		f.fill(9, 0, IN0, 11, 0, 3, Mat.AIR);
-		for (int x = 8; x <= 11; x++) {
+		for (int x = 9; x <= 11; x++) {
 			f.set(x, 1, 4, Mat.FENCE);
 		}
 		for (int z = IN0; z <= 3; z++) {
 			f.set(8, 1, z, Mat.FENCE);
+		}
+		f.fill(8, 1, 4, 8, 2, 4, Mat.PILLAR);
+		f.set(8, 3, 4, Mat.LANTERN);
+		f.fill(12, 1, 4, 12, 2, 4, Mat.PILLAR);
+		f.set(12, 3, 4, Mat.LANTERN);
+		f.fill(8, 0, 5, 12, 0, 6, Mat.FLOOR2);
+		for (int[] p : new int[][] {{3, 10}, {11, 10}}) {
+			column(f, p[0], p[1], TOP, Mat.PILLAR);
 		}
 		f.set(MID, TOP, 10, Mat.LANTERN);
 	}
