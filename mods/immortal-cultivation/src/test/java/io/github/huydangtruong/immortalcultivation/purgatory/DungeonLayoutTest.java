@@ -272,5 +272,22 @@ class DungeonLayoutTest {
 		System.out.println("pillar rooms " + pillars + " of " + rooms);
 		assertTrue(pillars * 12 > rooms, "pillar rooms " + pillars + " of " + rooms);
 	}
+
+	/** D269: skills break the inside of a module, never its shell, a staircase or pillar room, or the skin. */
+	@Test
+	void skillsBreakTheInsideOnly() {
+		Dungeon d = Layout.generate(7, 6);
+		for (Room r : d.rooms()) {
+			boolean whole = r.kind == RoomKind.STAIRS || r.kind == RoomKind.PILLAR;
+			assertTrue(d.guarded(r.x0(), r.y0() + 2, r.z0() + 5), r + " wall");
+			assertTrue(d.guarded(r.x0() + 5, r.y0(), r.z0() + 5), r + " floor");
+			assertTrue(d.guarded(r.x0() + 5, r.y1() - 1, r.z0() + 5), r + " ceiling");
+			for (int[] g : r.gates) {
+				assertTrue(d.guarded(g[0], g[1], g[2]), r + " gate");
+			}
+			assertEquals(whole, d.guarded(r.x0() + 7, r.y0() + 3, r.z0() + 7), r + " inside");
+		}
+		assertTrue(d.guarded(-1, 0, 0), "the skin");
+	}
 }
 

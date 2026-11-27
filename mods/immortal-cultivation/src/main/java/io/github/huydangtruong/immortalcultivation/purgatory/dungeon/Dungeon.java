@@ -15,6 +15,20 @@ public record Dungeon(long seed, int floor, Grid grid, List<Room> rooms, Room st
 		return null;
 	}
 
+	/**
+	 * D269: skills may break the inside of a module but not its shell (walls, floor, ceiling, gates), nor anything in a
+	 * staircase or Seal Pillar room (their steps are the only way up), nor anything outside the rooms (the bedrock skin).
+	 */
+	public boolean guarded(int x, int y, int z) {
+		for (Room r : rooms) {
+			if (x >= r.x0() && x < r.x1() && y >= r.y0() && y < r.y1() && z >= r.z0() && z < r.z1()) {
+				return r.kind == RoomKind.STAIRS || r.kind == RoomKind.PILLAR
+					|| x == r.x0() || x == r.x1() - 1 || z == r.z0() || z == r.z1() - 1 || y == r.y0() || y == r.y1() - 1;
+			}
+		}
+		return true;
+	}
+
 	/** True when a grid point is part of some room's box (walls included). */
 	public boolean built(int x, int y, int z) {
 		for (Room r : rooms) {

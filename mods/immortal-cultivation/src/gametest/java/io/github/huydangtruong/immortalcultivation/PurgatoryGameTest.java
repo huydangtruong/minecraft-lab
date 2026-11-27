@@ -222,7 +222,11 @@ public class PurgatoryGameTest {
 		}
 		Room start = d.start();
 		var wall = new net.minecraft.core.BlockPos(o.getX() + start.x0(), o.getY() + start.y0() + 2, o.getZ() + start.z0() + 5);
-		c.assertTrue(Purgatory.guarded(level, wall), "skills leave the dungeon alone");
+		c.assertTrue(Purgatory.guarded(level, wall), "D269: skills leave a module's walls alone");
+		c.assertTrue(Purgatory.inDungeon(level, wall), "no fire in the dungeon");
+		Room open = PurgatoryFloor.dungeon(r).rooms().stream().filter(x -> x.kind == RoomKind.LOCKED).findFirst().orElseThrow();
+		c.assertTrue(!Purgatory.guarded(level, new net.minecraft.core.BlockPos(o.getX() + open.x0() + 7, o.getY() + open.y0() + 3,
+			o.getZ() + open.z0() + 7)), "D269: the inside of a module breaks");
 		c.assertTrue(!Purgatory.guarded(level, wall.offset(0, 0, 500)), "but not the world around it");
 		Purgatory.finish(p, false);
 		for (int[] k : skin) {

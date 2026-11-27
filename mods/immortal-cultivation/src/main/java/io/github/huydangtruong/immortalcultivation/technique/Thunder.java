@@ -150,9 +150,8 @@ public final class Thunder {
 				}
 			}
 		}
-		Level.ExplosionInteraction blocks = io.github.huydangtruong.immortalcultivation.purgatory.Purgatory.guarded(sl, net.minecraft.core.BlockPos.containing(c))
-			? Level.ExplosionInteraction.NONE : Level.ExplosionInteraction.MOB; // D259: the Purgatory dungeon stays whole
-		sl.explode(null, null, new NoEntityDamage(), c.x, c.y, c.z, (float) TechniqueRules.thunderPower(lvl), false, blocks);
+		sl.explode(null, null, new NoEntityDamage(sl), c.x, c.y, c.z, (float) TechniqueRules.thunderPower(lvl), false,
+			Level.ExplosionInteraction.MOB); // D269: in the Purgatory dungeon module shells stay whole (NoEntityDamage)
 		for (LivingEntity e : near(sl, c, r, caster)) {
 			double d = distance(e, c);
 			float dmg = (float) TechniqueRules.thunderDamageAt(lvl, d);
@@ -192,6 +191,19 @@ public final class Thunder {
 
 	/** The explosion breaks blocks like a creeper but hurts nobody: the technique deals the damage. */
 	private static final class NoEntityDamage extends ExplosionDamageCalculator {
+		private final ServerLevel level;
+
+		NoEntityDamage(ServerLevel level) {
+			this.level = level;
+		}
+
+		@Override
+		public boolean shouldBlockExplode(Explosion explosion, net.minecraft.world.level.BlockGetter getter, net.minecraft.core.BlockPos pos,
+				net.minecraft.world.level.block.state.BlockState state, float power) {
+			return super.shouldBlockExplode(explosion, getter, pos, state, power)
+				&& !io.github.huydangtruong.immortalcultivation.purgatory.Purgatory.guarded(level, pos);
+		}
+
 		@Override
 		public boolean shouldDamageEntity(Explosion explosion, Entity entity) {
 			return false;

@@ -36,6 +36,7 @@ Trial-chamber-like floors: about 7-15 random rooms on a 6×6 cell grid (1 or 2 l
 - [x] D261: more path mobs, rune shulker bag (follows the winner home), bosses 2× size and +20% damage
 - [x] D262: 1-6 extra rooms at random, mostly two-door rooms (forks ~12%), loops only join dead ends
 - [x] D263: richer modules (mezzanines with stairs, columns, low cover walls, floating platforms with bridges), wooden gift chests in ~50% of rooms (simple_dungeon loot)
+- [x] D269: skills break module insides (Dungeon.guarded: shell, stairs and pillar rooms stay; fire still banned via Purgatory.inDungeon)
 - [x] D267: floor boss drops 10x its vanilla XP (LivingEntityXpMixin, BOSS_TAG)
 - [x] D266: stair hall rebuilt (two flights, landing, fountain, shelves), pillar_shrine and pillar_spire modules
 - [x] D265: Seal Pillar rooms (RoomKind.PILLAR, 3 modules, 60-health still wither skeleton inside two glowing block displays; shatters on death, room opens; reinforcements every 20 s; game test + screenshots)

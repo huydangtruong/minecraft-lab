@@ -202,20 +202,40 @@ public final class Purgatory {
 	}
 
 	/**
-	 * D259: blocks of a running dungeon (and its bedrock skin) that skills must not break, burn or replace. True only in the
-	 * Purgatory level, inside a run's grid or one block around it.
+	 * D259: inside a running dungeon (its grid or one block around it, the bedrock skin). Skills light no fire here (dungeon
+	 * wood would burn through the walls).
+	 */
+	public static boolean inDungeon(net.minecraft.world.level.Level level, BlockPos pos) {
+		return runAt(level, pos) != null;
+	}
+
+	/**
+	 * D269 (was D259: the whole dungeon): blocks a skill must not break or replace: a module's shell (walls, floor, ceiling,
+	 * gates), staircase and Seal Pillar rooms, the bedrock skin. The inside of other modules breaks like anywhere else.
 	 */
 	public static boolean guarded(net.minecraft.world.level.Level level, BlockPos pos) {
-		if (!(level instanceof ServerLevel sl) || sl != level(sl.getServer())) {
+		Run r = runAt(level, pos);
+		if (r == null) {
 			return false;
+		}
+		if (r.seed == 0) {
+			return true; // a run from before P-082
+		}
+		BlockPos o = DungeonBuilder.origin(r.slot);
+		return PurgatoryFloor.dungeon(r).guarded(pos.getX() - o.getX(), pos.getY() - o.getY(), pos.getZ() - o.getZ());
+	}
+
+	private static Run runAt(net.minecraft.world.level.Level level, BlockPos pos) {
+		if (!(level instanceof ServerLevel sl) || sl != level(sl.getServer())) {
+			return null;
 		}
 		Vec3 c = Vec3.atCenterOf(pos);
 		for (Run r : data(sl.getServer()).runs) {
 			if (inside(r.slot).inflate(1.5).contains(c)) {
-				return true;
+				return r;
 			}
 		}
-		return false;
+		return null;
 	}
 
 	/** Where a run's fighters start (watchers float a little higher). */
