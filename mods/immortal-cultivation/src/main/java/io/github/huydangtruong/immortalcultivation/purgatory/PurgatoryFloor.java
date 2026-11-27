@@ -452,6 +452,7 @@ public final class PurgatoryFloor {
 		for (Run r : Purgatory.data(server).runs) {
 			if (r.boss == Run.BOSS_ALIVE && Purgatory.inside(r.slot).contains(boss.position())) {
 				r.boss = Run.BOSS_DEAD;
+				Purgatory.bossFell(r, boss.position());
 			}
 		}
 	}

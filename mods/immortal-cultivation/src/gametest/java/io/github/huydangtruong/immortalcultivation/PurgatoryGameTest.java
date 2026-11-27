@@ -46,6 +46,30 @@ public class PurgatoryGameTest {
 		return c == null ? 0 : (int) c.nonEmptyItemCopyStream().filter(x -> x.is(Runes.ITEM)).count();
 	}
 
+	/** XP points in the orbs near a point. */
+	private static int orbs(net.minecraft.server.level.ServerLevel level, Vec3 at, double r) {
+		int n = 0;
+		for (var o : level.getEntitiesOfClass(net.minecraft.world.entity.ExperienceOrb.class, new net.minecraft.world.phys.AABB(at, at).inflate(r))) {
+			var out = net.minecraft.world.level.storage.TagValueOutput.createWithContext(net.minecraft.util.ProblemReporter.DISCARDING, level.registryAccess());
+			o.saveWithoutId(out);
+			n += o.getValue() * out.buildResult().getIntOr("Count", 1); // merged orbs keep a count
+		}
+		return n;
+	}
+
+	/** Runes in all the chests of a run's floor (D271). */
+	private static int chestRunes(GameTestHelper c, PurgatorySavedData.Run r) {
+		int n = 0;
+		for (var pos : io.github.huydangtruong.immortalcultivation.purgatory.DungeonBuilder.chests(PurgatoryFloor.dungeon(r), r.slot)) {
+			if (plevel(c).getBlockEntity(pos) instanceof net.minecraft.world.Container chest) {
+				for (int i = 0; i < chest.getContainerSize(); i++) {
+					n += inStack(chest.getItem(i));
+				}
+			}
+		}
+		return n;
+	}
+
 	private static ServerPlayer fighter(GameTestHelper c) {
 		GameTestKit.enable(c);
 		ServerPlayer p = GameTestKit.survivor(c);
@@ -66,8 +90,9 @@ public class PurgatoryGameTest {
 		c.assertTrue(Purgatory.finish(p, true), "won");
 		c.assertTrue(!Purgatory.fighting(p) && data(c).runOf(id(p)) == null, "run over");
 		c.assertTrue(p.level() == c.getLevel() && p.position().distanceTo(home) < 0.01, "back on the exact spot");
-		c.assertTrue(p.experienceLevel == PurgatoryRules.rewardLevels(1), "31 levels, got " + p.experienceLevel);
-		c.assertTrue(runes(p) == PurgatoryRules.rewardRunes(1, 1), "4 runes, got " + runes(p));
+		c.assertTrue(p.experienceLevel == 0 && runes(p) == 0, "D271: nothing is given, no bag");
+		c.assertTrue(orbs(c.getLevel(), p.position(), 2) == PurgatoryRules.rewardXp(1, 1), "D271: the XP lies at their feet: " + orbs(c.getLevel(), p.position(), 2));
+		c.getLevel().getEntitiesOfClass(net.minecraft.world.entity.ExperienceOrb.class, p.getBoundingBox().inflate(3)).forEach(net.minecraft.world.entity.Entity::discard);
 		PurgatorySavedData.Solo s = data(c).solo(id(p));
 		c.assertTrue(s.floor == 2 && s.cooldown == PurgatoryRules.COOLDOWN_TICKS, "floor 2 after a cooldown");
 		c.assertTrue(Purgatory.startSolo(p) != null, "cooling down");
@@ -340,6 +365,7 @@ public class PurgatoryGameTest {
 		PurgatorySavedData.Run r = data(c).runOf(id(p));
 		Room boss = PurgatoryFloor.dungeon(r).boss();
 		go(c, p, r, boss.centre);
+		c.assertTrue(chestRunes(c, r) == PurgatoryRules.chestRunes(1, 1), "D271: the runes are in the chests: " + chestRunes(c, r));
 		c.runAfterDelay(3, () -> {
 			var level = plevel(c);
 			var bosses = level.getEntitiesOfClass(Mob.class, Purgatory.inside(r.slot), m -> m.entityTags().contains(PurgatoryFloor.BOSS_TAG));
@@ -353,12 +379,13 @@ public class PurgatoryGameTest {
 			plain.discard();
 			c.assertTrue(vanilla > 0 && b.getExperienceReward(level, p) >= vanilla * 10 && b.getExperienceReward(level, p) % 10 == 0, // (gear adds vanilla XP too)
 				"D267: ten times the XP: " + b.getExperienceReward(level, p) + " vs " + vanilla);
+			Vec3 fell = b.position();
 			b.kill(level);
 			c.runAfterDelay(3, () -> {
 				c.assertTrue(data(c).runOf(id(p)) == r && r.won(), "D260: the winner stays a while");
 				c.assertTrue(data(c).solo(id(p)).floor == 2, "won: floor 2");
-				c.assertTrue(p.experienceLevel == PurgatoryRules.rewardLevels(1), "paid");
-				c.assertTrue(runes(p) == PurgatoryRules.rewardRunes(1, 1), "D261: the runes, in a bag: " + runes(p));
+				c.assertTrue(runes(p) == 0, "D271: no rune bag");
+				c.assertTrue(orbs(level, fell, 4) >= PurgatoryRules.rewardXp(1, 1), "D271: XP on the ground where the boss fell: " + orbs(level, fell, 4));
 				c.assertTrue(level.getEntitiesOfClass(Mob.class, Purgatory.inside(r.slot)).isEmpty(), "the mobs are gone");
 				c.assertTrue(PurgatoryNet.stateFor(c.getLevel().getServer(), data(c), p).mode() == PurgatoryNet.MODE_CLEARED, "shown as cleared");
 				int ticks = r.victoryTicks;
@@ -367,7 +394,7 @@ public class PurgatoryGameTest {
 					c.assertTrue(PurgatoryNet.apply(p, PurgatoryNet.COME_BACK, 0) == null, "Come back now");
 					c.assertTrue(data(c).runOf(id(p)) == null, "the run closed");
 					c.assertTrue(p.gameMode.getGameModeForPlayer() == GameType.SURVIVAL, "back home");
-					c.assertTrue(data(c).solo(id(p)).floor == 2 && p.experienceLevel == PurgatoryRules.rewardLevels(1), "paid once");
+					c.assertTrue(data(c).solo(id(p)).floor == 2 && runes(p) == 0, "won once, nothing handed out");
 					GameTestKit.drop(c, p);
 					c.succeed();
 				});
@@ -395,29 +422,18 @@ public class PurgatoryGameTest {
 		});
 	}
 
-	/** D261: a full inventory: the rune bag waits on the dungeon floor and lands at the winner's feet back home. */
+	/** D271: a floor's runes are hidden in its chests, more players more runes; the chests keep their own loot too. */
 	@GameTest(maxTicks = 40)
-	public void aBagLeftBehindFollowsTheWinnerHome(GameTestHelper c) {
+	public void theRunesAreInTheChests(GameTestHelper c) {
 		ServerPlayer p = fighter(c);
 		c.assertTrue(Purgatory.startSolo(p) == null, "solo starts");
-		for (int i = 0; i < p.getInventory().getContainerSize(); i++) {
-			p.getInventory().setItem(i, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DIRT, 64));
-		}
 		PurgatorySavedData.Run r = data(c).runOf(id(p));
-		r.boss = PurgatorySavedData.Run.BOSS_DEAD;
-		c.runAfterDelay(2, () -> {
-			var level = plevel(c);
-			var bags = level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, Purgatory.inside(r.slot), e -> inStack(e.getItem()) > 0);
-			c.assertTrue(bags.size() == 1 && inStack(bags.get(0).getItem()) == PurgatoryRules.rewardRunes(1, 1), "one bag on the floor: " + bags.size());
-			p.teleportTo(p.getX() + 3, p.getY(), p.getZ()); // walked away from it
-			c.assertTrue(PurgatoryNet.apply(p, PurgatoryNet.COME_BACK, 0) == null, "Come back now");
-			var home = p.level().getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, p.getBoundingBox().inflate(2), e -> inStack(e.getItem()) > 0);
-			c.assertTrue(home.size() == 1, "the bag is at their feet at home");
-			c.assertTrue(!Purgatory.inside(r.slot).contains(home.get(0).position()), "outside the dungeon");
-			home.forEach(net.minecraft.world.entity.Entity::discard);
-			GameTestKit.drop(c, p);
-			c.succeed();
-		});
+		c.assertTrue(!io.github.huydangtruong.immortalcultivation.purgatory.DungeonBuilder.chests(PurgatoryFloor.dungeon(r), r.slot).isEmpty(), "the floor has chests");
+		c.assertTrue(chestRunes(c, r) == PurgatoryRules.chestRunes(1, 1), "4 runes in the chests: " + chestRunes(c, r));
+		c.assertTrue(runes(p) == 0, "none handed out");
+		c.assertTrue(Purgatory.finish(p, false), "gave up");
+		GameTestKit.drop(c, p);
+		c.succeed();
 	}
 
 	/** D255: running out of time loses the floor (and costs nothing). */

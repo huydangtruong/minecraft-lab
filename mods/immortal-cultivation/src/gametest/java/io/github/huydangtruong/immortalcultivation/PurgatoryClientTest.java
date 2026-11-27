@@ -191,9 +191,9 @@ public class PurgatoryClientTest implements FabricClientGameTest {
 				throw new AssertionError("no cleared screen with Come back now");
 			}
 			context.waitTicks(40);
-			boolean home = server.computeOnServer(s -> player(s).level() == s.overworld() && player(s).experienceLevel >= 31);
+			boolean home = server.computeOnServer(s -> player(s).level() == s.overworld()); // D271: the XP stayed on the dungeon floor
 			if (!home) {
-				throw new AssertionError("the win did not send the player home with 31 levels");
+				throw new AssertionError("the win did not send the player home");
 			}
 			openTab(context);
 			context.takeScreenshot("purgatory-tab-cooldown");

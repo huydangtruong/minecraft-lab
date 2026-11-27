@@ -48,6 +48,20 @@ public final class DungeonBuilder {
 		return origin(slot).offset(g[0], g[1], g[2]);
 	}
 
+	/** D271: world positions of every chest of a floor (treasure and gift chests). */
+	public static java.util.List<BlockPos> chests(Dungeon d, int slot) {
+		java.util.List<BlockPos> out = new java.util.ArrayList<>();
+		for (Room r : d.rooms()) {
+			for (int[] c : r.chests) {
+				out.add(world(slot, c));
+			}
+			for (int[] c : r.gifts) {
+				out.add(world(slot, c));
+			}
+		}
+		return out;
+	}
+
 	public static void build(ServerLevel level, Dungeon d, int slot) {
 		force(level, slot, true);
 		BlockPos o = origin(slot);

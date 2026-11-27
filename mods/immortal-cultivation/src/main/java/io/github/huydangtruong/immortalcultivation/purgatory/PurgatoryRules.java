@@ -130,6 +130,25 @@ public final class PurgatoryRules {
 		return 3 * Math.max(1, players) + Math.max(0, floor);
 	}
 
+	/** D271: runes hidden in the chests of a floor: what every winner used to get (D251), times the players. */
+	public static int chestRunes(int floor, int players) {
+		return Math.max(1, players) * rewardRunes(floor, players);
+	}
+
+	/** XP points that take a player from level 0 to level n (vanilla: 2l+7 below 16, 5l-38 below 31, then 9l-158). */
+	public static int xpForLevels(int levels) {
+		int sum = 0;
+		for (int l = 0; l < levels; l++) {
+			sum += l < 15 ? 2 * l + 7 : l < 30 ? 5 * l - 38 : 9 * l - 158;
+		}
+		return sum;
+	}
+
+	/** D271: XP points the won floor leaves on the ground: the D240 levels (from level 0) for every player of the run. */
+	public static int rewardXp(int floor, int players) {
+		return Math.max(1, players) * xpForLevels(rewardLevels(floor));
+	}
+
 	/** D264: highest reward rune level of floor n: 3 below floor 20, 4 from 20, 5 from 30, 6 from 50, 7 from 70, 8 from 100. */
 	public static int maxRuneLevel(int floor) {
 		return floor >= 100 ? 8 : floor >= 70 ? 7 : floor >= 50 ? 6 : floor >= 30 ? 5 : floor >= 20 ? 4 : 3;

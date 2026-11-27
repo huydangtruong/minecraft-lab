@@ -46,3 +46,6 @@ Trial-chamber-like floors: about 7-15 random rooms on a 6×6 cell grid (1 or 2 l
 ## Risks / ask first
 - Old saved runs (before P-082) end as a loss that costs nothing; their 64³ box is cleared.
 - Big mobs (ravager) only spawn where they fit; a room may get fewer mobs than the wave number.
+
+## D271 (2026-11-27)
+- Runes go into the floor chests at build (`Purgatory.hideRunes`, `DungeonBuilder.chests`, `PurgatoryRules.chestRunes`); no reward bag. The win drops `PurgatoryRules.rewardXp` as XP orbs where the boss fell (`Purgatory.bossFell` → `win`); a command win puts each share at the winner's feet at home. Tests: `theRunesAreInTheChests`, updated win tests, `PurgatoryRulesTest`. Done on `feat/P-083-time-rewind` (built on this branch).

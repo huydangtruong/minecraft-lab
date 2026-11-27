@@ -36,6 +36,14 @@ class PurgatoryRulesTest {
 		assertEquals(30, PurgatoryRules.rewardRunes(27, 1));
 		assertEquals(4, PurgatoryRules.rewardRunes(1, 1));
 		assertEquals(17, PurgatoryRules.rewardRunes(5, 4));
+		assertEquals(68, PurgatoryRules.chestRunes(5, 4)); // D271
+		assertEquals(4, PurgatoryRules.chestRunes(1, 1));
+		assertEquals(0, PurgatoryRules.xpForLevels(0));
+		assertEquals(7, PurgatoryRules.xpForLevels(1));
+		assertEquals(352, PurgatoryRules.xpForLevels(16)); // vanilla table
+		assertEquals(1395, PurgatoryRules.xpForLevels(30));
+		assertEquals(1507, PurgatoryRules.xpForLevels(31));
+		assertEquals(2 * 1507, PurgatoryRules.rewardXp(1, 2));
 	}
 
 	/** D264: reward rune levels grow with the floor: up to 3 below 20, 4, 5 from 30, 6 from 50, 7 from 70, 8 from 100. */

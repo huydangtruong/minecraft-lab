@@ -24,6 +24,9 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
+import net.minecraft.world.entity.ExperienceOrb;
+import net.minecraft.world.Container;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -394,6 +397,7 @@ public final class Purgatory {
 		d.runs.add(r);
 		ServerLevel level = level(server);
 		DungeonBuilder.build(level, PurgatoryFloor.dungeon(r), slot);
+		hideRunes(level, r);
 		Vec3 c = start(r);
 		for (ServerPlayer p : players) {
 			d.back.put(key(p), backOf(p));
@@ -403,7 +407,7 @@ public final class Purgatory {
 			p.setDeltaMovement(Vec3.ZERO);
 			p.resetFallDistance();
 			p.sendSystemMessage(Component.literal((team ? "Team " : "") + "Purgatory floor " + floor
-				+ ": find and kill the boss within 10 minutes").withStyle(ChatFormatting.DARK_RED));
+				+ ": find and kill the boss within 10 minutes. The runes are in the chests").withStyle(ChatFormatting.DARK_RED));
 		}
 		d.changed();
 		return r;
@@ -411,13 +415,72 @@ public final class Purgatory {
 
 	/** Ends a run: settles it (unless it was already won, D260) and sends everyone home. */
 	static void end(MinecraftServer server, PurgatorySavedData d, Run r, boolean won) {
+		boolean paidHere = won && !r.won();
 		if (!r.won()) {
 			settle(server, d, r, won);
 		}
 		close(server, d, r);
+		if (paidHere) { // a win without the boss's death (command): each winner's share at their feet back home
+			for (String id : r.players) {
+				ServerPlayer p = server.getPlayerList().getPlayer(UUID.fromString(id));
+				if (p != null) {
+					ExperienceOrb.award(p.level(), p.position(), PurgatoryRules.rewardXp(r.floor, 1));
+				}
+			}
+		}
 	}
 
-	/** Floor, cooldown, rewards and the result line. */
+	/**
+	 * D271: the floor's runes go into its chests (treasure and gift chests, each rune in a random one) when it is built:
+	 * the fighters find and loot them. The chests' own loot is rolled first so it keeps its place.
+	 */
+	static void hideRunes(ServerLevel level, Run r) {
+		List<Container> chests = new ArrayList<>();
+		for (BlockPos pos : DungeonBuilder.chests(PurgatoryFloor.dungeon(r), r.slot)) {
+			if (level.getBlockEntity(pos) instanceof RandomizableContainerBlockEntity chest) {
+				chest.unpackLootTable(null);
+				chests.add(chest);
+			}
+		}
+		if (chests.isEmpty()) {
+			return;
+		}
+		int n = PurgatoryRules.chestRunes(r.floor, r.players.size());
+		for (int i = 0; i < n; i++) {
+			ItemStack rune = Runes.randomReward(level.registryAccess(), RNG, r.floor);
+			if (rune.isEmpty()) {
+				continue;
+			}
+			int first = RNG.nextInt(chests.size());
+			for (int k = 0; k < chests.size(); k++) {
+				if (putInEmptySlot(chests.get((first + k) % chests.size()), rune)) {
+					break;
+				}
+			}
+		}
+	}
+
+	private static boolean putInEmptySlot(Container c, ItemStack s) {
+		int size = c.getContainerSize();
+		int start = RNG.nextInt(size);
+		for (int k = 0; k < size; k++) {
+			int i = (start + k) % size;
+			if (c.getItem(i).isEmpty()) {
+				c.setItem(i, s);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** D271: where the boss of a run fell (its XP reward drops there); in memory only. */
+	private static final Map<Integer, Vec3> BOSS_AT = new java.util.HashMap<>();
+
+	static void bossFell(Run r, Vec3 at) {
+		BOSS_AT.put(r.id, at);
+	}
+
+	/** Floor, cooldown, the result line (rewards: runes in the chests, XP on the ground, D271). */
 	private static void settle(MinecraftServer server, PurgatorySavedData d, Run r, boolean won) {
 		if (r.team) {
 			if (won) {
@@ -434,14 +497,6 @@ public final class Purgatory {
 		String result = (r.team ? "Team " : "") + "Purgatory floor " + r.floor + (won ? " cleared!" : r.ticksLeft <= 0 ? " lost: time is up" : " lost");
 		for (String id : r.players) {
 			ServerPlayer p = server.getPlayerList().getPlayer(UUID.fromString(id));
-			if (won) {
-				Owed o = new Owed(PurgatoryRules.rewardLevels(r.floor), PurgatoryRules.rewardRunes(r.floor, r.players.size()), r.floor);
-				if (p != null) {
-					pay(p, o);
-				} else {
-					d.owed.computeIfAbsent(id, k -> new ArrayList<>()).add(o);
-				}
-			}
 			if (p != null) {
 				p.sendSystemMessage(Component.literal(result).withStyle(won ? ChatFormatting.GOLD : ChatFormatting.RED));
 			}
@@ -733,6 +788,12 @@ public final class Purgatory {
 	 */
 	private static void win(MinecraftServer server, PurgatorySavedData d, ServerLevel level, Run r) {
 		settle(server, d, r, true);
+		Vec3 at = BOSS_AT.remove(r.id);
+		if (at == null) {
+			at = start(r);
+		}
+		// D271: the reward is XP on the ground where the boss fell (no bag, no levels given); the runes are in the chests
+		ExperienceOrb.award(level, at, PurgatoryRules.rewardXp(r.floor, r.players.size()));
 		r.victoryTicks = DungeonRules.VICTORY_TICKS;
 		for (Mob m : level.getEntitiesOfClass(Mob.class, inside(r.slot), m -> m.entityTags().contains(TAG))) {
 			m.discard();
@@ -741,7 +802,7 @@ public final class Purgatory {
 		for (String id : r.players) {
 			ServerPlayer p = server.getPlayerList().getPlayer(UUID.fromString(id));
 			if (p != null) {
-				p.sendSystemMessage(Component.literal("Going back in " + DungeonRules.VICTORY_TICKS / 20
+				p.sendSystemMessage(Component.literal("The boss left XP on the ground. Going back in " + DungeonRules.VICTORY_TICKS / 20
 					+ " seconds (Come back now in the inventory leaves at once)").withStyle(ChatFormatting.GRAY));
 			}
 		}
