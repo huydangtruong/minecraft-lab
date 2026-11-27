@@ -132,6 +132,9 @@ public final class TechniqueCasts {
 			case CRYSTAL -> {
 				return Crystal.cast(caster, lvl, charge);
 			}
+			case CHRONO -> {
+				return io.github.huydangtruong.immortalcultivation.technique.chrono.Chrono.cast(caster, lvl);
+			}
 			case ILLUSION -> {
 				Illusion.summon(caster, lvl);
 				caster.level().playSound(null, caster.blockPosition(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.8f, 1.7f);

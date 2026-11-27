@@ -118,6 +118,7 @@ public final class TechniquesTab {
 			case WARP -> "Hold right click for 1 s to open a portal where you look. Left click warps you to any of your portals, or to another player.";
 			case GRASP -> "Aim at a mob and hold right click: a tether grows, and when it is full the mob is yours. Left click opens your mobs (follow, stay, guard, call, release). Throw armor or weapons near them to equip them.";
 			case ANGEL -> "Summons warrior angels that fly through walls and fight for you.";
+			case CHRONO -> "Time stops in a 16-block box around you and turns grey. Scroll down to wind it back (mobs, arrows, broken blocks, your health, armor and food), up to go forward again. Cast again, or wait, and time runs on from there. Records only while it sits in a skill slot.";
 			case CRYSTAL -> "Left click: a crystal cage closes around the mob or player you aim at. Right click: around you and the nearest one. Holds 2; hostile mobs inside cannot attack for a while.";
 			case SEISM -> "Tap: a boulder smashes where you aim. Hold 1 s (Lv 3+): three quake waves around you hit everything near.";
 		};

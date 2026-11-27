@@ -5,6 +5,7 @@
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
 		"AnimalBreedXpMixin",
+		"ArrowChronoAccess",
 		"DangerMonsterMixin",
 		"DangerSunBurnMixin",
 		"EliteHurtMixin",
@@ -13,6 +14,9 @@
 		"SpawnStateCapMixin",
 		"BlockDisplayAccess",
 		"BrainGraspMixin",
+		"ChronoBlockMixin",
+		"ChronoFreezeMixin",
+		"LivingEntityChronoAccess",
 		"CrystalExplosionMixin",
 		"CropGrowthTickMixin",
 		"CropPlantMixin",

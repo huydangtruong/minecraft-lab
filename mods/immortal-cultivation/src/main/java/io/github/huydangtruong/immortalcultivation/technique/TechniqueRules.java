@@ -510,6 +510,44 @@ public final class TechniqueRules {
 		return 40 - (Math.max(1, level) - 1);
 	}
 
+	// ---- Time Rewind (D268) ----
+
+	/** Side of the box where time stops (blocks). */
+	public static final int CHRONO_BOX = 16;
+	/** The box starts this many blocks below the caster's feet. */
+	public static final int CHRONO_BELOW = 4;
+	/** One notch of the mouse wheel moves the rewind by this many ticks (0.5 s). */
+	public static final int CHRONO_NOTCH_TICKS = 10;
+	/** Recorded ticks shown per server tick while the rewind moves (2 = twice real speed). */
+	public static final int CHRONO_PLAY_SPEED = 2;
+	/** Mobs and projectiles are recorded this far around the caster (wider than the box, so a mob that walks in can walk back out). */
+	public static final double CHRONO_RECORD_RADIUS = 24;
+
+	/** How long time stays stopped: 14 s at Lv 1 to 24 s at Lv 20. */
+	public static double chronoDurationSeconds(int level) {
+		int l = Math.max(1, Math.min(MAX_LEVEL, level));
+		return 14 + 10.0 * (l - 1) / (MAX_LEVEL - 1);
+	}
+
+	public static int chronoDurationTicks(int level) {
+		return (int) Math.round(chronoDurationSeconds(level) * 20);
+	}
+
+	/** How far back time can be wound: 8 s at Lv 1 to 24 s at Lv 20 (and never more than the technique has sat in a slot). */
+	public static double chronoRewindSeconds(int level) {
+		int l = Math.max(1, Math.min(MAX_LEVEL, level));
+		return 8 + 16.0 * (l - 1) / (MAX_LEVEL - 1);
+	}
+
+	public static int chronoRewindTicks(int level) {
+		return (int) Math.round(chronoRewindSeconds(level) * 20);
+	}
+
+	/** Lowest corner of the box for a caster standing at (x, y, z): x and z centred on the caster, the floor 4 blocks under the feet. */
+	public static int[] chronoBoxMin(double x, double y, double z) {
+		return new int[] {(int) Math.floor(x + 0.5) - CHRONO_BOX / 2, (int) Math.floor(y) - CHRONO_BELOW, (int) Math.floor(z + 0.5) - CHRONO_BOX / 2};
+	}
+
 	public static int cooldownTicks(Technique t, int level) {
 		return cooldownSeconds(t, level) * 20;
 	}
@@ -622,6 +660,11 @@ public final class TechniqueRules {
 					new Stat("Impact", SeismRules.impactHearts(level) + " hearts to hostile mobs"),
 					new Stat("Wave", "unlocks at Lv " + SeismRules.WAVE_MIN_LEVEL),
 					new Stat("Cooldown", t.cooldownSeconds() + " s"));
+			case CHRONO -> List.of(
+				new Stat("Time stop", num(chronoDurationSeconds(level)) + " s"),
+				new Stat("Rewind up to", num(chronoRewindSeconds(level)) + " s"),
+				new Stat("Area", CHRONO_BOX + " x " + CHRONO_BOX + " x " + CHRONO_BOX + " blocks"),
+				new Stat("Cooldown", t.cooldownSeconds() + " s, from when time runs again"));
 			case CRYSTAL -> List.of(
 				new Stat("Cage lasts", num(CrystalRules.cageSeconds(level)) + " s"),
 				new Stat("Hostile mobs can't attack", num(CrystalRules.disarmSeconds(level)) + " s"),

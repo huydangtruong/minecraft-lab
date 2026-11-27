@@ -16,6 +16,7 @@ public enum Technique {
 	HEALING("healing", "Healing Domain", 40, false), // D80: was Healing Light, 60 s
 	SACRIFICE("sacrifice", "Undying Jutsu", 45, false), // D47: was 30 s
 	CRYSTAL("crystal", "Crystal Prison", 48, false), // D143: left click = cage around what you aim at, right click = cage around you
+	CHRONO("chrono", "Time Rewind", 140, false), // D268: time stops in a 16-block box; the wheel rewinds it; recast (or the end) lets it run again
 	PHASE("phase", "Spirit Walk", 60, false), // D80: was 90 s; D118: was Shadow Walk; D129: was Spirit Phase
 	FLIGHT("flight", "Cloud Travel", 80, false), // D52; D80: was 120 s
 	TELEPORT("teleport", "Quantum Leap", 40, true), // D80: was 60 s; // D58, D74 (was Thousand Mile Step): charged throw like Fireball, then the caster teleports // D52: held like a weapon; each landed hit starts the 12 s cooldown

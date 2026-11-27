@@ -98,6 +98,7 @@ public class ImmortalCultivation implements ModInitializer {
 		ElixirItems.init();
 		io.github.huydangtruong.immortalcultivation.technique.FocusItems.init();
 		io.github.huydangtruong.immortalcultivation.technique.TechniqueCasts.init(); // P-011 part C: technique effects
+		io.github.huydangtruong.immortalcultivation.technique.chrono.Chrono.init(); // D268: Time Rewind
 		WandererMenus.init();
 		io.github.huydangtruong.immortalcultivation.reward.RewardBoxes.init(); // P-027: reward boxes
 		WandererScheduler.register();

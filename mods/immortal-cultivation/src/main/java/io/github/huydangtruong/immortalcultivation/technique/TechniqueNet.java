@@ -125,6 +125,10 @@ public final class TechniqueNet {
 		if (t == Technique.MAYHEM) {
 			return Mayhem.input(p, level, charge); // D174: shards and the 30 s cooldown are handled by Mayhem itself
 		}
+		if (t == Technique.CHRONO && io.github.huydangtruong.immortalcultivation.technique.chrono.Chrono.active(p)) {
+			io.github.huydangtruong.immortalcultivation.technique.chrono.Chrono.cast(p, level); // D268: a recast lets time run again
+			return null;
+		}
 		if (d.onCooldown(t, now)) {
 			return "On cooldown: " + (d.cooldownLeft(t, now) + 19) / 20 + " s";
 		}
@@ -133,7 +137,8 @@ public final class TechniqueNet {
 			return t == Technique.TELEPORT ? "No safe place to land" : t == Technique.BLADE ? "No target in range" : "You cannot cast now";
 		}
 		// D157: Solar Lance shows the cooldown bar from the first tick (beam time + 45 s); Lance.stop sets the real 45 s when the beam ends
-		int extra = t == Technique.LANCE ? LanceRules.durationTicks(level) : 0;
+		// D268: the same for Time Rewind (stop time + 140 s); Chrono.resume sets the real 140 s when time runs again
+		int extra = t == Technique.LANCE ? LanceRules.durationTicks(level) : t == Technique.CHRONO ? TechniqueRules.chronoDurationTicks(level) : 0;
 		TechniqueAttachment.set(p, TechniqueAttachment.get(p).withCooldown(t, now + extra + io.github.huydangtruong.immortalcultivation.passive.Passives.cooldown(p, TechniqueRules.cooldownTicks(t, level))));
 		return null;
 	}
