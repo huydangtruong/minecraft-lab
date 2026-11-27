@@ -16,7 +16,6 @@
 		"BrainGraspMixin",
 		"ChronoBlockMixin",
 		"ChronoFreezeMixin",
-		"LivingEntityChronoAccess",
 		"CrystalExplosionMixin",
 		"CropGrowthTickMixin",
 		"CropPlantMixin",

@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -27,6 +28,10 @@ public final class ClientChrono {
 	private static final Map<Integer, Zone> ZONES = new HashMap<>();
 	/** Wheel notches not yet sent (positive = back). */
 	private static int pending;
+	/** D272: the player let go of their own stop (sent, the server may not have answered yet). */
+	private static boolean released;
+	/** D272: keys that may let go: each counts once it has been up since the hold began (keys held at the cast do not). */
+	private static final Map<KeyMapping, Boolean> ARMED = new HashMap<>();
 
 	private ClientChrono() {}
 
@@ -39,12 +44,20 @@ public final class ClientChrono {
 					z.minZ() + z.size()), 0));
 			}
 		});
+		ClientTickEvents.START_CLIENT_TICK.register(mc -> {
+			if (mc.player != null && held(mc)) {
+				mc.player.setOldPosAndRot(); // the held player does not tick: keep its drawn position following the server's
+			}
+		});
 		ClientTickEvents.END_CLIENT_TICK.register(mc -> {
 			if (mc.player == null) {
 				ZONES.clear();
 				pending = 0;
+				released = false;
+				ARMED.clear();
 				return;
 			}
+			tickRelease(mc);
 			ZONES.replaceAll((id, z) -> new Zone(z.msg, z.box, z.age + 1));
 			ZONES.values().removeIf(z -> z.age > STALE);
 			if (pending != 0 && own(mc) != null) {
@@ -54,7 +67,42 @@ public final class ClientChrono {
 		});
 		// D268: in a stopped box, projectiles and items stand still on the client too (mobs keep ticking: it only smooths the
 		// positions the server sends while the recording plays)
-		ChronoFreeze.client = e -> !(e instanceof Player) && !(e instanceof LivingEntity) && inside(e);
+		// D272: the player who cast it stands still too until they move or click
+		ChronoFreeze.client = e -> e instanceof Player ? e == Minecraft.getInstance().player && held(Minecraft.getInstance())
+			: !(e instanceof LivingEntity) && inside(e);
+	}
+
+	/** True while the player's own stop holds them. */
+	public static boolean held(Minecraft mc) {
+		Zone z = own(mc);
+		return z != null && z.msg.casterHeld() && !released;
+	}
+
+	private static void tickRelease(Minecraft mc) {
+		if (own(mc) == null) {
+			released = false;
+			ARMED.clear();
+			return;
+		}
+		if (!held(mc)) {
+			return;
+		}
+		var o = mc.options;
+		boolean ownUse = ClientSkills.selectedTechnique(mc) == io.github.huydangtruong.immortalcultivation.technique.Technique.CHRONO;
+		KeyMapping[] keys = {o.keyUp, o.keyDown, o.keyLeft, o.keyRight, o.keyJump, o.keyShift, o.keyAttack, o.keyUse};
+		boolean first = ARMED.isEmpty();
+		for (KeyMapping k : keys) {
+			boolean down = k.isDown() && mc.gui.screen() == null;
+			if (first) {
+				ARMED.put(k, !down);
+			} else if (!down) {
+				ARMED.put(k, true);
+			} else if (ARMED.getOrDefault(k, false) && !(k == o.keyUse && ownUse)) { // right click with Time Rewind selected recasts
+				released = true;
+				ClientPlayNetworking.send(new ChronoNet.Release());
+				return;
+			}
+		}
 	}
 
 	private static boolean inside(Entity e) {

@@ -2,7 +2,6 @@ package io.github.huydangtruong.immortalcultivation.technique.chrono;
 
 import io.github.huydangtruong.immortalcultivation.ImmortalCultivation;
 import io.github.huydangtruong.immortalcultivation.mixin.ArrowChronoAccess;
-import io.github.huydangtruong.immortalcultivation.mixin.LivingEntityChronoAccess;
 import io.github.huydangtruong.immortalcultivation.passive.Passives;
 import io.github.huydangtruong.immortalcultivation.technique.Technique;
 import io.github.huydangtruong.immortalcultivation.technique.TechniqueAttachment;
@@ -36,6 +35,8 @@ import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.PositionMoveRotation;
+import net.minecraft.world.entity.Relative;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -55,10 +56,10 @@ import net.minecraft.world.phys.Vec3;
  * duration lets time run again from where it is shown, and the 140 s cooldown starts then.
  */
 public final class Chrono {
-	/** Per entity frame: x, y, z (from the recorder's anchor), yRot, xRot, head, body, health, vx, vy, vz. */
-	private static final int WIDTH = 11;
-	/** Per caster frame: health, food, saturation, then (item id, damage) for feet, legs, chest, head. */
-	private static final int SELF = 11;
+	/** Per entity frame: x, y, z (from the recorder's anchor), yRot, xRot, head, body, health, vx, vy, vz, fire ticks. */
+	private static final int WIDTH = 12;
+	/** Per caster frame: health, food, saturation, (item id, damage) for feet, legs, chest, head, then x, y, z, fall distance. */
+	private static final int SELF = 15;
 	private static final EquipmentSlot[] ARMOR = {EquipmentSlot.FEET, EquipmentSlot.LEGS, EquipmentSlot.CHEST, EquipmentSlot.HEAD};
 	private static final int MAX_BLOCK_CHANGES = 20_000;
 	private static final double SYNC_RANGE = 192;
@@ -115,6 +116,8 @@ public final class Chrono {
 		final Set<UUID> held;
 		final Map<UUID, Gone> hidden = new HashMap<>();
 		int blockFrame;
+		/** D272: the caster stands still in the stop and moves with the recording until they move or click. */
+		boolean casterHeld = true;
 
 		Zone(int[] min, long end, int castFrame, ChronoCursor cursor, Set<UUID> held) {
 			this.minX = min[0];
@@ -133,7 +136,9 @@ public final class Chrono {
 	public static void init() {
 		PayloadTypeRegistry.clientboundPlay().register(ChronoNet.Zone.TYPE, ChronoNet.Zone.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ChronoNet.Scroll.TYPE, ChronoNet.Scroll.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(ChronoNet.Release.TYPE, ChronoNet.Release.CODEC);
 		ServerPlayNetworking.registerGlobalReceiver(ChronoNet.Scroll.TYPE, (payload, ctx) -> scroll(ctx.player(), payload.notches()));
+		ServerPlayNetworking.registerGlobalReceiver(ChronoNet.Release.TYPE, (payload, ctx) -> release(ctx.player()));
 		ServerTickEvents.END_SERVER_TICK.register(Chrono::tick);
 		ServerEntityEvents.ENTITY_LOAD.register(Chrono::loaded);
 		ServerEntityEvents.ENTITY_UNLOAD.register(Chrono::unloaded);
@@ -200,7 +205,12 @@ public final class Chrono {
 			values(r, e, v);
 			r.tracks.computeIfAbsent(e.getUUID(), k -> new FrameRing(r.capacity, WIDTH)).put(r.frame, v);
 		}
-		r.self.put(r.frame, selfValues(p));
+		float[] sv = selfValues(p);
+		sv[11] = (float) (p.getX() - r.ax);
+		sv[12] = (float) (p.getY() - r.ay);
+		sv[13] = (float) (p.getZ() - r.az);
+		sv[14] = (float) p.fallDistance;
+		r.self.put(r.frame, sv);
 		if (r.frame % 20 == 0) {
 			prune(r);
 		}
@@ -228,6 +238,7 @@ public final class Chrono {
 		v[8] = (float) m.x;
 		v[9] = (float) m.y;
 		v[10] = (float) m.z;
+		v[11] = e.getRemainingFireTicks();
 		if (e instanceof LivingEntity le) {
 			v[5] = le.getYHeadRot();
 			v[6] = le.yBodyRot;
@@ -380,6 +391,21 @@ public final class Chrono {
 		return true;
 	}
 
+	/** True while the player's time stop still holds them (they have not moved or clicked yet). For tests. */
+	public static boolean held(ServerPlayer p) {
+		Recorder r = RECORDERS.get(p.getUUID());
+		return r != null && r.zone != null && r.zone.casterHeld;
+	}
+
+	/** D272: the caster moved or clicked: they leave the stop and act again, the box stays stopped. */
+	public static void release(ServerPlayer p) {
+		Recorder r = RECORDERS.get(p.getUUID());
+		if (r != null && r.zone != null && r.zone.casterHeld) {
+			r.zone.casterHeld = false;
+			broadcast(p, r, r.level.getServer().getTickCount());
+		}
+	}
+
 	/** Wheel notches from the caster (positive = back). */
 	public static void scroll(ServerPlayer p, int notches) {
 		Recorder r = RECORDERS.get(p.getUUID());
@@ -427,7 +453,12 @@ public final class Chrono {
 						e = recreate(r.level, src != null ? src : gone);
 					}
 					if (e != null && track != null && (track.get(f, v) || f < track.first() && track.get(track.first(), v))) {
-						apply(r, e, v);
+						if (e instanceof LivingEntity le && v[7] > 0 && (le.isDeadOrDying() || le.deathTime > 0)) {
+							e = fresh(r.level, e); // D272: a living copy, so clients drop the dying (lying, red) one
+						}
+						if (e != null) {
+							apply(r, e, v);
+						}
 					}
 				} else if (e != null) {
 					if (gone == null) {
@@ -437,7 +468,7 @@ public final class Chrono {
 				}
 			}
 			float[] s = new float[SELF];
-			if (p.isAlive() && r.self.get(f, s)) {
+			if (z.casterHeld && p.isAlive() && r.self.get(f, s)) {
 				p.setHealth(Math.min(s[0], p.getMaxHealth()));
 				p.getFoodData().setFoodLevel((int) s[1]);
 				p.getFoodData().setSaturation(s[2]);
@@ -448,6 +479,12 @@ public final class Chrono {
 						worn.setDamageValue((int) s[4 + i * 2]);
 					}
 				}
+				// D272: the held caster goes where they were (velocity from the frame before, so letting go carries on)
+				float[] prev = new float[SELF];
+				Vec3 at = new Vec3(r.ax + s[11], r.ay + s[12], r.az + s[13]);
+				Vec3 vel = r.self.get(f - 1, prev) ? at.subtract(r.ax + prev[11], r.ay + prev[12], r.az + prev[13]) : Vec3.ZERO;
+				p.connection.teleport(new PositionMoveRotation(at, vel, 0, 0), Relative.ROTATION);
+				p.fallDistance = s[14];
 			}
 		} finally {
 			applying = false;
@@ -473,11 +510,24 @@ public final class Chrono {
 		z.blockFrame = f;
 	}
 
+	/** Replaces a dying or hurt mob by a fresh copy (same UUID): its death and hurt state live on the clients too. */
+	private static Entity fresh(ServerLevel level, Entity e) {
+		CompoundTag t = save(e);
+		e.discard();
+		return recreate(level, new Gone(e.getType(), t, -1));
+	}
+
 	private static Entity recreate(ServerLevel level, Gone g) {
 		if (g == null) {
 			return null;
 		}
-		Entity e = EntityType.create(g.type, TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), g.data), level,
+		CompoundTag data = g.data.copy();
+		if (data.contains("Health")) { // D272: it comes back alive, not dying (the frame sets its real health)
+			data.putFloat("Health", Math.max(1f, data.getFloatOr("Health", 1f)));
+			data.putShort("DeathTime", (short) 0);
+			data.putShort("HurtTime", (short) 0);
+		}
+		Entity e = EntityType.create(g.type, TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), data), level,
 			EntitySpawnReason.LOAD).orElse(null);
 		if (e != null && !level.addFreshEntity(e)) {
 			return null;
@@ -488,6 +538,8 @@ public final class Chrono {
 	private static void apply(Recorder r, Entity e, float[] v) {
 		e.snapTo(r.ax + v[0], r.ay + v[1], r.az + v[2], v[3], v[4]);
 		e.setDeltaMovement(v[8], v[9], v[10]);
+		e.setRemainingFireTicks((int) v[11]);
+		e.setSharedFlagOnFire(v[11] > 0); // (a frozen entity does not refresh the flag clients draw the fire from)
 		if (e instanceof AbstractArrow a && v[8] * v[8] + v[9] * v[9] + v[10] * v[10] > 1e-4) {
 			((ArrowChronoAccess) a).permahearts$setInGround(false); // back in flight
 		}
@@ -495,10 +547,6 @@ public final class Chrono {
 			le.setYHeadRot(v[5]);
 			le.setYBodyRot(v[6]);
 			if (v[7] > 0) {
-				if (((LivingEntityChronoAccess) le).permahearts$dead() || le.deathTime > 0) {
-					((LivingEntityChronoAccess) le).permahearts$setDead(false); // D268: rewound to before it died
-					le.deathTime = 0;
-				}
 				le.setHealth(Math.min(v[7], le.getMaxHealth()));
 			}
 		}
@@ -530,7 +578,7 @@ public final class Chrono {
 		TechniqueAttachment.set(p, TechniqueAttachment.get(p).withCooldown(Technique.CHRONO,
 			overworld + Passives.cooldown(p, TechniqueRules.cooldownTicks(Technique.CHRONO, r.lvl))));
 		sl.playSound(null, p.blockPosition(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.2f, 1.4f);
-		ChronoNet.Zone end = new ChronoNet.Zone(p.getId(), z.minX, z.minY, z.minZ, 0, 0, 0, 0, 0);
+		ChronoNet.Zone end = new ChronoNet.Zone(p.getId(), z.minX, z.minY, z.minZ, 0, 0, 0, 0, 0, false);
 		for (ServerPlayer o : sl.players()) {
 			ServerPlayNetworking.send(o, end);
 		}
@@ -553,7 +601,7 @@ public final class Chrono {
 	private static void broadcast(ServerPlayer p, Recorder r, long now) {
 		Zone z = r.zone;
 		ChronoNet.Zone msg = new ChronoNet.Zone(p.getId(), z.minX, z.minY, z.minZ, TechniqueRules.CHRONO_BOX, (int) Math.max(0, z.end - now),
-			z.cursor.shown(), z.cursor.target(), z.cursor.usable());
+			z.cursor.shown(), z.cursor.target(), z.cursor.usable(), z.casterHeld);
 		Vec3 c = z.box.getCenter();
 		for (ServerPlayer o : r.level.players()) {
 			if (o == p || o.position().distanceToSqr(c) <= SYNC_RANGE * SYNC_RANGE) {

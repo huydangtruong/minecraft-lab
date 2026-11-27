@@ -63,3 +63,6 @@ A new technique `Technique.CHRONO` ("chrono", "Time Rewind", 140 s, not charged)
 - Client: `ClientChrono` (zones, wheel, freezes projectiles/items in a box), HUD timeline in `SkillBarHud`, `ChronoGrey` + `ChronoPostMixin` + accessors feed `post_effect/chrono.json` / `shaders/post/chrono.fsh` (ray vs box test with the depth buffer: the spike worked, no fallback).
 - Manager choices: D270.
 - Tests: `ChronoRulesTest`; `ChronoGameTest` (2: rewind of mob/kill/block/spawn/caster, freeze + hits + end); `ChronoClientTest` screenshots 130-133.
+
+## D272 (2026-11-27, playtest)
+- Dying mobs were revived in place and stayed lying and red on clients: now `Chrono.fresh` swaps in a copy with the same UUID; fire ticks are recorded per frame and the on-fire flag is set by hand. The caster is held (`Zone.casterHeld`, `ClientChrono.held` freezes the local player) and teleported along their recorded position, with velocity and fall distance; a fresh press of a movement key or a click sends `ChronoNet.Release`. Tests: both `'*:chrono*'` tests extended, `ChronoClientTest` checks the husks and the player position and walks free.

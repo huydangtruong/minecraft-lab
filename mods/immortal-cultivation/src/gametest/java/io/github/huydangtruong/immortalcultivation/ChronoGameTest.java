@@ -58,10 +58,12 @@ public class ChronoGameTest {
 		Zombie moved = zombie(c, 2.5, 6.5);
 		Zombie killed = zombie(c, 7.5, 6.5);
 		Zombie[] late = new Zombie[1];
+		c.runAfterDelay(20, () -> p.connection.teleport(abs(c, 4.5, 1, 2.5).x, abs(c, 4.5, 1, 2.5).y, abs(c, 4.5, 1, 2.5).z, 0f, 0f));
 		c.runAfterDelay(12, () -> killed.kill(c.getLevel()));
 		c.runAfterDelay(25, () -> {
 			moved.teleportTo(abs(c, 5.5, 1, 8.5).x, abs(c, 5.5, 1, 8.5).y, abs(c, 5.5, 1, 8.5).z);
 			moved.setHealth(6);
+			moved.setRemainingFireTicks(5000); // (zombies burn in the sun anyway: far more than that)
 			c.setBlock(5, 1, 5, Blocks.AIR);
 			p.setHealth(8);
 			p.getFoodData().setFoodLevel(5);
@@ -72,6 +74,8 @@ public class ChronoGameTest {
 			c.assertTrue(Chrono.recorded(p) >= 35, "about 40 ticks are recorded, found " + Chrono.recorded(p));
 			c.assertTrue(TechniqueNet.cast(p, 0, 1f) == null, "the cast is accepted");
 			c.assertTrue(Chrono.active(p), "time is stopped");
+			c.assertTrue(Chrono.held(p), "D272: the caster is held");
+			moved.kill(c.getLevel()); // killed in the stop: dying, frozen
 			c.setBlock(6, 1, 5, Blocks.AIR); // broken during the stop: rewinding does not bring it back
 			Chrono.scroll(p, 3); // 30 ticks back: before the zombie moved and the block broke, after the kill
 		});
@@ -81,16 +85,20 @@ public class ChronoGameTest {
 		c.runAfterDelay(60, () -> {
 			c.assertTrue(Chrono.shown(p) == 30, "the rewind reached 1.5 s back, shown " + Chrono.shown(p));
 			Vec3 home = abs(c, 2.5, 1, 6.5);
-			c.assertTrue(moved.position().distanceTo(home) < 0.1, "the zombie is back where it stood, at " + moved.position());
-			c.assertTrue(moved.getHealth() == moved.getMaxHealth(), "its health is back, " + moved.getHealth());
+			Zombie m = (Zombie) c.getLevel().getEntity(moved.getUUID());
+			c.assertTrue(m != null && m.isAlive() && m.deathTime == 0, "D272: the zombie killed in the stop is alive again");
+			c.assertTrue(m.getId() != moved.getId(), "D272: as a fresh copy (clients drop the dying one)");
+			c.assertTrue(m.position().distanceTo(home) < 0.1, "the zombie is back where it stood, at " + m.position());
+			c.assertTrue(m.getHealth() == m.getMaxHealth(), "its health is back, " + m.getHealth());
+			c.assertTrue(m.getRemainingFireTicks() < 1000, "D272: the fire it caught later is gone: " + m.getRemainingFireTicks());
 			c.assertTrue(c.getBlockState(new BlockPos(5, 1, 5)).is(Blocks.STONE), "the block broken before the stop is back");
 			c.assertTrue(c.getBlockState(new BlockPos(6, 1, 5)).isAir(), "the block broken during the stop stays broken");
 			c.assertTrue(late[0].isRemoved(), "the zombie that came later is gone");
 			c.assertTrue(p.getHealth() == p.getMaxHealth(), "the caster's health is back, " + p.getHealth());
 			c.assertTrue(p.getFoodData().getFoodLevel() == 20, "the caster's food is back, " + p.getFoodData().getFoodLevel());
 			Zombie back = (Zombie) c.getLevel().getEntity(killed.getUUID());
-			c.assertTrue(back != null && back.isAlive(), "the killed zombie is alive again");
-			c.assertTrue(p.position().distanceTo(abs(c, 3.5, 1, 2.5)) < 0.1, "the caster did not move");
+			c.assertTrue(back != null && back.isAlive() && back.deathTime == 0 && back.getHealth() == back.getMaxHealth(), "the killed zombie is alive again");
+			c.assertTrue(p.position().distanceTo(abs(c, 3.5, 1, 2.5)) < 0.1, "D272: the held caster went back to where they stood, at " + p.position());
 		});
 		c.runAfterDelay(70, () -> {
 			Zombie back = (Zombie) c.getLevel().getEntity(killed.getUUID());
@@ -118,6 +126,8 @@ public class ChronoGameTest {
 			c.assertTrue(Chrono.usable(p) == 0, "no stop yet");
 			c.assertTrue(TechniqueNet.cast(p, 0, 1f) == null, "the cast is accepted");
 			z.setDeltaMovement(0, 0.5, 0);
+			Chrono.release(p);
+			c.assertTrue(!Chrono.held(p) && Chrono.active(p), "D272: the caster let go, the box stays stopped");
 		});
 		c.runAfterDelay(15, () -> {
 			c.assertTrue(z.position().distanceTo(abs(c, 3.5, 1, 5.5)) < 0.01, "the zombie inside does not move, at " + z.position());

@@ -92,6 +92,11 @@ public class SkillBarHud implements HudElement {
 		int stop = ClientChrono.ticksLeft(mc);
 		if (stop > 0) { // D268: Time Rewind time left
 			lineY = timeLine(g, mc, right, "Time Stop", stop, 0xFFD8D8D8, lineY);
+			if (ClientChrono.held(mc)) { // D272
+				Component hint = Component.literal("Move or click to act");
+				g.text(mc.font, hint, right - mc.font.width(hint), lineY, 0xFFB0B0B0, true);
+				lineY -= 12;
+			}
 		}
 		Technique sel = ClientSkills.selectedTechnique(mc);
 		if (sel != null) {
