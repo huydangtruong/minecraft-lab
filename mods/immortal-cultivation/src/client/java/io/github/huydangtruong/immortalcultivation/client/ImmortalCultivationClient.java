@@ -35,6 +35,7 @@ public class ImmortalCultivationClient implements ClientModInitializer {
 		EntityRendererRegistry.register(io.github.huydangtruong.immortalcultivation.technique.warp.WarpPortal.TYPE, WarpPortalRenderer::new);
 		ClientGrasp.register(); // Soul Grasp (P-053)
 		ClientMayhem.register(); // Crystal Mayhem HUD (P-064)
+		ClientChrono.register(); // Time Rewind zones, wheel and HUD (D268)
 		ClientLance.register(); // Solar Lance (P-061)
 		LanceBeamHud.register(); // Solar Lance beam over the HUD (D163)
 		ClientSeism.register(); // Seism camera shake (P-056)

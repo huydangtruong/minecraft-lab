@@ -89,6 +89,10 @@ public class SkillBarHud implements HudElement {
 			g.text(mc.font, shards, right - mc.font.width(shards), lineY, 0xFFD9A8FF, true);
 			lineY -= 12;
 		}
+		int stop = ClientChrono.ticksLeft(mc);
+		if (stop > 0) { // D268: Time Rewind time left
+			lineY = timeLine(g, mc, right, "Time Stop", stop, 0xFFD8D8D8, lineY);
+		}
 		Technique sel = ClientSkills.selectedTechnique(mc);
 		if (sel != null) {
 			Component name = Component.literal(sel.displayName() + "  Lv " + d.level(sel));
@@ -103,6 +107,10 @@ public class SkillBarHud implements HudElement {
 			g.fill(bx + 1, by + 1, bx + 1 + Math.round((w - 2) * lance), by + 4, 0xFFFF9A20);
 			g.outline(bx, by, w, 5, 0xFF202020);
 		}
+		ClientChrono.Zone own = ClientChrono.own(mc);
+		if (own != null) { // D268: the rewind timeline above the health / armour rows: left = furthest back, right = the cast
+			chronoTimeline(g, mc, own.msg());
+		}
 		if (ClientSkills.charging()) { // power bar at the centre, just above the health / armour rows
 			float c = ClientSkills.chargeFraction();
 			int w = 102;
@@ -116,6 +124,27 @@ public class SkillBarHud implements HudElement {
 				g.text(mc.font, far, (g.guiWidth() - mc.font.width(far)) / 2, by - 10, 0xFFFFFFFF, true);
 			}
 		}
+	}
+
+	private static void chronoTimeline(GuiGraphicsExtractor g, Minecraft mc, io.github.huydangtruong.immortalcultivation.technique.chrono.ChronoNet.Zone z) {
+		int maxBack = io.github.huydangtruong.immortalcultivation.technique.TechniqueRules.chronoRewindTicks(
+			ClientSkills.data(mc.player).level(io.github.huydangtruong.immortalcultivation.technique.Technique.CHRONO));
+		int w = 142;
+		int bx = (g.guiWidth() - w) / 2;
+		int by = g.guiHeight() - 62;
+		int inner = w - 2;
+		int span = Math.max(1, Math.max(maxBack, z.usable()));
+		g.fill(bx, by, bx + w, by + 5, 0xA0000000);
+		int usableX = bx + 1 + inner - Math.round(inner * z.usable() / (float) span);
+		g.fill(usableX, by + 1, bx + 1 + inner, by + 4, 0xFF6A6A6A); // recorded and reachable
+		int shownX = bx + 1 + inner - Math.round(inner * z.shown() / (float) span);
+		g.fill(shownX, by + 1, bx + 1 + inner, by + 4, 0xFFBFD8FF); // rewound part
+		int targetX = bx + 1 + inner - Math.round(inner * z.target() / (float) span);
+		g.fill(targetX, by - 1, targetX + 1, by + 6, 0xFF8FB8FF);
+		g.fill(shownX - 1, by - 2, shownX + 1, by + 7, 0xFFFFFFFF);
+		g.outline(bx, by, w, 5, 0xFF202020);
+		Component t = Component.literal(z.shown() == 0 ? "0.0 s" : String.format(java.util.Locale.ROOT, "-%.1f s", z.shown() / 20f));
+		g.text(mc.font, t, (g.guiWidth() - mc.font.width(t)) / 2, by - 11, 0xFFFFFFFF, true);
 	}
 
 	/** One right-aligned "Name N s" line (red under 5 s); returns the y of the next line up. */

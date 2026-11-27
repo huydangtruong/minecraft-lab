@@ -171,6 +171,9 @@ public final class ClientSkills {
 	 * to set (a technique position leaves the real slot unchanged). {@code wheel} has vanilla's sign (negative = down).
 	 */
 	public static int scroll(Minecraft mc, double wheel, int hotbarSlot) {
+		if (ClientChrono.scroll(mc, wheel)) {
+			return hotbarSlot; // D268: while time is stopped the wheel scrubs time
+		}
 		int delta = -(int) Math.signum(wheel);
 		int[] slots = available(mc) ? usableSlots(mc) : new int[0];
 		if (slots.length == 0) {
@@ -227,6 +230,9 @@ public final class ClientSkills {
 			return false;
 		}
 		long left = t == Technique.WARP || t == Technique.MAYHEM ? 0 : d.cooldownLeft(t, mc.level.getGameTime()); // D75: placing a portal has no cooldown; D174: Mayhem keeps its own state (the server answers)
+		if (t == Technique.CHRONO && ClientChrono.own(mc) != null) {
+			left = 0; // D268: the recast lets time run again
+		}
 		if (left > 0) {
 			mc.player.sendOverlayMessage(Component.literal("On cooldown: " + SkillBarLogic.secondsLeft(left) + " s"));
 			return false;

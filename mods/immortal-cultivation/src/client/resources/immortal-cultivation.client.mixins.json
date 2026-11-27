@@ -4,6 +4,9 @@
 	"package": "io.github.huydangtruong.immortalcultivation.client.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"client": [
+		"ChronoPostMixin",
+		"PostChainAccess",
+		"PostPassAccess",
 		"ContainerScreenAccess",
 		"RecipeBookScreenAccess",
 		"RecipeBookScreenMixin",
