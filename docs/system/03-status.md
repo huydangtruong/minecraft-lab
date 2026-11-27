@@ -70,7 +70,7 @@ Release steps: [workflow/release.md](../workflow/release.md). Release **only whe
 
 ## Open, not scheduled
 
-- **Flaky game tests left:** `IllusionWorkGameTest.farmTakesSeedsFromTheChestAndPlantsEmptyFarmland` (the clone sometimes dies; failed 2 of 4 full runs during P-076). Golem guardian and Thunder pig were deflaked in P-076 R3. Grasp "not where it was seen" and "unloaded chunk comes when called" still fail now and then in full runs (pass alone, also on the P-076 base). A spawned zombie sometimes has 20.9 max health; P-077 pins it in the Lance and Seism helpers, `hostile_kill_gives_xp` may still see 21 XP.
+- **Flaky game tests left:** `GodSlayerGameTest.huntFlow` ("the boss followed into the Nether", failed once in a full run on 2026-11-27, passes alone 2/2); `IllusionWorkGameTest.farmTakesSeedsFromTheChestAndPlantsEmptyFarmland` (the clone sometimes dies; failed 2 of 4 full runs during P-076). Golem guardian and Thunder pig were deflaked in P-076 R3. Grasp "not where it was seen" and "unloaded chunk comes when called" still fail now and then in full runs (pass alone, also on the P-076 base). A spawned zombie sometimes has 20.9 max health; P-077 pins it in the Lance and Seism helpers, `hostile_kill_gives_xp` may still see 21 XP.
 - **Client suite** had been red on main since D178/D180/D188 (stale expectations); fixed in P-076, now green.
 
 - **BL-004**: a command to summon the Crimson Master with a chosen quest ([backlog/BACKLOG.md](../backlog/BACKLOG.md)).
