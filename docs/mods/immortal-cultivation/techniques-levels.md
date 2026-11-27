@@ -4,7 +4,7 @@ Tên trong game (D56): Lửa = Fireball, Băng = Frozen Breath, Hồi máu = Hea
 
 Sinh từ `technique/TechniqueRules.java`: sửa số liệu ở đó rồi tạo lại bảng này. Sát thương tính bằng máu (2 = 1 tim), "r" là bán kính tính bằng block.
 
-**Hồi chiêu** (không đổi theo level, D80): Lửa 16 giây · Băng 18 giây · Hồi máu 40 giây · Xuyên tường 60 giây · Hất tung 20 giây · Hiến Tế 45 giây · Bay 80 giây · Huyết Kiếm 12 giây (sau mỗi lần đánh trúng) · Quantum Leap 40 giây · Violet Guardian 120 giây · Warrior Angel 120 giây · Aqua Marine 100 giây · Illusion 110 giây · Cosmic Warping 90 giây ở Lv 1 giảm đều còn 40 giây ở Lv 20 (D81) · Thunder Strike 26 giây (D86, D95) · Seism 28 giây (D142, cả hai kiểu) · Crystal Prison 48 giây (D143) · Soul Grasp 120 giây (chỉ tính khi bắt thành công, D134). Huyết Kiếm: sát thương = cơ bản + cộng thêm của chiêu + linh dược, hút máu bằng lượng máu trừ được.
+**Hồi chiêu** (không đổi theo level, D80): Lửa 16 giây · Băng 18 giây · Hồi máu 40 giây · Xuyên tường 60 giây · Hất tung 20 giây · Hiến Tế 45 giây · Bay 80 giây · Huyết Kiếm 12 giây (sau mỗi lần đánh trúng) · Quantum Leap 40 giây · Violet Guardian 120 giây · Warrior Angel 120 giây · Aqua Marine 100 giây · Illusion 110 giây · Cosmic Warping 90 giây ở Lv 1 giảm đều còn 40 giây ở Lv 20 (D81) · Thunder Strike 26 giây (D86, D95) · Seism 28 giây (D142, cả hai kiểu) · Crystal Prison 48 giây (D143) · Time Rewind 140 giây (D268, tính từ lúc thời gian chạy lại) · Soul Grasp 120 giây (chỉ tính khi bắt thành công, D134). Huyết Kiếm: sát thương = cơ bản + cộng thêm của chiêu + linh dược, hút máu bằng lượng máu trừ được.
 
 **Choáng (D99):** Hất tung choáng mọi sinh vật bị đẩy (không phải người chơi) 1,0 giây ở Lv 1, +0,1 giây mỗi level (2,9 giây ở Lv 20): đứng yên, không đi, không đánh, không bắn. God Slayer chỉ chịu 10%.
 
@@ -41,6 +41,13 @@ Sinh từ `technique/TechniqueRules.java`: sửa số liệu ở đó rồi tạ
 - **Seismic Impact** (nhả chuột trước 1 giây, hoặc chuột trái): một tảng đá rơi xuống điểm ngắm (tối đa 48 ô, nhắm lên trời thì rơi xuống mặt đất dưới điểm xa nhất). Trong 0,2 giây tảng đá rơi, điểm rơi vẫn bám theo tâm màn hình. Gây `5 + Lv/2` tim (Lv 1: 5, Lv 2: 6, Lv 20: 15) cho quái thù địch (không phải boss) trong bán kính 3 ô. Không phá khối. Người chơi trong 8 ô thấy màn hình rung nhẹ.
 - **Seismic Wave** (giữ chuột phải 1 giây, từ Lv 3): ba đợt sóng gai đá ở giây 0, 1, 2 quanh chỗ bạn đứng, bán kính 3, 4, 5 ô. Mỗi đợt đánh mọi sinh vật đang đứng trên mặt đất (trừ bạn; vật triệu hồi, mob đã bắt, người chơi khác đều dính). Sát thương mỗi đợt `min(8, 2 + (Lv-3)/2)` tim (Lv 3: 2, Lv 5: 3, Lv 15 trở lên: 8). Hất lên `5 + (Lv-3)/2` ô (Lv 19-20: 13 ô), đẩy ngang 2 ô. Mục tiêu đứng cao hơn bạn 1 ô thì bớt 1 tim và 1 ô hất mỗi ô cao thêm. Mục tiêu đang bay (vừa bị hất) bị bỏ qua. Boss (God Slayer, thủ lĩnh nhiệm vụ, Wither, Ender Dragon, Warden) chỉ nhận sát thương, không bị hất. Trong 3 giây sóng bạn chậm đi 80%.
 - Dưới Lv 3 giữ chuột phải không hiện thanh nạp, nhả ra vẫn ra Impact kèm dòng "Seismic Wave unlocks at Lv 3".
+
+**Time Rewind (D268, D270, hệ Phòng thủ):** phải đặt vào ô chiêu thì chiêu mới ghi lại những gì xảy ra quanh bạn (24 ô).
+- **Bấm chiêu:** thời gian trong hộp 16x16x16 (bạn ở giữa, đáy thấp hơn chân 4 ô, hộp đứng yên chỗ niệm) dừng lại và mất màu. Dừng trong `14 + 10·(Lv-1)/19` giây (Lv 1: 14 s, Lv 20: 24 s).
+- **Lăn chuột xuống:** tua ngược 0,5 s mỗi nấc; **lăn lên:** tua tới, tối đa đến lúc niệm. Tua ngược tối đa `8 + 16·(Lv-1)/19` giây (Lv 1: 8 s, Lv 20: 24 s) và không quá thời gian đã ghi.
+- Tua được: vị trí, máu của quái và vật bay; quái chết hoặc khối bị phá **trước lúc dừng** thì hiện lại; quái sinh ra sau mốc đó thì biến mất. Máu, giáp, độ no của bạn được tua, vị trí thì không. Người chơi khác không bị dừng, không bị tua.
+- Trong lúc dừng: bạn vẫn đánh, phá khối được (khối phá lúc này không hiện lại); quái bị đánh văng khi thời gian chạy lại; mũi tên bay vào hộp thì đứng lại ở mép.
+- **Bấm lại** hoặc hết giờ: thời gian chạy tiếp từ chỗ đang xem. Hồi chiêu 140 giây tính từ lúc đó.
 
 **Crystal Prison (D143, hệ Khống chế):** chọn ô chiêu. Hồi chiêu 48 giây, bắt đầu khi chiêu thật sự tung ra (nhắm trượt thì không tốn).
 - **Chuột trái:** nhốt thứ bạn đang ngắm (quái hoặc người chơi, tối đa 64 ô). Ngắm vào khối thì lồng hiện ngay trước khối đó. Ngắm trượt, hoặc ngắm vào sinh vật cao/rộng hơn 3 ô (Ghast...) thì không tung.

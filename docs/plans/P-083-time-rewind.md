@@ -2,7 +2,7 @@
 
 > **Tóm tắt cho Huy (VN, ≤ 3 dòng):** chiêu mới "Time Rewind": bấm là thời gian trong hộp 16x16x16 quanh mình dừng lại và mất màu; lăn chuột để tua ngược/tua tới quái, mũi tên, khối bị phá; bấm lại (hoặc hết giờ) thì thời gian chạy tiếp từ chỗ đó. Máu, giáp, độ no của mình cũng được tua.
 
-- **Status:** draft (waiting for Huy's go)
+- **Status:** done on the branch (2026-11-27), not released
 - **Mod / decision:** `immortal-cultivation`, D268 · **Branch:** `feat/P-083-time-rewind` (from `feat/P-082-purgatory-dungeon`) · **Depends on:** P-082 (docs only)
 
 ## Goal
@@ -10,7 +10,7 @@ A new technique `Technique.CHRONO` ("chrono", "Time Rewind", 140 s, not charged)
 
 ## Scope
 - In: recording while the technique sits in a skill slot; the frozen box; scroll scrubbing; resume by recast or at the end of the duration; caster health/armor durability/food rewind; block history (changes before the cast); grayscale box (shader); a small timeline HUD; techniques tab text and icon; levels 1..20.
-- Out: rewinding other players, the caster's position, block changes made during the stop; taking back drops; anything in the Purgatory dungeon (D259: skills leave it alone, the cast is refused there).
+- Out: rewinding other players, the caster's position, block changes made during the stop; taking back drops; chest contents of blocks that come back (D270).
 
 ## Numbers (pure Java, `TechniqueRules`)
 - `chronoDurationSeconds(level)` = 14 + 10·(l-1)/19 (14 → 24).
@@ -51,9 +51,15 @@ A new technique `Technique.CHRONO` ("chrono", "Time Rewind", 140 s, not charged)
 02-findings (every new API), 03-status, `docs/mods/immortal-cultivation/spec.md` technique table, techniques-levels.md.
 
 ## Done when
-- [ ] Everything in D268 works in `runClient`, tests green, screenshots look grey in the box.
+- [x] Everything in D268 works in `runClient`, tests green, screenshots look grey in the box.
 
 ## Risks / ask first
 - The grayscale box shader (step 6) is the main unknown.
 - Entities with passengers, item frames, paintings: skip non-living entities that are not projectiles/items/TNT (they are not rewound).
 - Players in the zone are never frozen (D268); a PvP target can walk out.
+
+## Result (2026-11-27)
+- Server: `technique/chrono/Chrono` (recorder per player, zone, smooth scrub, resume), `FrameRing` + `ChronoCursor` (pure, JUnit), `ChronoNet` payloads, `ChronoFreeze`. Mixins `ChronoFreezeMixin` (TickRateManager), `ChronoBlockMixin` (Level.setBlock), `LivingEntityChronoAccess`, `ArrowChronoAccess`.
+- Client: `ClientChrono` (zones, wheel, freezes projectiles/items in a box), HUD timeline in `SkillBarHud`, `ChronoGrey` + `ChronoPostMixin` + accessors feed `post_effect/chrono.json` / `shaders/post/chrono.fsh` (ray vs box test with the depth buffer: the spike worked, no fallback).
+- Manager choices: D270.
+- Tests: `ChronoRulesTest`; `ChronoGameTest` (2: rewind of mob/kill/block/spawn/caster, freeze + hits + end); `ChronoClientTest` screenshots 130-133.
