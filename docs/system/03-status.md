@@ -2,7 +2,7 @@
 
 > Tóm tắt cho Huy: file này ghi việc đang làm dở và bước tiếp theo, để một phiên Claude mới đọc là làm tiếp được.
 > Manager cập nhật file này cuối mỗi đợt việc (merge, phát hành, quyết định mới).
-> Snapshot: 2026-11-28, after release 0.48.0 (P-084).
+> Snapshot: 2026-11-28, after release 0.49.0 (P-085, P-086).
 
 A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [workflow/team.md](../workflow/team.md) → the plan of the work in flight. Do not read the whole repo.
 
@@ -10,7 +10,7 @@ A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [w
 
 | What | Where |
 |---|---|
-| Last release | `immortal-cultivation-v0.48.0` (GitHub Releases on `huydangtruong/minecraft-lab`), `mod_version=0.48.0`. All old tags `permahearts-v*` were renamed to `immortal-cultivation-v*` on 2026-11-17 (D132); the installers still accept both prefixes |
+| Last release | `immortal-cultivation-v0.49.0` (GitHub Releases on `huydangtruong/minecraft-lab`), `mod_version=0.49.0`. All old tags `permahearts-v*` were renamed to `immortal-cultivation-v*` on 2026-11-17 (D132); the installers still accept both prefixes |
 | 0.12.0 contains | Warrior Angel (P-021, D62, D63), Aqua Marine (P-022, P-023, D64, D69), chieftain XP x10 and damage x2 (D65, D66), stronger Strength/Swiftness/Mining elixirs (D67), gold quest 64 (D68) |
 | 0.13.0 contains | Illusion technique (P-024, D71); D72 numbers (Warrior Angel, Cloud Travel, Undying Jutsu, Heaven Blast, Fireball, Frozen Breath); chieftain health 200 and the leader-bonus fix; Strength +2 (D70); "Death Match (PvP)" line |
 | 0.14.0 contains | Illusion work modes and hostile mobs targeting the clones (P-025, D73); Quantum Leap rename (turquoise) and Cosmic Warping portals (P-026, D74, D75); quest reward boxes (P-027, D76); technique slots cost 64, 128, 256, 512 emeralds (D77); clones plant bare farmland and pick up wool near the sheep. Not playtested by hand |
@@ -56,18 +56,18 @@ A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [w
 | 0.46.2 contains | D251 Purgatory floors last 6 min, 5 min wait, each winner gets 3 x players + floor runes. D252 a totem in either hand saves a Purgatory fighter and the run goes on. D253 mob health x2.5 and damage x2 on floor 10 (linear). Purgatory game tests 8/8 |
 | 0.47.0 contains | P-081 Purgatory wait (D254); P-082 Purgatory dungeon: generated rooms in a bedrock-skinned dungeon, sealed/pillar/treasure rooms, boss in the last room, 10 min clock, 30 s after the win (D255-D267, D269); runes hidden in the chests, boss drops XP on the ground, no rune bag (D271); team waves x1.8 for 2 players +0.8 per extra (D273); +1 stairs / +3 boss room mobs (D274). P-083 Time Rewind, 20th technique: 16-block time stop, wheel rewinds mobs, projectiles, blocks and the caster; caster held until they move or click (D268, D270, D272). Full build 315/315, client tests green. Team Purgatory not played with 2 real players |
 | 0.48.0 contains | P-084: summon/grasped/projectile kills count in the Death Match (D275); rename portals in the Cosmic Warping menu (D276); Throw Power rune (D277); new rune look with glyph and level number (D278); Healing Domain 64 hearts at Lv 20 + 3% max health/s (D279); Deadly Treasure ending raises danger (D280); Mega guards get danger strength (D281); witch potions scale with the witch's danger strength (D282). Server game tests green (320), flaky God Slayer `hunt_flow` on reruns. Not playtested by hand |
+| 0.49.0 contains | P-085 Purgatory: boss room locked until every sealing room is done (D284), doors wait for a teammate behind (D283), 6 big 2x2 halls with 4 waves and 2 chests, 2 halls from floor 10 (D285). P-086 God Slayer: x1.3 per level (D286), 6 fireballs, 3-katana fan with blood, narrower longer flame +50%, eye beam on land +100% (D287), Lv 6 Blast: orange flash 1.5 s, radius 8, 50 damage, breaks blocks, 3 s red blindness (D288). Server game tests 325 green. Not playtested by hand (team doors need 2 real players) |
 | On `main`, not released | Nothing |
 
 Release steps: [workflow/release.md](../workflow/release.md). Release **only when Huy says so**.
 
 ## In flight
 
-- **P-086 in flight** on `feat/P-086-god-slayer-power` (from the P-085 branch): God Slayer x1.3 per level (D286), stronger Fireball/Katana/Flame/Eye beam (D287), new Lv 6 Blast with red blindness (D288). JUnit + God Slayer game tests green, installed; not released, not playtested.
-- **P-085 in flight** on `feat/P-085-purgatory-boss-gate-big-rooms` (from main after 0.48.0): Purgatory boss room locked until every sealing room is done (D284), doors wait for a teammate behind (D283), 6 big 2x2 halls with 4 waves and 2 chests (D285). Code done, JUnit + Purgatory game tests green, installed; not released, not playtested.
+- 0.49.0 released 2026-11-28 (P-085, P-086, D283-D288). Branch `feat/P-086-god-slayer-power` (contains P-085) merged into main.
 - 0.48.0 released 2026-11-28 (P-084, D275-D282). Branch `feat/P-084-match-summon-kill-warp-rename` merged into main.
 - 0.47.0 released 2026-11-28: Purgatory dungeon and Time Rewind playtested only partly by Huy (solo); team Purgatory needs 2 real players.
 - Waiting for Huy: R11 (shared UI helpers, may move pixels) and R12 (Notes behind a feature switch) from [P-076](../plans/P-076-audit-refactor.md). Found, not fixed: `Warp.go` still calls `stopRiding()` before `teleportTo` (same pattern as B9).
-- **All plans up to P-084 are released** (last: 0.48.0). Released but not playtested by hand: everything from 0.13.0 on unless the release row says otherwise.
+- **All plans up to P-086 are released** (last: 0.49.0). Released but not playtested by hand: everything from 0.13.0 on unless the release row says otherwise.
 - **Next ideas:** BL-024/D112 (God Slayer arrives 2–5 days after the 4th Crimson Master leaves; Master pauses until the fight ends). P-040 leftovers: Katana → teleport behind → Flame breath chain, `/boss skill` command, a real blade model and guardian-style beam. Then the rest of D97's skills (minions, blind, arena, self-destruct). BL-014 (player technique fire burns the God Slayer).
 - **Windows installer bug** (reported by Huy's friend): picking a profile other than "26.3 Fabric Essential" says SUCCESS, but that profile's mods folder still has the old jar. Reading `minecraft-lab.ps1` (`Find-Profiles` / `Select-Profile`) found nothing yet. Waiting for the friend's `Mods folder:` line and that profile's Game directory.
 
