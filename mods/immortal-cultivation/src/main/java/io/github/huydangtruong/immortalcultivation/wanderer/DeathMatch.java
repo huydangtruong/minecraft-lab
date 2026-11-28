@@ -2,7 +2,12 @@ package io.github.huydangtruong.immortalcultivation.wanderer;
 
 import io.github.huydangtruong.immortalcultivation.QuestEventMessages;
 import io.github.huydangtruong.immortalcultivation.ImmortalCultivation;
+import io.github.huydangtruong.immortalcultivation.technique.OwnedSummon;
+import io.github.huydangtruong.immortalcultivation.technique.grasp.GraspedMob;
 import java.util.List;
+import java.util.UUID;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.projectile.Projectile;
 import java.util.Optional;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
@@ -112,13 +117,35 @@ public final class DeathMatch {
 		if (!running(server) || !ImmortalCultivation.enabled(server)) {
 			return null;
 		}
-		if (victim.getKillCredit() instanceof ServerPlayer sp && sp != victim) {
+		ServerPlayer p = playerBehind(server, victim.getKillCredit(), 0);
+		if (p != null && p != victim) {
+			return p;
+		}
+		p = source == null ? null : playerBehind(server, source.getEntity(), 0);
+		return p != null && p != victim ? p : null;
+	}
+
+	/**
+	 * D275: the player behind a killer: the player, or the owner of their summon (Warrior Angel, Violet Guardian, Illusion
+	 * clone), of their grasped mob, or of the projectile any of these shot.
+	 */
+	static ServerPlayer playerBehind(MinecraftServer server, Entity e, int depth) {
+		if (e == null || depth > 2) {
+			return null;
+		}
+		if (e instanceof ServerPlayer sp) {
 			return sp;
 		}
-		if (source != null && source.getEntity() instanceof ServerPlayer sp && sp != victim) {
-			return sp;
+		if (e instanceof Projectile pr) {
+			return playerBehind(server, pr.getOwner(), depth + 1);
 		}
-		return null;
+		UUID owner = null;
+		if (e instanceof OwnedSummon s) {
+			owner = s.owner();
+		} else if (e.getAttached(GraspedMob.ATTACHMENT) instanceof GraspedMob g) {
+			owner = g.owner();
+		}
+		return owner != null && e.level().getPlayerByUUID(owner) instanceof ServerPlayer sp ? sp : null;
 	}
 
 	/** A death that keeps hearts, items and XP. */

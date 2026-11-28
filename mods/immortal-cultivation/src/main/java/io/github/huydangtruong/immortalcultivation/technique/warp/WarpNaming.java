@@ -53,6 +53,21 @@ public final class WarpNaming {
 		}
 	}
 
+	/** Longest name a player may give a portal (D276). */
+	public static final int MAX_NAME = 32;
+
+	/** D276: a typed portal name: control characters dropped, spaces collapsed, trimmed, cut to {@link #MAX_NAME}. Null when nothing is left. */
+	public static String clean(String typed) {
+		if (typed == null) {
+			return null;
+		}
+		String s = typed.replaceAll("\\p{Cntrl}", "").replaceAll("\\s+", " ").strip();
+		if (s.length() > MAX_NAME) {
+			s = s.substring(0, MAX_NAME).strip();
+		}
+		return s.isEmpty() ? null : s;
+	}
+
 	/** Short tag shown after the coordinates: empty for the Overworld. */
 	public static String dimensionTag(String dimensionId) {
 		return switch (dimensionId) {

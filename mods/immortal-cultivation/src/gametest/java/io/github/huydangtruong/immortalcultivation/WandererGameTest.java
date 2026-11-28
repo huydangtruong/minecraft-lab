@@ -960,6 +960,33 @@ public class WandererGameTest {
 		}
 	}
 
+	/** D275: a player killed by another player's Warrior Angel (or its arrow) falls to that player: it counts and is protected. */
+	@GameTest(maxTicks = 100)
+	public void deathMatchKillByASummonCountsForItsOwner(GameTestHelper context) {
+		MinecraftServer s = context.getLevel().getServer();
+		try {
+			startMatchQuest(context, 4);
+			GameTestKit.floor(context);
+			ServerPlayer owner = GameTestKit.survivor(context);
+			GameTestKit.place(context, owner, 3.5, 1, 3.5, 0f, 0f);
+			ServerPlayer b = testPlayer(context);
+			context.assertTrue(Wanderer.startEvent(s, 0, owner), "start");
+			var angels = io.github.huydangtruong.immortalcultivation.technique.WarriorAngel.summon(owner, 1);
+			context.assertTrue(!angels.isEmpty(), "an angel");
+			var angel = angels.get(0);
+			b.setLastHurtByMob(angel); // the angel's blow: kill credit is the angel, not a player
+			var source = context.getLevel().damageSources().mobAttack(angel);
+			context.assertTrue(DeathMatch.isProtectedDeath(s, b, source), "protected: fell to the angel's owner");
+			fall(context, b, source);
+			context.assertTrue(Wanderer.data(s).quest().orElseThrow().lines().get(0).progress() == 1, "counts for the owner");
+			io.github.huydangtruong.immortalcultivation.technique.WarriorAngel.dismissAll(owner);
+			GameTestKit.drop(context, owner);
+			context.succeed();
+		} finally {
+			endMatchTest(s);
+		}
+	}
+
 	@GameTest(maxTicks = 100)
 	public void deathMatchMobDeathIsNormal(GameTestHelper context) {
 		MinecraftServer s = context.getLevel().getServer();

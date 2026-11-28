@@ -99,4 +99,14 @@ class WarpRulesTest {
 		assertNotNull(back.find(a.id()));
 		assertEquals(1, back.without(a.id()).portals().size());
 	}
+
+	@Test
+	void d276TypedNamesAreCleanedAndCut() {
+		assertEquals("Home Base", WarpNaming.clean("  Home \t  Base \n"));
+		assertEquals("Nhà của tôi", WarpNaming.clean("Nhà của tôi"));
+		assertEquals(null, WarpNaming.clean("   "));
+		assertEquals(null, WarpNaming.clean(null));
+		assertEquals(WarpNaming.MAX_NAME, WarpNaming.clean("x".repeat(50)).length());
+		assertEquals("ab", WarpNaming.clean("a\u0000b"));
+	}
 }

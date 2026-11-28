@@ -49,9 +49,11 @@ public final class Warp {
 	/** Radius of the structure search for the auto name (blocks). */
 	public static final int NAME_RADIUS = 64;
 
-	public static final int OPEN = 0, GO_PORTAL = 1, GO_PLAYER = 2, DELETE = 3;
+	public static final int OPEN = 0, GO_PORTAL = 1, GO_PLAYER = 2, DELETE = 3, RENAME = 4;
+	/** Separates the portal id from the new name in a RENAME target. */
+	public static final char RENAME_SEPARATOR = '|';
 
-	/** Client to server. kind: OPEN..DELETE, target: portal id or player UUID (empty for OPEN). */
+	/** Client to server. kind: OPEN..RENAME, target: portal id or player UUID (empty for OPEN; "id|new name" for RENAME). */
 	public record Request(int kind, String target) implements CustomPacketPayload {
 		public static final Type<Request> TYPE = new Type<>(Identifier.fromNamespaceAndPath(ImmortalCultivation.NAMESPACE, "warp_request"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Request> CODEC = StreamCodec.composite(
@@ -126,6 +128,16 @@ public final class Warp {
 				error = checkReady(p);
 				if (error == null) {
 					error = remove(p, Uuids.parseOrNull(target)) ? null : "That portal is not yours";
+					if (error == null) {
+						openMenu(p); // refresh the list
+					}
+				}
+			}
+			case RENAME -> {
+				error = checkReady(p);
+				if (error == null) {
+					int bar = target.indexOf(RENAME_SEPARATOR);
+					error = bar < 0 ? "Unknown request" : rename(p, Uuids.parseOrNull(target.substring(0, bar)), target.substring(bar + 1));
 					if (error == null) {
 						openMenu(p); // refresh the list
 					}
@@ -233,6 +245,32 @@ public final class Warp {
 			portal.discard();
 		}
 		return true;
+	}
+
+	/**
+	 * D276: the pencil button: gives one of the caller's portals a new name (cleaned by {@link WarpNaming#clean}, made
+	 * unique among the caller's other portals). Null when it worked, else the reason.
+	 */
+	public static String rename(ServerPlayer p, UUID id, String typed) {
+		String name = WarpNaming.clean(typed);
+		if (name == null) {
+			return "Type a name";
+		}
+		WarpSavedData data = WarpSavedData.of(p.level().getServer());
+		PortalRecord rec = id == null ? null : data.get().find(id);
+		if (rec == null || !rec.owner().equals(p.getUUID())) {
+			return "That portal is not yours";
+		}
+		List<String> names = new ArrayList<>();
+		for (PortalRecord r : data.get().of(p.getUUID())) {
+			if (!r.id().equals(id)) {
+				names.add(r.name());
+			}
+		}
+		name = WarpNaming.unique(name, names);
+		PortalRecord renamed = new PortalRecord(rec.id(), rec.owner(), rec.dimension(), rec.x(), rec.y(), rec.z(), rec.yaw(), name, rec.created());
+		data.set(data.get().without(id).with(renamed));
+		return null;
 	}
 
 	static ResourceKey<Level> dimensionKey(String id) {

@@ -14,6 +14,7 @@ import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.CameraType;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.PacketFlow;
@@ -24,7 +25,8 @@ import net.minecraft.world.level.GameType;
 
 /**
  * P-026: Cosmic Warping in a real client. Right click twice places two portals; a stand-in second player is online;
- * a left click opens the menu. Screenshots 90-warp-menu and 91-warp-portal.
+ * a left click opens the menu. D276: the pencil opens the rename box; typing and Enter renames the portal.
+ * Screenshots 90-warp-menu, 91-warp-portal, 92-warp-rename.
  */
 public class WarpClientTest implements FabricClientGameTest {
 	private static final int LEFT = 1;
@@ -94,6 +96,25 @@ public class WarpClientTest implements FabricClientGameTest {
 			context.waitTicks(15);
 			check(context.computeOnClient(mc -> mc.gui.screen() instanceof WarpScreen), "a left click opens the warp menu");
 			context.takeScreenshot("90-warp-menu");
+
+			// D276: the rename box (opened as the pencil does), clear the name, type a new one, Enter
+			context.runOnClient(mc -> {
+				WarpScreen ws = (WarpScreen) mc.gui.screen();
+				ws.openRename(ws.firstPortal());
+			});
+			context.waitTicks(5);
+			for (int i = 0; i < 40; i++) {
+				context.getInput().pressKey(InputConstants.KEY_BACKSPACE);
+			}
+			context.getInput().typeChars("Nhà của tôi");
+			context.waitTicks(5);
+			context.takeScreenshot("92-warp-rename");
+			context.getInput().pressKey(InputConstants.KEY_RETURN);
+			context.waitTicks(15);
+			String renamed = server.computeOnServer(s -> WarpSavedData.of(s).get().portals().stream()
+				.sorted(java.util.Comparator.comparingLong(io.github.huydangtruong.immortalcultivation.technique.warp.PortalRecord::created)).findFirst().orElseThrow().name());
+			check("Nhà của tôi".equals(renamed), "the first portal is renamed, was " + renamed);
+			context.takeScreenshot("93-warp-renamed");
 		}
 	}
 

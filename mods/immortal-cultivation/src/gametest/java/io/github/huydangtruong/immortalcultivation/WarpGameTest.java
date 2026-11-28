@@ -191,4 +191,26 @@ public class WarpGameTest {
 		cleanUp(c, p);
 		c.succeed();
 	}
+
+	@GameTest(maxTicks = 40)
+	public void d276OnlyTheOwnerRenamesAPortalAndNamesStayUnique(GameTestHelper c) {
+		ServerPlayer p = warper(c, 8.5, 8.5);
+		ServerPlayer other = GameTestKit.survivor(c);
+		PortalRecord one = portalAt(c, p, 4.5, 4.5);
+		PortalRecord two = portalAt(c, p, 2.5, 2.5);
+		WarpSavedData data = WarpSavedData.of(sl(c).getServer());
+		c.assertTrue(Warp.rename(other, one.id(), "Mine") != null, "a stranger cannot rename it");
+		c.assertTrue(Warp.rename(p, one.id(), "   ") != null, "an empty name is refused");
+		Warp.handle(p, Warp.RENAME, one.id() + "|  Home  ");
+		PortalRecord after = data.get().find(one.id());
+		c.assertTrue("Home".equals(after.name()), "renamed and trimmed through the request, was " + after.name());
+		c.assertTrue(after.created() == one.created() && after.x() == one.x(), "place and age are kept");
+		c.assertTrue(Warp.rename(p, two.id(), "Home") == null, "the second portal may take the same name");
+		c.assertTrue("Home 2".equals(data.get().find(two.id()).name()), "and gets a number, was " + data.get().find(two.id()).name());
+		c.assertTrue(Warp.rename(p, one.id(), "Home") == null && "Home".equals(data.get().find(one.id()).name()), "renaming to its own name keeps it");
+		c.assertTrue(data.get().of(p.getUUID()).size() == 2, "still two portals");
+		GameTestKit.drop(c, other);
+		cleanUp(c, p);
+		c.succeed();
+	}
 }
