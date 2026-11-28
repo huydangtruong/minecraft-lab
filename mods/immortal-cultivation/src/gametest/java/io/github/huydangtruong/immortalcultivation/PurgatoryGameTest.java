@@ -403,6 +403,20 @@ public class PurgatoryGameTest {
 		});
 	}
 
+	/** A locked room and an open room joined to it by a door, or null. */
+	private static Room[] lockedNextToOpen(Dungeon d) {
+		for (Room x : d.rooms()) {
+			if (x.kind == RoomKind.LOCKED) {
+				for (Room n : d.neighbours(x)) {
+					if (!n.kind.locks) {
+						return new Room[] {x, n};
+					}
+				}
+			}
+		}
+		return null;
+	}
+
 	/** D283: a room a fighter wakes keeps its doors open while a teammate is still in the room next to it, then shuts. */
 	@GameTest(maxTicks = 80)
 	public void aRoomWaitsForTheTeammateBehind(GameTestHelper c) {
@@ -410,21 +424,18 @@ public class PurgatoryGameTest {
 		ServerPlayer b = fighter(c);
 		a.getAbilities().invulnerable = true;
 		b.getAbilities().invulnerable = true;
-		PurgatorySavedData.Run r = Purgatory.startTeamForTests(java.util.List.of(a, b));
-		Dungeon d = PurgatoryFloor.dungeon(r);
-		Room room = null;
-		Room behind = null;
-		for (Room x : d.rooms()) {
-			if (x.kind == RoomKind.LOCKED) {
-				for (Room n : d.neighbours(x)) {
-					if (!n.kind.locks) {
-						room = x;
-						behind = n;
-					}
-				}
-			}
+		long seed = 1;
+		while (lockedNextToOpen(Layout.generate(seed, 1)) == null) {
+			seed++; // a floor with a locked room joined to an open one (random floors may have none)
 		}
-		c.assertTrue(room != null, "a locked room next to an open one");
+		Purgatory.nextSeedForTests = seed;
+		PurgatorySavedData.Run r = Purgatory.startTeamForTests(java.util.List.of(a, b));
+		c.assertTrue(r.seed == seed, "the chosen floor");
+		Dungeon d = PurgatoryFloor.dungeon(r);
+		Room[] pair = lockedNextToOpen(d);
+		c.assertTrue(pair != null, "a locked room next to an open one");
+		Room room = pair[0];
+		Room behind = pair[1];
 		Room sealed = room;
 		go(c, b, r, behind.centre);
 		go(c, a, r, sealed.centre);
