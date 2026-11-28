@@ -356,6 +356,35 @@ public class PurgatoryGameTest {
 		});
 	}
 
+	/** D290: mobs that appear in a room with lava have fire resistance; mobs of other rooms do not. */
+	@GameTest(maxTicks = 60)
+	public void lavaRoomMobsResistFire(GameTestHelper c) {
+		ServerPlayer p = fighter(c);
+		p.getAbilities().invulnerable = true;
+		long seed = 1;
+		while (Layout.generate(seed, 1).rooms().stream().noneMatch(x -> x.lava && x.kind != RoomKind.BOSS && !x.spawns.isEmpty())) {
+			seed++;
+		}
+		Purgatory.nextSeedForTests = seed;
+		c.assertTrue(Purgatory.startSolo(p) == null, "solo starts");
+		PurgatorySavedData.Run r = data(c).runOf(id(p));
+		Room room = PurgatoryFloor.dungeon(r).rooms().stream().filter(x -> x.lava && x.kind != RoomKind.BOSS && !x.spawns.isEmpty())
+			.findFirst().orElseThrow();
+		go(c, p, r, room.centre);
+		c.runAfterDelay(5, () -> {
+			var level = plevel(c);
+			var mobs = level.getEntitiesOfClass(Mob.class, Purgatory.inside(r.slot),
+				m -> m.entityTags().contains(Purgatory.TAG) && !m.entityTags().contains(PurgatoryFloor.PILLAR_TAG));
+			c.assertTrue(!mobs.isEmpty(), "mobs came in the lava room " + room.module);
+			for (Mob m : mobs) {
+				c.assertTrue(m.hasEffect(net.minecraft.world.effect.MobEffects.FIRE_RESISTANCE), "fire resistance on " + m);
+			}
+			Purgatory.finish(p, false);
+			GameTestKit.drop(c, p);
+			c.succeed();
+		});
+	}
+
 	/** Marks every sealing room but the boss room cleared. */
 	private static void clearSealedRooms(PurgatorySavedData.Run r) {
 		for (Room room : PurgatoryFloor.dungeon(r).rooms()) {

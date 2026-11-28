@@ -32,6 +32,8 @@ public final class Room {
 	public int[] boss;
 	/** Stair rooms: the wall the stairs run along (no door there below). */
 	public Dir stairSide = Dir.N;
+	/** D290: the room has lava, so its mobs get fire resistance. */
+	public boolean lava;
 	/** A standing spot near the middle (feet). */
 	public int[] centre;
 

@@ -282,6 +282,29 @@ class DungeonLayoutTest {
 	 * D285: every floor has its big halls (2x2 cells, one before floor 10, two from it), each sealing for four waves with two
 	 * treasure chests a fighter can stand next to, joined into the floor by its doors.
 	 */
+	/** D290: rooms with lava are marked, so their mobs get fire resistance. */
+	@Test
+	void lavaRoomsAreMarked() {
+		int lava = 0;
+		for (int floor : FLOORS) {
+			for (long seed = 0; seed < SEEDS; seed++) {
+				Dungeon d = Layout.generate(seed * 53 + floor, floor);
+				for (Room r : d.rooms()) {
+					if (r.module.equals("lava_bridge") || r.module.equals("grand_nether_bastion")) {
+						assertTrue(r.lava, r.module + " has lava");
+					}
+					if (r.module.equals("grand_library_atrium") || r.module.equals("grand_ocean_hall")) {
+						assertFalse(r.lava, r.module + " has no lava");
+					}
+					if (r.lava) {
+						lava++;
+					}
+				}
+			}
+		}
+		assertTrue(lava > 0, "some rooms have lava");
+	}
+
 	@Test
 	void bigHallsHaveFourWavesAndTwoChests() {
 		java.util.Map<String, Integer> used = new java.util.HashMap<>();

@@ -134,6 +134,9 @@ public final class Walker {
 			for (int x = r.x0() + 1; x < r.x1() - 1; x++) {
 				for (int z = r.z0() + 1; z < r.z1() - 1; z++) {
 					for (int y = r.y0() + 1; y < r.y1() - 1; y++) {
+						if (g.mat(x, y, z) == Mat.LAVA) {
+							r.lava = true; // D290
+						}
 						if (!reachable(x, y, z)) {
 							continue;
 						}

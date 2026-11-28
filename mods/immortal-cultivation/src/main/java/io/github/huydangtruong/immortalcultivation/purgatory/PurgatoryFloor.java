@@ -505,9 +505,19 @@ public final class PurgatoryFloor {
 		int made = 0;
 		for (int i = 0; made < n && i < far.size() && room0 + made < PurgatoryRules.MAX_ALIVE; i++) {
 			String type = pool.get(RNG.nextInt(pool.size()));
-			if (Purgatory.spawnMob(level, r, type, feet(r.slot, far.get(i)), alive, 1.0, null) != null) {
+			Mob m = Purgatory.spawnMob(level, r, type, feet(r.slot, far.get(i)), alive, 1.0, null);
+			if (m != null) {
+				fireproof(m, room);
 				made++;
 			}
+		}
+	}
+
+	/** D290: mobs of a room with lava do not burn in it (they used to walk in and die). */
+	static void fireproof(Mob m, Room room) {
+		if (room.lava) {
+			m.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.FIRE_RESISTANCE,
+				net.minecraft.world.effect.MobEffectInstance.INFINITE_DURATION, 0, false, false));
 		}
 	}
 
@@ -522,6 +532,7 @@ public final class PurgatoryFloor {
 			m = Purgatory.spawnMob(level, r, type, feet(r.slot, room.centre), alive, health, warden ? "Floor Warden" : "Floor Boss");
 		}
 		if (m != null) {
+			fireproof(m, room);
 			bossBody(m);
 			m.addTag(BOSS_TAG);
 			r.boss = Run.BOSS_ALIVE;
