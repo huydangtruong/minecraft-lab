@@ -48,10 +48,10 @@ public final class DungeonRules {
 		return Math.min(20, 10 + (Math.max(1, floor) - 1) / 2); // D259: floors 1-2 took about a minute with 6
 	}
 
-	/** D273: each fighter after the first adds this many times a room's solo wave. */
-	public static final double TEAM_WAVE_PER_PLAYER = 1.8;
+	/** D273: each fighter after the first adds this share of a room's solo wave (2 fighters: x1.8). */
+	public static final double TEAM_WAVE_PER_PLAYER = 0.8;
 
-	/** Mobs that come when a room wakes: the solo wave, times 1 + 1.8 per extra fighter (D273; MAX_ALIVE still caps). */
+	/** Mobs that come when a room wakes: the solo wave, times 1 + 0.8 per extra fighter (D273; MAX_ALIVE still caps). */
 	public static int wave(RoomKind kind, int floor, int players) {
 		int solo = soloWave(kind, floor);
 		return (int) Math.round(solo * (1 + TEAM_WAVE_PER_PLAYER * Math.max(0, players - 1)));

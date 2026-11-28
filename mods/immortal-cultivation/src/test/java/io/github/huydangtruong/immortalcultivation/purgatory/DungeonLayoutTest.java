@@ -198,9 +198,9 @@ class DungeonLayoutTest {
 		assertEquals(4, DungeonRules.wave(RoomKind.CORRIDOR, 1, 1)); // D261: was 2
 		assertEquals(5, DungeonRules.wave(RoomKind.OPEN, 1, 1));
 		assertTrue(DungeonRules.wave(RoomKind.STAIRS, 1, 1) >= 2);
-		assertEquals(14, DungeonRules.wave(RoomKind.LOCKED, 1, 2)); // D273: 5 + 1.8 x 5
-		assertEquals(23, DungeonRules.wave(RoomKind.LOCKED, 1, 3)); // 5 x 4.6
-		assertEquals(45, DungeonRules.wave(RoomKind.TREASURE, 1, 4)); // 7 x 6.4
+		assertEquals(9, DungeonRules.wave(RoomKind.LOCKED, 1, 2)); // D273: 5 x 1.8
+		assertEquals(13, DungeonRules.wave(RoomKind.LOCKED, 1, 3)); // 5 x 2.6
+		assertEquals(24, DungeonRules.wave(RoomKind.TREASURE, 1, 4)); // 7 x 3.4
 		for (long seed = 1; seed <= 30; seed++) {
 			Dungeon d = Layout.generate(seed, 1);
 			long locked = d.rooms().stream().filter(r -> r.kind == RoomKind.LOCKED || r.kind == RoomKind.PILLAR).count(); // D265: pillar rooms seal too
