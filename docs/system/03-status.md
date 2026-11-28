@@ -2,7 +2,7 @@
 
 > Tóm tắt cho Huy: file này ghi việc đang làm dở và bước tiếp theo, để một phiên Claude mới đọc là làm tiếp được.
 > Manager cập nhật file này cuối mỗi đợt việc (merge, phát hành, quyết định mới).
-> Snapshot: 2026-11-28, after release 0.49.0 (P-085, P-086).
+> Snapshot: 2026-11-28, after release 0.49.1 (P-087).
 
 A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [workflow/team.md](../workflow/team.md) → the plan of the work in flight. Do not read the whole repo.
 
@@ -10,7 +10,7 @@ A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [w
 
 | What | Where |
 |---|---|
-| Last release | `immortal-cultivation-v0.49.0` (GitHub Releases on `huydangtruong/minecraft-lab`), `mod_version=0.49.0`. All old tags `permahearts-v*` were renamed to `immortal-cultivation-v*` on 2026-11-17 (D132); the installers still accept both prefixes |
+| Last release | `immortal-cultivation-v0.49.1` (GitHub Releases on `huydangtruong/minecraft-lab`), `mod_version=0.49.1`. All old tags `permahearts-v*` were renamed to `immortal-cultivation-v*` on 2026-11-17 (D132); the installers still accept both prefixes |
 | 0.12.0 contains | Warrior Angel (P-021, D62, D63), Aqua Marine (P-022, P-023, D64, D69), chieftain XP x10 and damage x2 (D65, D66), stronger Strength/Swiftness/Mining elixirs (D67), gold quest 64 (D68) |
 | 0.13.0 contains | Illusion technique (P-024, D71); D72 numbers (Warrior Angel, Cloud Travel, Undying Jutsu, Heaven Blast, Fireball, Frozen Breath); chieftain health 200 and the leader-bonus fix; Strength +2 (D70); "Death Match (PvP)" line |
 | 0.14.0 contains | Illusion work modes and hostile mobs targeting the clones (P-025, D73); Quantum Leap rename (turquoise) and Cosmic Warping portals (P-026, D74, D75); quest reward boxes (P-027, D76); technique slots cost 64, 128, 256, 512 emeralds (D77); clones plant bare farmland and pick up wool near the sheep. Not playtested by hand |
@@ -57,13 +57,14 @@ A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [w
 | 0.47.0 contains | P-081 Purgatory wait (D254); P-082 Purgatory dungeon: generated rooms in a bedrock-skinned dungeon, sealed/pillar/treasure rooms, boss in the last room, 10 min clock, 30 s after the win (D255-D267, D269); runes hidden in the chests, boss drops XP on the ground, no rune bag (D271); team waves x1.8 for 2 players +0.8 per extra (D273); +1 stairs / +3 boss room mobs (D274). P-083 Time Rewind, 20th technique: 16-block time stop, wheel rewinds mobs, projectiles, blocks and the caster; caster held until they move or click (D268, D270, D272). Full build 315/315, client tests green. Team Purgatory not played with 2 real players |
 | 0.48.0 contains | P-084: summon/grasped/projectile kills count in the Death Match (D275); rename portals in the Cosmic Warping menu (D276); Throw Power rune (D277); new rune look with glyph and level number (D278); Healing Domain 64 hearts at Lv 20 + 3% max health/s (D279); Deadly Treasure ending raises danger (D280); Mega guards get danger strength (D281); witch potions scale with the witch's danger strength (D282). Server game tests green (320), flaky God Slayer `hunt_flow` on reruns. Not playtested by hand |
 | 0.49.0 contains | P-085 Purgatory: boss room locked until every sealing room is done (D284), doors wait for a teammate behind (D283), 6 big 2x2 halls with 4 waves and 2 chests, 2 halls from floor 10 (D285). P-086 God Slayer: x1.3 per level (D286), 6 fireballs, 3-katana fan with blood, narrower longer flame +50%, eye beam on land +100% (D287), Lv 6 Blast: orange flash 1.5 s, radius 8, 50 damage, breaks blocks, 3 s red blindness (D288). Server game tests 325 green. Not playtested by hand (team doors need 2 real players) |
+| 0.49.1 contains | P-087: old runes show the glyph and number look everywhere (D289); Purgatory mobs of lava rooms resist fire (D290); Seal Pillar +6 health per floor (D291); runes x1.5 per level, gear tooltip names each rune ("Sharpness Rune IV"), louder Heaven Blast (D292). Not playtested by hand |
 | On `main`, not released | Nothing |
 
 Release steps: [workflow/release.md](../workflow/release.md). Release **only when Huy says so**.
 
 ## In flight
 
-- **P-087 in flight** on `feat/P-087-old-rune-look` (from main after 0.49.0): old runes show the glyph and number look everywhere (D289); Purgatory mobs of rooms with lava get fire resistance (D290); Seal Pillar +6 health per floor (D291); runes ×1.5 per level, gear tooltip lists "X Rune IV", louder Heaven Blast (D292). Client suite green (before D292), installed; not released. Also: the D283 team game test now picks a floor with a locked room next to an open one (random floors could have none). Known flaky: `purgatory ... a_seal_pillar_room_opens_when_the_pillar_breaks` ("one pillar: 0") fails now and then when run with the other tests, always passes alone; cause not found yet.
+- 0.49.1 released 2026-11-28 (P-087, D289-D292). Branch `feat/P-087-old-rune-look` merged into main. Known flaky: `purgatory ... a_seal_pillar_room_opens_when_the_pillar_breaks` ("one pillar: 0") fails now and then with the other tests, always passes alone; cause not found yet.
 - 0.49.0 released 2026-11-28 (P-085, P-086, D283-D288). Branch `feat/P-086-god-slayer-power` (contains P-085) merged into main.
 - 0.48.0 released 2026-11-28 (P-084, D275-D282). Branch `feat/P-084-match-summon-kill-warp-rename` merged into main.
 - 0.47.0 released 2026-11-28: Purgatory dungeon and Time Rewind playtested only partly by Huy (solo); team Purgatory needs 2 real players.
