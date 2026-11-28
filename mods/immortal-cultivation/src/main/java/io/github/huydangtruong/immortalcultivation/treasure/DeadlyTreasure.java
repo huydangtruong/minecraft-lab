@@ -421,6 +421,7 @@ public final class DeadlyTreasure {
 			+ ", Y " + c.getY() + ", Z " + c.getZ() + " is open."), false);
 		d.clear();
 		TreasureBar.hide();
+		io.github.huydangtruong.immortalcultivation.danger.Danger.onSpecialEventEnded(server); // D280
 	}
 
 	/** Time is up with guards left (or never found): chest and guards vanish. */
@@ -433,6 +434,7 @@ public final class DeadlyTreasure {
 		server.getPlayerList().broadcastSystemMessage(text("Deadly Treasure has failed: the treasure and its guards are gone."), false);
 		d.clear();
 		TreasureBar.hide();
+		io.github.huydangtruong.immortalcultivation.danger.Danger.onSpecialEventEnded(server); // D280
 		cleanup(ow, d);
 	}
 

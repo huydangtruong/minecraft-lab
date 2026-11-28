@@ -82,6 +82,45 @@ public class DangerGameTest {
 	}
 
 	@GameTest(maxTicks = 20)
+	public void d280DeadlyTreasureEndingQueuesTheNextLevel(GameTestHelper c) {
+		enable(c);
+		MinecraftServer s = c.getLevel().getServer();
+		DangerSavedData d = DangerSavedData.of(s);
+		int before = d.level;
+		d.pendingAtTick = 0;
+		long now = s.overworld().getGameTime();
+		var t = io.github.huydangtruong.immortalcultivation.treasure.DeadlyTreasure.data(s);
+		t.clear();
+		t.phase = io.github.huydangtruong.immortalcultivation.treasure.TreasureRules.Phase.ACTIVE;
+		io.github.huydangtruong.immortalcultivation.treasure.DeadlyTreasure.fail(s, t);
+		c.assertTrue(d.pendingAtTick >= now + 4800 && d.pendingAtTick <= now + 4800 + 5, "a failed treasure queues +1, was " + (d.pendingAtTick - now));
+		c.assertTrue(d.level == before, "the level itself waits");
+		d.pendingAtTick = 0;
+		c.succeed();
+	}
+
+	@GameTest(maxTicks = 20)
+	public void d281MegaGuardGetsTheDangerStrength(GameTestHelper c) {
+		enable(c);
+		MinecraftServer s = c.getLevel().getServer();
+		ServerLevel level = c.getLevel();
+		var guard = io.github.huydangtruong.immortalcultivation.treasure.TreasureRules.group("blazes").guards().get(0);
+		net.minecraft.core.BlockPos at = c.absolutePos(new net.minecraft.core.BlockPos(1, 1, 1));
+		int before = DangerSavedData.of(s).level;
+		Mob m;
+		DangerSavedData.of(s).level = 33;
+		try {
+			m = io.github.huydangtruong.immortalcultivation.treasure.MegaMobs.create(level, guard, at, 0, at);
+		} finally {
+			DangerSavedData.of(s).level = before;
+		}
+		double k = 1 + DangerRules.strengthBonus(33);
+		c.assertTrue(Math.abs(m.getMaxHealth() - 80 * k) < 0.01, "Mega Blaze 20 x 4 x " + k + ", was " + m.getMaxHealth());
+		c.assertTrue(Math.abs(m.getHealth() - m.getMaxHealth()) < 0.01, "full health");
+		c.succeed();
+	}
+
+	@GameTest(maxTicks = 20)
 	public void zombieAtThirtyThreeHasStrengthBonusInHealthAndDamage(GameTestHelper c) {
 		enable(c);
 		Zombie z = zombieAt(c, 33, 3.5);

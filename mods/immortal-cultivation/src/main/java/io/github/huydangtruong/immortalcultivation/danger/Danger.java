@@ -63,6 +63,11 @@ public final class Danger {
 
 	/** A Crimson Master left (Wanderer.leave): the next +1 comes 4800 ticks later. */
 	public static void onWandererLeft(MinecraftServer server) {
+		onSpecialEventEnded(server);
+	}
+
+	/** D280: a Crimson Master left or a Deadly Treasure ended (won or failed): the next +1 comes 4800 ticks later. */
+	public static void onSpecialEventEnded(MinecraftServer server) {
 		if (!active(server)) {
 			return;
 		}

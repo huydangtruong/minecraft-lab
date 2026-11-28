@@ -108,6 +108,9 @@ public final class MegaMobs {
 		if (kb != null) {
 			kb.setBaseValue(Math.max(kb.getBaseValue(), TreasureRules.KNOCKBACK_RESISTANCE));
 		}
+		// D281: the danger level's strength (health, melee damage) on top of the Mega multiplier, like any hostile mob
+		io.github.huydangtruong.immortalcultivation.danger.DangerMobs.applyStrength(m,
+			io.github.huydangtruong.immortalcultivation.danger.Danger.level(level.getServer()));
 		m.setHealth(m.getMaxHealth());
 		m.setPersistenceRequired();
 		m.setHomeTo(home, TreasureRules.HOME_RADIUS);
