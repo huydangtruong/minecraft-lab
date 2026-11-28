@@ -65,6 +65,24 @@ public class RuneLookClientTest implements FabricClientGameTest {
 			context.setScreen(() -> new InventoryScreen(net.minecraft.client.Minecraft.getInstance().player));
 			context.waitTicks(10);
 			context.takeScreenshot("rune-look-inventory");
+			context.setScreen(() -> null);
+			// old runes inside a chest never tick: the client must still draw them with the new look
+			server.runOnServer(s -> {
+				ServerPlayer p = s.getPlayerList().getPlayers().get(0);
+				net.minecraft.core.BlockPos pos = p.blockPosition().above(3);
+				p.level().setBlockAndUpdate(pos, net.minecraft.world.level.block.Blocks.CHEST.defaultBlockState());
+				if (p.level().getBlockEntity(pos) instanceof net.minecraft.world.level.block.entity.ChestBlockEntity chest) {
+					for (int i = 0; i < 9; i++) {
+						ItemStack old = p.getInventory().getItem(i).copy();
+						String kind = old.get(DataComponents.CUSTOM_MODEL_DATA).strings().get(0);
+						old.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(List.of(), List.of(), List.of(kind), List.of()));
+						chest.setItem(i, old);
+					}
+					p.openMenu(chest);
+				}
+			});
+			context.waitTicks(10);
+			context.takeScreenshot("rune-look-old-chest");
 		}
 	}
 }

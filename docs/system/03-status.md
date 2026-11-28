@@ -63,6 +63,7 @@ Release steps: [workflow/release.md](../workflow/release.md). Release **only whe
 
 ## In flight
 
+- **P-087 in flight** on `feat/P-087-old-rune-look` (from main after 0.49.0): old runes show the glyph and number look everywhere (D289). Client suite green, installed; not released.
 - 0.49.0 released 2026-11-28 (P-085, P-086, D283-D288). Branch `feat/P-086-god-slayer-power` (contains P-085) merged into main.
 - 0.48.0 released 2026-11-28 (P-084, D275-D282). Branch `feat/P-084-match-summon-kill-warp-rename` merged into main.
 - 0.47.0 released 2026-11-28: Purgatory dungeon and Time Rewind playtested only partly by Huy (solo); team Purgatory needs 2 real players.
