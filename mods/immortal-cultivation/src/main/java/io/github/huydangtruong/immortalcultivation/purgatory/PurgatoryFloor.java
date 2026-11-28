@@ -333,7 +333,7 @@ public final class PurgatoryFloor {
 		var health = m.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
 		if (health != null) {
 			health.addPermanentModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(PILLAR_HEALTH_ID,
-				DungeonRules.PILLAR_HEALTH - health.getBaseValue(), net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE));
+				DungeonRules.pillarHealth(r.floor) - health.getBaseValue(), net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE));
 		}
 		var push = m.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.KNOCKBACK_RESISTANCE);
 		if (push != null) {

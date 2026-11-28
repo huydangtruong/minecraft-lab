@@ -282,6 +282,14 @@ class DungeonLayoutTest {
 	 * D285: every floor has its big halls (2x2 cells, one before floor 10, two from it), each sealing for four waves with two
 	 * treasure chests a fighter can stand next to, joined into the floor by its doors.
 	 */
+	/** D291: Seal Pillar health 60 on floor 1, +6 per floor. */
+	@Test
+	void pillarHealthGrowsPerFloor() {
+		assertEquals(60.0, DungeonRules.pillarHealth(1), 1e-9);
+		assertEquals(66.0, DungeonRules.pillarHealth(2), 1e-9);
+		assertEquals(114.0, DungeonRules.pillarHealth(10), 1e-9);
+	}
+
 	/** D290: rooms with lava are marked, so their mobs get fire resistance. */
 	@Test
 	void lavaRoomsAreMarked() {

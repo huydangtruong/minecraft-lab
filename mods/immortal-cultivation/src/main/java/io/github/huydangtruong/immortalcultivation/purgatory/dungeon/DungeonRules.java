@@ -75,6 +75,12 @@ public final class DungeonRules {
 
 	/** D265: health of a Seal Pillar (30 hearts). */
 	public static final double PILLAR_HEALTH = 60.0;
+	/** D291: the Seal Pillar gains 6 health (3 hearts) per floor above the first. */
+	public static final double PILLAR_HEALTH_PER_FLOOR = 6.0;
+
+	public static double pillarHealth(int floor) {
+		return PILLAR_HEALTH + PILLAR_HEALTH_PER_FLOOR * (Math.max(1, floor) - 1);
+	}
 	/** D265: while the pillar stands, more mobs come this often (up to a full wave alive). */
 	public static final int PILLAR_REINFORCE_TICKS = 20 * 20;
 	/** D265: share of the sealed rooms the layout adds that are pillar rooms. */
