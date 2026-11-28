@@ -48,18 +48,26 @@ public final class DungeonRules {
 		return Math.min(20, 10 + (Math.max(1, floor) - 1) / 2); // D259: floors 1-2 took about a minute with 6
 	}
 
-	/** Mobs that come when a room wakes. */
+	/** D273: each fighter after the first adds this many times a room's solo wave. */
+	public static final double TEAM_WAVE_PER_PLAYER = 1.8;
+
+	/** Mobs that come when a room wakes: the solo wave, times 1 + 1.8 per extra fighter (D273; MAX_ALIVE still caps). */
 	public static int wave(RoomKind kind, int floor, int players) {
+		int solo = soloWave(kind, floor);
+		return (int) Math.round(solo * (1 + TEAM_WAVE_PER_PLAYER * Math.max(0, players - 1)));
+	}
+
+	/** Mobs of a room's wave for one fighter. */
+	public static int soloWave(RoomKind kind, int floor) {
 		int f = Math.max(1, floor);
-		int extra = Math.max(0, players - 1);
 		return switch (kind) {
-			case LOCKED -> Math.min(14, 5 + f / 3 + 2 * extra);
-			case PILLAR -> Math.min(10, 4 + f / 4 + 2 * extra);
-			case TREASURE -> Math.min(16, 7 + f / 3 + 2 * extra);
-			case BOSS -> Math.min(8, 2 + f / 8 + extra);
-			case OPEN, DARK -> Math.min(10, 5 + f / 5 + extra); // D261: the path rooms had too few
-			case CORRIDOR, HAZARD, TRAP -> Math.min(9, 4 + f / 6 + extra);
-			case STAIRS -> Math.min(6, 2 + f / 8 + extra / 2);
+			case LOCKED -> Math.min(14, 5 + f / 3);
+			case PILLAR -> Math.min(10, 4 + f / 4);
+			case TREASURE -> Math.min(16, 7 + f / 3);
+			case BOSS -> Math.min(8, 2 + f / 8);
+			case OPEN, DARK -> Math.min(10, 5 + f / 5); // D261: the path rooms had too few
+			case CORRIDOR, HAZARD, TRAP -> Math.min(9, 4 + f / 6);
+			case STAIRS -> Math.min(6, 2 + f / 8);
 			default -> 0;
 		};
 	}
