@@ -8,8 +8,13 @@ import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.monster.zombie.Zombie;
+import net.minecraft.world.entity.projectile.arrow.ThrownTrident;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -95,6 +100,30 @@ public class RuneGameTest {
 		c.assertTrue(!p.getRecipeBook().contains(key), "locked at first");
 		p.getAdvancements().award(adv, "has_iron_ingot");
 		c.assertTrue(p.getRecipeBook().contains(key), "in the recipe book after picking up iron");
+		GameTestKit.drop(c, p);
+		c.succeed();
+	}
+
+	@GameTest(maxTicks = 20)
+	public void d277ThrowPowerRuneAddsDamageOnlyToAThrownTrident(GameTestHelper c) {
+		ServerLevel sl = c.getLevel();
+		Holder<Enchantment> throwPower = ench(c, ResourceKey.create(Registries.ENCHANTMENT,
+			Identifier.fromNamespaceAndPath(ImmortalCultivation.NAMESPACE, "throw_power")));
+		c.assertTrue(Runes.eligible(throwPower), "Throw Power has runes");
+		c.assertTrue(!throwPower.is(net.minecraft.tags.EnchantmentTags.IN_ENCHANTING_TABLE) && !throwPower.is(net.minecraft.tags.EnchantmentTags.ON_RANDOM_LOOT)
+			&& !throwPower.is(net.minecraft.tags.EnchantmentTags.TRADEABLE), "rune only: not in the table, loot or trades");
+		ItemStack trident = new ItemStack(Items.TRIDENT);
+		RuneEntry rune = new RuneEntry(throwPower, 4);
+		c.assertTrue(Runes.fits(trident, rune) && !Runes.fits(new ItemStack(Items.NETHERITE_SWORD), rune), "trident only");
+		Runes.setInscribed(trident, List.of(rune));
+		ServerPlayer p = GameTestKit.survivor(c);
+		Zombie target = c.spawn(EntityTypes.ZOMBIE, 2, 1, 2);
+		ThrownTrident thrown = new ThrownTrident(sl, p, trident);
+		float throwDamage = EnchantmentHelper.modifyDamage(sl, trident, target, sl.damageSources().trident(thrown, p), 8f);
+		float meleeDamage = EnchantmentHelper.modifyDamage(sl, trident, target, sl.damageSources().playerAttack(p), 9f);
+		c.assertTrue(Math.abs(throwDamage - 12.5f) < 0.01f, "rune IV = level 8 = +4.5 when thrown, was " + throwDamage);
+		c.assertTrue(Math.abs(meleeDamage - 9f) < 0.01f, "no bonus in melee, was " + meleeDamage);
+		thrown.discard();
 		GameTestKit.drop(c, p);
 		c.succeed();
 	}

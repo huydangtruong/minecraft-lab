@@ -49,7 +49,7 @@ public final class RuneRules {
 				"breach", "wind_burst" -> "attack";
 			case "protection", "fire_protection", "blast_protection", "projectile_protection", "thorns", "feather_falling",
 				"respiration", "depth_strider", "frost_walker", "soul_speed", "swift_sneak" -> "armor";
-			case "power", "punch", "quick_charge", "piercing", "loyalty", "riptide", "impaling", "lunge" -> "ranged";
+			case "power", "punch", "quick_charge", "piercing", "loyalty", "riptide", "impaling", "lunge", "throw_power" -> "ranged";
 			case "efficiency", "fortune", "unbreaking", "lure", "luck_of_the_sea" -> "tool";
 			default -> "other";
 		};

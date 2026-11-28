@@ -70,6 +70,7 @@ class PurgatoryRulesTest {
 		assertEquals("attack", io.github.huydangtruong.immortalcultivation.rune.RuneRules.kind("sharpness"));
 		assertEquals("armor", io.github.huydangtruong.immortalcultivation.rune.RuneRules.kind("protection"));
 		assertEquals("ranged", io.github.huydangtruong.immortalcultivation.rune.RuneRules.kind("power"));
+		assertEquals("ranged", io.github.huydangtruong.immortalcultivation.rune.RuneRules.kind("throw_power")); // D277
 		assertEquals("tool", io.github.huydangtruong.immortalcultivation.rune.RuneRules.kind("efficiency"));
 		assertEquals("other", io.github.huydangtruong.immortalcultivation.rune.RuneRules.kind("something_new"));
 	}
