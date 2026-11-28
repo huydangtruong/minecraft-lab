@@ -294,7 +294,7 @@ public class TechniqueEffectsGameTest {
 		}
 		TechniqueCasts.cast(p, Technique.HEALING, 1, 1f);
 		c.runAfterDelay(215, () -> {
-			float expected = 30 + (float) TechniqueRules.healingTotal(1);
+			float expected = 30 + (float) TechniqueRules.healingTotal(1) + 10 * 0.03f * 100; // D279: + 3% of max health (100) a second
 			c.assertTrue(Math.abs(cow.getHealth() - expected) < 0.01f, "cow should be at " + expected + ", was " + cow.getHealth());
 			c.assertTrue(h.getHealth() == 30f, "P-077 B11: a hostile husk in the circle must not heal, was " + h.getHealth());
 			c.assertTrue(far.getHealth() == 30f, "the husk outside the circle must not heal, was " + far.getHealth());

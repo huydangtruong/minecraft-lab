@@ -201,14 +201,13 @@ public final class TechniqueFields {
 	}
 
 	private static void heal(ServerLevel level, Field f) {
-		float perStep = (float) (TechniqueRules.healingTotal(f.techLevel()) / TechniqueRules.healingSeconds(f.techLevel()));
 		int healed = 0;
 		ServerPlayer owner = level.getServer().getPlayerList().getPlayer(f.owner());
 		for (LivingEntity e : inside(level, f)) {
 			// P-077 B11: the circle never heals a hostile mob standing in it, unless it is the caster's friend
 			boolean ally = !(e instanceof net.minecraft.world.entity.monster.Enemy) || (owner != null && Lance.isFriend(e, owner));
 			if (ally && e.getHealth() < e.getMaxHealth()) {
-				e.heal(perStep);
+				e.heal((float) TechniqueRules.healingStep(f.techLevel(), e.getMaxHealth())); // D279: + 3% of its max health
 				healed++;
 			}
 		}

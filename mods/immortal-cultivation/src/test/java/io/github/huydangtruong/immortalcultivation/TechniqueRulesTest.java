@@ -75,7 +75,8 @@ class TechniqueRulesTest {
 		assertArrayEquals(new double[] {0.40, 0.40 + 0.56 * 9 / 19, 0.96}, at(TechniqueRules::iceAttackSlow), 1e-9);
 		assertEquals(8, TechniqueRules.iceAreaSeconds(5));
 		assertEquals(4, TechniqueRules.iceLingerSeconds(5));
-		assertArrayEquals(new double[] {24, 24 + 72.0 * 9 / 19, 96}, at(TechniqueRules::healingTotal)); // D80: 12 -> 48 hearts
+		assertArrayEquals(new double[] {24, 24 + 104.0 * 9 / 19, 128}, at(TechniqueRules::healingTotal)); // D279: 12 -> 64 hearts
+		assertEquals(128 / 10.0 + 0.03 * 40, TechniqueRules.healingStep(20, 40), 1e-9); // D279: + 3% of max health a second
 		assertArrayEquals(new double[] {10, 19, 29}, at(TechniqueRules::phaseSeconds), 1e-9); // D169
 		assertArrayEquals(new double[] {5, 9.5, 12}, at(TechniqueRules::repulseDamage), 1e-9);
 		assertArrayEquals(new double[] {2.0, 4.25, 6.75}, at(TechniqueRules::repulseStunSeconds), 1e-9); // D162

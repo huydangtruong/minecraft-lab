@@ -202,9 +202,17 @@ public final class TechniqueRules {
 		return 10;
 	}
 
-	/** Health (half hearts) healed over the circle's whole duration (D80): 12 hearts at level 1 up to 48 at level 20, straight line. */
+	/** Health (half hearts) healed over the circle's whole duration: 12 hearts at level 1 up to 64 at level 20 (D279, was 48 in D80), straight line. */
 	public static double healingTotal(int level) {
-		return linear(level, 24, 96);
+		return linear(level, 24, 128);
+	}
+
+	/** D279: on top of {@link #healingTotal}, each one in the circle heals this share of its own max health every second. */
+	public static final double HEALING_MAX_HEALTH_PER_SECOND = 0.03;
+
+	/** Health one heal step (once a second) gives an entity with this max health: its share of the total plus 3% of its max health. */
+	public static double healingStep(int level, double maxHealth) {
+		return healingTotal(level) / healingSeconds(level) + HEALING_MAX_HEALTH_PER_SECOND * maxHealth;
 	}
 
 	/** D169: 10 s at level 1, +1 s per level (29 s at level 20). */
@@ -574,6 +582,7 @@ public final class TechniqueRules {
 			case HEALING -> List.of(
 				new Stat("Circle", num(healingRadius(level)) + " radius, " + num(healingSeconds(level)) + " s"),
 				new Stat("Heals", num(healingTotal(level) / 2) + " hearts"),
+				new Stat("Also", "+" + pct(HEALING_MAX_HEALTH_PER_SECOND) + " of own max health per second"),
 				new Stat("Cooldown", t.cooldownSeconds() + " s"));
 			case PHASE -> List.of(
 				new Stat("Duration", num(phaseSeconds(level)) + " s"),

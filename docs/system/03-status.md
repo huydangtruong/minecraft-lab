@@ -61,7 +61,7 @@ Release steps: [workflow/release.md](../workflow/release.md). Release **only whe
 
 ## In flight
 
-- **P-084** (branch `feat/P-084-match-summon-kill-warp-rename`, main checkout, pushed): D275 summon/grasped/projectile kills count in the Death Match; D276 rename button and box in the Cosmic Warping menu. D277 Throw Power rune (thrown trident damage, rune only). D278 new rune look (glyph per enchantment + level number; glyph sheet `docs/mods/immortal-cultivation/rune-designs/glyphs.png`, Huy may still change glyphs). Done and installed, not released. Resume: release when Huy asks.
+- **P-084** (branch `feat/P-084-match-summon-kill-warp-rename`, main checkout, pushed): D275 summon/grasped/projectile kills count in the Death Match; D276 rename button and box in the Cosmic Warping menu. D277 Throw Power rune (thrown trident damage, rune only). D278 new rune look (glyph per enchantment + level number; glyph sheet `docs/mods/immortal-cultivation/rune-designs/glyphs.png`, Huy may still change glyphs). D279 Healing Domain 64 hearts at Lv 20 + 3% of own max health a second. Done and installed, not released. Resume: release when Huy asks.
 - 0.47.0 released 2026-11-28: Purgatory dungeon and Time Rewind playtested only partly by Huy (solo); team Purgatory needs 2 real players.
 - Nothing in flight. Waiting for Huy: R11 (shared UI helpers, may move pixels) and R12 (Notes behind a feature switch) from [P-076](../plans/P-076-audit-refactor.md). Found, not fixed: `Warp.go` still calls `stopRiding()` before `teleportTo` (same pattern as B9).
 - **All plans up to P-083 are released** (last: 0.47.0). Released but not playtested by hand: everything from 0.13.0 on unless the release row says otherwise.
