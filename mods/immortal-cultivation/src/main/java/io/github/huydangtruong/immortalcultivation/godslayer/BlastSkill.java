@@ -17,7 +17,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * Lv 6 (D288): the boss stands still and glows red for 1.5 s (a red ring marks the 8 block radius), then blows up the
+ * Lv 6 (D288): the boss stands still and its body flashes orange for 1.5 s (no other warning), then blows up the
  * sphere around it: blocks break (like the Wither: mob griefing on, no drops, never bedrock-like blocks or chests), every creature
  * inside takes damage from 50 at Lv 6 and players inside see only red for 3 s.
  */
@@ -45,21 +45,12 @@ public final class BlastSkill implements GodSlayerSkill {
 		done = false;
 		if (t0 < 0) {
 			t0 = sl.getGameTime();
-			sl.playSound(null, boss.blockPosition(), SoundEvents.WARDEN_SONIC_CHARGE, SoundSource.HOSTILE, 3.0f, 0.6f);
+			boss.startCharge(GodSlayerRules.BLAST_WINDUP_TICKS);
 		}
 		long e = sl.getGameTime() - t0;
 		boss.setDeltaMovement(Vec3.ZERO);
-		Vec3 c = boss.position().add(0, boss.getBbHeight() / 2, 0);
 		if (e < GodSlayerRules.BLAST_WINDUP_TICKS) {
-			sl.sendParticles(RED, c.x, c.y, c.z, 12, 1.2, 2.0, 1.2, 0);
-			if (e % 5 == 0) {
-				double r = GodSlayerRules.BLAST_RADIUS;
-				for (int i = 0; i < 48; i++) {
-					double a = Math.PI * 2 * i / 48;
-					sl.sendParticles(RED, boss.getX() + Math.cos(a) * r, boss.getY() + 0.3, boss.getZ() + Math.sin(a) * r, 1, 0, 0, 0, 0);
-				}
-			}
-			return;
+			return; // the body flashes orange on the client (chargeTicks)
 		}
 		blast(sl, boss, true);
 		t0 = -1;

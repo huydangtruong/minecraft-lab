@@ -96,6 +96,9 @@ public class GodSlayerGameTest {
 		Husk far = c.spawn(EntityTypes.HUSK, new Vec3(7.5, 1, 7.5));
 		far.setNoAi(true);
 		float before = far.getHealth();
+		new BlastSkill().tick(b, p);
+		c.assertTrue(b.chargeTicks() == GodSlayerRules.BLAST_WINDUP_TICKS, "the charge starts the orange flash, was " + b.chargeTicks());
+		c.assertTrue(p.getHealth() == 1000f, "nothing happens during the charge");
 		BlastSkill.blast(c.getLevel(), b, false);
 		c.assertTrue(Math.abs(p.getHealth() - 950f) < 0.01f, "D288: blast = 50 at Lv 6, health " + p.getHealth());
 		c.assertTrue(far.getHealth() == before, "a husk 8.6 blocks away is not hit");

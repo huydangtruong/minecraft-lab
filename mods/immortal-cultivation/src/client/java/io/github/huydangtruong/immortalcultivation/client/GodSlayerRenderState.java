@@ -11,4 +11,6 @@ public class GodSlayerRenderState extends LivingEntityRenderState {
 	public boolean flying;
 	/** Frozen in the forward-flight pose: full lean without moving (D104). */
 	public boolean forwardLean;
+	/** Blast charge running (D288): the body flashes orange. */
+	public boolean charging;
 }

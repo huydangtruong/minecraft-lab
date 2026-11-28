@@ -66,6 +66,8 @@ public final class GodSlayer extends PathfinderMob {
 
 	/** Freeze pose for /boss freeze (D104): 0 = not frozen, 1 stand, 2 fly (hover), 3 fly with the forward lean. Synced to the client. */
 	private static final EntityDataAccessor<Integer> FREEZE = SynchedEntityData.defineId(GodSlayer.class, EntityDataSerializers.INT);
+	/** Ticks left of the blast charge (D288): the client makes the body flash orange while above 0. */
+	private static final EntityDataAccessor<Integer> CHARGE = SynchedEntityData.defineId(GodSlayer.class, EntityDataSerializers.INT);
 	public static final int FREEZE_NONE = 0;
 	public static final int FREEZE_STAND = 1;
 	public static final int FREEZE_FLY = 2;
@@ -101,6 +103,16 @@ public final class GodSlayer extends PathfinderMob {
 		super.defineSynchedData(builder);
 		builder.define(FLYING, false);
 		builder.define(FREEZE, FREEZE_NONE);
+		builder.define(CHARGE, 0);
+	}
+
+	/** Synced ticks left of the blast charge (orange flash). */
+	public int chargeTicks() {
+		return entityData.get(CHARGE);
+	}
+
+	public void startCharge(int ticks) {
+		entityData.set(CHARGE, ticks);
 	}
 
 	/** Synced freeze pose (0 = not frozen). */
@@ -310,6 +322,9 @@ public final class GodSlayer extends PathfinderMob {
 	@Override
 	protected void customServerAiStep(ServerLevel level) {
 		super.customServerAiStep(level);
+		if (chargeTicks() > 0) {
+			startCharge(chargeTicks() - 1);
+		}
 		if (isFrozen()) {
 			// D104: standing still in the chosen pose, keeping the facing it had
 			getNavigation().stop();
