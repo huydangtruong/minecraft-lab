@@ -17,12 +17,28 @@ class GodSlayerRulesTest {
 	@Test
 	void scaleAndStatsByLevel() {
 		assertEquals(1.0, GodSlayerRules.scale(1), 1e-9);
-		assertEquals(1.4, GodSlayerRules.scale(3), 1e-9);
-		assertEquals(2.8, GodSlayerRules.scale(10), 1e-9);
+		assertEquals(1.69, GodSlayerRules.scale(3), 1e-9); // D286: x1.3 per level
+		assertEquals(Math.pow(1.3, 9), GodSlayerRules.scale(10), 1e-9);
 		assertEquals(500f, GodSlayerRules.maxHealth(1), 1e-3);
-		assertEquals(700f, GodSlayerRules.maxHealth(3), 1e-3);
+		assertEquals(845f, GodSlayerRules.maxHealth(3), 1e-3);
+		assertEquals(5302.25f, GodSlayerRules.maxHealth(10), 0.1);
 		assertEquals(30f, GodSlayerRules.slashDamage(1), 1e-3);
-		assertEquals(42f, GodSlayerRules.slashDamage(3), 1e-3);
+		assertEquals(50.7f, GodSlayerRules.slashDamage(3), 1e-3);
+	}
+
+	@Test
+	void skillDamageStartsAtTheUnlockLevel() { // D287, D288
+		assertEquals(15f, GodSlayerRules.skillDamage(GodSlayerRules.FIREBALL_START, 2, 2), 1e-4);
+		assertEquals(19.5f, GodSlayerRules.skillDamage(GodSlayerRules.FIREBALL_START, 2, 3), 1e-4);
+		assertEquals(15f, GodSlayerRules.skillDamage(GodSlayerRules.FIREBALL_START, 2, 1), 1e-4);
+		assertEquals(14.4f, GodSlayerRules.skillDamage(GodSlayerRules.EYE_START, 5, 5), 1e-4);
+		assertEquals(50f, GodSlayerRules.skillDamage(GodSlayerRules.BLAST_START, 6, 6), 1e-4);
+		assertEquals(50 * Math.pow(1.3, 4), GodSlayerRules.skillDamage(GodSlayerRules.BLAST_START, 6, 10), 1e-3);
+		assertTrue(GodSlayerRules.inBlast(8, 0, 0));
+		assertFalse(GodSlayerRules.inBlast(6, 6, 0));
+		assertEquals(1f, GodSlayerRules.blindAlpha(60), 1e-6);
+		assertEquals(0.5f, GodSlayerRules.blindAlpha(5), 1e-6);
+		assertEquals(0f, GodSlayerRules.blindAlpha(0), 1e-6);
 	}
 
 	@Test

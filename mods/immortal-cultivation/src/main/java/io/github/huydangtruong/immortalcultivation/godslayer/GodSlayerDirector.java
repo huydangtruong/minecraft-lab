@@ -9,7 +9,7 @@ import java.util.random.RandomGenerator;
 /** Pure rules of the God Slayer skill director (D111): unlock by level and a shuffled bag of special skills. */
 public final class GodSlayerDirector {
 	public enum Kind {
-		FIREBALL(2), KATANA_THROW(3), FLAME_BREATH(4), EYE_BEAM(5);
+		FIREBALL(2), KATANA_THROW(3), FLAME_BREATH(4), EYE_BEAM(5), BLAST(6);
 
 		public final int unlockLevel;
 
@@ -19,7 +19,7 @@ public final class GodSlayerDirector {
 	}
 
 	/** Skills that are finished and wired in. A skill not listed here is never unlocked. */
-	private static final List<Kind> IMPLEMENTED = List.of(Kind.FIREBALL, Kind.KATANA_THROW, Kind.FLAME_BREATH, Kind.EYE_BEAM);
+	private static final List<Kind> IMPLEMENTED = List.of(Kind.FIREBALL, Kind.KATANA_THROW, Kind.FLAME_BREATH, Kind.EYE_BEAM, Kind.BLAST);
 
 	public static List<Kind> unlocked(int level) {
 		List<Kind> out = new ArrayList<>();

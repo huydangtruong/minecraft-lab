@@ -59,9 +59,55 @@ public final class GodSlayerRules {
 		return Math.max(1, Math.min(MAX_LEVEL, level));
 	}
 
-	/** Body scale: 1 at level 1, +0.2 per level. */
+	/** D286: every level is 30% stronger than the level before (compounding). */
+	public static final double GROWTH = 1.3;
+
+	/** Strength factor: 1 at level 1, x1.3 per level (Lv 10 = 1.3^9, about 10.6). Health and every damage use it. */
 	public static double scale(int level) {
-		return 1 + 0.2 * (clampLevel(level) - 1);
+		return Math.pow(GROWTH, clampLevel(level) - 1);
+	}
+
+	/**
+	 * Damage of a skill: its start value at the level it unlocks, then x1.3 per level above (D286, D287).
+	 * Below the unlock level the start value is returned.
+	 */
+	public static float skillDamage(float start, int unlockLevel, int level) {
+		return (float) (start * Math.pow(GROWTH, Math.max(0, clampLevel(level) - unlockLevel)));
+	}
+
+	/** D287: skill start values (at the unlock level) and shapes. */
+	public static final float FIREBALL_START = 15f;
+	public static final int FIREBALL_COUNT = 6;
+	public static final float KATANA_START = 28f;
+	public static final int KATANA_COUNT = 3;
+	/** Angle between two neighbouring katanas of the fan, in degrees. */
+	public static final double KATANA_FAN_STEP = 15;
+	/** Flame breath: 3 x 1.6 (old Lv 4 value) x 1.5. */
+	public static final float FLAME_START = 7.2f;
+	public static final double FLAME_RANGE = 10;
+	/** Half width of the flame cone, in degrees (was 30). */
+	public static final double FLAME_HALF_ANGLE = 15;
+	/** Eye beam: 4 x 1.8 (old Lv 5 value) x 2. */
+	public static final float EYE_START = 14.4f;
+
+	/** D288: Lv 6 blast. */
+	public static final int BLAST_LEVEL = 6;
+	public static final float BLAST_START = 50f;
+	public static final double BLAST_RADIUS = 8;
+	public static final int BLAST_WINDUP_TICKS = 30;
+	public static final int BLIND_TICKS = 60;
+
+	/** Is this block offset inside the blast sphere? */
+	public static boolean inBlast(int dx, int dy, int dz) {
+		return dx * dx + dy * dy + dz * dz <= BLAST_RADIUS * BLAST_RADIUS;
+	}
+
+	/** Opacity (0..1) of the red blindness screen: full, fading out over the last 10 ticks. */
+	public static float blindAlpha(long ticksLeft) {
+		if (ticksLeft <= 0) {
+			return 0f;
+		}
+		return Math.min(1f, ticksLeft / 10f);
 	}
 
 	public static float maxHealth(int level) {

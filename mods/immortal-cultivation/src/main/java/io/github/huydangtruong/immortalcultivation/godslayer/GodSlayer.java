@@ -448,6 +448,7 @@ public final class GodSlayer extends PathfinderMob {
 			specials.put(GodSlayerDirector.Kind.KATANA_THROW, new KatanaThrowSkill());
 			specials.put(GodSlayerDirector.Kind.FLAME_BREATH, new FlameBreathSkill());
 			specials.put(GodSlayerDirector.Kind.EYE_BEAM, new EyeBeamSkill());
+			specials.put(GodSlayerDirector.Kind.BLAST, new BlastSkill());
 		}
 		if (level().getGameTime() >= specialAt && bossLevel >= 2) {
 			GodSlayerDirector.Kind k = director.pick(new java.util.Random(random.nextLong()),bossLevel, kind -> specials.get(kind) != null

@@ -24,6 +24,7 @@ public class ImmortalCultivationClient implements ClientModInitializer {
 		StatsPanel.register();
 		LayeredHeartsHud.register();
 		GodSlayerWarningHud.register();
+		GodSlayerBlindHud.register();
 		// Replaces the wandering trader renderer; ordinary traders keep the vanilla texture.
 		EntityRendererRegistry.register(EntityTypes.WANDERING_TRADER, WandererRenderer::new);
 		EntityRendererRegistry.register(io.github.huydangtruong.immortalcultivation.technique.VioletGuardian.TYPE, VioletGuardianRenderer::new);
@@ -44,6 +45,7 @@ public class ImmortalCultivationClient implements ClientModInitializer {
 		net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
 			ClientGrasp.reset(); // B5: nothing of the old world survives into the next one
 			GodSlayerWarningHud.reset();
+			GodSlayerBlindHud.reset();
 			ClientSkills.resetOnDisconnect();
 			TechniquesTab.reset();
 			PassivesTab.reset();

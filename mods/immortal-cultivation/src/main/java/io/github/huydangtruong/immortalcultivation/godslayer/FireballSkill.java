@@ -11,7 +11,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 
-/** Lv 2: stands 0.75 s, then three fireballs 0.25 s apart. 8 x scale damage each, no block damage. */
+/** Lv 2: stands 0.75 s, then six fireballs 0.15 s apart (D287). Damage from 15 at Lv 2, no block damage. */
 public final class FireballSkill implements GodSlayerSkill {
 	private long t0 = -1;
 	private boolean done = true;
@@ -43,15 +43,15 @@ public final class FireballSkill implements GodSlayerSkill {
 		Vec3 hand = new Vec3(boss.getX(), boss.getY() + boss.getBbHeight() * 0.6, boss.getZ());
 		if (e < 15) {
 			sl.sendParticles(ParticleTypes.FLAME, hand.x, hand.y, hand.z, 4, 0.8, 0.5, 0.8, 0.02);
-		} else if (e == 15 || e == 20 || e == 25) {
+		} else if (e >= 15 && (e - 15) % 3 == 0 && (e - 15) / 3 < GodSlayerRules.FIREBALL_COUNT) {
 			Vec3 dir = target.getEyePosition().subtract(hand).normalize();
-			Ball b = new Ball(sl, boss, dir.scale(1.2), 8f * (float) GodSlayerRules.scale(boss.bossLevel()));
+			Ball b = new Ball(sl, boss, dir.scale(1.2), GodSlayerRules.skillDamage(GodSlayerRules.FIREBALL_START, unlockLevel(), boss.bossLevel()));
 			Vec3 p = hand.add(dir.scale(2.0));
 			b.setPos(p.x, p.y, p.z);
 			sl.addFreshEntity(b);
 			sl.playSound(null, boss.blockPosition(), SoundEvents.BLAZE_SHOOT, SoundSource.HOSTILE, 1.2f, 1.0f);
 		}
-		if (e >= 26) {
+		if (e >= 15 + 3 * GodSlayerRules.FIREBALL_COUNT) {
 			t0 = -1;
 			done = true;
 		}

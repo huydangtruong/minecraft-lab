@@ -62,6 +62,7 @@ Release steps: [workflow/release.md](../workflow/release.md). Release **only whe
 
 ## In flight
 
+- **P-086 in flight** on `feat/P-086-god-slayer-power` (from the P-085 branch): God Slayer x1.3 per level (D286), stronger Fireball/Katana/Flame/Eye beam (D287), new Lv 6 Blast with red blindness (D288). JUnit + God Slayer game tests green, installed; not released, not playtested.
 - **P-085 in flight** on `feat/P-085-purgatory-boss-gate-big-rooms` (from main after 0.48.0): Purgatory boss room locked until every sealing room is done (D284), doors wait for a teammate behind (D283), 6 big 2x2 halls with 4 waves and 2 chests (D285). Code done, JUnit + Purgatory game tests green, installed; not released, not playtested.
 - 0.48.0 released 2026-11-28 (P-084, D275-D282). Branch `feat/P-084-match-summon-kill-warp-rename` merged into main.
 - 0.47.0 released 2026-11-28: Purgatory dungeon and Time Rewind playtested only partly by Huy (solo); team Purgatory needs 2 real players.

@@ -7,9 +7,10 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 
-/** Lv 4: a flame cone 6 blocks long, 60 degrees wide, for 2.5 s. 3 x scale damage every 0.5 s and sets on fire. No block fire. */
+/** Lv 4: a flame cone 10 blocks long, 30 degrees wide (D287), for 2.5 s. Damage every 0.5 s and sets on fire. No block fire. */
 public final class FlameBreathSkill implements GodSlayerSkill {
-	private static final double RANGE = 6;
+	private static final double RANGE = GodSlayerRules.FLAME_RANGE;
+	private static final double HALF = GodSlayerRules.FLAME_HALF_ANGLE;
 	private long t0 = -1;
 	private boolean done = true;
 
@@ -42,10 +43,10 @@ public final class FlameBreathSkill implements GodSlayerSkill {
 			sl.sendParticles(ParticleTypes.FLAME, origin.x + look.x, origin.y, origin.z + look.z, 5, 0.5, 0.4, 0.5, 0.02);
 			return;
 		}
-		// cone particles: 60 degrees = +-30
-		for (int i = 0; i < 12; i++) {
+		// cone particles
+		for (int i = 0; i < 18; i++) {
 			double len = 1 + sl.getRandom().nextDouble() * (RANGE - 1);
-			double ang = Math.toRadians((sl.getRandom().nextDouble() - 0.5) * 60);
+			double ang = Math.toRadians((sl.getRandom().nextDouble() - 0.5) * 2 * HALF);
 			double c = Math.cos(ang);
 			double s = Math.sin(ang);
 			Vec3 d = new Vec3(look.x * c - look.z * s, (sl.getRandom().nextDouble() - 0.5) * 0.4, look.x * s + look.z * c);
@@ -53,7 +54,7 @@ public final class FlameBreathSkill implements GodSlayerSkill {
 			sl.sendParticles(ParticleTypes.FLAME, p.x, p.y, p.z, 1, 0.05, 0.05, 0.05, 0.01);
 		}
 		if (e % 10 == 0) {
-			float dmg = 3f * (float) GodSlayerRules.scale(boss.bossLevel());
+			float dmg = GodSlayerRules.skillDamage(GodSlayerRules.FLAME_START, unlockLevel(), boss.bossLevel());
 			for (LivingEntity le : sl.getEntitiesOfClass(LivingEntity.class, boss.getBoundingBox().inflate(RANGE, 3, RANGE))) {
 				if (le == boss || !le.isAlive()) {
 					continue;
@@ -64,7 +65,7 @@ public final class FlameBreathSkill implements GodSlayerSkill {
 					continue;
 				}
 				Vec3 flat = new Vec3(to.x, 0, to.z);
-				if (flat.lengthSqr() > 1e-4 && flat.normalize().dot(look) < Math.cos(Math.toRadians(30))) {
+				if (flat.lengthSqr() > 1e-4 && flat.normalize().dot(look) < Math.cos(Math.toRadians(HALF))) {
 					continue;
 				}
 				le.hurtServer(sl, sl.damageSources().mobAttack(boss), dmg);

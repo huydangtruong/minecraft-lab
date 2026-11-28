@@ -15,6 +15,8 @@ class GodSlayerDirectorTest {
 	void levelOneHasNoSpecials() {
 		assertTrue(GodSlayerDirector.unlocked(1).isEmpty());
 		assertEquals(List.of(Kind.FIREBALL), GodSlayerDirector.unlocked(2));
+		assertEquals(4, GodSlayerDirector.unlocked(5).size());
+		assertTrue(GodSlayerDirector.unlocked(6).contains(Kind.BLAST)); // D288
 	}
 
 	@Test

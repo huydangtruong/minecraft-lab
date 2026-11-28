@@ -1,5 +1,6 @@
 package io.github.huydangtruong.immortalcultivation;
 
+import io.github.huydangtruong.immortalcultivation.godslayer.BlastSkill;
 import io.github.huydangtruong.immortalcultivation.godslayer.GodSlayer;
 import io.github.huydangtruong.immortalcultivation.godslayer.GodSlayerHunt;
 import io.github.huydangtruong.immortalcultivation.godslayer.GodSlayerRules;
@@ -58,7 +59,7 @@ public class GodSlayerGameTest {
 		GodSlayer b = boss(c, 5.5, 1, 5.5, 1);
 		c.assertTrue(b.getMaxHealth() == 500f && b.getHealth() == 500f, "Lv 1 = 500 health, was " + b.getMaxHealth());
 		GodSlayer b10 = boss(c, 8.5, 1, 8.5, 10);
-		c.assertTrue(boss(c, 2.5, 1, 8.5, 3).getMaxHealth() == 700f, "Lv 3 = 700 health");
+		c.assertTrue(boss(c, 2.5, 1, 8.5, 3).getMaxHealth() == 845f, "Lv 3 = 845 health (D286: x1.3 per level)");
 		// D98: 5 blocks tall (hitbox 4.8) at every level, strength is only numbers
 		c.assertTrue(Math.abs(b.getBbHeight() - 4.8f) < 0.01f && Math.abs(b10.getBbHeight() - 4.8f) < 0.01f,
 			"hitbox 4.8 tall at every level, was " + b.getBbHeight() + " and " + b10.getBbHeight());
@@ -80,6 +81,26 @@ public class GodSlayerGameTest {
 		b.hurtServer(level, level.damageSources().playerAttack(p), 1000f);
 		c.assertTrue(b.getHealth() == 460f, "a player's 1000 hit takes exactly 40, health " + b.getHealth());
 		c.assertTrue(b.fireImmune() && !b.canBeLeashed(), "fire immune, cannot be leashed");
+		c.succeed();
+	}
+
+	@GameTest(maxTicks = 40)
+	public void blastHits50AtLevel6InItsRadiusOnly(GameTestHelper c) {
+		GameTestKit.floor(c);
+		c.getLevel().getServer().setDifficulty(Difficulty.NORMAL, true);
+		GodSlayer b = boss(c, 1.5, 1, 1.5, 6);
+		b.setNoAi(true);
+		ServerPlayer p = strong(c);
+		GameTestKit.place(c, p, 5.5, 1, 1.5, 0f, 0f);
+		p.setHealth(1000f);
+		Husk far = c.spawn(EntityTypes.HUSK, new Vec3(7.5, 1, 7.5));
+		far.setNoAi(true);
+		float before = far.getHealth();
+		BlastSkill.blast(c.getLevel(), b, false);
+		c.assertTrue(Math.abs(p.getHealth() - 950f) < 0.01f, "D288: blast = 50 at Lv 6, health " + p.getHealth());
+		c.assertTrue(far.getHealth() == before, "a husk 8.6 blocks away is not hit");
+		c.assertTrue(GodSlayerRules.skillDamage(GodSlayerRules.BLAST_START, 6, 7) == 65f, "Lv 7 = 65");
+		GameTestKit.drop(c, p);
 		c.succeed();
 	}
 
@@ -375,7 +396,7 @@ public class GodSlayerGameTest {
 				c.assertTrue(boss[0] != null, "the level 3 boss appeared");
 			})
 			.thenExecute(() -> {
-				c.assertTrue(boss[0].getMaxHealth() == 700f, "level 3 spawn has 700 health, was " + boss[0].getMaxHealth());
+				c.assertTrue(boss[0].getMaxHealth() == 845f, "level 3 spawn has 845 health, was " + boss[0].getMaxHealth());
 				GodSlayerHunt.data(server).huntEndTick = server.overworld().getGameTime();
 			})
 			.thenWaitUntil(() -> c.assertTrue(GodSlayerHunt.phase(server) == GodSlayerSavedData.Phase.IDLE, "the hunt ended at the time limit"))
