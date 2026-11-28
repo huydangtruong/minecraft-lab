@@ -64,10 +64,10 @@ public final class DungeonRules {
 			case LOCKED -> Math.min(14, 5 + f / 3);
 			case PILLAR -> Math.min(10, 4 + f / 4);
 			case TREASURE -> Math.min(16, 7 + f / 3);
-			case BOSS -> Math.min(8, 2 + f / 8);
+			case BOSS -> Math.min(11, 5 + f / 8); // D274: +3
 			case OPEN, DARK -> Math.min(10, 5 + f / 5); // D261: the path rooms had too few
 			case CORRIDOR, HAZARD, TRAP -> Math.min(9, 4 + f / 6);
-			case STAIRS -> Math.min(6, 2 + f / 8);
+			case STAIRS -> Math.min(7, 3 + f / 8); // D274: +1
 			default -> 0;
 		};
 	}

@@ -197,7 +197,9 @@ class DungeonLayoutTest {
 		assertEquals(1, DungeonRules.waves(RoomKind.OPEN));
 		assertEquals(4, DungeonRules.wave(RoomKind.CORRIDOR, 1, 1)); // D261: was 2
 		assertEquals(5, DungeonRules.wave(RoomKind.OPEN, 1, 1));
-		assertTrue(DungeonRules.wave(RoomKind.STAIRS, 1, 1) >= 2);
+		assertEquals(3, DungeonRules.wave(RoomKind.STAIRS, 1, 1)); // D274
+		assertEquals(5, DungeonRules.wave(RoomKind.BOSS, 1, 1));
+		assertEquals(11, DungeonRules.wave(RoomKind.BOSS, 99, 1));
 		assertEquals(9, DungeonRules.wave(RoomKind.LOCKED, 1, 2)); // D273: 5 x 1.8
 		assertEquals(13, DungeonRules.wave(RoomKind.LOCKED, 1, 3)); // 5 x 2.6
 		assertEquals(24, DungeonRules.wave(RoomKind.TREASURE, 1, 4)); // 7 x 3.4
