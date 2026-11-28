@@ -31,6 +31,7 @@ public final class Danger {
 	private Danger() {}
 
 	public static void init() {
+		WitchDanger.init(); // D282
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			if (server.getTickCount() % 20 == 0) {
 				tick(server, server.overworld().getGameTime());

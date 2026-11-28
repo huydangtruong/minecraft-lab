@@ -19,7 +19,26 @@ public final class WitchRules {
 	/** Who a thrown splash is meant for. ALLY_LIVING = allies, but not undead (Healing would hurt them). */
 	public enum Intent { ENEMY, ALLY, ALLY_LIVING }
 
+	/** D282: from this strength factor a witch's Poison is level II, from {@link #POISON_III_FACTOR} level III. */
+	public static final double POISON_II_FACTOR = 1.5;
+	public static final double POISON_III_FACTOR = 3.0;
+
 	private WitchRules() {}
+
+	/** D282: Poison amplifier (0 = I) of a witch with this danger strength factor (1 + strength bonus). */
+	public static int poisonAmplifier(double factor) {
+		return factor >= POISON_III_FACTOR ? 2 : factor >= POISON_II_FACTOR ? 1 : 0;
+	}
+
+	/** D282: Regeneration lasts factor times longer, so it heals factor times more in total. */
+	public static int regenerationTicks(int baseTicks, double factor) {
+		return (int) Math.round(baseTicks * Math.max(1.0, factor));
+	}
+
+	/** D282: Instant Health and Harming hit factor times harder (never weaker than vanilla). */
+	public static double instantFactor(double factor) {
+		return Math.max(1.0, factor);
+	}
 
 	/** True when an ally at this health fraction (0 to 1) needs a potion. */
 	public static boolean needsHealing(float fraction) {

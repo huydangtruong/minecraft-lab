@@ -121,6 +121,54 @@ public class DangerGameTest {
 	}
 
 	@GameTest(maxTicks = 20)
+	public void d282WitchPotionsFollowItsOwnDangerStrength(GameTestHelper c) {
+		enable(c);
+		MinecraftServer s = c.getLevel().getServer();
+		ServerLevel level = c.getLevel();
+		int before = DangerSavedData.of(s).level;
+		net.minecraft.world.entity.monster.Witch w;
+		DangerSavedData.of(s).level = 33;
+		try {
+			w = c.spawn(EntityTypes.WITCH, new Vec3(1.5, 1, 1.5));
+		} finally {
+			DangerSavedData.of(s).level = before;
+		}
+		w.setNoAi(true);
+		double k = 1 + DangerRules.strengthBonus(33);
+		c.assertTrue(Math.abs(DangerMobs.strengthFactor(w) - k) < 1e-6, "witch factor " + k + ", was " + DangerMobs.strengthFactor(w));
+		// thrown Poison goes up a level, thrown Regeneration lasts k times longer
+		var poison = new net.minecraft.world.entity.projectile.throwableitemprojectile.ThrownSplashPotion(level, w,
+			net.minecraft.world.item.alchemy.PotionContents.createItemStack(Items.SPLASH_POTION, net.minecraft.world.item.alchemy.Potions.POISON));
+		var regen = new net.minecraft.world.entity.projectile.throwableitemprojectile.ThrownSplashPotion(level, w,
+			net.minecraft.world.item.alchemy.PotionContents.createItemStack(Items.SPLASH_POTION, net.minecraft.world.item.alchemy.Potions.REGENERATION));
+		level.addFreshEntity(poison);
+		level.addFreshEntity(regen);
+		var pe = poison.getItem().get(net.minecraft.core.component.DataComponents.POTION_CONTENTS).getAllEffects().iterator().next();
+		var re = regen.getItem().get(net.minecraft.core.component.DataComponents.POTION_CONTENTS).getAllEffects().iterator().next();
+		c.assertTrue(pe.is(MobEffects.POISON) && pe.getAmplifier() == 1, "Poison II at x" + k + ", was " + pe);
+		c.assertTrue(re.is(MobEffects.REGENERATION) && re.getDuration() == Math.round(900 * k), "Regeneration x" + k + " longer, was " + re);
+		poison.discard();
+		regen.discard();
+		// splash Harming and Instant Health hit k times harder
+		var golem = c.spawn(EntityTypes.IRON_GOLEM, new Vec3(4.5, 1, 4.5));
+		golem.setNoAi(true);
+		MobEffects.INSTANT_DAMAGE.value().applyInstantaneousEffect(level, w, w, golem, 0, 1.0);
+		c.assertTrue(Math.abs(golem.getHealth() - (100 - (int) (6 * k + 0.5))) < 0.01, "Harming 6 x " + k + ", health " + golem.getHealth());
+		golem.setHealth(10);
+		MobEffects.INSTANT_HEALTH.value().applyInstantaneousEffect(level, w, w, golem, 0, 1.0);
+		c.assertTrue(Math.abs(golem.getHealth() - (10 + (int) (4 * k + 0.5))) < 0.51, "Instant Health 4 x " + k + ", health " + golem.getHealth());
+		// drinking Instant Health heals the witch k times more
+		w.setHealth(1);
+		MobEffects.INSTANT_HEALTH.value().applyEffectTick(level, w, 0);
+		c.assertTrue(Math.abs(w.getHealth() - (1 + 4 * k)) < 0.01, "drink heals 4 x " + k + ", health " + w.getHealth());
+		// a player-made splash is unchanged
+		golem.setHealth(10);
+		MobEffects.INSTANT_HEALTH.value().applyInstantaneousEffect(level, null, null, golem, 0, 1.0);
+		c.assertTrue(Math.abs(golem.getHealth() - 14) < 0.01, "plain Instant Health heals 4, health " + golem.getHealth());
+		c.succeed();
+	}
+
+	@GameTest(maxTicks = 20)
 	public void zombieAtThirtyThreeHasStrengthBonusInHealthAndDamage(GameTestHelper c) {
 		enable(c);
 		Zombie z = zombieAt(c, 33, 3.5);

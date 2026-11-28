@@ -18,6 +18,20 @@ class WitchRulesTest {
 	}
 
 	@Test
+	void d282PotionsScaleWithTheWitchStrength() {
+		assertEquals(0, WitchRules.poisonAmplifier(1.0));
+		assertEquals(0, WitchRules.poisonAmplifier(1.49));
+		assertEquals(1, WitchRules.poisonAmplifier(1.5));
+		assertEquals(1, WitchRules.poisonAmplifier(2.99));
+		assertEquals(2, WitchRules.poisonAmplifier(3.0));
+		assertEquals(2, WitchRules.poisonAmplifier(4.0));
+		assertEquals(900, WitchRules.regenerationTicks(900, 1.0));
+		assertEquals(3600, WitchRules.regenerationTicks(900, 4.0));
+		assertEquals(1.0, WitchRules.instantFactor(0.5));
+		assertEquals(2.5, WitchRules.instantFactor(2.5));
+	}
+
+	@Test
 	void allyPotionByHealth() {
 		assertEquals(Potion.HEALING, WitchRules.allyPotion(0.5f, false));
 		assertEquals(Potion.REGENERATION, WitchRules.allyPotion(0.6f, false));

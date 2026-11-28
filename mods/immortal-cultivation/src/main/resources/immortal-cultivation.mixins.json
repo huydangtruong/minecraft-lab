@@ -20,6 +20,7 @@
 		"CropGrowthTickMixin",
 		"CropPlantMixin",
 		"MegaDamageMixin",
+		"HealOrHarmEffectMixin",
 		"DisplayAccess",
 		"EndermanCageMixin",
 		"ExperienceOrbMixin",

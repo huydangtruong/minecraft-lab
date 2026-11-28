@@ -272,6 +272,13 @@ public final class DangerMobs {
 		return DangerRules.xpFactor(strength == null ? 0 : strength.amount(), inst.hasModifier(ELITE_HEALTH_ID));
 	}
 
+	/** D282: 1 + the danger strength this mob got when it spawned (kept after a Soul Grasp tame); 1 when unboosted. */
+	public static double strengthFactor(Entity e) {
+		AttributeInstance inst = e instanceof LivingEntity l ? l.getAttribute(Attributes.MAX_HEALTH) : null;
+		AttributeModifier strength = inst == null ? null : inst.getModifier(HEALTH_ID);
+		return strength == null ? 1.0 : 1.0 + strength.amount();
+	}
+
 	public static boolean isDaySpawn(Entity e) {
 		return e.entityTags().contains(DAY_TAG);
 	}
