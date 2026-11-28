@@ -156,7 +156,7 @@ public final class Runes {
 		return m.toImmutable();
 	}
 
-	/** Orange tooltip lines: one per enchantment, all its runes added up (D241). */
+	/** Orange tooltip lines: one per rune on the gear, with its level (D292). */
 	public static List<Component> tooltip(ItemStack s) {
 		List<Component> out = new ArrayList<>();
 		RuneEntry self = entryOf(s);
@@ -170,9 +170,8 @@ public final class Runes {
 		if (slots == 0) {
 			return out;
 		}
-		Map<Holder<Enchantment>, Integer> b = bonuses(s);
-		for (Map.Entry<Holder<Enchantment>, Integer> e : b.entrySet()) {
-			out.add(Component.literal("Rune: ").append(e.getKey().value().description().copy()).append(" +" + e.getValue()).withColor(ORANGE));
+		for (RuneEntry r : inscribed(s)) { // D292: each rune by its level ("Sharpness Rune IV"), not the added numbers
+			out.add(name(r).withColor(ORANGE));
 		}
 		out.add(Component.literal("Rune slots " + inscribed(s).size() + " / " + slots).withStyle(ChatFormatting.GRAY));
 		return out;

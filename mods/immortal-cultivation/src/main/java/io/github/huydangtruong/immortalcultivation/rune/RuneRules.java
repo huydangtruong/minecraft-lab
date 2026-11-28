@@ -9,10 +9,19 @@ public final class RuneRules {
 
 	private RuneRules() {}
 
-	/** D242: enchantment levels a rune adds: level n gives 2^(n-1) (1, 2, 4, 8 ...). */
+	/** D292: each rune level is 1.5 times the level before. */
+	public static final double GROWTH = 1.5;
+
+	/**
+	 * D292 (was D242's 2^(n-1)): enchantment levels a rune adds: ceil(1.5^(n-1)), capped at 255. Rounding up keeps every
+	 * level stronger than the one before: 1, 2, 3, 4, 6, 8, 12, 18, 26, 39, 58, 87, 130, 195, 255 ...
+	 */
 	public static int bonus(int runeLevel) {
 		int n = Math.max(1, runeLevel);
-		return n > 9 ? MAX_ENCHANT_LEVEL : Math.min(MAX_ENCHANT_LEVEL, 1 << (n - 1));
+		if (n > 15) {
+			return MAX_ENCHANT_LEVEL;
+		}
+		return (int) Math.min(MAX_ENCHANT_LEVEL, Math.ceil(Math.pow(GROWTH, n - 1) - 1e-9));
 	}
 
 	/** Base level plus every rune bonus, capped like vanilla. */

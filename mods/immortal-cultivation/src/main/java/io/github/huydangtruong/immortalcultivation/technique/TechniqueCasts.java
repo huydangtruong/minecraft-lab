@@ -240,6 +240,10 @@ public final class TechniqueCasts {
 					1, 0.05, 0.05, 0.05, 0.02);
 			}
 		}
+		// a heavy, layered boom: shock wave, ground slam and a deep blast
+		sl.playSound(null, caster.blockPosition(), SoundEvents.WARDEN_SONIC_BOOM, SoundSource.PLAYERS, 2.0f, 0.8f);
+		sl.playSound(null, caster.blockPosition(), SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.PLAYERS, 2.0f, 0.6f);
+		sl.playSound(null, caster.blockPosition(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 1.2f, 0.6f);
 		sl.playSound(null, caster.blockPosition(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, SoundSource.PLAYERS, 1.2f, 0.7f);
 	}
 

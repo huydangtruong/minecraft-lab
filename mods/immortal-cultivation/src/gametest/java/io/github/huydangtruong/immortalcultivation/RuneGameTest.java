@@ -34,7 +34,7 @@ public class RuneGameTest {
 		sword.enchant(ench(c, Enchantments.SHARPNESS), 3);
 		Runes.setInscribed(sword, List.of(new RuneEntry(ench(c, Enchantments.SHARPNESS), 3),
 			new RuneEntry(ench(c, Enchantments.SMITE), 1)));
-		c.assertTrue(EnchantmentHelper.getItemEnchantmentLevel(ench(c, Enchantments.SHARPNESS), sword) == 7, "3 + 4");
+		c.assertTrue(EnchantmentHelper.getItemEnchantmentLevel(ench(c, Enchantments.SHARPNESS), sword) == 6, "3 + 3 (D292)");
 		c.assertTrue(EnchantmentHelper.getItemEnchantmentLevel(ench(c, Enchantments.SMITE), sword) == 1, "Smite beside Sharpness");
 		c.assertTrue(Runes.slots(sword) == 2 && Runes.slots(new ItemStack(Items.IRON_INGOT)) == 0
 			&& Runes.slots(new ItemStack(Items.NETHERITE_BOOTS)) == 4, "slots by material");
@@ -60,7 +60,7 @@ public class RuneGameTest {
 		c.assertTrue(p.experienceLevel == 5, "15 levels paid, left " + p.experienceLevel);
 		ItemStack gear = m.gearStack();
 		c.assertTrue(Runes.inscribed(gear).size() == 1, "inscribed");
-		c.assertTrue(EnchantmentHelper.getItemEnchantmentLevel(ench(c, Enchantments.EFFICIENCY), gear) == 4, "Efficiency +4");
+		c.assertTrue(EnchantmentHelper.getItemEnchantmentLevel(ench(c, Enchantments.EFFICIENCY), gear) == 3, "Efficiency +3 (D292)");
 		c.assertTrue(!m.getSlot(RuneForgeMenu.RUNE0 + 1).mayPlace(Runes.rune(ench(c, Enchantments.EFFICIENCY), 2)), "10 levels too dear");
 		m.getSlot(RuneForgeMenu.RUNE0).remove(1);
 		c.assertTrue(p.experienceLevel == 5 && Runes.inscribed(m.gearStack()).isEmpty(), "taken out for free");
@@ -80,7 +80,7 @@ public class RuneGameTest {
 		m.getSlot(RuneForgeMenu.MERGE_B).setByPlayer(Runes.rune(ench(c, Enchantments.UNBREAKING), 2));
 		ItemStack out = m.getSlot(RuneForgeMenu.RESULT).getItem();
 		RuneEntry e = Runes.entryOf(out);
-		c.assertTrue(e != null && e.level() == 3 && e.bonus() == 4, "level 3 (+4)");
+		c.assertTrue(e != null && e.level() == 3 && e.bonus() == 3, "level 3 (+3, D292)");
 		ItemStack taken = m.getSlot(RuneForgeMenu.RESULT).remove(1);
 		m.getSlot(RuneForgeMenu.RESULT).onTake(p, taken);
 		c.assertTrue(m.getSlot(RuneForgeMenu.MERGE_A).getItem().isEmpty() && m.getSlot(RuneForgeMenu.MERGE_B).getItem().isEmpty(),
@@ -121,7 +121,7 @@ public class RuneGameTest {
 		ThrownTrident thrown = new ThrownTrident(sl, p, trident);
 		float throwDamage = EnchantmentHelper.modifyDamage(sl, trident, target, sl.damageSources().trident(thrown, p), 8f);
 		float meleeDamage = EnchantmentHelper.modifyDamage(sl, trident, target, sl.damageSources().playerAttack(p), 9f);
-		c.assertTrue(Math.abs(throwDamage - 12.5f) < 0.01f, "rune IV = level 8 = +4.5 when thrown, was " + throwDamage);
+		c.assertTrue(Math.abs(throwDamage - 10.5f) < 0.01f, "rune IV = level 4 = +2.5 when thrown (D292), was " + throwDamage);
 		c.assertTrue(Math.abs(meleeDamage - 9f) < 0.01f, "no bonus in melee, was " + meleeDamage);
 		thrown.discard();
 		GameTestKit.drop(c, p);
