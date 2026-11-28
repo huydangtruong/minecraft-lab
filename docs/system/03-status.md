@@ -2,7 +2,7 @@
 
 > Tóm tắt cho Huy: file này ghi việc đang làm dở và bước tiếp theo, để một phiên Claude mới đọc là làm tiếp được.
 > Manager cập nhật file này cuối mỗi đợt việc (merge, phát hành, quyết định mới).
-> Snapshot: 2026-11-26, after release 0.46.2 (D251-D253); P-082 Purgatory dungeon in review, with Huy's first playtest fixes (D259-D260).
+> Snapshot: 2026-11-28, after release 0.47.0 (Purgatory dungeon P-081/P-082, Time Rewind P-083).
 
 A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [workflow/team.md](../workflow/team.md) → the plan of the work in flight. Do not read the whole repo.
 
@@ -10,7 +10,7 @@ A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [w
 
 | What | Where |
 |---|---|
-| Last release | `immortal-cultivation-v0.46.2` (GitHub Releases on `huydangtruong/minecraft-lab`), `mod_version=0.46.2`. All old tags `permahearts-v*` were renamed to `immortal-cultivation-v*` on 2026-11-17 (D132); the installers still accept both prefixes |
+| Last release | `immortal-cultivation-v0.47.0` (GitHub Releases on `huydangtruong/minecraft-lab`), `mod_version=0.47.0`. All old tags `permahearts-v*` were renamed to `immortal-cultivation-v*` on 2026-11-17 (D132); the installers still accept both prefixes |
 | 0.12.0 contains | Warrior Angel (P-021, D62, D63), Aqua Marine (P-022, P-023, D64, D69), chieftain XP x10 and damage x2 (D65, D66), stronger Strength/Swiftness/Mining elixirs (D67), gold quest 64 (D68) |
 | 0.13.0 contains | Illusion technique (P-024, D71); D72 numbers (Warrior Angel, Cloud Travel, Undying Jutsu, Heaven Blast, Fireball, Frozen Breath); chieftain health 200 and the leader-bonus fix; Strength +2 (D70); "Death Match (PvP)" line |
 | 0.14.0 contains | Illusion work modes and hostile mobs targeting the clones (P-025, D73); Quantum Leap rename (turquoise) and Cosmic Warping portals (P-026, D74, D75); quest reward boxes (P-027, D76); technique slots cost 64, 128, 256, 512 emeralds (D77); clones plant bare farmland and pick up wool near the sheep. Not playtested by hand |
@@ -54,17 +54,16 @@ A fresh agent reads, in order: this file → [AGENTS.md](../../AGENTS.md) → [w
 | 0.46.0 contains | D243 Solar Lance 12 s (Lv 1) to 24 s (Lv 20). D244 gear panel for grasped mobs (right click). D245 a vanishing Illusion stores its load in the nearest chest. D246 Undying Jutsu forbids weapon and hand hits. P-078 Purgatory (D234-D240, D247): 4th Cultivation tab, solo and team floors in a 64³ bedrock box in `permahearts:purgatory`, 10 min survival, 30+n levels and n runes, watching, `/purgatory`; bosses and events wait. Runes and Rune Forge (D241, D242, D247): runes add enchantment levels past conflicts, inscribe 5 levels per rune level, merge free. Full build green (304 game tests), client suite green; team runs and the real game not tried by hand |
 | 0.46.1 contains | D248 Rune Forge recipe in the recipe book (unlocks with a diamond or an iron ingot). D249 Undying Jutsu countdown on the skill bar. D250 Purgatory Give up at the bottom centre of the inventory screen (E). Fix: the edge tabs work again from the Purgatory tab. Client suite green |
 | 0.46.2 contains | D251 Purgatory floors last 6 min, 5 min wait, each winner gets 3 x players + floor runes. D252 a totem in either hand saves a Purgatory fighter and the run goes on. D253 mob health x2.5 and damage x2 on floor 10 (linear). Purgatory game tests 8/8 |
+| 0.47.0 contains | P-081 Purgatory wait (D254); P-082 Purgatory dungeon: generated rooms in a bedrock-skinned dungeon, sealed/pillar/treasure rooms, boss in the last room, 10 min clock, 30 s after the win (D255-D267, D269); runes hidden in the chests, boss drops XP on the ground, no rune bag (D271); team waves x1.8 for 2 players +0.8 per extra (D273); +1 stairs / +3 boss room mobs (D274). P-083 Time Rewind, 20th technique: 16-block time stop, wheel rewinds mobs, projectiles, blocks and the caster; caster held until they move or click (D268, D270, D272). Full build 315/315, client tests green. Team Purgatory not played with 2 real players |
 | On `main`, not released | Nothing |
 
 Release steps: [workflow/release.md](../workflow/release.md). Release **only when Huy says so**.
 
 ## In flight
 
-- **P-082 Purgatory dungeon** (D255-D267, D269, D271 runes in the chests + boss XP on the ground, D273 team waves x(1+0.8 per extra player), D274 +1 stairs / +3 boss room mobs, committed on the P-083 branch), branch `feat/P-082-purgatory-dungeon` (pushed, built on `feat/P-081-purgatory-wait` = D254, also not released). Plan: [P-082](../plans/P-082-purgatory-dungeon.md). Done: generator + stuck checker (JUnit), builder, rooms/boss runtime, client room-tour screenshots; playtest fixes D259 (bedrock skin, skills leave the dungeon alone, 10+ rooms, more mobs, 2 waves) and D260 (30 s after the win, Come back now); D261 (more path mobs, rune bag, 2× bosses +20% damage); D262 (1-6 extra rooms at random, mostly two-door rooms); D263 richer rooms and gift chests; D264 rune levels by floor and stone colours; D265 Seal Pillar rooms (destroy a 30-heart pillar to open); D266 richer stair hall, 5 pillar modules; D267 boss drops 10x XP; D269 skills break module insides, not shells. Full build 311/311. Next: Huy plays a floor; tune looks and numbers from his notes; release only when he asks (merge P-081 then P-082 into `main`).
-- **P-083 Time Rewind** (D268, D270, D272 playtest fix: the caster is held and rewound too, move or click to act; dying/burning mobs come back clean), branch `feat/P-083-time-rewind` (built on P-082, pushed, not released). Plan: [P-083](../plans/P-083-time-rewind.md). Done: server recorder/stop/rewind, client grey box + wheel + timeline, focus item. Tests: `ChronoRulesTest`, `'*:chrono*'` 2/2, `ChronoClientTest`. Waiting for Huy's playtest.
-- Nothing in flight. 0.46.x not playtested by hand; team Purgatory needs 2 real players.
+- Nothing in flight. 0.47.0 released 2026-11-28: Purgatory dungeon and Time Rewind playtested only partly by Huy (solo); team Purgatory needs 2 real players.
 - Nothing in flight. Waiting for Huy: R11 (shared UI helpers, may move pixels) and R12 (Notes behind a feature switch) from [P-076](../plans/P-076-audit-refactor.md). Found, not fixed: `Warp.go` still calls `stopRiding()` before `teleportTo` (same pattern as B9).
-- **All plans up to P-075 are released** (last: 0.44.0). Released but not playtested by hand: everything from 0.13.0 on unless the release row says otherwise.
+- **All plans up to P-083 are released** (last: 0.47.0). Released but not playtested by hand: everything from 0.13.0 on unless the release row says otherwise.
 - **Next ideas:** BL-024/D112 (God Slayer arrives 2–5 days after the 4th Crimson Master leaves; Master pauses until the fight ends). P-040 leftovers: Katana → teleport behind → Flame breath chain, `/boss skill` command, a real blade model and guardian-style beam. Then the rest of D97's skills (minions, blind, arena, self-destruct). BL-014 (player technique fire burns the God Slayer).
 - **Windows installer bug** (reported by Huy's friend): picking a profile other than "26.3 Fabric Essential" says SUCCESS, but that profile's mods folder still has the old jar. Reading `minecraft-lab.ps1` (`Find-Profiles` / `Select-Profile`) found nothing yet. Waiting for the friend's `Mods folder:` line and that profile's Game directory.
 
