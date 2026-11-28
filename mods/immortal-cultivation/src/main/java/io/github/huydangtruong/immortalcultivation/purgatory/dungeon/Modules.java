@@ -37,6 +37,13 @@ public enum Modules {
 	LAVA_BRIDGE(RoomKind.HAZARD, 5, Modules::lavaBridge, Style.NETHER),
 	FLOODED_HALL(RoomKind.HAZARD, 5, Modules::floodedHall, Style.OCEAN),
 	DARK_ROOM(RoomKind.DARK, 5, Modules::darkRoom, Style.DEEP),
+	// D285: big 2x2-cell halls (the layout places them; weight only among each other)
+	GRAND_COPPER_ATRIUM(RoomKind.GRAND, 5, GrandHalls::copperAtrium, Style.TRIAL),
+	GRAND_NETHER_BASTION(RoomKind.GRAND, 5, GrandHalls::netherBastion, Style.NETHER),
+	GRAND_END_SPIRES(RoomKind.GRAND, 5, GrandHalls::endSpires, Style.END),
+	GRAND_DEEP_CITADEL(RoomKind.GRAND, 5, GrandHalls::deepCitadel, Style.DEEP),
+	GRAND_OCEAN_HALL(RoomKind.GRAND, 5, GrandHalls::oceanHall, Style.OCEAN),
+	GRAND_LIBRARY_ATRIUM(RoomKind.GRAND, 5, GrandHalls::libraryAtrium, Style.LIBRARY),
 	// special (placed by the layout, weight 0)
 	REST_SHRINE(RoomKind.REST, 0, Modules::restShrine, Style.GARDEN),
 	TREASURE_VAULT(RoomKind.TREASURE, 0, Modules::treasureVault, Style.TRIAL, Style.BASE),

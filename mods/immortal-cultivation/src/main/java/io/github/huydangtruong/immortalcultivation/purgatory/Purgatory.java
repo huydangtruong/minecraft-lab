@@ -384,6 +384,12 @@ public final class Purgatory {
 	/** Game tests only: the seed of the next run (0 = random), used once. */
 	public static long nextSeedForTests;
 
+	/** Game tests only: a floor 1 team run for these players at once (no queue, no cooldown). */
+	public static Run startTeamForTests(List<ServerPlayer> players) {
+		MinecraftServer server = players.get(0).level().getServer();
+		return begin(server, data(server), true, 1, players);
+	}
+
 	static Run begin(MinecraftServer server, PurgatorySavedData d, boolean team, int floor, List<ServerPlayer> players) {
 		int slot = d.freeSlot();
 		List<String> ids = new ArrayList<>();

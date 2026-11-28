@@ -9,6 +9,8 @@ public enum RoomKind {
 	PILLAR(true),
 	/** Sealed fight, then a chest. */
 	TREASURE(true),
+	/** D285: a big 2x2-cell hall (galleries, stairs, floating platforms): sealed for four waves, two treasure chests. */
+	GRAND(true),
 	/** Sealed, the floor boss: killing it wins the floor. */
 	BOSS(true);
 

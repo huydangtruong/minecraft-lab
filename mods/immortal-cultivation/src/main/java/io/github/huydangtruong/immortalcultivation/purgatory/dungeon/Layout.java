@@ -59,9 +59,29 @@ public final class Layout {
 	}
 
 	private int add(int c, int r, int l) {
-		owner[c][r][l] = cells.size();
-		cells.add(new int[] {c, r, l});
+		return add(c, r, l, 1);
+	}
+
+	/** A room of s x s cells with its first cell at (c, r): {column, row, layer, size}. */
+	private int add(int c, int r, int l, int s) {
+		for (int a = c; a < c + s; a++) {
+			for (int b = r; b < r + s; b++) {
+				owner[a][b][l] = cells.size();
+			}
+		}
+		cells.add(new int[] {c, r, l, s});
 		return cells.size() - 1;
+	}
+
+	/** D285: the cell of a room on its side {@code d}, {@code off} cells along that side. */
+	private static int[] sideCell(int[] at, Dir d, int off) {
+		int s = at[3];
+		return switch (d) {
+			case N -> new int[] {at[0] + off, at[1]};
+			case S -> new int[] {at[0] + off, at[1] + s - 1};
+			case W -> new int[] {at[0], at[1] + off};
+			default -> new int[] {at[0] + s - 1, at[1] + off};
+		};
 	}
 
 	private void link(int c, int r, int l, Dir d) {
@@ -69,27 +89,55 @@ public final class Layout {
 		door[c + d.dx][r + d.dz][l][d.opposite().ordinal()] = true;
 	}
 
-	/** Grow {@code count} new cells on a layer from a cell already in it. */
-	private boolean grow(int[] from, int count) {
+	/** Grow {@code count} new rooms on a layer from a room already in it; {@code bigs} of them are 2x2 halls (D285). */
+	private boolean grow(int[] from, int count, int bigs) {
 		List<int[]> mine = new ArrayList<>();
 		mine.add(from);
 		int added = 0;
+		int bigAdded = 0;
 		for (int tries = 0; added < count && tries < 3000; tries++) {
 			int[] at = rng.nextInt(10) < 6 ? mine.get(mine.size() - 1) : mine.get(rng.nextInt(mine.size()));
 			if (degree(at) >= 2 && rng.nextDouble() >= DungeonRules.BRANCH_CHANCE) {
 				continue; // D262: most rooms stay a plain way through (two doors); a fork only now and then
 			}
 			Dir d = Dir.values()[rng.nextInt(4)];
-			int c = at[0] + d.dx;
-			int r = at[1] + d.dz;
-			if (!inGrid(c, r) || owner[c][r][at[2]] >= 0 || blocked[at[0]][at[1]][at[2]][d.ordinal()]) {
+			int[] sc = sideCell(at, d, rng.nextInt(at[3]));
+			int c = sc[0] + d.dx;
+			int r = sc[1] + d.dz;
+			if (!inGrid(c, r) || owner[c][r][at[2]] >= 0 || blocked[sc[0]][sc[1]][at[2]][d.ordinal()]) {
 				continue;
 			}
-			mine.add(cells.get(add(c, r, at[2])));
-			link(at[0], at[1], at[2], d);
+			int room = -1;
+			if (bigAdded < bigs && added > 0 && rng.nextInt(count - added) < bigs - bigAdded) {
+				int first = rng.nextInt(2);
+				for (int k = 0; k < 2 && room < 0; k++) {
+					int o = (first + k) % 2;
+					int fx = switch (d) {
+						case E -> c;
+						case W -> c - 1;
+						default -> c - o;
+					};
+					int fz = switch (d) {
+						case S -> r;
+						case N -> r - 1;
+						default -> r - o;
+					};
+					if (free(fx, fz, 2, at[2])) {
+						room = add(fx, fz, at[2], 2);
+					}
+				}
+				if (room < 0) {
+					continue;
+				}
+				bigAdded++;
+			} else {
+				room = add(c, r, at[2]);
+			}
+			mine.add(cells.get(room));
+			link(sc[0], sc[1], at[2], d);
 			added++;
 		}
-		return added == count;
+		return added == count && bigAdded == bigs;
 	}
 
 	/** Steps from the start to every cell (through doors and the staircase). */
@@ -103,12 +151,16 @@ public final class Layout {
 			int i = q.poll();
 			int[] at = cells.get(i);
 			List<Integer> next = new ArrayList<>();
-			for (Dir d : Dir.values()) {
-				if (door[at[0]][at[1]][at[2]][d.ordinal()]) {
-					next.add(owner[at[0] + d.dx][at[1] + d.dz][at[2]]);
+			for (int c = at[0]; c < at[0] + at[3]; c++) {
+				for (int r = at[1]; r < at[1] + at[3]; r++) {
+					for (Dir d : Dir.values()) {
+						if (door[c][r][at[2]][d.ordinal()]) {
+							next.add(owner[c + d.dx][r + d.dz][at[2]]);
+						}
+					}
 				}
 			}
-			if (stairLow != null && at[0] == stairLow[0] && at[1] == stairLow[1]) {
+			if (isStair(at)) {
 				next.add(owner[at[0]][at[1]][1 - at[2]]);
 			}
 			for (int n : next) {
@@ -125,10 +177,12 @@ public final class Layout {
 		int target = DungeonRules.rooms(floor) + 1 + rng.nextInt(DungeonRules.EXTRA_ROOMS_MAX); // D262: 1 to 6 rooms more, at random
 		add(rng.nextInt(2), rng.nextInt(2), 0);
 		int lower = layers == 2 ? target / 2 : target;
-		if (!grow(cells.get(0), lower - 1)) {
+		int bigs = DungeonRules.grandRooms(floor);
+		int bigsLow = layers == 2 ? 1 : bigs; // D285: one big hall below, the second (from floor 10) upstairs
+		if (!grow(cells.get(0), lower - 1, bigsLow)) {
 			return null;
 		}
-		if (layers == 2 && !placeStairs(target - lower)) {
+		if (layers == 2 && !placeStairs(target - lower, bigs - bigsLow)) {
 			return null;
 		}
 		if (!placeBoss()) {
@@ -138,11 +192,13 @@ public final class Layout {
 		return build(seed, attempts);
 	}
 
-	private boolean placeStairs(int upper) {
+	private boolean placeStairs(int upper, int bigs) {
 		int[] dist = distances();
 		List<Integer> order = new ArrayList<>();
 		for (int i = 1; i < cells.size(); i++) {
-			order.add(i);
+			if (cells.get(i)[3] == 1) {
+				order.add(i);
+			}
 		}
 		Collections.shuffle(order, rng);
 		order.sort(Comparator.comparingInt(i -> -dist[i]));
@@ -161,7 +217,7 @@ public final class Layout {
 			blocked[at[0]][at[1]][0][side.ordinal()] = true;
 			stairLow = new int[] {at[0], at[1], side.ordinal()};
 			int top = add(at[0], at[1], 1);
-			return grow(cells.get(top), upper - 1);
+			return grow(cells.get(top), upper - 1, bigs);
 		}
 		return false;
 	}
@@ -171,7 +227,7 @@ public final class Layout {
 		int last = layers - 1;
 		List<Integer> order = new ArrayList<>();
 		for (int i = 1; i < cells.size(); i++) {
-			if (cells.get(i)[2] == last && dist[i] >= 0) {
+			if (cells.get(i)[2] == last && cells.get(i)[3] == 1 && dist[i] >= 0) {
 				order.add(i);
 			}
 		}
@@ -243,10 +299,13 @@ public final class Layout {
 
 	private void addLoops() {
 		for (int[] at : cells) {
+			if (at[3] != 1) {
+				continue; // D285: the big halls keep the doors they grew with
+			}
 			for (Dir d : new Dir[] {Dir.E, Dir.S}) {
 				int c = at[0] + d.dx;
 				int r = at[1] + d.dz;
-				if (inGrid(c, r) && owner[c][r][at[2]] >= 0 && !door[at[0]][at[1]][at[2]][d.ordinal()]
+				if (inGrid(c, r) && owner[c][r][at[2]] >= 0 && cells.get(owner[c][r][at[2]])[3] == 1 && !door[at[0]][at[1]][at[2]][d.ordinal()]
 					&& !blocked[at[0]][at[1]][at[2]][d.ordinal()] && !blocked[c][r][at[2]][d.opposite().ordinal()]
 					&& degree(at) < 2 && degree(cells.get(owner[c][r][at[2]])) < 2 // D262: loops only join dead ends, no new forks
 					&& rng.nextDouble() < DungeonRules.LOOP_CHANCE) {
@@ -263,7 +322,7 @@ public final class Layout {
 	private Walker.Result gifts(Grid grid, List<Room> rooms, int[] start, Room boss, Walker.Result res) {
 		List<int[]> placed = new ArrayList<>();
 		for (Room r : rooms) {
-			if (r.kind == RoomKind.START || r.kind == RoomKind.BOSS || r.kind == RoomKind.TREASURE
+			if (r.kind == RoomKind.START || r.kind == RoomKind.BOSS || r.kind == RoomKind.TREASURE || r.kind == RoomKind.GRAND
 				|| rng.nextDouble() >= DungeonRules.GIFT_CHANCE) {
 				continue;
 			}
@@ -344,7 +403,7 @@ public final class Layout {
 	}
 
 	private boolean isStair(int[] at) {
-		return stairLow != null && at[0] == stairLow[0] && at[1] == stairLow[1];
+		return stairLow != null && at[3] == 1 && at[0] == stairLow[0] && at[1] == stairLow[1];
 	}
 
 	private Dungeon build(long seed, int attempts) {
@@ -352,11 +411,14 @@ public final class Layout {
 		// which module each cell gets
 		Modules[] pick = new Modules[cells.size()];
 		pick[0] = Modules.START;
+		Map<Modules, Integer> grandUses = new EnumMap<>(Modules.class);
 		List<Integer> plain = new ArrayList<>();
 		for (int i = 1; i < cells.size(); i++) {
 			int[] at = cells.get(i);
 			if (isStair(at)) {
 				pick[i] = at[2] == 0 ? Modules.STAIR_UP : Modules.STAIR_DOWN;
+			} else if (at[3] == 2) {
+				pick[i] = weighted(grandUses, RoomKind.GRAND); // D285
 			} else {
 				plain.add(i);
 			}
@@ -398,10 +460,14 @@ public final class Layout {
 		for (int i = 0; i < cells.size(); i++) {
 			int[] at = cells.get(i);
 			Modules m = pick[i];
-			Room room = new Room(i, m.kind, m.id(), m.pickStyle(rng), at[0], at[1], at[2], 1, 1);
-			for (Dir d : Dir.values()) {
-				if (door[at[0]][at[1]][at[2]][d.ordinal()]) {
-					room.ports.add(new Port(d, 0));
+			Room room = new Room(i, m.kind, m.id(), m.pickStyle(rng), at[0], at[1], at[2], at[3], at[3]);
+			for (int c = at[0]; c < at[0] + at[3]; c++) {
+				for (int r = at[1]; r < at[1] + at[3]; r++) {
+					for (Dir d : Dir.values()) {
+						if (door[c][r][at[2]][d.ordinal()]) {
+							room.ports.add(new Port(d, d == Dir.N || d == Dir.S ? c - at[0] : r - at[1]));
+						}
+					}
 				}
 			}
 			if (i == bossCell) {
@@ -440,8 +506,12 @@ public final class Layout {
 
 	private int degree(int[] at) {
 		int n = 0;
-		for (Dir d : Dir.values()) {
-			n += door[at[0]][at[1]][at[2]][d.ordinal()] ? 1 : 0;
+		for (int c = at[0]; c < at[0] + at[3]; c++) {
+			for (int r = at[1]; r < at[1] + at[3]; r++) {
+				for (Dir d : Dir.values()) {
+					n += door[c][r][at[2]][d.ordinal()] ? 1 : 0;
+				}
+			}
 		}
 		return n;
 	}
@@ -451,7 +521,7 @@ public final class Layout {
 		double total = 0;
 		List<Modules> pool = new ArrayList<>();
 		for (Modules m : Modules.values()) {
-			if (m.weight > 0 && (only == null || m.kind == only)) {
+			if (m.weight > 0 && (only == null ? m.kind != RoomKind.GRAND : m.kind == only)) {
 				pool.add(m);
 				total += m.weight / (1.0 + 2 * uses.getOrDefault(m, 0));
 			}

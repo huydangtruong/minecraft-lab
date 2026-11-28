@@ -15,6 +15,39 @@ public record Dungeon(long seed, int floor, Grid grid, List<Room> rooms, Room st
 		return null;
 	}
 
+	/** D283: the rooms joined to this one by a door (same layer). */
+	public List<Room> neighbours(Room room) {
+		List<Room> out = new ArrayList<>();
+		for (Port p : room.ports) {
+			int cx;
+			int cz;
+			switch (p.side()) {
+				case N -> {
+					cx = room.cx + p.slot();
+					cz = room.cz - 1;
+				}
+				case S -> {
+					cx = room.cx + p.slot();
+					cz = room.cz + room.cd;
+				}
+				case W -> {
+					cx = room.cx - 1;
+					cz = room.cz + p.slot();
+				}
+				default -> {
+					cx = room.cx + room.cw;
+					cz = room.cz + p.slot();
+				}
+			}
+			for (Room r : rooms) {
+				if (r != room && r.covers(cx, cz, room.layer) && !out.contains(r)) {
+					out.add(r);
+				}
+			}
+		}
+		return out;
+	}
+
 	/**
 	 * D269: skills may break the inside of a module but not its shell (walls, floor, ceiling, gates), nor anything in a
 	 * staircase or Seal Pillar room (their steps are the only way up), nor anything outside the rooms (the bedrock skin).

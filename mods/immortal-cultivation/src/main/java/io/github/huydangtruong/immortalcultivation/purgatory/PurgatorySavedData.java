@@ -54,6 +54,24 @@ public class PurgatorySavedData extends SavedData {
 		public static final int DONE = 2;
 		/** Sealed, the second and last wave (D259). */
 		public static final int SEALED_LAST = 3;
+		/** D285: sealed with n waves sent is SEALED_WAVE + n, for the middle waves of a room with more than two. */
+		public static final int SEALED_WAVE = 10;
+
+		/** True while a room is sealed (any wave). */
+		public static boolean sealed(int state) {
+			return state == SEALED || state == SEALED_LAST || state > SEALED_WAVE;
+		}
+
+		/** Waves a sealed room has sent so far. */
+		public static int wavesSent(int state, int waves) {
+			return state == SEALED ? 1 : state == SEALED_LAST ? waves : state - SEALED_WAVE;
+		}
+
+		/** The state once wave number {@code wave} of {@code waves} has come. */
+		public static int afterWave(int wave, int waves) {
+			return wave >= waves ? SEALED_LAST : wave <= 1 ? SEALED : SEALED_WAVE + wave;
+		}
+
 		/** Boss states. */
 		public static final int BOSS_WAITING = 0;
 		public static final int BOSS_ALIVE = 1;

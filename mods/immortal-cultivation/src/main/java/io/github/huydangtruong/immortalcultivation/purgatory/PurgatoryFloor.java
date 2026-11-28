@@ -89,7 +89,7 @@ public final class PurgatoryFloor {
 	}
 
 	/** The room a fighter stands in, or null (in a doorway). */
-	static Room roomOf(Run r, ServerPlayer p) {
+	public static Room roomOf(Run r, ServerPlayer p) {
 		BlockPos o = DungeonBuilder.origin(r.slot);
 		BlockPos b = p.blockPosition();
 		return dungeon(r).roomAt(b.getX() - o.getX(), b.getY() - o.getY(), b.getZ() - o.getZ());
@@ -115,10 +115,19 @@ public final class PurgatoryFloor {
 			}
 		}
 		boolean second = server.getTickCount() % 20 == 0;
+		boolean tenth = server.getTickCount() % 10 == 0;
 		for (Room room : d.rooms()) {
 			List<ServerPlayer> in = where.getOrDefault(room, List.of());
 			int state = r.room(room.index);
-			if (state == Run.IDLE) {
+			if (Run.sealed(state) && tenth) {
+				closeWhenClear(level, r, d, room, alive); // D283: the doors shut once no teammate is left just outside
+			}
+			if (state == Run.IDLE && room.kind == RoomKind.BOSS && roomsLeftBeforeBoss(r, d) > 0) {
+				bossGateShut(level, r, d, room, alive, in, tenth, second); // D284
+			} else if (state == Run.IDLE) {
+				if (room.kind == RoomKind.BOSS && tenth) {
+					bossGateOpen(server, level, r, room);
+				}
 				for (ServerPlayer p : in) {
 					if (deepIn(r, room, p)) {
 						wake(server, level, r, room, alive);
@@ -127,12 +136,14 @@ public final class PurgatoryFloor {
 				}
 			} else if (state == Run.SEALED && room.kind == RoomKind.PILLAR) {
 				tickPillar(server, level, r, room, alive);
-			} else if ((state == Run.SEALED || state == Run.SEALED_LAST) && room.kind != RoomKind.BOSS) {
+			} else if (Run.sealed(state) && room.kind != RoomKind.BOSS) {
 				int t = r.tickRoom(room.index);
 				if (t % 10 == 0) {
 					List<Mob> mobs = mobs(level, box(r.slot, room).inflate(0.5));
-					if (mobs.isEmpty() && state == Run.SEALED && DungeonRules.waves(room.kind) > 1) {
-						secondWave(server, level, r, room, alive); // D259
+					int waves = DungeonRules.waves(room.kind);
+					int sent = Run.wavesSent(state, waves);
+					if (mobs.isEmpty() && sent < waves) {
+						nextWave(server, level, r, room, alive, sent + 1, waves); // D259, D285
 					} else if (mobs.isEmpty() || t >= DungeonRules.OPEN_AFTER_TICKS) {
 						open(level, r, room);
 					} else if (t >= DungeonRules.GLOW_AFTER_TICKS) {
@@ -155,28 +166,132 @@ public final class PurgatoryFloor {
 
 	private static void wake(MinecraftServer server, ServerLevel level, Run r, Room room, List<ServerPlayer> alive) {
 		int players = r.team ? r.players.size() : 1;
+		boolean shut = true;
 		if (room.kind.locks) {
-			seal(level, r, room);
 			r.room(room.index, Run.SEALED);
-			level.playSound(null, BlockPos.containing(box(r.slot, room).getCenter()), SoundEvents.IRON_DOOR_CLOSE, SoundSource.BLOCKS, 2f, 0.6f);
+			if (room.kind == RoomKind.BOSS) {
+				pullIn(level, r, room, alive);
+			}
+			shut = closeWhenClear(level, r, dungeon(r), room, alive);
 		} else {
 			r.room(room.index, Run.DONE);
 		}
+		String later = shut ? "" : " (they shut once every fighter just outside is in)";
 		if (room.kind == RoomKind.BOSS) {
-			pullIn(level, r, room, alive);
 			spawnBoss(level, r, room, alive);
 			Purgatory.tellRun(server, r, "The boss wakes!");
 		} else if (room.kind == RoomKind.PILLAR) {
 			spawnPillar(level, r, room);
-			Purgatory.tellRun(server, r, "The doors seal: destroy the glowing Seal Pillar to open them!");
+			Purgatory.tellRun(server, r, "The doors seal: destroy the glowing Seal Pillar to open them!" + later);
+		} else if (room.kind == RoomKind.GRAND) {
+			Purgatory.tellRun(server, r, "The great hall seals: survive " + DungeonRules.GRAND_WAVES + " waves!" + later);
 		} else if (room.kind.locks) {
-			Purgatory.tellRun(server, r, "The doors seal: kill every mob to open them");
+			Purgatory.tellRun(server, r, "The doors seal: kill every mob to open them" + later);
 		}
 		spawnWave(level, r, room, alive, DungeonRules.wave(room.kind, r.floor, players));
 	}
 
-	private static void secondWave(MinecraftServer server, ServerLevel level, Run r, Room room, List<ServerPlayer> alive) {
-		r.room(room.index, Run.SEALED_LAST);
+	/**
+	 * D283: bars a sealed room's open gates unless a living fighter is still just outside it (in a room joined to it by a
+	 * door, or in its doorways), so nobody is shut out of the fight or locked in the room behind. True when every gate is
+	 * barred (or there was nothing to bar).
+	 */
+	private static boolean closeWhenClear(ServerLevel level, Run r, Dungeon d, Room room, List<ServerPlayer> alive) {
+		boolean open = false;
+		for (int[] g : room.gates) {
+			if (level.getBlockState(DungeonBuilder.world(r.slot, g)).isAir()) {
+				open = true;
+				break;
+			}
+		}
+		if (!open) {
+			return true;
+		}
+		if (room.kind != RoomKind.BOSS && fighterJustOutside(r, d, room, alive)) {
+			return false;
+		}
+		if (seal(level, r, room) > 0) {
+			level.playSound(null, BlockPos.containing(box(r.slot, room).getCenter()), SoundEvents.IRON_DOOR_CLOSE, SoundSource.BLOCKS, 2f, 0.6f);
+		}
+		return true;
+	}
+
+	/** D283: a living fighter stands in a room joined to this one by a door, or in its doorways. */
+	static boolean fighterJustOutside(Run r, Dungeon d, Room room, List<ServerPlayer> alive) {
+		List<Room> next = d.neighbours(room);
+		AABB doorways = box(r.slot, room).inflate(2.0, 0, 2.0);
+		for (ServerPlayer p : alive) {
+			Room at = roomOf(r, p);
+			if (at == room) {
+				continue;
+			}
+			if (at == null ? doorways.contains(p.position()) : next.contains(at)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** D284: sealing rooms of the floor (the boss room aside) that are not cleared yet. */
+	static int roomsLeftBeforeBoss(Run r, Dungeon d) {
+		List<RoomKind> kinds = new ArrayList<>();
+		List<Boolean> done = new ArrayList<>();
+		for (Room room : d.rooms()) {
+			kinds.add(room.kind);
+			done.add(r.room(room.index) == Run.DONE);
+		}
+		return DungeonRules.roomsLeftBeforeBoss(kinds, done);
+	}
+
+	/**
+	 * D284: the boss room stays barred while sealing rooms are left: its door is barred, a fighter who got in anyway is put
+	 * back in the room before it, and fighters near the door are told how many rooms are left.
+	 */
+	private static void bossGateShut(ServerLevel level, Run r, Dungeon d, Room boss, List<ServerPlayer> alive, List<ServerPlayer> in,
+			boolean tenth, boolean second) {
+		if (tenth) {
+			seal(level, r, boss);
+		}
+		List<Room> next = d.neighbours(boss);
+		for (ServerPlayer p : in) {
+			if (!next.isEmpty() && next.get(0).centre != null) {
+				Vec3 c = feet(r.slot, next.get(0).centre);
+				p.stopRiding();
+				p.teleportTo(level, c.x, c.y, c.z, Set.of(), p.getYRot(), p.getXRot(), false);
+				p.setDeltaMovement(Vec3.ZERO);
+				p.resetFallDistance();
+			}
+		}
+		if (second) {
+			int left = roomsLeftBeforeBoss(r, d);
+			AABB near = box(r.slot, boss).inflate(8.0, 2.0, 8.0);
+			for (ServerPlayer p : alive) {
+				if (near.contains(p.position())) {
+					p.sendOverlayMessage(Component.literal("The boss room is sealed: clear " + left + " more sealed room" + (left == 1 ? "" : "s"))
+						.withStyle(ChatFormatting.RED));
+				}
+			}
+		}
+	}
+
+	/** D284: every sealing room is cleared: the boss room's bars go (once). */
+	private static void bossGateOpen(MinecraftServer server, ServerLevel level, Run r, Room boss) {
+		boolean barred = false;
+		for (int[] g : boss.gates) {
+			BlockPos p = DungeonBuilder.world(r.slot, g);
+			if (level.getBlockState(p).is(Blocks.IRON_BARS)) {
+				level.setBlock(p, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
+				barred = true;
+			}
+		}
+		if (barred) {
+			level.playSound(null, BlockPos.containing(box(r.slot, boss).getCenter()), SoundEvents.IRON_DOOR_OPEN, SoundSource.BLOCKS, 2f, 0.8f);
+			Purgatory.tellRun(server, r, "Every sealed room is cleared: the boss room opens!");
+		}
+	}
+
+	private static void nextWave(MinecraftServer server, ServerLevel level, Run r, Room room, List<ServerPlayer> alive, int wave, int waves) {
+		r.room(room.index, Run.afterWave(wave, waves));
 		r.resetRoom(room.index);
 		List<ServerPlayer> in = new ArrayList<>();
 		AABB b = box(r.slot, room);
@@ -187,7 +302,7 @@ public final class PurgatoryFloor {
 		}
 		level.playSound(null, BlockPos.containing(b.getCenter()), SoundEvents.TRIAL_SPAWNER_SPAWN_MOB, SoundSource.HOSTILE, 2f, 0.8f);
 		spawnWave(level, r, room, in.isEmpty() ? alive : in, DungeonRules.wave(room.kind, r.floor, r.team ? r.players.size() : 1));
-		Purgatory.tellRun(server, r, "A second wave comes!");
+		Purgatory.tellRun(server, r, waves == 2 ? "A second wave comes!" : "Wave " + wave + " of " + waves + " comes!");
 	}
 
 	// ---- Seal Pillar (D265) ----
@@ -317,8 +432,7 @@ public final class PurgatoryFloor {
 			e.discard(); // D265
 		}
 		for (Room room : dungeon(r).rooms()) {
-			int state = r.room(room.index);
-			if (state == Run.SEALED || state == Run.SEALED_LAST) {
+			if (Run.sealed(r.room(room.index))) {
 				open(level, r, room);
 			}
 		}
@@ -338,12 +452,13 @@ public final class PurgatoryFloor {
 		}
 	}
 
-	private static void seal(ServerLevel level, Run r, Room room) {
+	/** Bars every open gate no fighter stands in; returns how many it barred. */
+	private static int seal(ServerLevel level, Run r, Room room) {
 		BlockState bars = Blocks.IRON_BARS.defaultBlockState();
 		List<BlockPos> placed = new ArrayList<>();
 		for (int[] g : room.gates) {
 			BlockPos p = DungeonBuilder.world(r.slot, g);
-			if (level.getEntitiesOfClass(ServerPlayer.class, new AABB(p)).isEmpty() && level.getBlockState(p).isAir()) {
+			if (level.getBlockState(p).isAir() && level.getEntitiesOfClass(ServerPlayer.class, new AABB(p)).isEmpty()) {
 				level.setBlock(p, bars, Block.UPDATE_CLIENTS);
 				placed.add(p);
 			}
@@ -355,6 +470,7 @@ public final class PurgatoryFloor {
 				level.setBlock(p, shaped, Block.UPDATE_CLIENTS);
 			}
 		}
+		return placed.size();
 	}
 
 	private static void open(ServerLevel level, Run r, Room room) {

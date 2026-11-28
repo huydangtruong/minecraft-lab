@@ -241,7 +241,7 @@ class DungeonLayoutTest {
 			for (long seed = 0; seed < SEEDS; seed++) {
 				Dungeon d = Layout.generate(seed * 131 + floor, floor);
 				for (Room r : d.rooms()) {
-					if (r.kind != RoomKind.START && r.kind != RoomKind.BOSS && r.kind != RoomKind.TREASURE) {
+					if (r.kind != RoomKind.START && r.kind != RoomKind.BOSS && r.kind != RoomKind.TREASURE && r.kind != RoomKind.GRAND) {
 						rooms++;
 						gifts += r.gifts.size();
 						for (int[] g : r.gifts) {
@@ -276,6 +276,57 @@ class DungeonLayoutTest {
 		}
 		System.out.println("pillar rooms " + pillars + " of " + rooms);
 		assertTrue(pillars * 12 > rooms, "pillar rooms " + pillars + " of " + rooms);
+	}
+
+	/**
+	 * D285: every floor has its big halls (2x2 cells, one before floor 10, two from it), each sealing for four waves with two
+	 * treasure chests a fighter can stand next to, joined into the floor by its doors.
+	 */
+	@Test
+	void bigHallsHaveFourWavesAndTwoChests() {
+		java.util.Map<String, Integer> used = new java.util.HashMap<>();
+		for (int floor : FLOORS) {
+			for (long seed = 0; seed < SEEDS; seed++) {
+				Dungeon d = Layout.generate(seed * 53 + floor, floor);
+				Walker.Result res = Walker.check(d.grid(), d.rooms(), d.start().centre, d.boss());
+				long halls = d.rooms().stream().filter(r -> r.kind == RoomKind.GRAND).count();
+				assertEquals(DungeonRules.grandRooms(floor), halls, "floor " + floor + " seed " + seed);
+				for (Room r : d.rooms()) {
+					if (r.kind != RoomKind.GRAND) {
+						continue;
+					}
+					used.merge(r.module, 1, Integer::sum);
+					assertEquals(2, r.cw, r.toString());
+					assertEquals(2, r.cd, r.toString());
+					assertEquals(2, r.chests.size(), r + " chests");
+					assertTrue(r.gifts.isEmpty(), r + " no gift chest");
+					assertFalse(r.ports.isEmpty(), r + " doors");
+					assertTrue(r.spawns.size() >= 24, r + " spawns " + r.spawns.size());
+					for (int[] ch : r.chests) {
+						assertEquals(Mat.CHEST, d.grid().mat(ch[0], ch[1], ch[2]));
+						boolean near = false;
+						for (int[] n : new int[][] {{1, 0}, {-1, 0}, {0, 1}, {0, -1}}) {
+							near |= res.reachable(ch[0] + n[0], ch[1], ch[2] + n[1]);
+						}
+						assertTrue(near, r + " chest at " + java.util.Arrays.toString(ch) + " can be reached");
+					}
+					assertFalse(d.neighbours(r).isEmpty(), r + " neighbours");
+				}
+			}
+		}
+		System.out.println("big halls " + used);
+		assertEquals(6, used.size(), "all six halls show up: " + used);
+		assertEquals(4, DungeonRules.waves(RoomKind.GRAND));
+	}
+
+	/** D284: the boss room waits for every sealing room but itself. */
+	@Test
+	void theBossWaitsForEverySealingRoom() {
+		java.util.List<RoomKind> kinds = java.util.List.of(RoomKind.START, RoomKind.LOCKED, RoomKind.CORRIDOR, RoomKind.PILLAR,
+			RoomKind.GRAND, RoomKind.TREASURE, RoomKind.BOSS);
+		assertEquals(4, DungeonRules.roomsLeftBeforeBoss(kinds, java.util.List.of(false, false, false, false, false, false, false)));
+		assertEquals(1, DungeonRules.roomsLeftBeforeBoss(kinds, java.util.List.of(false, true, false, true, false, true, false)));
+		assertEquals(0, DungeonRules.roomsLeftBeforeBoss(kinds, java.util.List.of(false, true, false, true, true, true, false)));
 	}
 
 	/** D269: skills break the inside of a module, never its shell, a staircase or pillar room, or the skin. */

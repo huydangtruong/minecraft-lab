@@ -356,6 +356,137 @@ public class PurgatoryGameTest {
 		});
 	}
 
+	/** Marks every sealing room but the boss room cleared. */
+	private static void clearSealedRooms(PurgatorySavedData.Run r) {
+		for (Room room : PurgatoryFloor.dungeon(r).rooms()) {
+			if (room.kind.locks && room.kind != RoomKind.BOSS) {
+				r.room(room.index, PurgatorySavedData.Run.DONE);
+			}
+		}
+	}
+
+	private static java.util.List<Mob> runMobs(net.minecraft.server.level.ServerLevel level, PurgatorySavedData.Run r) {
+		return level.getEntitiesOfClass(Mob.class, Purgatory.inside(r.slot), m -> m.entityTags().contains(Purgatory.TAG));
+	}
+
+	/** D284: the boss room stays barred, and puts a fighter back out, until every sealing room is cleared; then it opens. */
+	@GameTest(maxTicks = 80)
+	public void theBossRoomWaitsForEverySealedRoom(GameTestHelper c) {
+		ServerPlayer p = fighter(c);
+		p.getAbilities().invulnerable = true;
+		c.assertTrue(Purgatory.startSolo(p) == null, "solo starts");
+		PurgatorySavedData.Run r = data(c).runOf(id(p));
+		Room boss = PurgatoryFloor.dungeon(r).boss();
+		go(c, p, r, boss.centre);
+		c.runAfterDelay(12, () -> {
+			var level = plevel(c);
+			c.assertTrue(r.room(boss.index) == PurgatorySavedData.Run.IDLE, "the boss does not wake");
+			c.assertTrue(level.getEntitiesOfClass(Mob.class, Purgatory.inside(r.slot), m -> m.entityTags().contains(PurgatoryFloor.BOSS_TAG)).isEmpty(),
+				"no boss yet");
+			c.assertTrue(PurgatoryFloor.roomOf(r, p) != boss, "put back out of the boss room");
+			for (int[] g : boss.gates) {
+				c.assertTrue(level.getBlockState(DungeonBuilder.world(r.slot, g)).is(Blocks.IRON_BARS), "the boss door is barred");
+			}
+			clearSealedRooms(r);
+			c.runAfterDelay(12, () -> {
+				for (int[] g : boss.gates) {
+					c.assertTrue(level.getBlockState(DungeonBuilder.world(r.slot, g)).isAir(), "the boss door opens");
+				}
+				go(c, p, r, boss.centre);
+				c.runAfterDelay(3, () -> {
+					c.assertTrue(r.boss == PurgatorySavedData.Run.BOSS_ALIVE, "the boss wakes");
+					Purgatory.finish(p, false);
+					GameTestKit.drop(c, p);
+					c.succeed();
+				});
+			});
+		});
+	}
+
+	/** D283: a room a fighter wakes keeps its doors open while a teammate is still in the room next to it, then shuts. */
+	@GameTest(maxTicks = 80)
+	public void aRoomWaitsForTheTeammateBehind(GameTestHelper c) {
+		ServerPlayer a = fighter(c);
+		ServerPlayer b = fighter(c);
+		a.getAbilities().invulnerable = true;
+		b.getAbilities().invulnerable = true;
+		PurgatorySavedData.Run r = Purgatory.startTeamForTests(java.util.List.of(a, b));
+		Dungeon d = PurgatoryFloor.dungeon(r);
+		Room room = null;
+		Room behind = null;
+		for (Room x : d.rooms()) {
+			if (x.kind == RoomKind.LOCKED) {
+				for (Room n : d.neighbours(x)) {
+					if (!n.kind.locks) {
+						room = x;
+						behind = n;
+					}
+				}
+			}
+		}
+		c.assertTrue(room != null, "a locked room next to an open one");
+		Room sealed = room;
+		go(c, b, r, behind.centre);
+		go(c, a, r, sealed.centre);
+		c.runAfterDelay(12, () -> {
+			var level = plevel(c);
+			c.assertTrue(r.room(sealed.index) == PurgatorySavedData.Run.SEALED, "woken");
+			c.assertTrue(!runMobs(level, r).isEmpty(), "mobs came");
+			for (int[] g : sealed.gates) {
+				c.assertTrue(level.getBlockState(DungeonBuilder.world(r.slot, g)).isAir(), "the doors wait for the teammate");
+			}
+			go(c, b, r, sealed.centre);
+			c.runAfterDelay(12, () -> {
+				for (int[] g : sealed.gates) {
+					c.assertTrue(level.getBlockState(DungeonBuilder.world(r.slot, g)).is(Blocks.IRON_BARS), "the doors shut once both are in");
+				}
+				Purgatory.finish(a, false);
+				GameTestKit.drop(c, a);
+				GameTestKit.drop(c, b);
+				c.succeed();
+			});
+		});
+	}
+
+	/** D285: a big hall seals for four waves, then opens; it holds two treasure chests. */
+	@GameTest(maxTicks = 160)
+	public void aBigHallSendsFourWaves(GameTestHelper c) {
+		ServerPlayer p = fighter(c);
+		p.getAbilities().invulnerable = true;
+		c.assertTrue(Purgatory.startSolo(p) == null, "solo starts");
+		PurgatorySavedData.Run r = data(c).runOf(id(p));
+		Room hall = first(PurgatoryFloor.dungeon(r), RoomKind.GRAND);
+		var level = plevel(c);
+		for (int[] ch : hall.chests) {
+			c.assertTrue(level.getBlockState(DungeonBuilder.world(r.slot, ch)).is(Blocks.CHEST), "a chest");
+		}
+		c.assertTrue(hall.chests.size() == 2, "two chests");
+		go(c, p, r, hall.centre);
+		int[] states = {PurgatorySavedData.Run.SEALED, PurgatorySavedData.Run.SEALED_WAVE + 2, PurgatorySavedData.Run.SEALED_WAVE + 3,
+			PurgatorySavedData.Run.SEALED_LAST, PurgatorySavedData.Run.DONE};
+		wave(c, r, hall, states, 0, p);
+	}
+
+	private static void wave(GameTestHelper c, PurgatorySavedData.Run r, Room hall, int[] states, int i, ServerPlayer p) {
+		c.runAfterDelay(i == 0 ? 3 : 15, () -> {
+			var level = plevel(c);
+			c.assertTrue(r.room(hall.index) == states[i], "state " + i + ": " + r.room(hall.index));
+			if (i == states.length - 1) {
+				for (int[] g : hall.gates) {
+					c.assertTrue(level.getBlockState(DungeonBuilder.world(r.slot, g)).isAir(), "doors open");
+				}
+				Purgatory.finish(p, false);
+				GameTestKit.drop(c, p);
+				c.succeed();
+				return;
+			}
+			var mobs = runMobs(level, r);
+			c.assertTrue(!mobs.isEmpty(), "wave " + (i + 1) + " came");
+			mobs.forEach(m -> m.kill(level));
+			wave(c, r, hall, states, i + 1, p);
+		});
+	}
+
 	/** P-082: the boss waits in the last room; killing it wins the floor. */
 	@GameTest(maxTicks = 80)
 	public void killingTheBossWinsTheFloor(GameTestHelper c) {
@@ -364,6 +495,7 @@ public class PurgatoryGameTest {
 		c.assertTrue(Purgatory.startSolo(p) == null, "solo starts");
 		PurgatorySavedData.Run r = data(c).runOf(id(p));
 		Room boss = PurgatoryFloor.dungeon(r).boss();
+		clearSealedRooms(r); // D284: the boss room opens only after them
 		go(c, p, r, boss.centre);
 		c.assertTrue(chestRunes(c, r) == PurgatoryRules.chestRunes(1, 1), "D271: the runes are in the chests: " + chestRunes(c, r));
 		c.runAfterDelay(3, () -> {

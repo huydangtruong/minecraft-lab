@@ -64,6 +64,7 @@ public final class DungeonRules {
 			case LOCKED -> Math.min(14, 5 + f / 3);
 			case PILLAR -> Math.min(10, 4 + f / 4);
 			case TREASURE -> Math.min(16, 7 + f / 3);
+			case GRAND -> Math.min(16, 6 + f / 3); // D285: four of these
 			case BOSS -> Math.min(11, 5 + f / 8); // D274: +3
 			case OPEN, DARK -> Math.min(10, 5 + f / 5); // D261: the path rooms had too few
 			case CORRIDOR, HAZARD, TRAP -> Math.min(9, 4 + f / 6);
@@ -86,7 +87,31 @@ public final class DungeonRules {
 
 	/** Waves a sealed room sends (D259): the second comes when the first is dead. */
 	public static int waves(RoomKind kind) {
-		return kind == RoomKind.LOCKED || kind == RoomKind.TREASURE ? 2 : 1;
+		return kind == RoomKind.GRAND ? GRAND_WAVES : kind == RoomKind.LOCKED || kind == RoomKind.TREASURE ? 2 : 1;
+	}
+
+	/** D285: waves of a big hall. */
+	public static final int GRAND_WAVES = 4;
+	/** D285: from this floor a floor has two big halls (one before). */
+	public static final int TWO_GRAND_FROM = 10;
+
+	/** D285: big 2x2-cell halls on a floor. */
+	public static int grandRooms(int floor) {
+		return Math.max(1, floor) >= TWO_GRAND_FROM ? 2 : 1;
+	}
+
+	/**
+	 * D284: the boss room opens only when every other sealing room is cleared. {@code kinds} are the rooms' kinds and
+	 * {@code done} whether each is cleared; returns how many sealing rooms (not the boss room) are still not cleared.
+	 */
+	public static int roomsLeftBeforeBoss(java.util.List<RoomKind> kinds, java.util.List<Boolean> done) {
+		int left = 0;
+		for (int i = 0; i < kinds.size(); i++) {
+			if (kinds.get(i).locks && kinds.get(i) != RoomKind.BOSS && !done.get(i)) {
+				left++;
+			}
+		}
+		return left;
 	}
 
 	/** After the boss dies the fighters stay this long (D260), or leave at once with Come back now. */
