@@ -11,6 +11,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -23,6 +24,7 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.component.CustomModelData;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 
@@ -75,10 +77,15 @@ public final class Runes {
 	public static ItemStack rune(Holder<Enchantment> e, int level) {
 		ItemStack s = new ItemStack(ITEM);
 		s.set(RUNE, new RuneEntry(e, Math.max(1, level)));
-		String kind = RuneRules.kind(e.unwrapKey().map(k -> k.identifier().getPath()).orElse(""));
-		s.set(net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA,
-			new net.minecraft.world.item.component.CustomModelData(List.of(), List.of(), List.of(kind), List.of())); // D264: stone colour
+		s.set(DataComponents.CUSTOM_MODEL_DATA, look(new RuneEntry(e, Math.max(1, level))));
 		return s;
+	}
+
+	/** D264 + D278: what the item model reads: kind (stone colour), enchantment (glyph), then the two number layers. */
+	public static CustomModelData look(RuneEntry r) {
+		String path = r.enchantment().unwrapKey().map(k -> k.identifier().getPath()).orElse("");
+		String[] number = RuneRules.numberLayers(r.level());
+		return new CustomModelData(List.of(), List.of(), List.of(RuneRules.kind(path), path, number[0], number[1]), List.of());
 	}
 
 	public static ItemStack rune(RuneEntry entry) {

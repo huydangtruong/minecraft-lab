@@ -71,6 +71,12 @@ class PurgatoryRulesTest {
 		assertEquals("armor", io.github.huydangtruong.immortalcultivation.rune.RuneRules.kind("protection"));
 		assertEquals("ranged", io.github.huydangtruong.immortalcultivation.rune.RuneRules.kind("power"));
 		assertEquals("ranged", io.github.huydangtruong.immortalcultivation.rune.RuneRules.kind("throw_power")); // D277
+		// D278: number layers of the rune texture
+		assertEquals(java.util.List.of("c1", ""), java.util.List.of(io.github.huydangtruong.immortalcultivation.rune.RuneRules.numberLayers(1)));
+		assertEquals(java.util.List.of("c9", ""), java.util.List.of(io.github.huydangtruong.immortalcultivation.rune.RuneRules.numberLayers(9)));
+		assertEquals(java.util.List.of("t1", "o0"), java.util.List.of(io.github.huydangtruong.immortalcultivation.rune.RuneRules.numberLayers(10)));
+		assertEquals(java.util.List.of("t4", "o2"), java.util.List.of(io.github.huydangtruong.immortalcultivation.rune.RuneRules.numberLayers(42)));
+		assertEquals(java.util.List.of("t9", "o9"), java.util.List.of(io.github.huydangtruong.immortalcultivation.rune.RuneRules.numberLayers(500)));
 		assertEquals("tool", io.github.huydangtruong.immortalcultivation.rune.RuneRules.kind("efficiency"));
 		assertEquals("other", io.github.huydangtruong.immortalcultivation.rune.RuneRules.kind("something_new"));
 	}

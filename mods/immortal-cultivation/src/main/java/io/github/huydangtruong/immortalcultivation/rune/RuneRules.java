@@ -55,6 +55,18 @@ public final class RuneRules {
 		};
 	}
 
+	/** Highest level the number on a rune shows (D278). */
+	public static final int MAX_SHOWN_LEVEL = 99;
+
+	/**
+	 * D278: the two number layers of a rune texture: a lone digit is centred ("c3", ""), two digits are tens and ones
+	 * ("t1", "o2"). Levels above 99 show 99.
+	 */
+	public static String[] numberLayers(int level) {
+		int n = Math.max(1, Math.min(MAX_SHOWN_LEVEL, level));
+		return n < 10 ? new String[]{"c" + n, ""} : new String[]{"t" + n / 10, "o" + n % 10};
+	}
+
 	/** "I", "II" ... up to 10, then plain numbers. */
 	public static String roman(int n) {
 		String[] r = {"I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"};

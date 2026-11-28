@@ -1,0 +1,240 @@
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import javax.imageio.ImageIO;
+
+/** Draws 8 rune texture concepts (16x16 pixel art) and a sheet that shows them big and at slot size. */
+public class RuneMock {
+	// kind palettes: outline, light, base, shadow (from the current textures)
+	static final int[][] KIND = {
+		{0x2a1012, 0xa8585e, 0x803c44, 0x56262c}, // attack
+		{0x10182c, 0x5a78a8, 0x3e5684, 0x283a5c}, // armor
+		{0x122a14, 0x5e9a5e, 0x427442, 0x2a502c}, // ranged
+		{0x0e2626, 0x529690, 0x3a6e6a, 0x264a48}, // tool
+	};
+	static final int GLYPH = 0xff9a2e, GLYPH_HI = 0xffd27a, CELL = 0x1a1216, CELL_EDGE = 0xc89a3a, DIGIT = 0xfff0c0, DIM = 0x00000000;
+
+	static final String[][] GLYPHS = {
+		{"...#...", "..###..", "...#...", "...#...", ".#.#.#.", "..###..", "...#..."}, // Sharpness
+		{".#####.", ".#...#.", ".#.#.#.", ".#.#.#.", "..#.#..", "...#...", "......."}, // Protection
+		{".#.#.#.", ".#.#.#.", ".#####.", "...#...", "...#...", "...#...", "...#..."}, // Throw Power
+		{".#####.", "#..#..#", "...#...", "...#...", "...#...", "...#...", "......."}, // Efficiency
+	};
+	static final String[] NAMES = {"Sharpness", "Protection", "Throw Power", "Efficiency"};
+	static final int[] LEVELS = {1, 3, 5, 8};
+	static final String[] DIGITS = {
+		"###,#.#,#.#,#.#,###", ".#.,##.,.#.,.#.,###", "###,..#,###,#..,###", "###,..#,###,..#,###", "#.#,#.#,###,..#,..#",
+		"###,#..,###,..#,###", "###,#..,###,#.#,###", "###,..#,..#,.#.,.#.", "###,#.#,###,#.#,###", "###,#.#,###,..#,###"};
+
+	interface Mask { boolean in(int x, int y); }
+
+	static class Icon {
+		int[][] px = new int[16][16]; // ARGB, 0 = clear
+		void set(int x, int y, int rgb) { if (x >= 0 && y >= 0 && x < 16 && y < 16) px[y][x] = 0xFF000000 | rgb; }
+		void clear(int x, int y) { if (x >= 0 && y >= 0 && x < 16 && y < 16) px[y][x] = 0; }
+	}
+
+	/** A shaded stone: outline where a neighbour is outside, light on the top/left inner edge, shadow on bottom/right, speckles. */
+	static void stone(Icon ic, Mask m, int[] pal) {
+		for (int y = 0; y < 16; y++) for (int x = 0; x < 16; x++) {
+			if (!m.in(x, y)) continue;
+			boolean edge = !m.in(x - 1, y) || !m.in(x + 1, y) || !m.in(x, y - 1) || !m.in(x, y + 1);
+			int c = pal[2];
+			if (edge) c = pal[0];
+			else if (!m.in(x - 2, y) || !m.in(x, y - 2)) c = pal[1];
+			else if (!m.in(x + 2, y) || !m.in(x, y + 2) || !m.in(x + 3, y)) c = pal[3];
+			else if (((x * 7 + y * 13) % 11) == 0) c = pal[3];
+			ic.set(x, y, c);
+		}
+	}
+
+	static boolean inside(Mask m, int x, int y) { return x >= 0 && y >= 0 && x < 16 && y < 16 && m.in(x, y); }
+
+	static void glyph(Icon ic, int g, int ox, int oy) {
+		String[] rows = GLYPHS[g];
+		for (int y = 0; y < rows.length; y++) for (int x = 0; x < rows[y].length(); x++)
+			if (rows[y].charAt(x) == '#') ic.set(ox + x, oy + y, (x + y) % 5 == 1 ? GLYPH_HI : GLYPH);
+	}
+
+	static void digit(Icon ic, int d, int ox, int oy, int rgb) {
+		String[] rows = DIGITS[d].split(",");
+		for (int y = 0; y < 5; y++) for (int x = 0; x < 3; x++) if (rows[y].charAt(x) == '#') ic.set(ox + x, oy + y, rgb);
+	}
+
+	/** A dark cell with a gold edge and the level digit: w x h at (x, y). */
+	static void cell(Icon ic, int x, int y, int w, int h, int level) {
+		for (int j = 0; j < h; j++) for (int i = 0; i < w; i++) {
+			boolean e = i == 0 || j == 0 || i == w - 1 || j == h - 1;
+			ic.set(x + i, y + j, e ? CELL_EDGE : CELL);
+		}
+		digit(ic, level, x + (w - 3) / 2, y + (h - 5) / 2, DIGIT);
+	}
+
+	static final String[] ROMAN = {"", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"};
+	static final java.util.Map<Character, String> ROMAN_FONT = java.util.Map.of(
+		'I', "#,#,#,#,#", 'V', "#.#,#.#,#.#,.#.,.#.", 'X', "#.#,#.#,.#.,#.#,#.#");
+
+	static int romanWidth(String r) {
+		int w = 0;
+		for (char ch : r.toCharArray()) w += ROMAN_FONT.get(ch).split(",")[0].length() + 1;
+		return w - 1;
+	}
+
+	static void roman(Icon ic, String r, int ox, int oy) {
+		int x = ox;
+		for (char ch : r.toCharArray()) {
+			String[] rows = ROMAN_FONT.get(ch).split(",");
+			for (int y = 0; y < 5; y++) for (int i = 0; i < rows[y].length(); i++) if (rows[y].charAt(i) == '#') ic.set(x + i, oy + y, DIGIT);
+			x += rows[0].length() + 1;
+		}
+	}
+
+	static Icon design(int d, int kind, int g, int level) {
+		Icon ic = new Icon();
+		int[] pal = KIND[kind];
+		switch (d) {
+			case 1 -> { // oval stone, number tag bottom right
+				Mask m = (x, y) -> sq((x - 6.5) / 6.6) + sq((y - 7.5) / 7.9) <= 1;
+				stone(ic, m, pal);
+				glyph(ic, g, 3, 3);
+				cell(ic, 10, 9, 5, 7, level);
+			}
+			case 2 -> { // square tablet, glyph above a line, 2 rows of 4 pips
+				Mask m = (x, y) -> x >= 1 && x <= 14 && y >= 0 && y <= 15 && !((x == 1 || x == 14) && (y == 0 || y == 15));
+				stone(ic, m, pal);
+				glyph(ic, g, 4, 1);
+				for (int x = 3; x <= 12; x++) ic.set(x, 9, pal[0]);
+				for (int i = 0; i < 8; i++) {
+					int px = 4 + (i % 4) * 2, py = 11 + (i / 4) * 2;
+					ic.set(px + 1, py, i < level ? GLYPH_HI : pal[3]);
+					ic.set(px + 1, py + 1, i < level ? GLYPH : pal[0]);
+				}
+			}
+			case 3 -> { // heater shield, Roman numeral band
+				Mask m = (x, y) -> y >= 0 && y <= 15 && x >= 1 && x <= 14 && (y < 9 || Math.abs(x - 7.5) <= 6.5 - (y - 9) * 1.05);
+				stone(ic, m, pal);
+				glyph(ic, g, 4, 1);
+				for (int y = 8; y <= 14; y++) for (int x = 2; x <= 13; x++) if (inside(m, x, y) && inside(m, x - 1, y) && inside(m, x + 1, y) && inside(m, x, y + 1)) ic.set(x, y, (y == 8 || !inside(m, x, y + 2)) ? CELL_EDGE : CELL);
+				String r = ROMAN[level];
+				roman(ic, r, 8 - (romanWidth(r) + 1) / 2, 9);
+			}
+			case 4 -> { // hexagon, gems around the rim light up
+				Mask m = (x, y) -> { double cx = x - 7.5, cy = y - 7.5; return Math.abs(cy) <= 7.6 && Math.abs(cx) <= 6.8 && Math.abs(cx) * 0.58 + Math.abs(cy) * 0.5 <= 5.6; };
+				stone(ic, m, pal);
+				glyph(ic, g, 4, 5);
+				int[][] gems = {{7, 2}, {10, 3}, {12, 7}, {10, 12}, {8, 13}, {5, 12}, {3, 8}, {5, 3}};
+				for (int i = 0; i < 8; i++) ic.set(gems[i][0], gems[i][1], i < level ? GLYPH_HI : pal[0]);
+			}
+			case 5 -> { // round coin with a ring, round badge bottom right
+				Mask m = (x, y) -> sq(x - 7.5) + sq(y - 7.5) <= 58;
+				stone(ic, m, pal);
+				for (int y = 0; y < 16; y++) for (int x = 0; x < 16; x++) {
+					double r = Math.sqrt(sq(x - 7.5) + sq(y - 7.5));
+					if (r > 5.6 && r <= 6.4) ic.set(x, y, pal[3]);
+				}
+				glyph(ic, g, 3, 3);
+				Mask badge = (x, y) -> sq(x - 12.5) + sq(y - 12.5) <= 9.5;
+				for (int y = 9; y < 16; y++) for (int x = 9; x < 16; x++) if (badge.in(x, y)) {
+					boolean e = !badge.in(x - 1, y) || !badge.in(x + 1, y) || !badge.in(x, y - 1) || !badge.in(x, y + 1);
+					ic.set(x, y, e ? CELL_EDGE : CELL);
+				}
+				digit(ic, level, 11, 10, DIGIT);
+			}
+			case 6 -> { // obelisk, level gauge on the right side
+				Mask m = (x, y) -> x >= 2 && x <= 13 && y >= 0 && y <= 15 && !(y == 0 && (x <= 3 || x >= 12)) && !(y == 1 && (x == 2 || x == 13));
+				stone(ic, m, pal);
+				glyph(ic, g, 3, 3);
+				for (int y = 5; y <= 14; y++) { ic.set(10, y, pal[0]); ic.set(13, y, pal[0]); }
+				ic.set(11, 5, pal[0]); ic.set(12, 5, pal[0]); ic.set(11, 14, pal[0]); ic.set(12, 14, pal[0]);
+				for (int i = 0; i < 8; i++) {
+					boolean on = i < level;
+					ic.set(11, 13 - i, on ? GLYPH : CELL); ic.set(12, 13 - i, on ? GLYPH_HI : CELL);
+				}
+			}
+			case 7 -> { // diamond, number box at the bottom tip
+				Mask m = (x, y) -> Math.abs(x - 7.5) + Math.abs(y - 7.5) <= 8.6;
+				stone(ic, m, pal);
+				glyph(ic, g, 4, 2);
+				cell(ic, 5, 9, 5, 7, level);
+			}
+			default -> { // broken shard, corner ribbon top left
+				int[] xs = {5, 12, 15, 14, 9, 2, 0, 1}, ys = {0, 1, 5, 13, 15, 14, 9, 3};
+				Polygon p = new Polygon(xs, ys, xs.length);
+				Mask m = (x, y) -> p.contains(x + 0.5, y + 0.5);
+				stone(ic, m, pal);
+				// crack
+				int[][] crack = {{11, 2}, {11, 3}, {12, 4}, {12, 5}, {13, 6}};
+				for (int[] c : crack) ic.set(c[0], c[1], pal[0]);
+				glyph(ic, g, 6, 6);
+				for (int y = 0; y < 8; y++) for (int x = 0; x < 8 - y; x++) {
+					boolean e = x == 0 || y == 0 || x + y == 7;
+					ic.set(x, y, e ? CELL_EDGE : CELL);
+				}
+				digit(ic, level, 1, 1, DIGIT);
+			}
+		}
+		return ic;
+	}
+
+	static double sq(double v) { return v * v; }
+
+	static final String[] TITLES = {"", "1. Oval stone + number tag", "2. Tablet + level pips", "3. Shield + Roman numeral",
+		"4. Hexagon + rim gems", "5. Coin + round badge", "6. Obelisk + level gauge", "7. Diamond + tip box", "8. Shard + corner ribbon"};
+
+	static void blit(Graphics2D g, Icon ic, int x0, int y0, int scale) {
+		for (int y = 0; y < 16; y++) for (int x = 0; x < 16; x++) {
+			int c = ic.px[y][x];
+			if (c == 0) continue;
+			g.setColor(new Color(c, true));
+			g.fillRect(x0 + x * scale, y0 + y * scale, scale, scale);
+		}
+	}
+
+	/** A vanilla-like inventory slot. */
+	static void slot(Graphics2D g, int x, int y, int s) {
+		g.setColor(new Color(0x8b8b8b)); g.fillRect(x, y, s, s);
+		g.setColor(new Color(0x373737)); g.fillRect(x, y, s, 2); g.fillRect(x, y, 2, s);
+		g.setColor(Color.WHITE); g.fillRect(x, y + s - 2, s, 2); g.fillRect(x + s - 2, y, 2, s);
+	}
+
+	public static void main(String[] args) throws Exception {
+		File out = new File(args[0]);
+		out.mkdirs();
+		int big = 8, panelW = 4 * (16 * big + 20) + 20, panelH = 40 + 16 * big + 26 + 48 + 14;
+		BufferedImage sheet = new BufferedImage(panelW * 2, panelH * 4, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D sg = sheet.createGraphics();
+		sg.setColor(new Color(0x1e1e24)); sg.fillRect(0, 0, sheet.getWidth(), sheet.getHeight());
+		for (int d = 1; d <= 8; d++) {
+			BufferedImage panel = new BufferedImage(panelW, panelH, BufferedImage.TYPE_INT_ARGB);
+			Graphics2D g = panel.createGraphics();
+			g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+			g.setColor(new Color(0x2a2a32)); g.fillRect(0, 0, panelW, panelH);
+			g.setColor(new Color(0x9a7a20)); g.drawRect(0, 0, panelW - 1, panelH - 1);
+			g.setColor(Color.WHITE); g.setFont(new Font("SansSerif", Font.BOLD, 20));
+			g.drawString(TITLES[d], 14, 28);
+			for (int k = 0; k < 4; k++) {
+				Icon ic = design(d, k, k, LEVELS[k]);
+				int x = 20 + k * (16 * big + 20), y = 40;
+				blit(g, ic, x, y, big);
+				g.setColor(new Color(0xc8c8d0)); g.setFont(new Font("SansSerif", Font.PLAIN, 14));
+				g.drawString(NAMES[k] + " " + ROMAN[LEVELS[k]], x, y + 16 * big + 18);
+				// slot size: x2 (GUI scale 2) and x3
+				int sy = y + 16 * big + 28;
+				slot(g, x, sy, 36); blit(g, ic, x + 2, sy + 2, 2);
+				slot(g, x + 44, sy, 52); blit(g, ic, x + 46, sy + 2, 3);
+				ImageIO.write(toImage(ic), "png", new File(out, "design" + d + "_" + NAMES[k].toLowerCase().replace(' ', '_') + ".png"));
+			}
+			g.dispose();
+			ImageIO.write(panel, "png", new File(out, "design" + d + ".png"));
+			sg.drawImage(panel, ((d - 1) % 2) * panelW, ((d - 1) / 2) * panelH, null);
+		}
+		sg.dispose();
+		ImageIO.write(sheet, "png", new File(out, "all-designs.png"));
+	}
+
+	static BufferedImage toImage(Icon ic) {
+		BufferedImage b = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+		for (int y = 0; y < 16; y++) for (int x = 0; x < 16; x++) b.setRGB(x, y, ic.px[y][x]);
+		return b;
+	}
+}

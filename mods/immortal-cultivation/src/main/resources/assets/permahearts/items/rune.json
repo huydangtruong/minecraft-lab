@@ -1,40 +1,78 @@
 {
-  "model": {
-    "type": "minecraft:select",
-    "property": "minecraft:custom_model_data",
-    "cases": [
-      {
-        "when": "attack",
-        "model": {
-          "type": "minecraft:model",
-          "model": "permahearts:item/rune_attack"
-        }
-      },
-      {
-        "when": "armor",
-        "model": {
-          "type": "minecraft:model",
-          "model": "permahearts:item/rune_armor"
-        }
-      },
-      {
-        "when": "ranged",
-        "model": {
-          "type": "minecraft:model",
-          "model": "permahearts:item/rune_ranged"
-        }
-      },
-      {
-        "when": "tool",
-        "model": {
-          "type": "minecraft:model",
-          "model": "permahearts:item/rune_tool"
-        }
-      }
-    ],
-    "fallback": {
-      "type": "minecraft:model",
-      "model": "permahearts:item/rune"
-    }
-  }
+  "model": {"type": "minecraft:composite", "models": [
+    {"type": "minecraft:select", "property": "minecraft:custom_model_data", "index": 1, "cases": [
+        {"when": "sharpness", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/sharpness"}},
+        {"when": "smite", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/smite"}},
+        {"when": "bane_of_arthropods", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/bane_of_arthropods"}},
+        {"when": "knockback", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/knockback"}},
+        {"when": "fire_aspect", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/fire_aspect"}},
+        {"when": "looting", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/looting"}},
+        {"when": "sweeping_edge", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/sweeping_edge"}},
+        {"when": "density", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/density"}},
+        {"when": "breach", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/breach"}},
+        {"when": "wind_burst", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/wind_burst"}},
+        {"when": "protection", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/protection"}},
+        {"when": "fire_protection", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/fire_protection"}},
+        {"when": "blast_protection", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/blast_protection"}},
+        {"when": "projectile_protection", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/projectile_protection"}},
+        {"when": "thorns", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/thorns"}},
+        {"when": "feather_falling", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/feather_falling"}},
+        {"when": "respiration", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/respiration"}},
+        {"when": "depth_strider", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/depth_strider"}},
+        {"when": "frost_walker", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/frost_walker"}},
+        {"when": "soul_speed", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/soul_speed"}},
+        {"when": "swift_sneak", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/swift_sneak"}},
+        {"when": "power", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/power"}},
+        {"when": "punch", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/punch"}},
+        {"when": "quick_charge", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/quick_charge"}},
+        {"when": "piercing", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/piercing"}},
+        {"when": "loyalty", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/loyalty"}},
+        {"when": "riptide", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/riptide"}},
+        {"when": "impaling", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/impaling"}},
+        {"when": "lunge", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/lunge"}},
+        {"when": "throw_power", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/throw_power"}},
+        {"when": "efficiency", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/efficiency"}},
+        {"when": "fortune", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/fortune"}},
+        {"when": "unbreaking", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/unbreaking"}},
+        {"when": "lure", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/lure"}},
+        {"when": "luck_of_the_sea", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/luck_of_the_sea"}}
+      ], "fallback": {"type": "minecraft:select", "property": "minecraft:custom_model_data", "index": 0, "cases": [
+        {"when": "attack", "model": {"type": "minecraft:model", "model": "permahearts:item/rune_attack"}},
+        {"when": "armor", "model": {"type": "minecraft:model", "model": "permahearts:item/rune_armor"}},
+        {"when": "ranged", "model": {"type": "minecraft:model", "model": "permahearts:item/rune_ranged"}},
+        {"when": "tool", "model": {"type": "minecraft:model", "model": "permahearts:item/rune_tool"}}
+      ], "fallback": {"type": "minecraft:model", "model": "permahearts:item/rune"}}},
+    {"type": "minecraft:select", "property": "minecraft:custom_model_data", "index": 2, "cases": [
+        {"when": "c1", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/digit_c1"}},
+        {"when": "t1", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/digit_t1"}},
+        {"when": "c2", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/digit_c2"}},
+        {"when": "t2", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/digit_t2"}},
+        {"when": "c3", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/digit_c3"}},
+        {"when": "t3", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/digit_t3"}},
+        {"when": "c4", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/digit_c4"}},
+        {"when": "t4", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/digit_t4"}},
+        {"when": "c5", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/digit_c5"}},
+        {"when": "t5", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/digit_t5"}},
+        {"when": "c6", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/digit_c6"}},
+        {"when": "t6", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/digit_t6"}},
+        {"when": "c7", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/digit_c7"}},
+        {"when": "t7", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/digit_t7"}},
+        {"when": "c8", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/digit_c8"}},
+        {"when": "t8", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/digit_t8"}},
+        {"when": "c9", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/digit_c9"}},
+        {"when": "t9", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/digit_t9"}}
+      ], "fallback": {"type": "minecraft:empty"}},
+    {"type": "minecraft:select", "property": "minecraft:custom_model_data", "index": 3, "cases": [
+        {"when": "o0", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/digit_o0"}},
+        {"when": "o1", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/digit_o1"}},
+        {"when": "o2", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/digit_o2"}},
+        {"when": "o3", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/digit_o3"}},
+        {"when": "o4", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/digit_o4"}},
+        {"when": "o5", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/digit_o5"}},
+        {"when": "o6", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/digit_o6"}},
+        {"when": "o7", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/digit_o7"}},
+        {"when": "o8", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/digit_o8"}},
+        {"when": "o9", "model": {"type": "minecraft:model", "model": "permahearts:item/rune/digit_o9"}}
+      ], "fallback": {"type": "minecraft:empty"}}
+  ]}
 }
